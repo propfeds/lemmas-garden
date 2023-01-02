@@ -172,7 +172,7 @@ I. It's a good opportunity to channel emotions.
 
 - Achievements:
   - Immortal: Celebrate your farm's 50th anniversary.
-  - Rabbits on Your Lawn: Let hopleek spread.
+  - Rabbits on Your Lawn: Let hopleek spread to a plot with a PvZ plant.
 - Chapters:
   - After 1st pub: Yesterday, a small plot of land was registered to Lemma
   Rancher. Today, Lemma's garden does weatherly. Tomorrow, Madeline would be
