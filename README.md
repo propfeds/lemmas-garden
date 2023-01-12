@@ -60,6 +60,13 @@ between tau not feeling bloated and pub multipliers not too small)
   - Can I make it so much fun people want to *replay* the 0 -> e100 section?
 - Tau based on **cumulative harvest p** (not called rho, just a p)?
   - **More convenient** than having to hit the advertise button
+  - To prevent spamming, **apply a tax** every publish
+    ```js
+    const SALES_MULT = BigNumber.ONE - BigNumber.from(0.06);  // balancing?
+    let cumRho; // value can be used dynamically in a story chapter to explain
+    var prePublish = () => cumRho = currencySum.value;
+    var postPublish = () => currencySum.value = cumRho * SALES_MULT;
+    ```
 - Tau based on **cumulative money spent on publishing** (adverts)?
   - Spend all money once per month (at any day), which then unlocks the publish
   - Like me, Lemma doesn't stick to a schedule other than a basic alarm clock
@@ -174,9 +181,13 @@ I. It's a good opportunity to channel emotions.
   - Immortal: Celebrate your farm's 50th anniversary.
   - Rabbits on Your Lawn: Let hopleek spread to a plot with a PvZ plant.
 - Chapters:
-  - After 1st pub: Yesterday, a small plot of land was registered to Lemma
+  - Introduction: Yesterday, a small plot of land was registered to Lemma
   Rancher. Today, Lemma's garden does weatherly. Tomorrow, Madeline would be
   proud.
+  - First publish: 'Let's see we got... this much from last harvest.
+  Minus the sales tax, maintenance, plant food dog food,... I wonder why it'd 
+  always miraculously add up to {0}% each time? Lemma, [can you] prove this?'
+  {1}p had been deducted from Lemma's savings of {2}p after publishing.
   - Clickable headlines after certain points (like hopleek spawning, or
   published adverts)
   - e100 tau: Today marked an extraordinary milestone for the eternal farm. For
