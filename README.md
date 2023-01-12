@@ -174,7 +174,7 @@ between tau not feeling bloated and pub multipliers not too small)
 
 ## Writing
 
-I am writing this stuff following the recent break-up between my best friend and
+I am writing this stuff following the recent break-up between a friend and
 I. It's a good opportunity to channel emotions.
 
 - Achievements:
@@ -185,16 +185,17 @@ I. It's a good opportunity to channel emotions.
   Rancher. Today, Lemma's garden does weatherly. Tomorrow, Madeline would be
   proud.
   - First publish: 'Let's see we got... this much from last harvest.
-  Minus the sales tax, maintenance, plant food dog food,... I wonder why it'd 
+  Minus the sales tax, maintenance, dog food, *plant* food... I wonder why it'd 
   always miraculously add up to {0}% each time? Lemma, [can you] prove this?'
-  {1}p had been deducted from Lemma's savings of {2}p after publishing.
-  - Clickable headlines after certain points (like hopleek spawning, or
-  published adverts)
+  {1}p had been deducted from Lemma's savings after publishing.
+  - Clickable headlines (singular upgrade) after certain points:
+    - Hopleek spawning
+    - Published adverts
   - e100 tau: Today marked an extraordinary milestone for the eternal farm. For
   the first time, Lemma hosted an excursion with the students from the prestiged
   University of Eldi (Laitnenopxe). Tonight, she had a whole celebration meeting
   with the luminaries.
-  At last, under the ensnaring pillow she soundly sleeps and tomorrow, for once,
-  she would wake up early. Glancing at the golden haze, she would brush her
-  hands over the sunflower's face again... Even if to her, every meaning had
+  At last, under the ensnaring pillow she soundly sleeps, and tomorrow, for 
+  once, she would wake up early. Glancing at the golden haze, she would brush 
+  her hands over the sunflower's face again... Even if to her, every meaning had
   already lost. (lost -> more like failed)
