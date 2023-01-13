@@ -1,17 +1,20 @@
 # Lemma's Garden
 
-Gardening theory for Exponential Idle.
+Gardening theory (mod) for Exponential Idle.
 
-**Lemma because**
+Playstyle: slow, semi active, timing required, reading of plant descriptions
+
+**Lemma because:**
 
 - Her name is Lemma
 - You can switch stages like a lemma
 - L for L-systems
 - There is adversity in the world
 
-Playstyle: slow, semi active, timing required, reading of plant descriptions?
+## Table of Contents
 
 - [Lemma's Garden](#lemmas-garden)
+  - [Table of Contents](#table-of-contents)
   - [Problems](#problems)
     - [1. I don't know gardening.](#1-i-dont-know-gardening)
     - [2. Limitations.](#2-limitations)
@@ -24,6 +27,10 @@ Playstyle: slow, semi active, timing required, reading of plant descriptions?
     - [1. Time](#1-time)
     - [2. Space](#2-space)
   - [Plants](#plants)
+    - [1. Early-game](#1-early-game)
+    - [2. Mid-game](#2-mid-game)
+    - [3. Late-game](#3-late-game)
+    - [4. Misc](#4-misc)
   - [Tools](#tools)
   - [UI](#ui)
   - [Writing](#writing)
@@ -31,9 +38,11 @@ Playstyle: slow, semi active, timing required, reading of plant descriptions?
 ## Problems
 
 ### 1. I don't know gardening.
+
 - Just **try watching a lot** of gardening footage to get a general feeling
 
 ### 2. Limitations.
+
 - Plants may evolve quickly but **L-system rendering might be too slow** to
 update growth in real time
 - **Long internal state**?
@@ -44,16 +53,19 @@ update growth in real time
 reset
 
 ### 3. Quirks.
+
 - **Gameplay pattern is unique** from every other theory:
   - All other theories revolve around ever-increasing rho
   - Growth and publish **timing is consistent**, but might be a bit slow
 
 ### 4. Gameplay flow.
+
 - Need plant **interactions** with each other, with the seasons, day/night, etc.
 
 ## Progression
 
 ### 1. Cumulative UX
+
 - **Low publish exponent** and small end game (e45 seems to be a good balance
 between tau not feeling bloated and pub multipliers not too small)
   - Journey to **e100** tau (e30 rho) is **short but** from e100 -> e150 is long
@@ -64,8 +76,8 @@ between tau not feeling bloated and pub multipliers not too small)
     ```js
     const SALES_MULT = BigNumber.ONE - BigNumber.from(0.06);  // balancing?
     let cumRho; // value can be used dynamically in a story chapter to explain
-    var prePublish = () => cumRho = currencySum.value;
-    var postPublish = () => currencySum.value = cumRho * SALES_MULT;
+    var prePublish = () => cumRho = currencySavings.value;
+    var postPublish = () => currencySavings.value = cumRho * SALES_MULT;
     ```
 - Tau based on **cumulative money spent on publishing** (adverts)?
   - Spend all money once per month (at any day), which then unlocks the publish
@@ -73,6 +85,7 @@ between tau not feeling bloated and pub multipliers not too small)
   - This will reduce player freedom
 
 ### 2. Episodic UX
+
 - Current plants don't get **deleted** when publishing
   - If publishing isn't limited to once per month, then publishing every harvest
   would be annoying but optimal
@@ -85,6 +98,7 @@ between tau not feeling bloated and pub multipliers not too small)
 ## World Mechanics
 
 ### 1. Time
+
 - Day night cycles
   - https://www.youtube.com/watch?v=9LgVqx-pV2k
   - Daily harvest schedule for Lemma (10 AM)
@@ -98,35 +112,53 @@ between tau not feeling bloated and pub multipliers not too small)
 - Well that's too long, we should really at least **double the speed**?
   - 36 minutes per publish isn't coffee-break either, but that's the best we got
   - It could enable fast-paced active play of the leeks
-  - I hope it's not too fast
-  - But, leek season will come sooner too
+    - Leek season will also come much more quickly
+    - But slower speed allows management of multiple plots of leek/mint
   - And, night time will literally no longer matter since time goes by so fast
 - Seasonal plants
   - Intro plant must be seasonal to introduce any timing mechanic
 - https://homeguides.sfgate.com/plants-grow-fastest-seeds-53378.html
 
 ### 2. Space
+
 - **Six plots**, with 5 locked at the beginning
-- **River** in one plot for diverse gameplay
+  - First plot unlock comes early
 - Different plots may have **different properties**?
+  - Also a **river** for diverse gameplay
 
 ## Plants
 
-- Long-term trees for idle
-- Sunflower & sunflower batteries!
+- Growth is **based on sequence length** times a per-plant constant?
+
+### 1. Early-game
+
+- **Quick flower bush** that can grow bigger but slows down of course
+  - First free cost
+- **Root veggies** that make you guess how big they are?
+
+### 2. Mid-game
+
+- **Sunflowers** & sunflower batteries!
   - Accelerate plant growth in adjacent plots
   - Fact: plants actually grow faster at night, as they photosynthesise in
   daylight, and use the stored energy at night
-- Root veggies that make you guess how big they are
-- Population growth / logistic map? (Plants that can spread on their own)
-  - Invasive species that can slow nearby growth
-    - Three cornered leek that spreads at a certain population number, therefore
-    rewards active play
-    - https://invasiveweedsolutions.co.uk/invasive-weeds/non-native/three-cornered-garlic/
-    - Remixed as Hopleek (Bunny Leek) in-game with a weird fictional L-system
-  - Mint spreads too - which one is more annoying?
-    - Spearmint leaves lose their aromatic appeal after the plant flowers
-  - Research more: https://hellohomestead.com/dandelions-mint-other-edible-plants-that-spread-and-take-over/
+- **Invasive species** that can slow nearby growth
+  - **Three cornered leek** that spreads at a certain population number
+    - Rewards active play
+  - https://invasiveweedsolutions.co.uk/invasive-weeds/non-native/three-cornered-garlic/
+  - Remixed as Hopleek (Bunny Leek) in-game with a weird fictional L-system?
+
+### 3. Late-game
+
+- Long-term **trees for idle**
+- **Mint** spreads too - which one is more annoying?
+  - Spearmint leaves lose their aromatic appeal after the plant flowers
+  - Population growth / logistic map? (with plants that can spread on their own)
+
+### 4. Misc
+
+- Research more: https://hellohomestead.com/dandelions-mint-other-edible-plants-that-spread-and-take-over/
+- Snapdragon / toadflax
 
 ## Tools
 
