@@ -124,6 +124,7 @@ between tau not feeling bloated and pub multipliers not too small)
 - **Six plots**, with 5 locked at the beginning
   - First plot unlock comes early
 - Different plots may have **different properties**?
+  - Might be **too complicated** and **inelegant** - this is not a normal game
   - Also a **river** for diverse gameplay
 
 ## Plants
