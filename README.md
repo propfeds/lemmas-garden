@@ -126,6 +126,10 @@ between tau not feeling bloated and pub multipliers not too small)
 - Different plots may have **different properties**?
   - Might be **too complicated** and **inelegant** - this is not a normal game
   - Also a **river** for diverse gameplay
+- **Plot 0** is a wild forest
+  - Contains all sorts of plants that can spread into plots 1~6
+  - Not harvestable, but instead has challenges
+    - Beating them will unlock new plant types
 
 ## Plants
 
