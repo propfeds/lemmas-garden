@@ -34,6 +34,8 @@ Playstyle: slow, semi active, timing required, reading of plant descriptions
   - [Tools](#tools)
   - [UI](#ui)
   - [Writing](#writing)
+    - [1. Achievements:](#1-achievements)
+    - [2. Chapters:](#2-chapters)
 
 ## Problems
 
@@ -74,7 +76,7 @@ between tau not feeling bloated and pub multipliers not too small)
   - **More convenient** than having to hit the advertise button
   - To prevent spamming, **apply a tax** every publish
     ```js
-    const SALES_MULT = BigNumber.ONE - BigNumber.from(0.06);  // balancing?
+    const SALES_MULT = BigNumber.ONE - BigNumber.from(0.12);  // balancing?
     let cumRho; // value can be used dynamically in a story chapter to explain
     var prePublish = () => cumRho = currencySavings.value;
     var postPublish = () => currencySavings.value = cumRho * SALES_MULT;
@@ -145,8 +147,11 @@ between tau not feeling bloated and pub multipliers not too small)
 
 - **Sunflowers** & sunflower batteries!
   - Accelerate plant growth in adjacent plots
+  - Its ability to head towards the sun will get weaker as it gets older,
+  and the flowers can only stay heading east
   - Fact: plants actually grow faster at night, as they photosynthesise in
   daylight, and use the stored energy at night
+  - Snow buttercups can face sun too - mini snow batteries?
 - **Invasive species** that can slow nearby growth
   - **Three cornered leek** that spreads at a certain population number
     - Rewards active play
@@ -214,25 +219,29 @@ between tau not feeling bloated and pub multipliers not too small)
 I am writing this stuff following the recent break-up between a friend and
 I. It's a good opportunity to channel emotions.
 
-- Achievements:
-  - Immortal: Celebrate your farm's 50th anniversary.
-  - Rabbits on Your Lawn: Let hopleek spread to a plot with a PvZ plant.
-- Chapters:
-  - Introduction: Yesterday, a small plot of land was registered to Lemma
-  Rancher. Today, Lemma's garden does weatherly. Tomorrow, Madeline would be
-  proud.
-  - First publish: 'Let's see we got... this much from last harvest.
-  Minus the sales tax, maintenance, dog food, *plant* food... I wonder why it'd 
-  always miraculously add up to {0}% each time? Lemma, [can you] prove this?'
-  {1}p had been deducted from Lemma's savings after publishing.
-  - Clickable headlines (singular upgrade) after certain points:
-    - Hopleek spawning
-    - Published adverts
-  - e100 tau: Today marked an extraordinary milestone for the eternal farm. For
-  the first time, Lemma hosted an excursion with the students from the prestiged
-  University of Eldi (Laitnenopxe). Tonight, she had a whole celebration meeting
-  with the luminaries.
-  At last, under the ensnaring pillow she soundly sleeps, and tomorrow, for 
-  once, she would wake up early. Glancing at the golden haze, she would brush 
-  her hands over the sunflower's face again... Even if to her, every meaning had
-  already lost. (lost -> more like failed)
+### 1. Achievements:
+
+- **Immortal**: Celebrate your farm's 50th anniversary.
+- **Rabbits on Your Lawn**: Let hopleek spread to a plot with a PvZ plant.
+
+### 2. Chapters:
+
+- **Introduction**: Yesterday, a small plot of land was registered to Lemma
+Rancher. Today, Lemma's garden does wonderfully. Tomorrow, Madeline would be
+proud.
+- **First publish**: 'Let's see we got... this much from last harvest.
+Minus the sales tax, maintenance, dog food, *plant* food... I wonder why it'd 
+always miraculously add up to {0}% each time? Lemma, can [you] prove this?'
+We called it the weather's toll. Just to stop worrying about it too much.
+- **Clickable headlines** (singular upgrade) after certain points:
+  - Hopleek spawning
+  - Published adverts
+- **e100 tau**: Today marked an extraordinary milestone for the eternal farm.
+For the first time, Lemma hosted an excursion with the students from the
+prestiged University of Eldi (Laitnenopxe). Tonight, she had a whole celebration
+meeting with her luminary friends.
+At last, under the ensnaring pillow she soundly sleeps.
+Tomorrow, she would wake up earlier than usual. Glancing at the golden haze, she
+would brush her hands over the sunflower's face...
+Even if to her, every meaning had already lost.
+(lost -> more like failed)
