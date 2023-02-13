@@ -132,6 +132,7 @@ between tau not feeling bloated and pub multipliers not too small)
   - Contains all sorts of plants that can spread into plots 1~6
   - Not harvestable, but instead has challenges
     - Beating them will unlock new plant types
+    - Ideas: 5x+1 Cotton Conjecture, ~~Botched~~ Bloated Linden (lol)
 
 ## Plants
 
@@ -181,6 +182,12 @@ between tau not feeling bloated and pub multipliers not too small)
   - Fire toggle: first starts burning one by one slowly, then burns faster
     - If it completely burns everything, it will spread to the next plot
 
+- Mutations: let players mutate a plant for one level or forever?
+  - Adopts the new plant's ruleset
+  - Example colony: 24 of Hopleek (35) x Dog rose
+  - Cutting leaves or harvesting fruits will have the same notation:
+  - 24 of Hopleek (20, 30, 35) x Dog rose (48, 59, etc.)
+
 ## UI
 
 - Reset arrow: invest - does it overlap with publish?
@@ -208,10 +215,11 @@ between tau not feeling bloated and pub multipliers not too small)
     - (Plot 1) Plant X (currently chosen)
     - (Plot 1) Other plants (hidden)
     - (Plot 2~6) Plant Y (currently chosen) (for autobuy purposes)
-- Upgrades:
+- Perma upgrades:
   - Alarm clock? In the 18th century? Unlocks auto-harvest and auto-buy.
   - Fire: can burn all plants on a plot, can spread
   - Beehive: boosts spreading of flowers, affected by fire smoke?
+  - Settings for the game
 - Milestones:
 
 ## Writing
@@ -238,7 +246,7 @@ We called it the weather's toll. Just to stop worrying about it too much.
   - Published adverts
 - **e100 tau**: Today marked an extraordinary milestone for the eternal farm.
 For the first time, Lemma hosted an excursion with the students from the
-prestiged University of Eldi (Laitnenopxe). Tonight, she had a whole celebration
+prestiged University of Idle (Exponential). Tonight, she had a whole celebration
 meeting with her luminary friends.
 At last, under the ensnaring pillow she soundly sleeps.
 Tomorrow, she would wake up earlier than usual. Glancing at the golden haze, she
