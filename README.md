@@ -147,9 +147,11 @@ between tau not feeling bloated and pub multipliers not too small)
 ### 2. Mid-game
 
 - **Sunflowers** & sunflower batteries!
+  - This cultivar of sunflowers is dysfunctional. They cannot turn their heads to face the sun, even when they're young. Regardless, Lemma often brushes over their heads as if they were her children.
   - Accelerate plant growth in adjacent plots
   - Its ability to head towards the sun will get weaker as it gets older,
   and the flowers can only stay heading east
+  - GIANT SUN FLOWERS LATE GAME
   - Fact: plants actually grow faster at night, as they photosynthesise in
   daylight, and use the stored energy at night
   - Snow buttercups can face sun too - mini snow batteries?
@@ -158,6 +160,7 @@ between tau not feeling bloated and pub multipliers not too small)
     - Rewards active play
   - https://invasiveweedsolutions.co.uk/invasive-weeds/non-native/three-cornered-garlic/
   - Remixed as Hopleek (Bunny Leek) in-game with a weird fictional L-system?
+    - Hopleek nibbles other plants at night when player is offline
 
 ### 3. Late-game
 
