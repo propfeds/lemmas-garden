@@ -1259,23 +1259,650 @@ class LSystem
  */
 class Renderer
 {
-    constructor(sequence, camera = {}, stroke = {})
+    constructor(sequence, params, camera = {}, stroke = {})
+    {
+        this.figureScale = camera.scale || 1;
+        this.cameraMode = camera.mode || 0;
+        this.followFactor = camera.followFactor || 0.15;
+        this.camCentre = new Vector3(camera.x || 0, camera.y || 0,
+        camera.z || 0);
+        this.upright = camera.upright || false;
+        this.lastCamera = new Vector3(0, 0, 0);
+        this.lastCamVel = new Vector3(0, 0, 0);
+
+        this.tickLength = stroke.tickLength || 1;
+        // Loop mode is always 0
+        // Whether to reset graph on hitting reset button is a game setting
+        this.loadModels = stroke.loadModels || true;
+        this.quickDraw = stroke.quickDraw || false;
+        this.quickBacktrack = stroke.quickBacktrack || false;
+        this.backtrackTail = stroke.backtrackTail || true;
+        this.hesitateApex = stroke.hesitateApex || true;
+        this.hesitateFork = stroke.hesitateFork || true;
+        
+        this.sequence = sequence;
+        this.params = params;
+        this.state = new Vector3(0, 0, 0);
+        this.ori = this.upright ? uprightQuat : new Quaternion();
+        this.stack = [];
+        this.idxStack = [];
+        this.models = [];
+        this.modelParams = [];
+        this.mdi = [];
+        this.i = 0;
+        this.elapsed = 0;
+        this.cooldown = 0;
+        this.polygonMode = 0;
+    }
+
+    /**
+     * Resets the renderer.
+     * @param {boolean} clearGraph whether to clear the graph.
+     */
+    reset(clearGraph = true)
+    {
+        this.state = new Vector3(0, 0, 0);
+        this.ori = this.upright ? uprightQuat : new Quaternion();
+        this.stack = [];
+        this.idxStack = [];
+        this.i = 0;
+        this.models = [];
+        this.modelParams = [];
+        this.mdi = [];
+        this.cooldown = 0;
+        this.polygonMode = 0;
+        this.elapsed = 0;
+        if(clearGraph)
+        {
+            theory.clearGraph();
+        }
+    }
+    configure(sequence, params, camera = {}, stroke = {})
     {
         this.figureScale = camera.scale || 1;
         this.cameraMode = camera.mode || 0;
         this.camCentre = new Vector3(camera.x || 0, camera.y || 0,
         camera.z || 0);
         this.upright = camera.upright || false;
-        // Whether to reset graph on hitting reset button is a game setting
+        this.lastCamera = new Vector3(0, 0, 0);
+        this.lastCamVel = new Vector3(0, 0, 0);
+
+        this.tickLength = stroke.tickLength || 1;
         // Loop mode is always 0
+        // Whether to reset graph on hitting reset button is a game setting
+        this.loadModels = stroke.loadModels || true;
         this.quickDraw = stroke.quickDraw || false;
         this.quickBacktrack = stroke.quickBacktrack || false;
-        // Load models = game setting, to reduce lagge
         this.backtrackTail = stroke.backtrackTail || true;
         this.hesitateApex = stroke.hesitateApex || true;
-        
+        this.hesitateFork = stroke.hesitateFork || true;
         
         this.sequence = sequence;
+        this.params = params;
+
+        this.reset();
+    }
+    /**
+     * Moves the cursor forward.
+     */
+    forward(distance = 1)
+    {
+        this.state += this.ori.headingVector * distance;
+    }
+    /**
+     * Ticks the clock.
+     */
+    tick()
+    {
+        if(this.sequence.length)
+            ++this.elapsed;
+    }
+    /**
+     * Computes the next cursor position internally.
+     */
+    draw()
+    {
+        this.tick();
+        if(this.elapsed % this.tickLength)  // Only update on multiples
+            return;
+
+        let j, t, moved;
+        let loopLimit = 2;  // Shenanigans may arise with models? Try this
+        for(j = 0; j < loopLimit; ++j)
+        {
+            if(this.cooldown > 0 && this.polygonMode <= 0)
+            {
+                --this.cooldown;
+                return;
+            }
+
+            if(this.models.length > 0)
+            {
+                // Unreadable pile of shit
+                for(; this.mdi[this.mdi.length - 1] <
+                this.models[this.models.length - 1].length;
+                ++this.mdi[this.mdi.length - 1])
+                {
+                    switch(this.models[this.models.length - 1][
+                    this.mdi[this.mdi.length - 1]])
+                    {
+                        case ' ':
+                            log('Blank space detected.')
+                            break;
+                        case '+':
+                            if(this.modelParams[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]])
+                                this.ori = this.ori.rotate(this.modelParams[
+                                this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]][0].toNumber(),
+                                '+');
+                            else
+                                this.ori = this.system.rotations.get('+').mul(
+                                this.ori);
+                            break;
+                        case '-':
+                            if(this.modelParams[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]])
+                                this.ori = this.ori.rotate(this.modelParams[
+                                this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]][0].toNumber(),
+                                '-');
+                            else
+                                this.ori = this.system.rotations.get('-').mul(
+                                this.ori);
+                            break;
+                        case '&':
+                            if(this.modelParams[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]])
+                                this.ori = this.ori.rotate(this.modelParams[
+                                this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]][0].toNumber(),
+                                '&');
+                            else
+                                this.ori = this.system.rotations.get('&').mul(
+                                this.ori);
+                            break;
+                        case '^':
+                            if(this.modelParams[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]])
+                                this.ori = this.ori.rotate(this.modelParams[
+                                this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]][0].toNumber(),
+                                '^');
+                            else
+                                this.ori = this.system.rotations.get('^').mul(
+                                this.ori);
+                            break;
+                        case '\\':
+                            if(this.modelParams[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]])
+                                this.ori = this.ori.rotate(this.modelParams[
+                                this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]][0].toNumber(),
+                                '\\');
+                            else
+                                this.ori = this.system.rotations.get('\\').mul(
+                                this.ori);
+                            break;
+                        case '/':
+                            if(this.modelParams[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]])
+                                this.ori = this.ori.rotate(this.modelParams[
+                                this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]][0].toNumber(),
+                                '/');
+                            else
+                                this.ori = this.system.rotations.get('/').mul(
+                                this.ori);
+                            break;
+                        case '|':
+                            this.ori = zUpQuat.mul(this.ori);
+                            break;
+                        case '$':
+                            this.ori = this.ori.alignToVertical();
+                            break;
+                        case 'T':
+                            let args = this.modelParams[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]];
+                            if(args)
+                            {
+                                if(args.length >= 4)
+                                    this.ori = this.ori.applyTropism(
+                                    args[0].toNumber(),
+                                    args[1].toNumber(),
+                                    args[2].toNumber(),
+                                    args[3].toNumber());
+                                else
+                                    this.ori = this.ori.applyTropism(
+                                    args[0].toNumber());
+                            }
+                            else
+                                this.ori = this.ori.applyTropism(
+                                this.system.tropism);
+                            break;
+                        case '~':
+                            if(!this.system.models.has(
+                            this.models[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1] + 1]))
+                                break;
+
+                            ++this.mdi[this.mdi.length - 1];
+                            let model = this.system.deriveModel(this.models[
+                            this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]], this.modelParams[
+                            this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]]);
+
+                            this.models.push(model.result);
+                            this.modelParams.push(model.params);
+                            this.mdi.push(0);
+                            return;
+                        case '[':
+                            this.idxStack.push(this.stack.length);
+                            this.stack.push([this.state, this.ori]);
+                            break;
+                        case ']':
+                            if(this.cooldown > 0 && this.polygonMode <= 0)
+                            {
+                                --this.cooldown;
+                                return;
+                            }
+
+                            if(this.stack.length == 0)
+                            {
+                                log('You\'ve clearly made a bracket error.');
+                                break;
+                            }
+
+                            moved = this.state !==
+                            this.stack[this.stack.length - 1][0];
+
+                            t = this.stack.pop();
+                            this.state = t[0];
+                            this.ori = t[1];
+                            if(this.stack.length ==
+                            this.idxStack[this.idxStack.length - 1])
+                            {
+                                this.idxStack.pop();
+                                if(moved)
+                                    this.cooldown = 1;
+                                if(this.hesitateFork && this.polygonMode <= 0)
+                                {
+                                    ++this.mdi[this.mdi.length - 1];
+                                    return;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            if(this.polygonMode <= 0)
+                                return;
+                            else
+                            {
+                                --this.mdi[this.mdi.length - 1];
+                                break;
+                            }
+                        case '%':
+                            // Nothing to do here
+                            break;
+                        case '{':        
+                            ++this.polygonMode;
+                            break;
+                        case '}':
+                            --this.polygonMode;
+                            break;
+                        case '.':
+                            if(this.polygonMode <= 0)
+                                log('You cannot register a vertex outside of ' +
+                                'polygon drawing.');
+                            else
+                                ++this.mdi[this.mdi.length - 1];
+                            return;
+                        default:
+                            if(this.cooldown > 0 && this.polygonMode <= 0)
+                            {
+                                --this.cooldown;
+                                return;
+                            }
+
+                            let ignored = this.system.ignoreList.has(
+                            this.models[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]]) ||
+                            this.loadModels && this.system.models.has(
+                            this.models[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]]);
+                            let breakAhead = BACKTRACK_LIST.has(
+                            this.models[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1] + 1]);
+                            let btAhead = this.models[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1] + 1] == ']' ||
+                            this.mdi[this.mdi.length - 1] ==
+                            this.models[this.models.length - 1].length - 1;
+
+                            if(this.hesitateApex && btAhead)
+                                this.cooldown = 1;
+
+                            if(this.quickDraw && breakAhead)
+                                this.cooldown = 1;
+
+                            moved = this.stack.length == 0 ||
+                            (this.stack.length > 0 && this.state !==
+                            this.stack[this.stack.length - 1][0]);
+
+                            if(!this.quickBacktrack && moved && !ignored)
+                                this.stack.push([this.state, this.ori]);
+
+                            if(!ignored)
+                            {
+                                if(this.models[this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]] == 'F' &&
+                                this.modelParams[this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]])
+                                {
+                                    this.forward(this.modelParams[
+                                    this.models.length - 1][
+                                    this.mdi[this.mdi.length - 1]][
+                                    0].toNumber());
+                                }
+                                else
+                                    this.forward();
+                            }
+
+                            if(this.quickBacktrack && breakAhead)
+                                this.stack.push([this.state, this.ori]);
+                            
+                            if(this.quickDraw && !btAhead)
+                                break;
+                            else if(this.polygonMode <= 0)
+                            {
+                                ++this.mdi[this.mdi.length - 1];
+                                return;
+                            }
+                            else
+                                break;
+                    }
+                }
+                this.models.pop();
+                this.modelParams.pop();
+                this.mdi.pop();
+                ++loopLimit;
+                // continue prevents the regular loop from running
+                continue;
+            }
+            for(; this.i < this.levels[this.lv].length; ++this.i)
+            {
+                // if(this.models.length > 0)
+                //     break;
+                switch(this.levels[this.lv][this.i])
+                {
+                    case ' ':
+                        log('Blank space detected.')
+                        break;
+                    case '+':
+                        if(this.levelParams[this.lv][this.i])
+                            this.ori = this.ori.rotate(this.levelParams[
+                            this.lv][this.i][0].toNumber(), '+');
+                        else
+                            this.ori = this.system.rotations.get('+').mul(
+                            this.ori);
+                        break;
+                    case '-':
+                        if(this.levelParams[this.lv][this.i])
+                            this.ori = this.ori.rotate(this.levelParams[
+                            this.lv][this.i][0].toNumber(), '-');
+                        else
+                            this.ori = this.system.rotations.get('-').mul(
+                            this.ori);
+                        break;
+                    case '&':
+                        if(this.levelParams[this.lv][this.i])
+                            this.ori = this.ori.rotate(this.levelParams[
+                            this.lv][this.i][0].toNumber(), '&');
+                        else
+                            this.ori = this.system.rotations.get('&').mul(
+                            this.ori);
+                        break;
+                    case '^':
+                        if(this.levelParams[this.lv][this.i])
+                            this.ori = this.ori.rotate(this.levelParams[
+                            this.lv][this.i][0].toNumber(), '^');
+                        else
+                            this.ori = this.system.rotations.get('^').mul(
+                            this.ori);
+                        break;
+                    case '\\':
+                        if(this.levelParams[this.lv][this.i])
+                            this.ori = this.ori.rotate(this.levelParams[
+                            this.lv][this.i][0].toNumber(), '\\');
+                        else
+                            this.ori = this.system.rotations.get('\\').mul(
+                            this.ori);
+                        break;
+                    case '/':
+                        if(this.levelParams[this.lv][this.i])
+                            this.ori = this.ori.rotate(this.levelParams[
+                            this.lv][this.i][0].toNumber(), '/');
+                        else
+                            this.ori = this.system.rotations.get('/').mul(
+                            this.ori);
+                        break;
+                    case '|':
+                        this.ori = zUpQuat.mul(this.ori);
+                        break;
+                    case '$':
+                        this.ori = this.ori.alignToVertical();
+                        break;
+                    case 'T':
+                        let args = this.levelParams[this.lv][this.i];
+                        if(args)
+                        {
+                            if(args.length >= 4)
+                                this.ori = this.ori.applyTropism(
+                                args[0].toNumber(),
+                                args[1].toNumber(),
+                                args[2].toNumber(),
+                                args[3].toNumber());
+                            else
+                                this.ori = this.ori.applyTropism(
+                                args[0].toNumber());
+                        }
+                        else
+                            this.ori = this.ori.applyTropism(
+                            this.system.tropism);
+                        break;
+                    case '~':
+                        if(!this.loadModels || !this.system.models.has(
+                        this.levels[this.lv][this.i + 1]))
+                            break;
+
+                        ++this.i;
+                        let model = this.system.deriveModel(this.levels[
+                        this.lv][this.i], this.levelParams[this.lv][this.i]);
+
+                        this.models.push(model.result);
+                        this.modelParams.push(model.params);
+                        this.mdi.push(0);
+                        return;
+                    case '[':
+                        this.idxStack.push(this.stack.length);
+                        this.stack.push([this.state, this.ori]);
+                        break;
+                    case ']':
+                        if(this.cooldown > 0 && this.polygonMode <= 0)
+                        {
+                            --this.cooldown;
+                            return;
+                        }
+
+                        if(this.stack.length == 0)
+                        {
+                            log('You\'ve clearly made a bracket error.');
+                            break;
+                        }
+
+                        moved = this.state !==
+                        this.stack[this.stack.length - 1][0];
+
+                        t = this.stack.pop();
+                        this.state = t[0];
+                        this.ori = t[1];
+                        if(this.stack.length ==
+                        this.idxStack[this.idxStack.length - 1])
+                        {
+                            this.idxStack.pop();
+                            if(moved)
+                                this.cooldown = 1;
+                            if(this.hesitateFork && this.polygonMode <= 0)
+                            {
+                                ++this.i;
+                                return;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        if(this.polygonMode <= 0)
+                            return;
+                        else
+                        {
+                            --this.i;
+                            break;
+                        }
+                    case '%':
+                        // Nothing to do here, all handled by LSystem derivation
+                        break;
+                    case '{':        
+                        ++this.polygonMode;
+                        break;
+                    case '}':
+                        --this.polygonMode;
+                        break;
+                    case '.':
+                        if(this.polygonMode <= 0)
+                            log('You cannot register a vertex outside of ' +
+                            'polygon drawing.');
+                        else
+                            ++this.i;
+                        return;
+                    default:
+                        if(this.cooldown > 0 && this.polygonMode <= 0)
+                        {
+                            --this.cooldown;
+                            return;
+                        }
+
+                        let ignored = this.system.ignoreList.has(
+                        this.levels[this.lv][this.i]) || this.loadModels &&
+                        this.system.models.has(this.levels[this.lv][this.i]);
+                        let breakAhead = BACKTRACK_LIST.has(
+                        this.levels[this.lv][this.i + 1]);
+                        let btAhead = this.levels[this.lv][this.i + 1] == ']' ||
+                        this.i == this.levels[this.lv].length - 1;
+
+                        if(this.hesitateApex && btAhead)
+                            this.cooldown = 1;
+
+                        if(this.quickDraw && breakAhead)
+                            this.cooldown = 1;
+
+                        moved = this.stack.length == 0 ||
+                        (this.stack.length > 0 && this.state !==
+                        this.stack[this.stack.length - 1][0]);
+
+                        if(!this.quickBacktrack && moved && !ignored)
+                            this.stack.push([this.state, this.ori]);
+
+                        if(!ignored)
+                        {
+                            if(this.levels[this.lv][this.i] == 'F' &&
+                            this.levelParams[this.lv][this.i])
+                            {
+                                this.forward(this.levelParams[this.lv][this.i][
+                                0].toNumber());
+                            }
+                            else
+                                this.forward();
+                        }
+
+                        if(this.quickBacktrack && breakAhead)
+                            this.stack.push([this.state, this.ori]);
+                        
+                        if(this.quickDraw && !btAhead)
+                            break;
+                        else if(this.polygonMode <= 0)
+                        {
+                            ++this.i;
+                            return;
+                        }
+                        else
+                            break;
+                }
+            }
+            // This is what the renderer will do at the end of a loop
+            if(!this.backtrackTail || this.stack.length == 0)
+                return;
+            else
+            {
+                let t = this.stack.pop();
+                this.state = t[0];
+                this.ori = t[1];
+                return;
+            }
+        }
+    }
+    /**
+     * Return swizzled coordinates according to the in-game system. The game
+     * uses Android UI coordinates, which is X-right Y-down Z-face.
+     * @param {Vector3} coords the original coordinates.
+     * @returns {Vector3}
+     */
+    swizzle(coords)
+    {
+        // The game uses left-handed Y-up, aka Y-down coordinates.
+        return new Vector3(coords.x, -coords.y, coords.z);
+    }
+    /**
+     * Returns the camera centre's coordinates.
+     * @returns {Vector3}
+     */
+    get centre()
+    {
+        if(this.cameraMode)
+            return -this.cursor;
+
+        return this.swizzle(-this.camCentre / this.figureScale);
+    }
+    /**
+     * Returns the turtle's coordinates.
+     * @returns {Vector3}
+     */
+    get cursor()
+    {
+        let coords = this.state / this.figureScale;
+        return this.swizzle(coords);
+    }
+    /**
+     * Returns the camera's coordinates.
+     * @returns {Vector3}
+     */
+    get camera()
+    {
+        let newCamera;
+        switch(this.cameraMode)
+        {
+            case 1:
+                // I accidentally discovered Bézier curves unknowingly.
+                let dist = this.centre - this.lastCamera;
+                newCamera = this.lastCamera + dist * this.followFactor ** 2 +
+                this.lastCamVel * (1 - this.followFactor) ** 2;
+                this.lastCamVel = newCamera - this.lastCamera;
+                this.lastCamera = newCamera;
+                return newCamera;
+            case 0:
+                return this.centre;
+        }
     }
 }
 
@@ -1290,7 +1917,7 @@ const xUpQuat = new Quaternion(0, 1, 0, 0);
 const yUpQuat = new Quaternion(0, 0, 1, 0);
 const zUpQuat = new Quaternion(0, 0, 0, 1);
 
-let renderer = new Renderer('');
+let renderer = new Renderer('', []);
 let globalRNG = new Xorshift(Date.now());
 
 var plotPerma;
