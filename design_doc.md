@@ -74,6 +74,7 @@ between tau not feeling bloated and pub multipliers not too small)
   - Can I make it so much fun people want to *replay* the 0 -> e100 section?
 - Tau based on **cumulative harvest p** (not called rho, just a p)?
   - **More convenient** than having to hit the advertise button
+  - **Only one currency** required
   - To prevent spamming, **apply a tax** every publish
     ```js
     const SALES_MULT = BigNumber.ONE - BigNumber.from(0.12);  // balancing?
@@ -160,7 +161,9 @@ between tau not feeling bloated and pub multipliers not too small)
     - Rewards active play
   - https://invasiveweedsolutions.co.uk/invasive-weeds/non-native/three-cornered-garlic/
   - Remixed as Hopleek (Bunny Leek) in-game with a weird fictional L-system?
-    - Hopleek nibbles other plants at night when player is offline
+    - Hopleek nibbles other plants at night when player is offline?
+    - Or when not focusing on the plot with hopleeks?
+      - Nibbles the string from right to left
 
 ### 3. Late-game
 
