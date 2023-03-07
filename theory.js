@@ -1,4 +1,5 @@
-import { ExponentialCost, FirstFreeCost } from '../api/Costs';
+import { BigNumber } from '../api/BigNumber';
+import { ExponentialCost, FirstFreeCost, FreeCost } from '../api/Costs';
 import { Localization } from '../api/Localization';
 import { theory } from '../api/Theory';
 import { Vector3 } from '../api/Vector3';
@@ -20,8 +21,7 @@ var getDescription = (language) =>
         en:
 `An idle gardening theory.
 
-Yesterday, remnants of an old garden was cleaned anew.
-Today, do it weatherly.`,
+Yesterday, Lemma swept away remnants of her old garden.`,
     };
 
     return descs[language] || descs.en;
@@ -32,8 +32,9 @@ var version = 0;
 let time = 0;
 let plots = [];
 let normaliseQuaternions = false;
-let maxCharsPerTick = 500;
+let maxCharsPerTick = 250;
 let tmpCurrency;
+let everybodyGangsta = true;
 
 // Balance parameters
 
@@ -62,8 +63,8 @@ const locStrings =
     en:
     {
         versionName: 'alpha 0',
-        unlockPlot: `plot {0}`,
-        unlockPlots: `plots {0}~{1}`
+        unlockPlot: `\\text{{plot }}{{{0}}}`,
+        unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`
     }
 };
 
@@ -1908,8 +1909,31 @@ class Renderer
 
 class Colony
 {
+    constructor(population, system, growthCost, actions = [], camera = {},
+    stroke = {})
+    {
+        this.system = system;
+        this.sequence = system.axiom;
+        this.params = system.axiomParams;
+        this.stage = 0;
+        this.population = population;
+        this.energy = 0;
+        this.growth = 0;
+        this.growthCost = growthCost;
+        this.actions = actions;
+        this.camera = camera;
+        this.stroke = stroke;
+    }
+    grow(dt)
+    {
 
+    }
+    derive()
+    {
+
+    }
 }
+
 
 // const sidewayQuat = new Quaternion(1, 0, 0, 0);
 const uprightQuat = new Quaternion(-Math.sqrt(2)/2, 0, 0, Math.sqrt(2)/2);
@@ -1924,11 +1948,16 @@ var plotPerma;
 
 var currency;
 
-
 var init = () =>
 {
     currency = theory.createCurrency('p');
 
+    {
+        let free_penny = theory.createUpgrade(0, currency, new FreeCost);
+        free_penny.description = 'Get 1 penny for free';
+        free_penny.info = 'Yields 1 penny';
+        free_penny.bought = (_) => currency.value += BigNumber.ONE;
+    }
     /* Plot unlock
     Before you can plant any plants, you have to switch tab and unlock plot 0.
     */
@@ -1937,18 +1966,20 @@ var init = () =>
         plotPerma.getDescription = (amount) =>
         {
             if(amount == 1)
-                return Localization.getUpgradeUnlockDesc(getLoc('unlockPlot'),
-                plotPerma.level - 1 + amount);
-            return Localization.getUpgradeUnlockDesc(getLoc('unlockPlots'),
-            plotPerma.level, plotPerma.level - 1 + amount);
+                return Localization.getUpgradeUnlockDesc(Localization.format(
+                getLoc('unlockPlot'), plotPerma.level - 1 + amount));
+            return Localization.getUpgradeUnlockDesc(Localization.format(
+            getLoc('unlockPlots'), plotPerma.level,
+            plotPerma.level - 1 + amount));
         }
         plotPerma.getInfo = (amount) =>
         {
             if(amount == 1)
-                return Localization.getUpgradeUnlockInfo(getLoc('unlockPlot'),
-                plotPerma.level - 1 + amount);
-            return Localization.getUpgradeUnlockInfo(getLoc('unlockPlots'),
-            plotPerma.level, plotPerma.level - 1 + amount);
+                return Localization.getUpgradeUnlockInfo(Localization.format(
+                getLoc('unlockPlot'), plotPerma.level - 1 + amount));
+            return Localization.getUpgradeUnlockInfo(Localization.format(
+            getLoc('unlockPlots'), plotPerma.level,
+            plotPerma.level - 1 + amount));
         }
         plotPerma.bought = (_) => updateAvailability();
         plotPerma.maxLevel = maxPlots;
@@ -1967,7 +1998,7 @@ var updateAvailability = () =>
     return;
 }
 
-var getTau = () => currency.value.pow(tauRateN / tauRateD);
+var getTau = () => currency.value.max(BigNumber.ZERO).pow(tauRateN / tauRateD);
 var getCurrencyFromTau = (tau) =>
 [
     tau.max(BigNumber.ONE).pow(tauRateD / tauRateN),
@@ -1982,7 +2013,7 @@ var prePublish = () =>
 // You can be in debt for this lol
 var postPublish = () =>
 {
-    currency.value = tmpCurrency - getCurrencyFromTau(theory.tau) * (1 - toll);
+    currency.value = tmpCurrency - getCurrencyFromTau(theory.tau)[0] * toll;
 }
 
 var canResetStage = () => true;
