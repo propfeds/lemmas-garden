@@ -19,9 +19,10 @@ var getDescription = (language) =>
     let descs =
     {
         en:
-`An idle gardening theory.
+`An idle gardening theory, based on L-systems.
 
-Yesterday, Lemma swept away remnants of her old garden.`,
+Last night, Lemma swept away remnants of her old garden.
+Today, it will do weatherly.`,
     };
 
     return descs[language] || descs.en;
@@ -44,7 +45,7 @@ const toll = .12;
 const tauRateN = 10;   // e30 = 100 tau, e45 = end
 const tauRateD = 3;
 
-const pubExp = .024;    // 8% recovery
+const pubExp = .12;    // 8% recovery
 var getPublicationMultiplier = (tau) => tau.pow(pubExp);
 var getPublicationMultiplierFormula = (symbol) =>
 `{${symbol}}^{${pubExp}}`;
@@ -1272,6 +1273,7 @@ class Renderer
         this.lastCamVel = new Vector3(0, 0, 0);
 
         this.tickLength = stroke.tickLength || 1;
+        this.initDelay = stroke.initDelay || 0;
         // Loop mode is always 0
         // Whether to reset graph on hitting reset button is a game setting
         this.loadModels = stroke.loadModels || true;
@@ -1291,7 +1293,7 @@ class Renderer
         this.modelParams = [];
         this.mdi = [];
         this.i = 0;
-        this.elapsed = 0;
+        this.elapsed = -this.initDelay;
         this.cooldown = 0;
         this.polygonMode = 0;
     }
@@ -1312,7 +1314,7 @@ class Renderer
         this.mdi = [];
         this.cooldown = 0;
         this.polygonMode = 0;
-        this.elapsed = 0;
+        this.elapsed = -this.initDelay;
         if(clearGraph)
         {
             theory.clearGraph();
@@ -1329,6 +1331,7 @@ class Renderer
         this.lastCamVel = new Vector3(0, 0, 0);
 
         this.tickLength = stroke.tickLength || 1;
+        this.initDelay = stroke.initDelay || 0;
         // Loop mode is always 0
         // Whether to reset graph on hitting reset button is a game setting
         this.loadModels = stroke.loadModels || true;
@@ -1615,7 +1618,7 @@ class Renderer
                             
                             if(this.quickDraw && !btAhead)
                                 break;
-                            else if(this.polygonMode <= 0)
+                            else if(this.polygonMode <= 0  && !ignored)
                             {
                                 ++this.mdi[this.mdi.length - 1];
                                 return;
@@ -1631,59 +1634,59 @@ class Renderer
                 // continue prevents the regular loop from running
                 continue;
             }
-            for(; this.i < this.levels[this.lv].length; ++this.i)
+            for(; this.i < this.sequence.length; ++this.i)
             {
                 // if(this.models.length > 0)
                 //     break;
-                switch(this.levels[this.lv][this.i])
+                switch(this.sequence[this.i])
                 {
                     case ' ':
                         log('Blank space detected.')
                         break;
                     case '+':
-                        if(this.levelParams[this.lv][this.i])
+                        if(this.params[this.i])
                             this.ori = this.ori.rotate(this.levelParams[
-                            this.lv][this.i][0].toNumber(), '+');
+                            this.i][0].toNumber(), '+');
                         else
                             this.ori = this.system.rotations.get('+').mul(
                             this.ori);
                         break;
                     case '-':
-                        if(this.levelParams[this.lv][this.i])
+                        if(this.params[this.i])
                             this.ori = this.ori.rotate(this.levelParams[
-                            this.lv][this.i][0].toNumber(), '-');
+                            this.i][0].toNumber(), '-');
                         else
                             this.ori = this.system.rotations.get('-').mul(
                             this.ori);
                         break;
                     case '&':
-                        if(this.levelParams[this.lv][this.i])
+                        if(this.params[this.i])
                             this.ori = this.ori.rotate(this.levelParams[
-                            this.lv][this.i][0].toNumber(), '&');
+                            this.i][0].toNumber(), '&');
                         else
                             this.ori = this.system.rotations.get('&').mul(
                             this.ori);
                         break;
                     case '^':
-                        if(this.levelParams[this.lv][this.i])
+                        if(this.params[this.i])
                             this.ori = this.ori.rotate(this.levelParams[
-                            this.lv][this.i][0].toNumber(), '^');
+                            this.i][0].toNumber(), '^');
                         else
                             this.ori = this.system.rotations.get('^').mul(
                             this.ori);
                         break;
                     case '\\':
-                        if(this.levelParams[this.lv][this.i])
+                        if(this.params[this.i])
                             this.ori = this.ori.rotate(this.levelParams[
-                            this.lv][this.i][0].toNumber(), '\\');
+                            this.i][0].toNumber(), '\\');
                         else
                             this.ori = this.system.rotations.get('\\').mul(
                             this.ori);
                         break;
                     case '/':
-                        if(this.levelParams[this.lv][this.i])
+                        if(this.params[this.i])
                             this.ori = this.ori.rotate(this.levelParams[
-                            this.lv][this.i][0].toNumber(), '/');
+                            this.i][0].toNumber(), '/');
                         else
                             this.ori = this.system.rotations.get('/').mul(
                             this.ori);
@@ -1695,7 +1698,7 @@ class Renderer
                         this.ori = this.ori.alignToVertical();
                         break;
                     case 'T':
-                        let args = this.levelParams[this.lv][this.i];
+                        let args = this.params[this.i];
                         if(args)
                         {
                             if(args.length >= 4)
@@ -1714,12 +1717,12 @@ class Renderer
                         break;
                     case '~':
                         if(!this.loadModels || !this.system.models.has(
-                        this.levels[this.lv][this.i + 1]))
+                        this.sequence[this.i + 1]))
                             break;
 
                         ++this.i;
-                        let model = this.system.deriveModel(this.levels[
-                        this.lv][this.i], this.levelParams[this.lv][this.i]);
+                        let model = this.system.deriveModel(this.sequence[
+                        this.i], this.params[this.i]);
 
                         this.models.push(model.result);
                         this.modelParams.push(model.params);
@@ -1795,12 +1798,12 @@ class Renderer
                         }
 
                         let ignored = this.system.ignoreList.has(
-                        this.levels[this.lv][this.i]) || this.loadModels &&
-                        this.system.models.has(this.levels[this.lv][this.i]);
+                        this.sequence[this.i]) || this.loadModels &&
+                        this.system.models.has(this.sequence[this.i]);
                         let breakAhead = BACKTRACK_LIST.has(
-                        this.levels[this.lv][this.i + 1]);
-                        let btAhead = this.levels[this.lv][this.i + 1] == ']' ||
-                        this.i == this.levels[this.lv].length - 1;
+                        this.sequence[this.i + 1]);
+                        let btAhead = this.sequence[this.i + 1] == ']' ||
+                        this.i == this.sequence.length - 1;
 
                         if(this.hesitateApex && btAhead)
                             this.cooldown = 1;
@@ -1817,10 +1820,10 @@ class Renderer
 
                         if(!ignored)
                         {
-                            if(this.levels[this.lv][this.i] == 'F' &&
-                            this.levelParams[this.lv][this.i])
+                            if(this.sequence[this.i] == 'F' &&
+                            this.params[this.i])
                             {
-                                this.forward(this.levelParams[this.lv][this.i][
+                                this.forward(this.params[this.i][
                                 0].toNumber());
                             }
                             else
@@ -1832,9 +1835,9 @@ class Renderer
                         
                         if(this.quickDraw && !btAhead)
                             break;
-                        else if(this.polygonMode <= 0)
+                        else if(this.polygonMode <= 0 && !ignored)
                         {
-                            ++this.i;
+                            ++i;
                             return;
                         }
                         else
