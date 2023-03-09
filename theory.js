@@ -19,9 +19,7 @@ var getDescription = (language) =>
     let descs =
     {
         en:
-`An idle gardening theory, based on L-systems.
-
-Last night, Lemma swept away remnants of her old garden.
+`Last night, Lemma swept away remnants of her old garden.
 Today, it will do weatherly.`,
     };
 
@@ -31,7 +29,8 @@ var authors = 'propfeds';
 var version = 0;
 
 let time = 0;
-let plots = [];
+let plot = 0;
+let plotManagers = [];
 let normaliseQuaternions = false;
 let maxCharsPerTick = 250;
 let tmpCurrency;
@@ -41,14 +40,18 @@ let everybodyGangsta = true;
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(1000)));
 
-const toll = .12;
+const tax = .12;
 const tauRateN = 10;   // e30 = 100 tau, e45 = end
 const tauRateD = 3;
 
-const pubExp = .12;    // 8% recovery
-var getPublicationMultiplier = (tau) => tau.pow(pubExp);
+const pubExp = .03;
+var getPublicationMultiplier = (tau) => tau.max(BigNumber.ONE).pow(pubExp *
+tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
 var getPublicationMultiplierFormula = (symbol) =>
-`{${symbol}}^{${pubExp}}`;
+`\\begin{array}{c}{${symbol}}^{${pubExp} \\ln({\\ln{${symbol}})}}\\\\
+(\\text{${getLoc('tax')}}\\colon\\enspace${tax}\\times\\max\\,\\text{p})
+\\end{array}`;
+// Need a better place to write this
 
 const maxPlots = 6;
 
@@ -64,8 +67,11 @@ const locStrings =
     en:
     {
         versionName: 'alpha 0',
+
+        plotTitle: `\\text{{Plot }}{{{0}}}`,
         unlockPlot: `\\text{{plot }}{{{0}}}`,
-        unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`
+        unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
+        tax: 'Publishing tax',
     }
 };
 
@@ -1923,9 +1929,17 @@ class Colony
         this.energy = 0;
         this.growth = 0;
         this.growthCost = growthCost;
+        this.stats = this.calculateStats();
         this.actions = actions;
         this.camera = camera;
         this.stroke = stroke;
+    }
+    calculateStats()
+    {
+        return {
+            synthRate: BigNumber.ZERO,
+            profit: BigNumber.ZERO
+        }
     }
     grow(dt)
     {
@@ -1970,28 +1984,34 @@ var init = () =>
         {
             if(amount == 1)
                 return Localization.getUpgradeUnlockDesc(Localization.format(
-                getLoc('unlockPlot'), plotPerma.level - 1 + amount));
+                getLoc('unlockPlot'), plotPerma.level + amount));
             return Localization.getUpgradeUnlockDesc(Localization.format(
-            getLoc('unlockPlots'), plotPerma.level,
-            plotPerma.level - 1 + amount));
+            getLoc('unlockPlots'), plotPerma.level + 1,
+            plotPerma.level + amount));
         }
         plotPerma.getInfo = (amount) =>
         {
             if(amount == 1)
                 return Localization.getUpgradeUnlockInfo(Localization.format(
-                getLoc('unlockPlot'), plotPerma.level - 1 + amount));
+                getLoc('unlockPlot'), plotPerma.level + amount));
             return Localization.getUpgradeUnlockInfo(Localization.format(
-            getLoc('unlockPlots'), plotPerma.level,
-            plotPerma.level - 1 + amount));
+            getLoc('unlockPlots'), plotPerma.level + 1,
+            plotPerma.level + amount));
         }
-        plotPerma.bought = (_) => updateAvailability();
+        plotPerma.bought = (_) => {
+            theory.invalidatePrimaryEquation();
+            updateAvailability()
+        };
         plotPerma.maxLevel = maxPlots;
     }
     theory.createPublicationUpgrade(1, currency, 1);
     theory.createBuyAllUpgrade(2, currency, 1);
     theory.createAutoBuyerUpgrade(3, currency, 1);
     // To do: challenge plot (-1)
-    // Next: milestones
+    // Next: plant unlocks and milestones
+
+    theory.primaryEquationScale = 0.9;
+    theory.secondaryEquationHeight = 330;
 
     updateAvailability();
 }
@@ -2000,6 +2020,32 @@ var updateAvailability = () =>
 {
     return;
 }
+
+var tick = (elapsedTime, multiplier) =>
+{
+    time += elapsedTime * multiplier;
+    theory.invalidateTertiaryEquation();
+}
+
+var getPrimaryEquation = () =>
+{
+    if(!plotPerma.level)
+        return '';
+    return Localization.format(getLoc('plotTitle'), plot + 1);
+}
+
+// secondary
+
+var getTertiaryEquation = () =>
+{
+    let nofDays = Math.floor(time / 144);
+    let timeofDay = time % 144;
+    let hour = Math.floor(timeofDay / 6);
+
+    return `\\text{Day }${nofDays + 1},\\enspace${hour}\\text{ o' clock}`;
+}
+
+// quaternary
 
 var getTau = () => currency.value.max(BigNumber.ZERO).pow(tauRateN / tauRateD);
 var getCurrencyFromTau = (tau) =>
@@ -2016,7 +2062,7 @@ var prePublish = () =>
 // You can be in debt for this lol
 var postPublish = () =>
 {
-    currency.value = tmpCurrency - getCurrencyFromTau(theory.tau)[0] * toll;
+    currency.value = tmpCurrency - getCurrencyFromTau(theory.tau)[0] * tax;
 }
 
 var canResetStage = () => true;
@@ -2024,6 +2070,44 @@ var canResetStage = () => true;
 var getResetStageMessage = () => getLoc('resetRenderer');
 
 var resetStage = () => renderer.reset();
+
+var canGoToPreviousStage = () => plotPerma.level > 0 && plot > 0;
+
+var goToPreviousStage = () =>
+{
+    --plot;
+    renderer.reset();
+    theory.invalidatePrimaryEquation();
+    theory.invalidateSecondaryEquation();
+};
+var canGoToNextStage = () => plot < plotPerma.level - 1;
+var goToNextStage = () =>
+{
+    ++plot;
+    renderer.reset();
+    theory.invalidatePrimaryEquation();
+    theory.invalidateSecondaryEquation();
+};
+
+var getInternalState = () => JSON.stringify
+({
+    version: version,
+    time: time,
+})
+
+var setInternalState = (stateStr) =>
+{
+    if(!stateStr)
+        return;
+
+    let state = JSON.parse(stateStr);
+
+    if('time' in state)
+    {
+        time = state.time;
+    }
+    theory.invalidateTertiaryEquation();
+}
 
 var get3DGraphPoint = () => renderer.cursor;
 
