@@ -61,6 +61,8 @@ const LS_RULE = /([^:]+)(:(.+))?=(.*)/;
 const LS_CONTEXT =
 /((.)(\(([^\)]+)\))?<)?((.)(\(([^\)]+)\))?)(>(.)(\(([^\)]+)\))?)?/;
 const BACKTRACK_LIST = new Set('+-&^\\/|[$T');
+// Leaves and apices
+const SYNTHABLE_PARTS = new Set('LA');
 const menuLang = Localization.language;
 const locStrings =
 {
@@ -1918,7 +1920,7 @@ class Renderer
 
 class Colony
 {
-    constructor(population, system, growthCost, actions = [], camera = {},
+    constructor(population, system, growthRate, growthCost, actions = [], camera = {},
     stroke = {})
     {
         this.system = system;
@@ -1926,28 +1928,60 @@ class Colony
         this.params = system.axiomParams;
         this.stage = 0;
         this.population = population;
-        this.energy = 0;
-        this.growth = 0;
+
+        this.energy = BigNumber.ZERO;
+        this.growth = BigNumber.ZERO;
+        this.growthRate = growthRate;
         this.growthCost = growthCost;
-        this.stats = this.calculateStats();
         this.actions = actions;
+        let stats = this.calculateStats(actions[0].symbols);
+        this.synthRate = stats.synthRate;
+        this.profit = stats.profit;
+
         this.camera = camera;
         this.stroke = stroke;
     }
-    calculateStats()
+    calculateStats(harvestable = new Set())
     {
+        // Mockup
+        // TODO: Integrate tasks like ancestree and derive
+        let synthRate = BigNumber.ZERO;
+        let profit = BigNumber.ZERO;
+        for(let i = 0; i < this.sequence.length; ++i)
+        {
+            if(SYNTHABLE_PARTS.has(this.sequence[i]) && this.params[i])
+                synthRate += this.params[i][0];
+            if(harvestable.has(this.sequence[i]) && this.params[i])
+                profit += this.params[i][0];
+        }
         return {
-            synthRate: BigNumber.ZERO,
-            profit: BigNumber.ZERO
+            synthRate: synthRate,
+            profit: profit
         }
     }
-    grow(dt)
+    grow(dt, synth = true)
     {
+        if(synth)
+            this.energy += dt * this.synthRate * this.population;
+        
+        let dg = this.energy.min(dt * this.growthRate * this.population);
+        this.growth += dg;
+        this.energy -= dg;
 
+        if((everybodyGangsta && this.growth >= this.growthCost *
+        this.sequence.length * this.population) || this.ancestreeTask.start ||
+        this.deriveTask.start || this.calcTask.start)
+        {
+            everybodyGangsta = false;
+            this.derive();
+        }
     }
     derive()
     {
-
+        // Ancestree, derive and calc stats
+        everybodyGangsta = true;
+        theory.invalidateSecondaryEquation();
+        theory.invalidateQuaternaryValues();
     }
 }
 
