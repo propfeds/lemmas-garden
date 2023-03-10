@@ -28,13 +28,9 @@ Today, it will do weatherly.`,
 var authors = 'propfeds';
 var version = 0;
 
-let time = 0;
 let plot = 0;
-let plotManagers = [];
-let normaliseQuaternions = false;
-let maxCharsPerTick = 250;
+let colony = 0;
 let tmpCurrency;
-let everybodyGangsta = true;
 
 // Balance parameters
 
@@ -48,12 +44,14 @@ const pubExp = .03;
 var getPublicationMultiplier = (tau) => tau.max(BigNumber.ONE).pow(pubExp *
 tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
 var getPublicationMultiplierFormula = (symbol) =>
-`\\begin{array}{c}{${symbol}}^{${pubExp} \\ln({\\ln{${symbol}})}}\\\\
+`\\begin{array}{c}{${symbol}}^{${pubExp}\\ln({\\ln{${symbol}})}}\\\\
 (\\text{${getLoc('tax')}}\\colon\\enspace${tax}\\times\\max\\,\\text{p})
 \\end{array}`;
 // Need a better place to write this
 
 const maxPlots = 6;
+
+// Other constants
 
 const TRIM_SP = /\s+/g;
 const LS_RULE = /([^:]+)(:(.+))?=(.*)/;
@@ -62,8 +60,10 @@ const LS_CONTEXT =
 /((.)(\(([^\)]+)\))?<)?((.)(\(([^\)]+)\))?)(>(.)(\(([^\)]+)\))?)?/;
 const BACKTRACK_LIST = new Set('+-&^\\/|[$T');
 // Leaves and apices
-const SYNTHABLE_PARTS = new Set('LA');
-const menuLang = Localization.language;
+const SYNTHABLE_SYMBOLS = new Set('LA');
+const MAX_CHARS_PER_TICK = 200;
+const NORMALISE_QUATERNIONS = false;
+const MENU_LANG = Localization.language;
 const locStrings =
 {
     en:
@@ -82,7 +82,7 @@ const locStrings =
  * @param {string} name the internal name of the string.
  * @returns {string} the string.
  */
-let getLoc = (name, lang = menuLang) =>
+let getLoc = (name, lang = MENU_LANG) =>
 {
     if(lang in locStrings && name in locStrings[lang])
         return locStrings[lang][name];
@@ -299,7 +299,7 @@ class Quaternion
         this.j * quat.i + this.k * quat.r;
 
         let result = new Quaternion(t0, t1, t2, t3);
-        if(normaliseQuaternions)
+        if(NORMALISE_QUATERNIONS)
             return result.normalise;
         else
             return result;
@@ -826,7 +826,7 @@ class LSystem
         let i = task.start || 0;
         for(; i < sequence.length; ++i)
         {
-            if(i - task.start > maxCharsPerTick)
+            if(i - task.start > MAX_CHARS_PER_TICK)
             {
                 return {
                     start: i,
@@ -897,7 +897,7 @@ class LSystem
         let charCount = 0;
         for(; i < sequence.length; ++i)
         {
-            if(charCount > maxCharsPerTick)
+            if(charCount > MAX_CHARS_PER_TICK)
             {
                 return {
                     start: i,
@@ -1192,7 +1192,7 @@ class LSystem
         let i = task.start || 0;
         for(; i < sequence.length; ++i)
         {
-            if((i - task.start) * (task.start + 1) > maxCharsPerTick)
+            if((i - task.start) * (task.start + 1) > MAX_CHARS_PER_TICK)
             {
                 return {
                     start: i,
@@ -1332,11 +1332,10 @@ class Renderer
     {
         this.figureScale = camera.scale || 1;
         this.cameraMode = camera.mode || 0;
+        this.followFactor = camera.followFactor || 0.15;
         this.camCentre = new Vector3(camera.x || 0, camera.y || 0,
         camera.z || 0);
         this.upright = camera.upright || false;
-        this.lastCamera = new Vector3(0, 0, 0);
-        this.lastCamVel = new Vector3(0, 0, 0);
 
         this.tickLength = stroke.tickLength || 1;
         this.initDelay = stroke.initDelay || 0;
@@ -1918,12 +1917,15 @@ class Renderer
     }
 }
 
+/**
+ * Don't use this class.
+ */
 class Colony
 {
-    constructor(population, system, growthRate, growthCost, actions = [], camera = {},
-    stroke = {})
+    constructor(id, population)
     {
-        this.system = system;
+        this.id = id;
+        this.system = PLANT_DATA[id].system;
         this.sequence = system.axiom;
         this.params = system.axiomParams;
         this.stage = 0;
@@ -1931,60 +1933,271 @@ class Colony
 
         this.energy = BigNumber.ZERO;
         this.growth = BigNumber.ZERO;
-        this.growthRate = growthRate;
-        this.growthCost = growthCost;
-        this.actions = actions;
-        let stats = this.calculateStats(actions[0].symbols);
-        this.synthRate = stats.synthRate;
-        this.profit = stats.profit;
+        this.growthRate = PLANT_DATA[id].growthRate;
+        this.growthCost = PLANT_DATA[id].growthCost;
+        this.actions = PLANT_DATA[id].actions;
+        // First action is always harvest
+        this.synthRate = PLANT_DATA[id].synthRate;
+        this.profit = PLANT_DATA[id].profit;
 
-        this.camera = camera;
-        this.stroke = stroke;
+        this.camera = PLANT_DATA[id].camera;
+        this.stroke = PLANT_DATA[id].stroke;
+
+
     }
-    calculateStats(harvestable = new Set())
+
+    calculateStats(harvestable = new Set(), task = {})
     {
-        // Mockup
-        // TODO: Integrate tasks like ancestree and derive
-        let synthRate = BigNumber.ZERO;
-        let profit = BigNumber.ZERO;
-        for(let i = 0; i < this.sequence.length; ++i)
+        let synthRate = task.synthRate || BigNumber.ZERO;
+        let profit = task.profit || BigNumber.ZERO;
+        let i = task.start || 0;
+        for(; i < this.sequence.length; ++i)
         {
-            if(SYNTHABLE_PARTS.has(this.sequence[i]) && this.params[i])
+            if(i - task.start > MAX_CHARS_PER_TICK)
+            {
+                return {
+                    start: i,
+                    synthRate: synthRate,
+                    profit: profit
+                }
+            }
+            if(SYNTHABLE_SYMBOLS.has(this.sequence[i]) && this.params[i])
                 synthRate += this.params[i][0];
             if(harvestable.has(this.sequence[i]) && this.params[i])
                 profit += this.params[i][0];
         }
         return {
+            start: 0,
             synthRate: synthRate,
             profit: profit
         }
     }
+    generateRendererConfig()
+    {
+        return {
+            camera:
+            {
+                figureScale: this.camera.figureScale(this.stage),
+                cameraMode: this.camera.cameraMode,
+                followFactor: this.camera.followFactor,
+                x: this.camera.x(this.stage),
+                y: this.camera.y(this.stage),
+                Z: this.camera.z(this.stage),
+                upright: this.camera.upright
+            },
+            stroke:
+            {
+                tickLength: this.stroke.tickLength(this.stage),
+                initDelay: this.stroke.initDelay(this.stage),
+                loadModels: this.stroke.loadModels,
+                quickDraw: this.stroke.quickDraw,
+                quickBacktrack: this.stroke.quickBacktrack,
+                backtrackTail: this.stroke.backtrackTail,
+                hesitateApex: this.stroke.hesitateApex,
+                hesitateFork: this.stroke.hesitateFork
+            }
+        };
+    }
     grow(dt, synth = true)
     {
+        // Synth means it's daytime - growth rate is only 1
+        let dg;
         if(synth)
-            this.energy += dt * this.synthRate * this.population;
-        
-        let dg = this.energy.min(dt * this.growthRate * this.population);
+        {
+            this.energy += dt * this.synthRate;
+            dg = this.energy.min(dt);
+        }
+        else
+            dg = this.energy.min(dt * this.growthRate);
+
         this.growth += dg;
         this.energy -= dg;
 
         if((everybodyGangsta && this.growth >= this.growthCost *
-        this.sequence.length * this.population) || this.ancestreeTask.start ||
+        this.sequence.length) || this.ancestreeTask.start ||
         this.deriveTask.start || this.calcTask.start)
         {
             everybodyGangsta = false;
-            this.derive();
+            this.evolve();
         }
     }
-    derive()
+    performAction(id)
+    {
+        // Harvest is always id 0.
+        // Example structure:
+        // let actions = [
+        //     {
+        //         name: 'harvest',
+        //         symbols: new Set('KB'),
+        //         killColony: true
+        //     },
+        //     {
+        //         name: 'prune',
+        //         system: new LSystem('', ['L(s): s<0.25 =']),
+        //         killColony: false
+        //     }
+        // ]
+        if(id == 0)
+            currency.value += this.profit * BigNumber.from(this.population) *
+            theory.publicationMultiplier;
+
+        if(this.actions[id].killColony)
+        {
+            // What do I do? How do I order the plot manager to kill? How do I
+            // manipulate the currency from here? Or from outside?
+            // Skip tasks to save time because it's dead anyway
+            return;
+        }
+        // Future idea: maybe instead of using an LS to prune/harvest, develop
+        // efficient pruner/harvester, like a naked L-system rule???
+        // derive and calc stats (possibly ancestree if future actions require
+        // checking adjacency)
+        everybodyGangsta = false;
+        if(!('derivation' in this.deriveTask) ||
+        ('derivation' in this.deriveTask && this.deriveTask.start))
+        {
+            this.deriveTask = this.actions[id].system.derive(this.sequence,
+            this.params, null, null, this.deriveTask);
+            return;
+        }
+        if(!('synthRate' in this.calcTask) ||
+        ('synthRate' in this.calcTask && this.calcTask.start))
+        {
+            this.calcTask = this.calculateStats(this.actions[0].symbols);
+            return;
+        }
+        this.sequence = this.deriveTask.derivation;
+        this.params = this.deriveTask.parameters;
+        this.synthRate = this.calcTask.synthRate;
+        this.profit = this.calcTask.profit;
+        this.deriveTask =
+        {
+            start: 0
+        };
+        this.calcTask =
+        {
+            start: 0
+        };
+        everybodyGangsta = true;
+        theory.invalidateSecondaryEquation();
+        theory.invalidateQuaternaryValues();
+    }
+    evolve()
     {
         // Ancestree, derive and calc stats
+        if(!('ancestors' in this.ancestreeTask) ||
+        ('ancestors' in this.ancestreeTask && this.ancestreeTask.start))
+        {
+            this.ancestreeTask = this.system.getAncestree(this.sequence,
+            this.ancestreeTask);
+            return;
+        }
+        if(!('derivation' in this.deriveTask) ||
+        ('derivation' in this.deriveTask && this.deriveTask.start))
+        {
+            this.deriveTask = this.system.derive(this.sequence, this.params,
+            this.ancestreeTask.ancestors, this.ancestreeTask.children,
+            this.deriveTask);
+            return;
+        }
+        if(!('synthRate' in this.calcTask) ||
+        ('synthRate' in this.calcTask && this.calcTask.start))
+        {
+            this.calcTask = this.calculateStats(this.actions[0].symbols);
+            return;
+        }
+        this.sequence = this.deriveTask.derivation;
+        this.params = this.deriveTask.parameters;
+        this.synthRate = this.calcTask.synthRate;
+        this.profit = this.calcTask.profit;
+        ++this.stage;
+        this.ancestreeTask =
+        {
+            start: 0
+        };
+        this.deriveTask =
+        {
+            start: 0
+        };
+        this.calcTask =
+        {
+            start: 0
+        };
+        let config = this.generateRendererConfig();
+        renderer.configure(this.sequence, this.params, config.camera,
+        config.stroke);
         everybodyGangsta = true;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
     }
 }
 
+/**
+ * This is not ECS, I'm not good enough to understand ECS.
+*/
+class ColonyManager
+{
+    constructor(colonies, time, timeRemainder)
+    {
+        // 6*inf
+        this.colonies = colonies || Array.from({length: maxPlots}, (_) => []);
+        this.time = time;
+        this.timeRemainder = timeRemainder;
+        this.dayNightCycle = Math.floor((time + 36) / 72);
+
+        this.gangsta = null;
+        this.ancestreeTask =
+        {
+            start: 0
+        };
+        this.deriveTask =
+        {
+            start: 0
+        };
+        this.calcTask =
+        {
+            start: 0
+        };
+    }
+
+    addColony(plot, id, population)
+    {
+        for(let i = 0; this.colonies[plot].length; ++i)
+        {
+            if(this.colonies[plot][i].id == id && !this.colonies[plot][i].stage)
+            {
+                this.colonies[plot][i].population += population;
+                return;
+            }
+        }
+        this.colonies[plot].push({
+            id: id,
+            population: population,
+            sequence: PLANT_DATA[id].system.axiom,
+            params: PLANT_DATA[id].system.axiomParams,
+            stage: 0,
+
+            energy: BigNumber.ZERO,
+            growth: BigNumber.ZERO,
+
+        });
+    }
+    killColony(plot, index)
+    {
+        if(!this.colonies[plot][index])
+            return;
+        this.colonies[plot].splice(index, 1);
+    }
+
+    get object()
+    {
+        return {
+            colonies: this.colonies,
+            time: this.time,
+            timeRemainder: this.timeRemainder
+        };
+    }
+}
 
 // const sidewayQuat = new Quaternion(1, 0, 0, 0);
 const uprightQuat = new Quaternion(-Math.sqrt(2)/2, 0, 0, Math.sqrt(2)/2);
@@ -1992,6 +2205,7 @@ const xUpQuat = new Quaternion(0, 1, 0, 0);
 const yUpQuat = new Quaternion(0, 0, 1, 0);
 const zUpQuat = new Quaternion(0, 0, 0, 1);
 
+let manager = new ColonyManager();
 let renderer = new Renderer('', []);
 let globalRNG = new Xorshift(Date.now());
 
@@ -2126,7 +2340,9 @@ var goToNextStage = () =>
 var getInternalState = () => JSON.stringify
 ({
     version: version,
-    time: time,
+    plot: plot,
+    colony: colony,
+    manager: manager.object
 })
 
 var setInternalState = (stateStr) =>
@@ -2136,10 +2352,14 @@ var setInternalState = (stateStr) =>
 
     let state = JSON.parse(stateStr);
 
-    if('time' in state)
-    {
-        time = state.time;
-    }
+    if('plot' in state)
+        plot = state.plot;
+    if('colony' in state)
+        colony = state.colony;
+
+    if('manager' in state)
+        manager = new ColonyManager(...state.manager);
+
     theory.invalidateTertiaryEquation();
 }
 
