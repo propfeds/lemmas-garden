@@ -36,7 +36,7 @@ let tmpCurrency;
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(1000)));
 
-const tax = .12;
+const taxRate = .12;
 const tauRateN = 10;   // e30 = 100 tau, e45 = end
 const tauRateD = 3;
 
@@ -45,7 +45,7 @@ var getPublicationMultiplier = (tau) => tau.max(BigNumber.ONE).pow(pubExp *
 tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
 var getPublicationMultiplierFormula = (symbol) =>
 `\\begin{array}{c}{${symbol}}^{${pubExp}\\ln({\\ln{${symbol}})}}\\\\
-(\\text{${getLoc('tax')}}\\colon\\enspace${tax}\\times\\max\\,\\text{p})
+(\\text{${getLoc('tax')}}\\colon\\enspace${taxRate}\\times\\max\\,\\text{p})
 \\end{array}`;
 // Need a better place to write this
 
@@ -1922,7 +1922,7 @@ class Renderer
 */
 class ColonyManager
 {
-    constructor(colonies, time, timeRemainder)
+    constructor(colonies, time = 0, timeRemainder = 0)
     {
         // 6*inf
         this.colonies = colonies || Array.from({length: maxPlots}, (_) => []);
@@ -2236,7 +2236,7 @@ var init = () =>
     // Next: plant unlocks and milestones
 
     theory.primaryEquationScale = 0.9;
-    theory.secondaryEquationHeight = 330;
+    // theory.secondaryEquationHeight = 330;
 
     updateAvailability();
 }
@@ -2248,7 +2248,7 @@ var updateAvailability = () =>
 
 var tick = (elapsedTime, multiplier) =>
 {
-    time += elapsedTime * multiplier;
+    manager.time += elapsedTime * multiplier;
     theory.invalidateTertiaryEquation();
 }
 
@@ -2259,20 +2259,27 @@ var getPrimaryEquation = () =>
     return Localization.format(getLoc('plotTitle'), plot + 1);
 }
 
-// secondary
+var getSecondaryEquation = () =>
+{
+    return `${theory.latexSymbol}=\\max\\,\\text{p}^{${tauRateN}/${tauRateD}}`;
+}
 
 var getTertiaryEquation = () =>
 {
-    let nofDays = Math.floor(time / 144);
-    let timeofDay = time % 144;
+    let nofDays = Math.floor(manager.time / 144);
+    let timeofDay = manager.time % 144;
     let hour = Math.floor(timeofDay / 6);
 
-    return `\\text{Day }${nofDays + 1},\\enspace${hour}\\text{ o' clock}`;
+    return `\\text{Day }${nofDays + 1},\\enspace${hour}\\text{ o' clock}
+    ${theory.canPublish && theory.publicationUpgrade.level ? `\\, - \\,
+    \\text{Tax\\colon}\\enspace${getCurrencyFromTau(theory.tau)[0] * taxRate}
+    \\text{p}` : ''}`;
 }
 
 // quaternary
 
 var getTau = () => currency.value.max(BigNumber.ZERO).pow(tauRateN / tauRateD);
+
 var getCurrencyFromTau = (tau) =>
 [
     tau.max(BigNumber.ONE).pow(tauRateD / tauRateN),
@@ -2287,7 +2294,7 @@ var prePublish = () =>
 // You can be in debt for this lol
 var postPublish = () =>
 {
-    currency.value = tmpCurrency - getCurrencyFromTau(theory.tau)[0] * tax;
+    currency.value = tmpCurrency - getCurrencyFromTau(theory.tau)[0] * taxRate;
 }
 
 var canResetStage = () => true;
@@ -2301,7 +2308,6 @@ var canGoToPreviousStage = () => plotPerma.level > 0 && plot > 0;
 var goToPreviousStage = () =>
 {
     --plot;
-    renderer.reset();
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
 };
@@ -2309,7 +2315,6 @@ var canGoToNextStage = () => plot < plotPerma.level - 1;
 var goToNextStage = () =>
 {
     ++plot;
-    renderer.reset();
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
 };
@@ -2335,7 +2340,8 @@ var setInternalState = (stateStr) =>
         colony = state.colony;
 
     if('manager' in state)
-        manager = new ColonyManager(...state.manager);
+        manager = new ColonyManager(state.manager.colonies, state.manager.time,
+        state.manager.timeRemainder);
 
     theory.invalidateTertiaryEquation();
 }

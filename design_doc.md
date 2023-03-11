@@ -259,3 +259,4 @@ Tomorrow, she would wake up earlier than usual. Glancing at the golden haze, she
 would brush her hands over the sunflower's face...
 Even if to her, every meaning had already lost.
 (lost -> more like failed)
+- Story about **coin toss** to determine who's husband (thanks J Draper)
