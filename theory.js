@@ -60,7 +60,7 @@ const LS_CONTEXT =
 /((.)(\(([^\)]+)\))?<)?((.)(\(([^\)]+)\))?)(>(.)(\(([^\)]+)\))?)?/;
 const BACKTRACK_LIST = new Set('+-&^\\/|[$T');
 // Leaves and apices
-const SYNTHABLE_SYMBOLS = new Set('LA');
+const SYNTHABLE_SYMBOLS = new Set('LaA');
 const MAX_CHARS_PER_TICK = 200;
 const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
@@ -1918,34 +1918,101 @@ class Renderer
 }
 
 /**
- * Don't use this class.
- */
-class Colony
+ * This is not ECS, I'm not good enough to understand ECS.
+*/
+class ColonyManager
 {
-    constructor(id, population)
+    constructor(colonies, time, timeRemainder)
     {
-        this.id = id;
-        this.system = PLANT_DATA[id].system;
-        this.sequence = system.axiom;
-        this.params = system.axiomParams;
-        this.stage = 0;
-        this.population = population;
+        // 6*inf
+        this.colonies = colonies || Array.from({length: maxPlots}, (_) => []);
+        this.time = time;
+        this.timeRemainder = timeRemainder;
+        this.dayNightCycle = Math.floor((time + 36) / 72);
 
-        this.energy = BigNumber.ZERO;
-        this.growth = BigNumber.ZERO;
-        this.growthRate = PLANT_DATA[id].growthRate;
-        this.growthCost = PLANT_DATA[id].growthCost;
-        this.actions = PLANT_DATA[id].actions;
-        // First action is always harvest
-        this.synthRate = PLANT_DATA[id].synthRate;
-        this.profit = PLANT_DATA[id].profit;
-
-        this.camera = PLANT_DATA[id].camera;
-        this.stroke = PLANT_DATA[id].stroke;
-
-
+        this.gangsta = null;
+        this.ancestreeTask =
+        {
+            start: 0
+        };
+        this.deriveTask =
+        {
+            start: 0
+        };
+        this.calcTask =
+        {
+            start: 0
+        };
     }
 
+    get object()
+    {
+        return {
+            colonies: this.colonies,
+            time: this.time,
+            timeRemainder: this.timeRemainder
+        };
+    }
+
+    addColony(plot, id, population)
+    {
+        for(let i = 0; this.colonies[plot].length; ++i)
+        {
+            if(this.colonies[plot][i].id == id && !this.colonies[plot][i].stage)
+            {
+                this.colonies[plot][i].population += population;
+                return;
+            }
+        }
+        let stats = this.calculateStats(PLANT_DATA[id].actions[0].symbols);
+        this.colonies[plot].push({
+            id: id,
+            population: population,
+            sequence: PLANT_DATA[id].system.axiom,
+            params: PLANT_DATA[id].system.axiomParams,
+            stage: 0,
+
+            energy: BigNumber.ZERO,
+            growth: BigNumber.ZERO,
+            synthRate: stats.synthRate,
+            profit: stats.profit
+        });
+    }
+    killColony(plot, index)
+    {
+        if(!this.colonies[plot][index])
+            return;
+        this.colonies[plot].splice(index, 1);
+    }
+    growAll(dt)
+    {
+        // TODO: write this
+        return;
+    }
+    // TODO: rewrite all below
+    grow(dt, synth = true)
+    {
+        // Synth means it's daytime - growth rate is only 1
+        let dg;
+        if(synth)
+        {
+            this.energy += dt * this.synthRate;
+            dg = this.energy.min(dt);
+        }
+        else
+            dg = this.energy.min(dt * this.growthRate);
+
+        this.growth += dg;
+        this.energy -= dg;
+
+        if((everybodyGangsta && this.growth >= this.growthCost *
+        this.sequence.length) || this.ancestreeTask.start ||
+        this.deriveTask.start || this.calcTask.start)
+        {
+            everybodyGangsta = false;
+            this.evolve();
+        }
+    }
     calculateStats(harvestable = new Set(), task = {})
     {
         let synthRate = task.synthRate || BigNumber.ZERO;
@@ -1997,29 +2064,6 @@ class Colony
                 hesitateFork: this.stroke.hesitateFork
             }
         };
-    }
-    grow(dt, synth = true)
-    {
-        // Synth means it's daytime - growth rate is only 1
-        let dg;
-        if(synth)
-        {
-            this.energy += dt * this.synthRate;
-            dg = this.energy.min(dt);
-        }
-        else
-            dg = this.energy.min(dt * this.growthRate);
-
-        this.growth += dg;
-        this.energy -= dg;
-
-        if((everybodyGangsta && this.growth >= this.growthCost *
-        this.sequence.length) || this.ancestreeTask.start ||
-        this.deriveTask.start || this.calcTask.start)
-        {
-            everybodyGangsta = false;
-            this.evolve();
-        }
     }
     performAction(id)
     {
@@ -2129,73 +2173,6 @@ class Colony
         everybodyGangsta = true;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
-    }
-}
-
-/**
- * This is not ECS, I'm not good enough to understand ECS.
-*/
-class ColonyManager
-{
-    constructor(colonies, time, timeRemainder)
-    {
-        // 6*inf
-        this.colonies = colonies || Array.from({length: maxPlots}, (_) => []);
-        this.time = time;
-        this.timeRemainder = timeRemainder;
-        this.dayNightCycle = Math.floor((time + 36) / 72);
-
-        this.gangsta = null;
-        this.ancestreeTask =
-        {
-            start: 0
-        };
-        this.deriveTask =
-        {
-            start: 0
-        };
-        this.calcTask =
-        {
-            start: 0
-        };
-    }
-
-    addColony(plot, id, population)
-    {
-        for(let i = 0; this.colonies[plot].length; ++i)
-        {
-            if(this.colonies[plot][i].id == id && !this.colonies[plot][i].stage)
-            {
-                this.colonies[plot][i].population += population;
-                return;
-            }
-        }
-        this.colonies[plot].push({
-            id: id,
-            population: population,
-            sequence: PLANT_DATA[id].system.axiom,
-            params: PLANT_DATA[id].system.axiomParams,
-            stage: 0,
-
-            energy: BigNumber.ZERO,
-            growth: BigNumber.ZERO,
-
-        });
-    }
-    killColony(plot, index)
-    {
-        if(!this.colonies[plot][index])
-            return;
-        this.colonies[plot].splice(index, 1);
-    }
-
-    get object()
-    {
-        return {
-            colonies: this.colonies,
-            time: this.time,
-            timeRemainder: this.timeRemainder
-        };
     }
 }
 
