@@ -28,6 +28,9 @@ Today, it will do weatherly.`,
 var authors = 'propfeds';
 var version = 0;
 
+let time = 0;
+let growthIntegral = 0;
+let insolationIntegral = 0;
 let plot = 0;
 let colony = 0;
 let tmpCurrency;
@@ -1922,13 +1925,10 @@ class Renderer
 */
 class ColonyManager
 {
-    constructor(colonies, time = 0, timeRemainder = 0)
+    constructor(colonies)
     {
         // 6*inf
         this.colonies = colonies || Array.from({length: maxPlots}, (_) => []);
-        this.time = time;
-        this.timeRemainder = timeRemainder;
-        this.dayNightCycle = Math.floor((time + 36) / 72);
 
         this.gangsta = null;
         this.ancestreeTask =
@@ -1948,9 +1948,7 @@ class ColonyManager
     get object()
     {
         return {
-            colonies: this.colonies,
-            time: this.time,
-            timeRemainder: this.timeRemainder
+            colonies: this.colonies
         };
     }
 
@@ -1984,9 +1982,11 @@ class ColonyManager
             return;
         this.colonies[plot].splice(index, 1);
     }
-    growAll(dt)
+    growAll(di, dg)
     {
         // TODO: write this
+        // Idea: instead of calculating day night cycles, consider the synthesis
+        // and growth functions as sinusoidal
         return;
     }
     // TODO: rewrite all below
@@ -2248,7 +2248,16 @@ var updateAvailability = () =>
 
 var tick = (elapsedTime, multiplier) =>
 {
-    manager.time += elapsedTime * multiplier;
+    let dt = elapsedTime * multiplier;
+    time += dt;
+    // insolation: -cos(x*pi/72)
+    // TODO: integrate this
+    // universal growth factor = cos(x*pi/72)/2 + 1/2
+    let newGI = time / 2 + 36 * Math.sin(time * Math.PI / 72) / Math.PI;
+    let dg = newGI - growthIntegral;
+    growthIntegral = newGI;
+
+    manager.growAll(0, dg);
     theory.invalidateTertiaryEquation();
 }
 
@@ -2266,8 +2275,8 @@ var getSecondaryEquation = () =>
 
 var getTertiaryEquation = () =>
 {
-    let nofDays = Math.floor(manager.time / 144);
-    let timeofDay = manager.time % 144;
+    let nofDays = Math.floor(time / 144);
+    let timeofDay = time % 144;
     let hour = Math.floor(timeofDay / 6);
 
     return `\\text{Day }${nofDays + 1},\\enspace${hour}\\text{ o' clock}
@@ -2322,6 +2331,9 @@ var goToNextStage = () =>
 var getInternalState = () => JSON.stringify
 ({
     version: version,
+    time: time,
+    insolationIntegral: insolationIntegral,
+    growthIntegral: growthIntegral,
     plot: plot,
     colony: colony,
     manager: manager.object
@@ -2334,6 +2346,18 @@ var setInternalState = (stateStr) =>
 
     let state = JSON.parse(stateStr);
 
+    if('time' in state)
+        time = state.time;
+    if('insolationIntegral' in state)
+        insolationIntegral = state.insolationIntegral;
+    else
+        insolationIntegral = 0; // help me lol
+    if('growthIntegral' in state)
+        growthIntegral = state.growthIntegral;
+    else
+        growthIntegral = time / 2 + 36 * Math.sin(time * Math.PI / 72) /
+        Math.PI;
+    
     if('plot' in state)
         plot = state.plot;
     if('colony' in state)
@@ -2345,6 +2369,8 @@ var setInternalState = (stateStr) =>
 
     theory.invalidateTertiaryEquation();
 }
+
+var get2DGraphValue = () => (Math.cos(time * Math.PI / 72) + 1) / 2;
 
 var get3DGraphPoint = () => renderer.cursor;
 
