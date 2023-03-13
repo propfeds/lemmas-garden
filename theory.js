@@ -32,6 +32,7 @@ let time = 0;
 let days = 0;
 let insolationIntegral = 0;
 let growthIntegral = 0;
+let graphMode = 1;
 let plot = 0;
 let colony = 0;
 let tmpCurrency;
@@ -1923,6 +1924,58 @@ class Renderer
     }
 }
 
+const PLANT_DATA =
+[
+    {
+        name: 'Arrow weed',
+        system: new LSystem('A(1)', [
+            'F(l)=F(l*2)',
+            'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t/2)'
+        ], 30),
+        growthRate: 0.5,
+        growthCost: 300,
+        actions:
+        [
+            {
+                name: 'Harvest',
+                symbols: new Set('A'),
+                system: new LSystem('', ['A=']),
+                killColony: false
+            },
+            {
+                name: 'Prune',
+                system: new LSystem('', ['F=']),
+                killColony: true
+            }
+        ],
+        camera: (stage) =>
+        {
+            return {
+                figureScale: 2 ** stage,
+                // cameraMode: 0,
+                // followFactor: 0.15,
+                x: 2 ** stage,
+                y: 0,
+                Z: 0,
+                upright: false
+            };
+        },
+        stroke: (stage) =>
+        {
+            return {
+                tickLength: stage < 3 ? 2 : 1,
+                // initDelay: 0,
+                // loadModels: true,
+                // quickDraw: false,
+                // quickBacktrack: false,
+                // backtrackTail: true,
+                // hesitateApex: true,
+                // hesitateFork: true,
+            };
+        }
+    }
+]
+
 /**
  * This is not ECS, I'm not good enough to understand ECS.
 */
@@ -1933,6 +1986,7 @@ class ColonyManager
         // 6*inf
         this.colonies = colonies || Array.from({length: maxPlots}, (_) => []);
 
+        // Everyone gangsta until a colony starts evolving
         this.gangsta = null;
         this.ancestreeTask =
         {
@@ -1987,41 +2041,36 @@ class ColonyManager
     }
     growAll(di, dg)
     {
-        // TODO: write this
-        // Idea: instead of calculating day night cycles, consider the synthesis
-        // and growth functions as sinusoidal
-        return;
+        if(this.gangsta)
+            this.evolve();
+
+        for(let i = 0; i < this.colonies.length; ++i)
+        {
+            for(let j = 0; j < this.colonies[i].length; ++i)
+            {
+                let c = this.colonies[i][j];
+                c.energy += di * c.synthRate;
+
+                let maxdg = c.energy.min(dg * PLANT_DATA[c.id].growthRate);
+                c.growth += maxdg;
+                c.energy -= maxdg;
+
+                if(!this.gangsta && c.growth >= PLANT_DATA[c.id].growthCost *
+                c.sequence.length)
+                {
+                    c.growth -= PLANT_DATA[c.id].growthCost * c.sequence.length;
+                    this.gangsta = [i, j];
+                }
+            }
+        }
     }
     // TODO: rewrite all below
-    grow(dt, synth = true)
-    {
-        // Synth means it's daytime - growth rate is only 1
-        let dg;
-        if(synth)
-        {
-            this.energy += dt * this.synthRate;
-            dg = this.energy.min(dt);
-        }
-        else
-            dg = this.energy.min(dt * this.growthRate);
-
-        this.growth += dg;
-        this.energy -= dg;
-
-        if((everybodyGangsta && this.growth >= this.growthCost *
-        this.sequence.length) || this.ancestreeTask.start ||
-        this.deriveTask.start || this.calcTask.start)
-        {
-            everybodyGangsta = false;
-            this.evolve();
-        }
-    }
-    calculateStats(harvestable = new Set(), task = {})
+    calculateStats(colony, harvestable = new Set(), task = {})
     {
         let synthRate = task.synthRate || BigNumber.ZERO;
         let profit = task.profit || BigNumber.ZERO;
         let i = task.start || 0;
-        for(; i < this.sequence.length; ++i)
+        for(; i < colony.sequence.length; ++i)
         {
             if(i - task.start > MAX_CHARS_PER_TICK)
             {
@@ -2031,10 +2080,10 @@ class ColonyManager
                     profit: profit
                 }
             }
-            if(SYNTHABLE_SYMBOLS.has(this.sequence[i]) && this.params[i])
-                synthRate += this.params[i][0];
-            if(harvestable.has(this.sequence[i]) && this.params[i])
-                profit += this.params[i][0];
+            if(SYNTHABLE_SYMBOLS.has(colony.sequence[i]) && colony.params[i])
+                synthRate += colony.params[i][0];
+            if(harvestable.has(colony.sequence[i]) && colony.params[i])
+                profit += colony.params[i][0];
         }
         return {
             start: 0,
@@ -2268,10 +2317,8 @@ var tick = (elapsedTime, multiplier) =>
     let dg = newGI - growthIntegral;
     growthIntegral = newGI;
 
-    manager.growAll(di, dg);
+    manager.growAll(BigNumber.from(di), BigNumber.from(dg));
     theory.invalidateTertiaryEquation();
-
-    log(insolationIntegral / 144 * Math.PI);
 }
 
 var getEquationOverlay = () =>
@@ -2359,14 +2406,36 @@ var getInternalState = () => JSON.stringify
     plot: plot,
     colony: colony,
     manager: manager.object
-})
+}, bigStringify);
+
+// Copied from the ol Oiler's Formula
+var bigStringify = (_, val) =>
+{
+    try
+    {
+        if(val instanceof BigNumber)
+            return 'BigNumber' + val.toBase64String();
+    }
+    catch {};
+    return val;
+}
+
+var unBigStringify = (_, val) =>
+{
+    if (val && typeof val === 'string')
+    {
+        if(val.startsWith('BigNumber'))
+            return BigNumber.fromBase64String(val.substring(9));
+    }
+    return val;
+}
 
 var setInternalState = (stateStr) =>
 {
     if(!stateStr)
         return;
 
-    let state = JSON.parse(stateStr);
+    let state = JSON.parse(stateStr, unBigStringify);
 
     if('time' in state)
     {
@@ -2392,7 +2461,18 @@ var setInternalState = (stateStr) =>
     theory.invalidateTertiaryEquation();
 }
 
-var get2DGraphValue = () => insolationIntegral;
+var get2DGraphValue = () =>
+{
+    switch(graphMode)
+    {
+        case 0:
+            return 0;
+        case 1:     // Insolation
+            return Math.max(0, -Math.cos(time * Math.PI / 72));
+        case 2:     // Growth
+            return (Math.cos(time * Math.PI / 72) + 1) / 2;
+    }
+};
 
 var get3DGraphPoint = () => renderer.cursor;
 
