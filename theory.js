@@ -2000,6 +2000,16 @@ class ColonyManager
         {
             start: 0
         };
+        // Processed before regular gangsta
+        this.actionGangsta = null;
+        this.actionDeriveTask =
+        {
+            start: 0
+        };
+        this.actionCalcTask =
+        {
+            start: 0
+        };
     }
 
     get object()
@@ -2041,7 +2051,9 @@ class ColonyManager
     }
     growAll(di, dg)
     {
-        if(this.gangsta)
+        if(this.actionGangsta)
+            this.continueAction();
+        else if(this.gangsta)
             this.evolve();
 
         for(let i = 0; i < this.colonies.length; ++i)
@@ -2064,9 +2076,10 @@ class ColonyManager
             }
         }
     }
-    // TODO: rewrite all below
-    calculateStats(colony, harvestable = new Set(), task = {})
+    calculateStats(colony, task = {})
     {
+        // This is the only case where the colony needed
+        let harvestable = PLANT_DATA[colony.id].actions[0].symbols;
         let synthRate = task.synthRate || BigNumber.ZERO;
         let profit = task.profit || BigNumber.ZERO;
         let i = task.start || 0;
@@ -2091,122 +2104,91 @@ class ColonyManager
             profit: profit
         }
     }
-    generateRendererConfig()
+    continueAction()
     {
-        return {
-            camera:
-            {
-                figureScale: this.camera.figureScale(this.stage),
-                cameraMode: this.camera.cameraMode,
-                followFactor: this.camera.followFactor,
-                x: this.camera.x(this.stage),
-                y: this.camera.y(this.stage),
-                Z: this.camera.z(this.stage),
-                upright: this.camera.upright
-            },
-            stroke:
-            {
-                tickLength: this.stroke.tickLength(this.stage),
-                initDelay: this.stroke.initDelay(this.stage),
-                loadModels: this.stroke.loadModels,
-                quickDraw: this.stroke.quickDraw,
-                quickBacktrack: this.stroke.quickBacktrack,
-                backtrackTail: this.stroke.backtrackTail,
-                hesitateApex: this.stroke.hesitateApex,
-                hesitateFork: this.stroke.hesitateFork
-            }
-        };
-    }
-    performAction(id)
-    {
-        // Harvest is always id 0.
-        // Example structure:
-        // let actions = [
-        //     {
-        //         name: 'harvest',
-        //         symbols: new Set('KB'),
-        //         killColony: true
-        //     },
-        //     {
-        //         name: 'prune',
-        //         system: new LSystem('', ['L(s): s<0.25 =']),
-        //         killColony: false
-        //     }
-        // ]
-        if(id == 0)
-            currency.value += this.profit * BigNumber.from(this.population) *
-            theory.publicationMultiplier;
-
-        if(this.actions[id].killColony)
-        {
-            // What do I do? How do I order the plot manager to kill? How do I
-            // manipulate the currency from here? Or from outside?
-            // Skip tasks to save time because it's dead anyway
-            return;
-        }
         // Future idea: maybe instead of using an LS to prune/harvest, develop
         // efficient pruner/harvester, like a naked L-system rule???
+        let c = this.colonies[this.actionGangsta[0]][this.actionGangsta[1]];
+        let id = this.actionGangsta[2];
         // derive and calc stats (possibly ancestree if future actions require
         // checking adjacency)
-        everybodyGangsta = false;
-        if(!('derivation' in this.deriveTask) ||
-        ('derivation' in this.deriveTask && this.deriveTask.start))
+        if(!('derivation' in this.actionDeriveTask) ||
+        ('derivation' in this.actionDeriveTask && this.actionDeriveTask.start))
         {
-            this.deriveTask = this.actions[id].system.derive(this.sequence,
-            this.params, null, null, this.deriveTask);
+            this.actionDeriveTask = PLANT_DATA[c.id].actions[id].system.derive(
+            c.sequence, c.params, null, null, this.actionDeriveTask);
             return;
         }
-        if(!('synthRate' in this.calcTask) ||
-        ('synthRate' in this.calcTask && this.calcTask.start))
+        if(!('synthRate' in this.actionCalcTask) ||
+        ('synthRate' in this.actionCalcTask && this.actionCalcTask.start))
         {
-            this.calcTask = this.calculateStats(this.actions[0].symbols);
+            this.actionCalcTask = this.calculateStats(c, this.actionCalcTask);
             return;
         }
-        this.sequence = this.deriveTask.derivation;
-        this.params = this.deriveTask.parameters;
-        this.synthRate = this.calcTask.synthRate;
-        this.profit = this.calcTask.profit;
-        this.deriveTask =
+        c.sequence = this.actionDeriveTask.derivation;
+        c.params = this.actionDeriveTask.parameters;
+        c.synthRate = this.actionCalcTask.synthRate;
+        c.profit = this.actionCalcTask.profit;
+        this.actionDeriveTask =
         {
             start: 0
         };
-        this.calcTask =
+        this.actionCalcTask =
         {
             start: 0
         };
-        everybodyGangsta = true;
+        this.actionGangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
     }
+    performAction(plot, index, id)
+    {
+        if(!this.colonies[plot][index])
+            return;
+        let c = this.colonies[plot][index];
+        // Harvest is always id 0.
+        if(id == 0)
+            currency.value += c.profit * BigNumber.from(c.population) *
+            theory.publicationMultiplier;
+
+        if(PLANT_DATA[c.id].actions[id].killColony)
+        {
+            this.killColony(plot, index);
+            return;
+        }
+        this.actionGangsta = [plot, index, id];
+        return;
+    }
     evolve()
     {
+        let c = this.colonies[this.gangsta[0]][this.gangsta[1]];
         // Ancestree, derive and calc stats
         if(!('ancestors' in this.ancestreeTask) ||
         ('ancestors' in this.ancestreeTask && this.ancestreeTask.start))
         {
-            this.ancestreeTask = this.system.getAncestree(this.sequence,
-            this.ancestreeTask);
+            this.ancestreeTask = PLANT_DATA[c.id].system.getAncestree(
+            c.sequence, this.ancestreeTask);
             return;
         }
         if(!('derivation' in this.deriveTask) ||
         ('derivation' in this.deriveTask && this.deriveTask.start))
         {
-            this.deriveTask = this.system.derive(this.sequence, this.params,
-            this.ancestreeTask.ancestors, this.ancestreeTask.children,
+            this.deriveTask = PLANT_DATA[c.id].system.derive(c.sequence,
+            c.params, this.ancestreeTask.ancestors, this.ancestreeTask.children,
             this.deriveTask);
             return;
         }
         if(!('synthRate' in this.calcTask) ||
         ('synthRate' in this.calcTask && this.calcTask.start))
         {
-            this.calcTask = this.calculateStats(this.actions[0].symbols);
+            this.calcTask = this.calculateStats(c, this.calcTask);
             return;
         }
-        this.sequence = this.deriveTask.derivation;
-        this.params = this.deriveTask.parameters;
-        this.synthRate = this.calcTask.synthRate;
-        this.profit = this.calcTask.profit;
-        ++this.stage;
+        c.sequence = this.deriveTask.derivation;
+        c.params = this.deriveTask.parameters;
+        c.synthRate = this.calcTask.synthRate;
+        c.profit = this.calcTask.profit;
+        ++c.stage;
         this.ancestreeTask =
         {
             start: 0
@@ -2219,10 +2201,9 @@ class ColonyManager
         {
             start: 0
         };
-        let config = this.generateRendererConfig();
-        renderer.configure(this.sequence, this.params, config.camera,
-        config.stroke);
-        everybodyGangsta = true;
+        renderer.configure(this.sequence, this.params,
+        PLANT_DATA[c.id].camera(c.stage), PLANT_DATA[c.id].stroke(c.stage));
+        this.gangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
     }
