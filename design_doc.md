@@ -196,7 +196,10 @@ between tau not feeling bloated and pub multipliers not too small)
 
 ## UI
 
-- Reset arrow: invest - does it overlap with publish?
+- Settings:
+  - Reset graph on renderer reset
+  - Performance mode: turns off renderer, make a 2d graph instead
+    - 2d 'screensaver' settings: insolation, growth integrals
 - Top-left overlay: version
 - Previous/next arrows: switch plot
 - Primary: Plot N - Plant name (pollinated, invaded 250)
