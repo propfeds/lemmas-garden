@@ -1,7 +1,10 @@
 import { BigNumber } from '../api/BigNumber';
 import { ExponentialCost, FirstFreeCost, FreeCost } from '../api/Costs';
 import { Localization } from '../api/Localization';
-import { theory } from '../api/Theory';
+import { QuaternaryEntry, theory } from '../api/Theory';
+import { LayoutOptions } from '../api/ui/properties/LayoutOptions';
+import { TextAlignment } from '../api/ui/properties/TextAlignment';
+import { Thickness } from '../api/ui/properties/Thickness';
 import { Vector3 } from '../api/Vector3';
 
 var id = 'lemmas_garden';
@@ -84,9 +87,11 @@ const locStrings =
         switchColony: 'Switch colony',
         switchColonyInfo: 'Cycles through the list of colonies',
 
-        actionHarvest: 'Harvest',
-        actionPrune: 'Prune',
-        actionKillInfo: 'Kills the colony',
+        btnView: 'View',
+        btnHarvest: 'Harvest',
+        btnHarvestKill: 'Harvest\\\\(kill)',
+        btnPrune: 'Prune',
+        btnPruneKill: 'Prune\\\\(kill)',
 
         switchPlant: 'Switch plant (Plot {0})',
         switchPlantInfo: 'Cycles through the list of plants',
@@ -95,7 +100,7 @@ const locStrings =
         [
             'Testing my arrow weeds'
         ],
-        
+
         resetRenderer: 'You are about to reset the renderer.'
     }
 };
@@ -178,6 +183,11 @@ let getSmallBtnSize = (width) =>
 
     return 32;
 }
+
+const cDispColour = new Map();
+cDispColour.set(Theme.STANDARD, 'c0c0c0');
+cDispColour.set(Theme.DARK, 'b5b5b5');
+cDispColour.set(Theme.LIGHT, '434343');
 
 /**
  * Represents an instance of the Xorshift RNG.
@@ -1962,19 +1972,15 @@ const PLANT_DATA =
         ], 30),
         cost: new FirstFreeCost(new ExponentialCost(1, 1)),
         growthRate: BigNumber.ONE,
-        growthCost: BigNumber.from(60),
+        growthCost: BigNumber.from(45),
         actions:
         [
-            {
-                name: getLoc('actionHarvest'),
-                info: getLoc('actionHarvest'),
+            {   // Always a harvest
                 symbols: new Set('A'),
                 system: new LSystem('', ['A=']),
                 killColony: false
             },
-            {
-                name: getLoc('actionPrune'),
-                info: getLoc('actionKillInfo'),
+            {   // Always a prune
                 system: new LSystem('', ['F=']),
                 killColony: true
             }
@@ -2052,11 +2058,12 @@ class ColonyManager
 
     addColony(plot, id, population)
     {
-        for(let i = 0; this.colonies[plot].length; ++i)
+        for(let i = 0; i < this.colonies[plot].length; ++i)
         {
             if(this.colonies[plot][i].id == id && !this.colonies[plot][i].stage)
             {
                 this.colonies[plot][i].population += population;
+                theory.invalidateQuaternaryValues();
                 return;
             }
         }
@@ -2075,6 +2082,7 @@ class ColonyManager
         c.synthRate = stats.synthRate;
         c.profit = stats.profit;
         this.colonies[plot].push(c);
+        theory.invalidateQuaternaryValues();
         updateAvailability();
     }
     killColony(plot, index)
@@ -2275,8 +2283,139 @@ let manager = new ColonyManager();
 let renderer = new Renderer(new LSystem(), '', []);
 let globalRNG = new Xorshift(Date.now());
 
+let quaternaryEntries =
+[
+    new QuaternaryEntry('\\text{p}_1', '0'),
+    new QuaternaryEntry('\\text{p}_2', '0'),
+    new QuaternaryEntry('\\text{p}_3', '0'),
+    new QuaternaryEntry('\\text{p}_4', '0'),
+    new QuaternaryEntry('\\text{p}_5', '0'),
+    new QuaternaryEntry('\\text{p}_6', '0'),
+];
+
+const LSFrame = ui.createFrame
+({
+    isVisible: () => manager.colonies[plot][colonyIdx[plot]] ? true : false,
+    column: 2,
+    cornerRadius: 1,
+    horizontalOptions: LayoutOptions.START,
+    verticalOptions: LayoutOptions.START,
+    hasShadow: true,
+    heightRequest: getImageSize(ui.screenWidth),
+    widthRequest: getImageSize(ui.screenWidth),
+    content: ui.createImage
+    ({
+        source: ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/plant-roots.png'),
+        aspect: Aspect.ASPECT_FIT,
+        useTint: false
+    }),
+    onTouched: (e) =>
+    {
+        if(e.type == TouchType.SHORTPRESS_RELEASED ||
+        e.type == TouchType.LONGPRESS_RELEASED)
+        {
+            Sound.playClick();
+        }
+    }
+});
+// const LSLabel = ui.createLatexLabel
+// ({
+//     isVisible: () => manager.colonies[plot][colonyIdx[plot]] ? true : false,
+//     column: 0,
+//     horizontalOptions: LayoutOptions.START,
+//     verticalOptions: LayoutOptions.START,
+//     margin: new Thickness(0, 30, 0, 0),
+//     text: getLoc('btnView'),
+//     fontSize: 9,
+//     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
+// });
+const harvestFrame = ui.createFrame
+({
+    isVisible: () => manager.colonies[plot][colonyIdx[plot]] ? true : false,
+    column: 1,
+    cornerRadius: 1,
+    horizontalOptions: LayoutOptions.START,
+    verticalOptions: LayoutOptions.START,
+    hasShadow: true,
+    heightRequest: getImageSize(ui.screenWidth),
+    widthRequest: getImageSize(ui.screenWidth),
+    content: ui.createImage
+    ({
+        source: ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cornucopia.png'),
+        aspect: Aspect.ASPECT_FIT,
+        useTint: false
+    }),
+    onTouched: (e) =>
+    {
+        if(e.type == TouchType.SHORTPRESS_RELEASED ||
+        e.type == TouchType.LONGPRESS_RELEASED)
+        {
+            Sound.playClick();
+            manager.performAction(plot, colonyIdx[plot], 0);
+        }
+    }
+});
+// const harvestLabel = ui.createLatexLabel
+// ({
+//     isVisible: () => manager.colonies[plot][colonyIdx[plot]] ? true : false,
+//     column: 1,
+//     horizontalOptions: LayoutOptions.START,
+//     verticalOptions: LayoutOptions.START,
+//     margin: new Thickness(0, 30, 0, 0),
+//     text: getLoc('btnHarvest'),
+//     fontSize: 9,
+//     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
+// });
+const pruneFrame = ui.createFrame
+({
+    isVisible: () => manager.colonies[plot][colonyIdx[plot]] ? true : false,
+    column: 0,
+    cornerRadius: 1,
+    horizontalOptions: LayoutOptions.START,
+    verticalOptions: LayoutOptions.START,
+    hasShadow: true,
+    heightRequest: getImageSize(ui.screenWidth),
+    widthRequest: getImageSize(ui.screenWidth),
+    content: ui.createImage
+    ({
+        source: ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.png'),
+        aspect: Aspect.ASPECT_FIT,
+        useTint: false
+    }),
+    onTouched: (e) =>
+    {
+        if(e.type == TouchType.SHORTPRESS_RELEASED ||
+        e.type == TouchType.LONGPRESS_RELEASED)
+        {
+            Sound.playClick();
+            manager.performAction(plot, colonyIdx[plot], 1);
+        }
+    }
+});
+// const pruneLabel = ui.createLatexLabel
+// ({
+//     isVisible: () => manager.colonies[plot][colonyIdx[plot]] ? true : false,
+//     column: 2,
+//     horizontalOptions: LayoutOptions.START,
+//     verticalOptions: LayoutOptions.START,
+//     margin: new Thickness(0, 30, 0, 0),
+//     text: getLoc('btnPrune'),
+//     fontSize: 9,
+//     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
+// });
+const actionsLabel = ui.createLatexLabel
+({
+    isVisible: () => manager.colonies[plot][colonyIdx[plot]] ? true : false,
+    column: 1,
+    horizontalOptions: LayoutOptions.END,
+    verticalOptions: LayoutOptions.START,
+    margin: new Thickness(0, 14, 120, 0),
+    text: 'Actions: ',
+    fontSize: 10,
+    textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
+});
+
 var switchColony;
-var actions = new Array(3);
 
 var switchPlant = new Array(maxPlots);
 var plants = Array.from({length: maxPlots}, (_) => []);
@@ -2305,42 +2444,10 @@ var init = () =>
             manager.colonies[plot].length;
             let c = manager.colonies[plot][colonyIdx[plot]];
             renderer.colony = c;
-            for(let i = 0; i < 3; ++i)
-            {
-                if(PLANT_DATA[c.id].actions[i])
-                    actions[i].isAvailable = true;
-                else
-                    actions[i].isAvailable = false;
-            }
         };
     }
     /* Actions
     */
-    for(let i = 0; i < 3; ++i)
-    {
-        actions[i] = theory.createSingularUpgrade(100 + i, currency,
-        new FreeCost);
-        actions[i].getDescription = () =>
-        {
-            let c = manager.colonies[plot][colonyIdx[plot]];
-            if(!c)
-                return '';
-            return PLANT_DATA[c.id].actions[i].name;
-        }
-        actions[i].getInfo = () =>
-        {
-            let c = manager.colonies[plot][colonyIdx[plot]];
-            if(!c)
-                return '';
-            return PLANT_DATA[c.id].actions[i].info;
-        }
-        actions[i].bought = (_) =>
-        {
-            actions[i].level = 0;
-            manager.performAction(plot, colonyIdx[plot], i);
-        }
-        actions[i].isAvailable = false;
-    }
 
     {
         let free_penny = theory.createUpgrade(9001, currency, new FreeCost);
@@ -2416,7 +2523,7 @@ var init = () =>
     // To do: challenge plot (-1)
     // Next: plant unlocks and milestones
 
-    theory.primaryEquationScale = 0.9;
+    theory.primaryEquationScale = 0.96;
     theory.secondaryEquationHeight = 100;
 }
 
@@ -2430,14 +2537,6 @@ var updateAvailability = () =>
             plants[i][j].isAvailable = (j == plantIdx[i] && i == plot) ||
             plants[i][j].level > 0;
         }
-    }
-    let c = manager.colonies[plot][colonyIdx[plot]];
-    for(let i = 0; i < 3; ++i)
-    {
-        if(c)
-            actions[i].isAvailable = PLANT_DATA[c.id].actions[i] ? true : false;
-        else
-            actions[i].isAvailable = false;
     }
 }
 
@@ -2468,12 +2567,47 @@ var tick = (elapsedTime, multiplier) =>
 
 var getEquationOverlay = () =>
 {
-    let result = ui.createLatexLabel
+    let result = ui.createGrid
     ({
-        text: getLoc('versionName'),
-        margin: new Thickness(8, 4),
-        fontSize: 9,
-        textColor: Color.TEXT_MEDIUM
+        // rowDefinitions: ['1*', '1*'],
+        columnDefinitions: ['1*', '1*'],
+        inputTransparent: true,
+        cascadeInputTransparent: false,
+        children:
+        [
+            // For reference
+            // ui.createFrame({row: 0, column: 2}),
+            // ui.createFrame({row: 1, column: 2}),
+            ui.createLatexLabel
+            ({
+                row: 0,
+                column: 0,
+                verticalTextAlignment: TextAlignment.START,
+                margin: new Thickness(8, 4),
+                text: getLoc('versionName'),
+                fontSize: 9,
+                textColor: Color.TEXT_MEDIUM
+            }),
+            ui.createGrid
+            ({
+                row: 0, column: 1,
+                margin: new Thickness(9),
+                columnSpacing: 16,
+                horizontalOptions: LayoutOptions.END,
+                inputTransparent: true,
+                cascadeInputTransparent: false,
+                children:
+                [
+                    LSFrame,
+                    // LSLabel,
+                    harvestFrame,
+                    // harvestLabel,
+                    pruneFrame,
+                    // pruneLabel
+                ]
+            }),
+            actionsLabel
+        ]
     });
     return result;
 }
@@ -2492,7 +2626,10 @@ var getSecondaryEquation = () =>
     let c = manager.colonies[plot][colonyIdx[plot]];
     if(!c)
         return finalBit;
-    let result = `${c.population}\\times\\text{${PLANT_DATA[c.id].name}, stage ${c.stage}}\\\\${PLANT_DATA[c.id].system.reconstruct(c.sequence, c.params).result}\\\\E=${c.energy}\\enspace g=${c.growth}/${PLANT_DATA[c.id].growthCost * c.sequence.length}\\\\r_s=${c.synthRate}\\enspace p=${c.profit}\\\\`;
+    let result = `${c.population}\\times
+    \\text{${PLANT_DATA[c.id].name}, stage ${c.stage}}\\\\E=${c.energy}\\enspace
+    g=${c.growth}/${PLANT_DATA[c.id].growthCost * c.sequence.length}\\\\
+    r_s=${c.synthRate}\\enspace p=${c.profit}\\\\`;
     return result + finalBit;
 }
 
@@ -2507,7 +2644,21 @@ var getTertiaryEquation = () =>
     \\text{p}` : ''}`;
 }
 
-// quaternary
+var getQuaternaryEntries = () =>
+{
+    for(let i = 0; i < plotPerma.level; ++i)
+    {
+        let sum = BigNumber.ZERO;
+        for(let j = 0; j < manager.colonies[i].length; ++j)
+        {
+            let c = manager.colonies[i][j];
+            sum += c.profit * BigNumber.from(c.population) *
+            theory.publicationMultiplier;
+        }
+        quaternaryEntries[i].value = sum;
+    }
+    return quaternaryEntries.slice(0, plotPerma.level);
+}
 
 var getTau = () => currency.value.max(BigNumber.ZERO).pow(tauRateN / tauRateD);
 
@@ -2540,7 +2691,8 @@ var goToPreviousStage = () =>
 {
     --plot;
     let c = manager.colonies[plot][colonyIdx[plot]];
-    renderer.colony = c;
+    if(c)
+        renderer.colony = c;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     updateAvailability();
@@ -2550,7 +2702,8 @@ var goToNextStage = () =>
 {
     ++plot;
     let c = manager.colonies[plot][colonyIdx[plot]];
-    renderer.colony = c;
+    if(c)
+        renderer.colony = c;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     updateAvailability();
@@ -2619,7 +2772,8 @@ var setInternalState = (stateStr) =>
         state.manager.timeRemainder);
 
     let c = manager.colonies[plot][colonyIdx[plot]];
-    renderer.colony = c;
+    if(c)
+        renderer.colony = c;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     theory.invalidateTertiaryEquation();
