@@ -2,6 +2,7 @@ import { BigNumber } from '../api/BigNumber';
 import { ExponentialCost, FirstFreeCost, FreeCost } from '../api/Costs';
 import { Localization } from '../api/Localization';
 import { QuaternaryEntry, theory } from '../api/Theory';
+import { ImageSource } from '../api/ui/properties/ImageSource';
 import { LayoutOptions } from '../api/ui/properties/LayoutOptions';
 import { TextAlignment } from '../api/ui/properties/TextAlignment';
 import { Thickness } from '../api/ui/properties/Thickness';
@@ -2089,7 +2090,8 @@ class ColonyManager
     {
         if(!this.colonies[plot][index])
             return;
-        plants[plot][index].level -= this.colonies[plot][index].population;
+        plants[plot][index].level -= Math.min(plants[plot][index].level,
+        this.colonies[plot][index].population);
         this.colonies[plot].splice(index, 1);
         updateAvailability();
     }
@@ -2305,7 +2307,7 @@ const LSFrame = ui.createFrame
     widthRequest: getImageSize(ui.screenWidth),
     content: ui.createImage
     ({
-        source: ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/plant-roots.png'),
+        source: ImageSource.EYE,
         aspect: Aspect.ASPECT_FIT,
         useTint: false
     }),
@@ -2446,14 +2448,17 @@ var init = () =>
             renderer.colony = c;
         };
     }
-    /* Actions
-    */
 
+    /* Free penny
+    For testing purposes
+    */
     {
         let free_penny = theory.createUpgrade(9001, currency, new FreeCost);
         free_penny.description = 'Get 1 penny for free';
         free_penny.info = 'Yields 1 penny';
         free_penny.bought = (_) => currency.value += BigNumber.ONE;
+        free_penny.isAutoBuyable = false;
+        free_penny.isAvailable = false;
     }
 
     for(let i = 0; i < maxPlots; ++i)
@@ -2481,11 +2486,14 @@ var init = () =>
         switchPlant[i].bought = (_) =>
         {
             switchPlant[i].level = 0;
+            if(switchPlant[i].isAutoBuyable)
+                return;
             if(manager.colonies[i].length)
                 return;
             plantIdx[i] = (plantIdx[i] + 1) % PLANT_DATA.length;
             updateAvailability();
         };
+        switchPlant[i].isAutoBuyable = false;
         switchPlant[i].isAvailable = false;
     }
     /* Plot unlock
@@ -2542,6 +2550,8 @@ var updateAvailability = () =>
 
 var tick = (elapsedTime, multiplier) =>
 {
+    for(let i = 0; i < maxPlots; ++i)
+        switchPlant[i].isAutoBuyable = false;
     // https://www.desmos.com/calculator/pfku4nopgy
     let dt = elapsedTime * multiplier;
     time += dt;
@@ -2677,6 +2687,7 @@ var prePublish = () =>
 var postPublish = () =>
 {
     currency.value = tmpCurrency - getCurrencyFromTau(theory.tau)[0] * taxRate;
+    theory.invalidateQuaternaryValues();
 }
 
 var canResetStage = () => true;
