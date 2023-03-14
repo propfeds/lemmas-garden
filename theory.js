@@ -1958,8 +1958,8 @@ const PLANT_DATA =
             'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t/2)'
         ], 30),
         cost: new FirstFreeCost(new ExponentialCost(1, 1)),
-        growthRate: 0.5,
-        growthCost: 300,
+        growthRate: BigNumber.ONE,
+        growthCost: BigNumber.from(60),
         actions:
         [
             {
@@ -2049,7 +2049,6 @@ class ColonyManager
 
     addColony(plot, id, population)
     {
-        log(`Registering ${population} specimens of plant ID ${id} to plot ${plot}.`)
         for(let i = 0; this.colonies[plot].length; ++i)
         {
             if(this.colonies[plot][i].id == id && !this.colonies[plot][i].stage)
@@ -2073,12 +2072,15 @@ class ColonyManager
         c.synthRate = stats.synthRate;
         c.profit = stats.profit;
         this.colonies[plot].push(c);
+        updateAvailability();
     }
     killColony(plot, index)
     {
         if(!this.colonies[plot][index])
             return;
+        plants[plot][index].level -= this.colonies[plot][index].population;
         this.colonies[plot].splice(index, 1);
+        updateAvailability();
     }
     growAll(di, dg)
     {
@@ -2150,14 +2152,23 @@ class ColonyManager
             c.sequence, c.params, null, null, this.actionDeriveTask);
             return;
         }
+        if(!this.actionDeriveTask.derivation.length)
+        {
+            this.killColony(...this.actionGangsta);
+            this.actionDeriveTask =
+            {
+                start: 0
+            };
+            this.actionGangsta = null;
+        }
+        c.sequence = this.actionDeriveTask.derivation;
+        c.params = this.actionDeriveTask.parameters;
         if(!('synthRate' in this.actionCalcTask) ||
         ('synthRate' in this.actionCalcTask && this.actionCalcTask.start))
         {
             this.actionCalcTask = this.calculateStats(c, this.actionCalcTask);
             return;
         }
-        c.sequence = this.actionDeriveTask.derivation;
-        c.params = this.actionDeriveTask.parameters;
         c.synthRate = this.actionCalcTask.synthRate;
         c.profit = this.actionCalcTask.profit;
         this.actionDeriveTask =
@@ -2208,14 +2219,27 @@ class ColonyManager
             this.deriveTask);
             return;
         }
+        if(!this.deriveTask.derivation.length)
+        {
+            this.killColony(...this.gangsta);
+            this.ancestreeTask =
+            {
+                start: 0
+            };
+            this.deriveTask =
+            {
+                start: 0
+            };
+            this.gangsta = null;
+        }
+        c.sequence = this.deriveTask.derivation;
+        c.params = this.deriveTask.parameters;
         if(!('synthRate' in this.calcTask) ||
         ('synthRate' in this.calcTask && this.calcTask.start))
         {
             this.calcTask = this.calculateStats(c, this.calcTask);
             return;
         }
-        c.sequence = this.deriveTask.derivation;
-        c.params = this.deriveTask.parameters;
         c.synthRate = this.calcTask.synthRate;
         c.profit = this.calcTask.profit;
         ++c.stage;
@@ -2269,7 +2293,7 @@ var init = () =>
         switchColony = theory.createSingularUpgrade(0, currency, new FreeCost);
         switchColony.description = getLoc('switchColony');
         switchColony.info = getLoc('switchColonyInfo');
-        switchColony.boughtOrRefunded = (_) =>
+        switchColony.bought = (_) =>
         {
             switchColony.level = 0;
             if(!manager.colonies[plot].length)
@@ -2297,15 +2321,20 @@ var init = () =>
         actions[i].getDescription = () =>
         {
             let c = manager.colonies[plot][colonyIdx[plot]];
+            if(!c)
+                return '';
             return PLANT_DATA[c.id].actions[i].name;
         }
         actions[i].getInfo = () =>
         {
             let c = manager.colonies[plot][colonyIdx[plot]];
+            if(!c)
+                return '';
             return PLANT_DATA[c.id].actions[i].info;
         }
-        actions[i].boughtOrRefunded = (_) =>
+        actions[i].bought = (_) =>
         {
+            actions[i].level = 0;
             manager.performAction(plot, colonyIdx[plot], i);
         }
         actions[i].isAvailable = false;
@@ -2325,7 +2354,7 @@ var init = () =>
         switchPlant[i].description = Localization.format(
         getLoc('switchPlant'), i + 1);
         switchPlant[i].info = getLoc('switchPlantInfo');
-        switchPlant[i].boughtOrRefunded = (_) =>
+        switchPlant[i].bought = (_) =>
         {
             switchPlant[i].level = 0;
             if(manager.colonies[i].length)
@@ -2333,8 +2362,7 @@ var init = () =>
             plantIdx[i] = (plantIdx[i] + 1) % PLANT_DATA.length;
             updateAvailability();
         };
-        switchPlant[i].isAvailable = plot == i &&
-        !manager.colonies[i].length;
+        switchPlant[i].isAvailable = false;
 
         for(let j = 0; j < PLANT_DATA.length; ++j)
         {
@@ -2343,13 +2371,12 @@ var init = () =>
             plants[i][j].description = Localization.format(
             getLoc('plant'), i + 1, PLANT_DATA[j].name);
             plants[i][j].info = getLoc('plantInfo')[j];
-            plants[i][j].boughtOrRefunded = (amount) =>
+            plants[i][j].bought = (amount) =>
             {
                 manager.addColony(i, j, amount);
                 switchPlant[i].isAvailable = false;
             };
-            plants[i][j].isAvailable = (j == plantIdx[i] && plot == i) ||
-            plants[i][j].level > 0;
+            plants[i][j].isAvailable = false;
         }
     }
     /* Plot unlock
@@ -2388,19 +2415,27 @@ var init = () =>
     // Next: plant unlocks and milestones
 
     theory.primaryEquationScale = 0.9;
-    // theory.secondaryEquationHeight = 330;
+    theory.secondaryEquationHeight = 100;
 }
 
 var updateAvailability = () =>
 {
     for(let i = 0; i < plotPerma.level; ++i)
     {
-        switchPlant[i].isAvailable = plot == i && !manager.colonies[i].length;
+        switchPlant[i].isAvailable = i == plot && !manager.colonies[i].length;
         for(let j = 0; j < PLANT_DATA.length; ++j)
         {
-            plants[i][j].isAvailable = (j == plantIdx[i] && plot == i) ||
+            plants[i][j].isAvailable = (j == plantIdx[i] && i == plot) ||
             plants[i][j].level > 0;
         }
+    }
+    let c = manager.colonies[plot][colonyIdx[plot]];
+    for(let i = 0; i < 3; ++i)
+    {
+        if(c)
+            actions[i].isAvailable = PLANT_DATA[c.id].actions[i] ? true : false;
+        else
+            actions[i].isAvailable = false;
     }
 }
 
@@ -2424,6 +2459,7 @@ var tick = (elapsedTime, multiplier) =>
     growthIntegral = newGI;
 
     manager.growAll(BigNumber.from(di), BigNumber.from(dg));
+    theory.invalidateSecondaryEquation();
     theory.invalidateTertiaryEquation();
 }
 
@@ -2448,7 +2484,13 @@ var getPrimaryEquation = () =>
 
 var getSecondaryEquation = () =>
 {
-    return `${theory.latexSymbol}=\\max\\,\\text{p}^{${tauRateN}/${tauRateD}}`;
+    let finalBit = `${theory.latexSymbol}=
+    \\max\\,\\text{p}^{${tauRateN}/${tauRateD}}`;
+    let c = manager.colonies[plot][colonyIdx[plot]];
+    if(!c)
+        return finalBit;
+    let result = `${c.population}\\times${c.id}:\\enspace Stg.\\enspace${c.stage}\\enspace ${PLANT_DATA[c.id].system.reconstruct(c.sequence, c.params).result}\\\\E=${c.energy}\\enspace g=${c.growth}/${PLANT_DATA[c.id].growthCost * c.sequence.length}\\\\r_s=${c.synthRate}\\enspace p=${c.profit}\\\\`;
+    return result + finalBit;
 }
 
 var getTertiaryEquation = () =>
