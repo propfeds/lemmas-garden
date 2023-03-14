@@ -28,13 +28,16 @@ Today, it will do weatherly.`,
 var authors = 'propfeds';
 var version = 0;
 
+const maxPlots = 6;
+
 let time = 0;
 let days = 0;
 let insolationIntegral = 0;
 let growthIntegral = 0;
 let graphMode = 1;
 let plot = 0;
-let colony = 0;
+let colonyIdx = new Array(maxPlots).fill(0);
+let plantIdx = new Array(maxPlots).fill(0);
 let tmpCurrency;
 
 // Balance parameters
@@ -53,8 +56,6 @@ var getPublicationMultiplierFormula = (symbol) =>
 (\\text{${getLoc('tax')}}\\colon\\enspace${taxRate}\\times\\max\\,\\text{p})
 \\end{array}`;
 // Need a better place to write this
-
-const maxPlots = 6;
 
 // Other constants
 
@@ -79,6 +80,21 @@ const locStrings =
         unlockPlot: `\\text{{plot }}{{{0}}}`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         tax: 'Publishing tax',
+
+        switchColony: 'Switch colony',
+        switchColonyInfo: 'Cycles through the list of colonies',
+
+        actionHarvest: 'Harvest',
+        actionPrune: 'Prune',
+        actionKillInfo: 'Kills the colony',
+
+        switchPlant: 'Switch plant (Plot {0})',
+        switchPlantInfo: 'Cycles through the list of plants',
+        plant: 'Plot {0}: {1}',
+        plantInfo:
+        [
+            'Testing my arrow weeds'
+        ],
         
         resetRenderer: 'You are about to reset the renderer.'
     }
@@ -1335,6 +1351,15 @@ class Renderer
             theory.clearGraph();
         }
     }
+    /**
+     * Configures the colony.
+     * @param {object} colony hmm.
+     */
+    set colony(colony)
+    {
+        this.configure(colony.sequence, colony.params,
+        PLANT_DATA[colony.id].camera, PLANT_DATA[colony.id].stroke);
+    }
     configure(sequence, params, camera = {}, stroke = {})
     {
         this.figureScale = camera.scale || 1;
@@ -1932,18 +1957,21 @@ const PLANT_DATA =
             'F(l)=F(l*2)',
             'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t/2)'
         ], 30),
+        cost: new FirstFreeCost(new ExponentialCost(1, 1)),
         growthRate: 0.5,
         growthCost: 300,
         actions:
         [
             {
-                name: 'Harvest',
+                name: getLoc('actionHarvest'),
+                info: getLoc('actionHarvest'),
                 symbols: new Set('A'),
                 system: new LSystem('', ['A=']),
                 killColony: false
             },
             {
-                name: 'Prune',
+                name: getLoc('actionPrune'),
+                info: getLoc('actionKillInfo'),
                 system: new LSystem('', ['F=']),
                 killColony: true
             }
@@ -2021,6 +2049,7 @@ class ColonyManager
 
     addColony(plot, id, population)
     {
+        log(`Registering ${population} specimens of plant ID ${id} to plot ${plot}.`)
         for(let i = 0; this.colonies[plot].length; ++i)
         {
             if(this.colonies[plot][i].id == id && !this.colonies[plot][i].stage)
@@ -2029,8 +2058,8 @@ class ColonyManager
                 return;
             }
         }
-        let stats = this.calculateStats(PLANT_DATA[id].actions[0].symbols);
-        this.colonies[plot].push({
+        let c =
+        {
             id: id,
             population: population,
             sequence: PLANT_DATA[id].system.axiom,
@@ -2038,10 +2067,12 @@ class ColonyManager
             stage: 0,
 
             energy: BigNumber.HUNDRED,
-            growth: BigNumber.ZERO,
-            synthRate: stats.synthRate,
-            profit: stats.profit
-        });
+            growth: BigNumber.ZERO
+        };
+        let stats = this.calculateStats(c);
+        c.synthRate = stats.synthRate;
+        c.profit = stats.profit;
+        this.colonies[plot].push(c);
     }
     killColony(plot, index)
     {
@@ -2157,7 +2188,6 @@ class ColonyManager
             return;
         }
         this.actionGangsta = [plot, index, id];
-        return;
     }
     evolve()
     {
@@ -2219,6 +2249,12 @@ let manager = new ColonyManager();
 let renderer = new Renderer('', []);
 let globalRNG = new Xorshift(Date.now());
 
+var switchColony;
+var actions = new Array(3);
+
+var switchPlant = new Array(maxPlots);
+var plants = Array.from({length: maxPlots}, (_) => []);
+
 var plotPerma;
 
 var currency;
@@ -2226,12 +2262,95 @@ var currency;
 var init = () =>
 {
     currency = theory.createCurrency('p');
+    /* Switch colony
+    Moduloe
+    */
+    {
+        switchColony = theory.createSingularUpgrade(0, currency, new FreeCost);
+        switchColony.description = getLoc('switchColony');
+        switchColony.info = getLoc('switchColonyInfo');
+        switchColony.boughtOrRefunded = (_) =>
+        {
+            switchColony.level = 0;
+            if(!manager.colonies[plot].length)
+                return;
+
+            colonyIdx[plot] = (colonyIdx[plot] + 1) %
+            manager.colonies[plot].length;
+            let c = manager.colonies[plot][colonyIdx[plot]];
+            renderer.colony = c;
+            for(let i = 0; i < 3; ++i)
+            {
+                if(PLANT_DATA[c.id].actions[i])
+                    actions[i].isAvailable = true;
+                else
+                    actions[i].isAvailable = false;
+            }
+        };
+    }
+    /* Actions
+    */
+    for(let i = 0; i < 3; ++i)
+    {
+        actions[i] = theory.createSingularUpgrade(100 + i, currency,
+        new FreeCost);
+        actions[i].getDescription = () =>
+        {
+            let c = manager.colonies[plot][colonyIdx[plot]];
+            return PLANT_DATA[c.id].actions[i].name;
+        }
+        actions[i].getInfo = () =>
+        {
+            let c = manager.colonies[plot][colonyIdx[plot]];
+            return PLANT_DATA[c.id].actions[i].info;
+        }
+        actions[i].boughtOrRefunded = (_) =>
+        {
+            manager.performAction(plot, colonyIdx[plot], i);
+        }
+        actions[i].isAvailable = false;
+    }
 
     {
-        let free_penny = theory.createUpgrade(0, currency, new FreeCost);
+        let free_penny = theory.createUpgrade(9001, currency, new FreeCost);
         free_penny.description = 'Get 1 penny for free';
         free_penny.info = 'Yields 1 penny';
         free_penny.bought = (_) => currency.value += BigNumber.ONE;
+    }
+
+    for(let i = 0; i < maxPlots; ++i)
+    {
+        switchPlant[i] = theory.createUpgrade(i * 100 + 99, currency,
+        new FreeCost);
+        switchPlant[i].description = Localization.format(
+        getLoc('switchPlant'), i + 1);
+        switchPlant[i].info = getLoc('switchPlantInfo');
+        switchPlant[i].boughtOrRefunded = (_) =>
+        {
+            switchPlant[i].level = 0;
+            if(manager.colonies[i].length)
+                return;
+            plantIdx[i] = (plantIdx[i] + 1) % PLANT_DATA.length;
+            updateAvailability();
+        };
+        switchPlant[i].isAvailable = plot == i &&
+        !manager.colonies[i].length;
+
+        for(let j = 0; j < PLANT_DATA.length; ++j)
+        {
+            plants[i][j] = theory.createUpgrade(i * 100 + j, currency,
+            PLANT_DATA[j].cost);
+            plants[i][j].description = Localization.format(
+            getLoc('plant'), i + 1, PLANT_DATA[j].name);
+            plants[i][j].info = getLoc('plantInfo')[j];
+            plants[i][j].boughtOrRefunded = (amount) =>
+            {
+                manager.addColony(i, j, amount);
+                switchPlant[i].isAvailable = false;
+            };
+            plants[i][j].isAvailable = (j == plantIdx[i] && plot == i) ||
+            plants[i][j].level > 0;
+        }
     }
     /* Plot unlock
     Before you can plant any plants, you have to switch tab and unlock plot 0.
@@ -2270,13 +2389,19 @@ var init = () =>
 
     theory.primaryEquationScale = 0.9;
     // theory.secondaryEquationHeight = 330;
-
-    updateAvailability();
 }
 
 var updateAvailability = () =>
 {
-    return;
+    for(let i = 0; i < plotPerma.level; ++i)
+    {
+        switchPlant[i].isAvailable = plot == i && !manager.colonies[i].length;
+        for(let j = 0; j < PLANT_DATA.length; ++j)
+        {
+            plants[i][j].isAvailable = (j == plantIdx[i] && plot == i) ||
+            plants[i][j].level > 0;
+        }
+    }
 }
 
 var tick = (elapsedTime, multiplier) =>
@@ -2371,6 +2496,7 @@ var goToPreviousStage = () =>
     --plot;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
+    updateAvailability();
 };
 var canGoToNextStage = () => plot < plotPerma.level - 1;
 var goToNextStage = () =>
@@ -2378,6 +2504,7 @@ var goToNextStage = () =>
     ++plot;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
+    updateAvailability();
 };
 
 var getInternalState = () => JSON.stringify
@@ -2385,7 +2512,8 @@ var getInternalState = () => JSON.stringify
     version: version,
     time: time,
     plot: plot,
-    colony: colony,
+    colonyIdx: colonyIdx,
+    plantIdx: plantIdx,
     manager: manager.object
 }, bigStringify);
 
@@ -2432,14 +2560,20 @@ var setInternalState = (stateStr) =>
     
     if('plot' in state)
         plot = state.plot;
-    if('colony' in state)
-        colony = state.colony;
+    if('colonyIdx' in state)
+        colonyIdx = state.colonyIdx;
+    if('plantIdx' in state)
+        plantIdx = state.plantIdx;
 
     if('manager' in state)
         manager = new ColonyManager(state.manager.colonies, state.manager.time,
         state.manager.timeRemainder);
 
+    theory.invalidatePrimaryEquation();
+    theory.invalidateSecondaryEquation();
     theory.invalidateTertiaryEquation();
+    // theory.invalidateQuaternaryValues();
+    updateAvailability();
 }
 
 var get2DGraphValue = () =>
