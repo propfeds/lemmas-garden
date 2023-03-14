@@ -1292,7 +1292,7 @@ class LSystem
  */
 class Renderer
 {
-    constructor(sequence, params, camera = {}, stroke = {})
+    constructor(system, sequence, params, camera = {}, stroke = {})
     {
         this.figureScale = camera.scale || 1;
         this.cameraMode = camera.mode || 0;
@@ -1313,7 +1313,8 @@ class Renderer
         this.backtrackTail = stroke.backtrackTail || true;
         this.hesitateApex = stroke.hesitateApex || true;
         this.hesitateFork = stroke.hesitateFork || true;
-        
+
+        this.system = system;
         this.sequence = sequence;
         this.params = params;
         this.state = new Vector3(0, 0, 0);
@@ -1357,8 +1358,10 @@ class Renderer
      */
     set colony(colony)
     {
+        this.system = PLANT_DATA[colony.id].system;
         this.configure(colony.sequence, colony.params,
-        PLANT_DATA[colony.id].camera, PLANT_DATA[colony.id].stroke);
+        PLANT_DATA[colony.id].camera(colony.stage),
+        PLANT_DATA[colony.id].stroke(colony.stage));
     }
     configure(sequence, params, camera = {}, stroke = {})
     {
@@ -1876,7 +1879,7 @@ class Renderer
                             break;
                         else if(this.polygonMode <= 0 && !ignored)
                         {
-                            ++i;
+                            ++this.i;
                             return;
                         }
                         else
@@ -1979,7 +1982,7 @@ const PLANT_DATA =
         camera: (stage) =>
         {
             return {
-                figureScale: 2 ** stage,
+                scale: 2 ** stage,
                 // cameraMode: 0,
                 // followFactor: 0.15,
                 x: 2 ** stage,
@@ -2255,8 +2258,7 @@ class ColonyManager
         {
             start: 0
         };
-        renderer.configure(this.sequence, this.params,
-        PLANT_DATA[c.id].camera(c.stage), PLANT_DATA[c.id].stroke(c.stage));
+        renderer.colony = c;
         this.gangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
@@ -2270,7 +2272,7 @@ const yUpQuat = new Quaternion(0, 0, 1, 0);
 const zUpQuat = new Quaternion(0, 0, 0, 1);
 
 let manager = new ColonyManager();
-let renderer = new Renderer('', []);
+let renderer = new Renderer(new LSystem(), '', []);
 let globalRNG = new Xorshift(Date.now());
 
 var switchColony;
@@ -2349,21 +2351,6 @@ var init = () =>
 
     for(let i = 0; i < maxPlots; ++i)
     {
-        switchPlant[i] = theory.createUpgrade(i * 100 + 99, currency,
-        new FreeCost);
-        switchPlant[i].description = Localization.format(
-        getLoc('switchPlant'), i + 1);
-        switchPlant[i].info = getLoc('switchPlantInfo');
-        switchPlant[i].bought = (_) =>
-        {
-            switchPlant[i].level = 0;
-            if(manager.colonies[i].length)
-                return;
-            plantIdx[i] = (plantIdx[i] + 1) % PLANT_DATA.length;
-            updateAvailability();
-        };
-        switchPlant[i].isAvailable = false;
-
         for(let j = 0; j < PLANT_DATA.length; ++j)
         {
             plants[i][j] = theory.createUpgrade(i * 100 + j, currency,
@@ -2378,6 +2365,21 @@ var init = () =>
             };
             plants[i][j].isAvailable = false;
         }
+
+        switchPlant[i] = theory.createUpgrade(i * 100 + 99, currency,
+        new FreeCost);
+        switchPlant[i].description = Localization.format(
+        getLoc('switchPlant'), i + 1);
+        switchPlant[i].info = getLoc('switchPlantInfo');
+        switchPlant[i].bought = (_) =>
+        {
+            switchPlant[i].level = 0;
+            if(manager.colonies[i].length)
+                return;
+            plantIdx[i] = (plantIdx[i] + 1) % PLANT_DATA.length;
+            updateAvailability();
+        };
+        switchPlant[i].isAvailable = false;
     }
     /* Plot unlock
     Before you can plant any plants, you have to switch tab and unlock plot 0.
@@ -2459,6 +2461,7 @@ var tick = (elapsedTime, multiplier) =>
     growthIntegral = newGI;
 
     manager.growAll(BigNumber.from(di), BigNumber.from(dg));
+    renderer.draw();
     theory.invalidateSecondaryEquation();
     theory.invalidateTertiaryEquation();
 }
@@ -2489,7 +2492,7 @@ var getSecondaryEquation = () =>
     let c = manager.colonies[plot][colonyIdx[plot]];
     if(!c)
         return finalBit;
-    let result = `${c.population}\\times${c.id}:\\enspace Stg.\\enspace${c.stage}\\enspace ${PLANT_DATA[c.id].system.reconstruct(c.sequence, c.params).result}\\\\E=${c.energy}\\enspace g=${c.growth}/${PLANT_DATA[c.id].growthCost * c.sequence.length}\\\\r_s=${c.synthRate}\\enspace p=${c.profit}\\\\`;
+    let result = `${c.population}\\times\\text{${PLANT_DATA[c.id].name}, stage ${c.stage}}\\\\${PLANT_DATA[c.id].system.reconstruct(c.sequence, c.params).result}\\\\E=${c.energy}\\enspace g=${c.growth}/${PLANT_DATA[c.id].growthCost * c.sequence.length}\\\\r_s=${c.synthRate}\\enspace p=${c.profit}\\\\`;
     return result + finalBit;
 }
 
@@ -2536,6 +2539,8 @@ var canGoToPreviousStage = () => plotPerma.level > 0 && plot > 0;
 var goToPreviousStage = () =>
 {
     --plot;
+    let c = manager.colonies[plot][colonyIdx[plot]];
+    renderer.colony = c;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     updateAvailability();
@@ -2544,6 +2549,8 @@ var canGoToNextStage = () => plot < plotPerma.level - 1;
 var goToNextStage = () =>
 {
     ++plot;
+    let c = manager.colonies[plot][colonyIdx[plot]];
+    renderer.colony = c;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     updateAvailability();
@@ -2611,6 +2618,8 @@ var setInternalState = (stateStr) =>
         manager = new ColonyManager(state.manager.colonies, state.manager.time,
         state.manager.timeRemainder);
 
+    let c = manager.colonies[plot][colonyIdx[plot]];
+    renderer.colony = c;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     theory.invalidateTertiaryEquation();
@@ -2618,18 +2627,18 @@ var setInternalState = (stateStr) =>
     updateAvailability();
 }
 
-var get2DGraphValue = () =>
-{
-    switch(graphMode)
-    {
-        case 0:
-            return 0;
-        case 1:     // Insolation
-            return Math.max(0, -Math.cos(time * Math.PI / 72));
-        case 2:     // Growth
-            return (Math.cos(time * Math.PI / 72) + 1) / 2;
-    }
-};
+// var get2DGraphValue = () =>
+// {
+//     switch(graphMode)
+//     {
+//         case 0:
+//             return 0;
+//         case 1:     // Insolation
+//             return Math.max(0, -Math.cos(time * Math.PI / 72));
+//         case 2:     // Growth
+//             return (Math.cos(time * Math.PI / 72) + 1) / 2;
+//     }
+// };
 
 var get3DGraphPoint = () => renderer.cursor;
 
