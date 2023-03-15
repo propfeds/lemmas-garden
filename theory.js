@@ -2220,7 +2220,7 @@ class ColonyManager
             if(id == 0)
                 currency.value += c.profit * BigNumber.from(c.population) *
                 theory.publicationMultiplier;
-            this.killColony(plot, index);
+            this.killColony(...this.actionGangsta);
             this.actionGangsta = null;
             theory.invalidateSecondaryEquation();
             theory.invalidateQuaternaryValues();
@@ -2867,18 +2867,18 @@ var setInternalState = (stateStr) =>
     updateAvailability();
 }
 
-// var get2DGraphValue = () =>
-// {
-//     switch(graphMode)
-//     {
-//         case 0:
-//             return 0;
-//         case 1:     // Insolation
-//             return Math.max(0, -Math.cos(time * Math.PI / 72));
-//         case 2:     // Growth
-//             return (Math.cos(time * Math.PI / 72) + 1) / 2;
-//     }
-// };
+var get2DGraphValue = () =>
+{
+    switch(graphMode)
+    {
+        case 0:
+            return 0;
+        case 1:     // Insolation
+            return Math.max(0, -Math.cos(time * Math.PI / 72));
+        case 2:     // Growth
+            return (Math.cos(time * Math.PI / 72) + 1) / 2;
+    }
+};
 
 var get3DGraphPoint = () => renderer.cursor;
 
