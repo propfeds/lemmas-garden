@@ -191,6 +191,46 @@ cDispColour.set(Theme.DARK, 'b5b5b5');
 cDispColour.set(Theme.LIGHT, '434343');
 
 /**
+ * What else do you expect?
+ */
+class Queue
+{
+    constructor()
+    {
+        this._oldestIndex = 1;
+        this._newestIndex = 1;
+        this._storage = {};
+    }
+
+    get length()
+    {
+        return this._newestIndex - this._oldestIndex;
+    };
+
+    enqueue(data)
+    {
+        this._storage[this._newestIndex] = data;
+        this._newestIndex++;
+    };
+
+    dequeue()
+    {
+        var oldestIndex = this._oldestIndex,
+            newestIndex = this._newestIndex,
+            deletedData;
+
+        if (oldestIndex !== newestIndex)
+        {
+            deletedData = this._storage[oldestIndex];
+            delete this._storage[oldestIndex];
+            this._oldestIndex++;
+
+            return deletedData;
+        }
+    }
+}
+
+/**
  * Represents an instance of the Xorshift RNG.
  */
 class Xorshift
@@ -2039,6 +2079,7 @@ class ColonyManager
             start: 0
         };
         // Processed before regular gangsta
+        this.actionQueue = new Queue();
         this.actionGangsta = null;
         this.actionDeriveTask =
         {
@@ -2099,6 +2140,8 @@ class ColonyManager
     {
         if(this.actionGangsta)
             this.continueAction();
+        else if(this.actionQueue.length)
+            this.performAction(...this.actionQueue.dequeue());
         else if(this.gangsta)
             this.evolve();
 
@@ -2201,6 +2244,12 @@ class ColonyManager
         if(!this.colonies[plot][index])
             return;
         let c = this.colonies[plot][index];
+        let action = [plot, index, id];
+        if(this.actionGangsta)
+        {
+            this.actionQueue.enqueue(action);
+            return;
+        }
         // Harvest is always id 0.
         if(id == 0)
             currency.value += c.profit * BigNumber.from(c.population) *
@@ -2211,7 +2260,7 @@ class ColonyManager
             this.killColony(plot, index);
             return;
         }
-        this.actionGangsta = [plot, index, id];
+        this.actionGangsta = action;
     }
     evolve()
     {
@@ -2297,7 +2346,6 @@ let quaternaryEntries =
 
 const LSFrame = ui.createFrame
 ({
-    isVisible: () => manager.colonies[plot][colonyIdx[plot]] ? true : false,
     column: 2,
     cornerRadius: 1,
     horizontalOptions: LayoutOptions.START,
@@ -2322,7 +2370,6 @@ const LSFrame = ui.createFrame
 });
 // const LSLabel = ui.createLatexLabel
 // ({
-//     isVisible: () => manager.colonies[plot][colonyIdx[plot]] ? true : false,
 //     column: 0,
 //     horizontalOptions: LayoutOptions.START,
 //     verticalOptions: LayoutOptions.START,
@@ -2333,7 +2380,6 @@ const LSFrame = ui.createFrame
 // });
 const harvestFrame = ui.createFrame
 ({
-    isVisible: () => manager.colonies[plot][colonyIdx[plot]] ? true : false,
     column: 1,
     cornerRadius: 1,
     horizontalOptions: LayoutOptions.START,
@@ -2359,7 +2405,6 @@ const harvestFrame = ui.createFrame
 });
 // const harvestLabel = ui.createLatexLabel
 // ({
-//     isVisible: () => manager.colonies[plot][colonyIdx[plot]] ? true : false,
 //     column: 1,
 //     horizontalOptions: LayoutOptions.START,
 //     verticalOptions: LayoutOptions.START,
@@ -2370,7 +2415,6 @@ const harvestFrame = ui.createFrame
 // });
 const pruneFrame = ui.createFrame
 ({
-    isVisible: () => manager.colonies[plot][colonyIdx[plot]] ? true : false,
     column: 0,
     cornerRadius: 1,
     horizontalOptions: LayoutOptions.START,
@@ -2396,7 +2440,6 @@ const pruneFrame = ui.createFrame
 });
 // const pruneLabel = ui.createLatexLabel
 // ({
-//     isVisible: () => manager.colonies[plot][colonyIdx[plot]] ? true : false,
 //     column: 2,
 //     horizontalOptions: LayoutOptions.START,
 //     verticalOptions: LayoutOptions.START,
@@ -2407,7 +2450,6 @@ const pruneFrame = ui.createFrame
 // });
 const actionsLabel = ui.createLatexLabel
 ({
-    isVisible: () => manager.colonies[plot][colonyIdx[plot]] ? true : false,
     column: 1,
     horizontalOptions: LayoutOptions.END,
     verticalOptions: LayoutOptions.START,
@@ -2541,10 +2583,8 @@ var updateAvailability = () =>
     {
         switchPlant[i].isAvailable = i == plot && !manager.colonies[i].length;
         for(let j = 0; j < PLANT_DATA.length; ++j)
-        {
-            plants[i][j].isAvailable = (j == plantIdx[i] && i == plot) ||
+            plants[i][j].isAvailable = j == plantIdx[i] ||
             plants[i][j].level > 0;
-        }
     }
 }
 
@@ -2590,8 +2630,7 @@ var getEquationOverlay = () =>
             // ui.createFrame({row: 1, column: 2}),
             ui.createLatexLabel
             ({
-                row: 0,
-                column: 0,
+                row: 0, column: 0,
                 verticalTextAlignment: TextAlignment.START,
                 margin: new Thickness(8, 4),
                 text: getLoc('versionName'),
@@ -2600,6 +2639,8 @@ var getEquationOverlay = () =>
             }),
             ui.createGrid
             ({
+                isVisible: () => manager.colonies[plot][colonyIdx[plot]] ?
+                true : false,
                 row: 0, column: 1,
                 margin: new Thickness(9),
                 columnSpacing: 16,
