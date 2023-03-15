@@ -2317,7 +2317,8 @@ class ColonyManager
         {
             start: 0
         };
-        renderer.colony = c;
+        if(this.gangsta[0] == plot && this.gangsta[1] == colonyIdx[plot])
+            renderer.colony = c;
         this.gangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
@@ -2450,6 +2451,8 @@ const pruneFrame = ui.createFrame
 // });
 const actionsLabel = ui.createLatexLabel
 ({
+    isVisible: () => manager.colonies[plot][colonyIdx[plot]] ?
+    true : false,
     column: 1,
     horizontalOptions: LayoutOptions.END,
     verticalOptions: LayoutOptions.START,
