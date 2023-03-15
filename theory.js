@@ -47,7 +47,7 @@ let tmpCurrency;
 
 // Balance parameters
 
-const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(1000)));
+const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(1000)));
 const permaCosts =
 [
     BigNumber.from(60),
