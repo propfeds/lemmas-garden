@@ -47,7 +47,13 @@ let tmpCurrency;
 
 // Balance parameters
 
-const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(1000)));
+const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(1000)));
+const permaCosts =
+[
+    BigNumber.from(60),
+    BigNumber.from(1e30),
+    BigNumber.from(1e45)
+]
 
 const taxRate = .12;
 const tauRate = 1;   // e30 = 100 tau, e45 = end, but tau rate 1 = better design
@@ -2163,20 +2169,21 @@ class ColonyManager
                 if(!this.gangsta && c.growth >= PLANT_DATA[c.id].growthCost *
                 c.sequence.length)
                 {
-                    c.growth -= PLANT_DATA[c.id].growthCost * c.sequence.length;
                     this.gangsta = [i, j];
                 }
             }
         }
     }
-    calculateStats(colony, task = {})
+    calculateStats(colony, task = {}, dTask = {})
     {
         // This is the only case where the colony needed
         let harvestable = PLANT_DATA[colony.id].actions[0].symbols;
         let synthRate = task.synthRate || BigNumber.ZERO;
         let profit = task.profit || BigNumber.ZERO;
+        let sequence = dTask.derivation || colony.sequence;
+        let params = dTask.parameters || colony.params;
         let i = task.start || 0;
-        for(; i < colony.sequence.length; ++i)
+        for(; i < sequence.length; ++i)
         {
             if(i - task.start > MAX_CHARS_PER_TICK)
             {
@@ -2186,10 +2193,10 @@ class ColonyManager
                     profit: profit
                 }
             }
-            if(SYNTHABLE_SYMBOLS.has(colony.sequence[i]) && colony.params[i])
-                synthRate += colony.params[i][0];
-            if(harvestable.has(colony.sequence[i]) && colony.params[i])
-                profit += colony.params[i][0];
+            if(SYNTHABLE_SYMBOLS.has(sequence[i]) && params[i])
+                synthRate += params[i][0];
+            if(harvestable.has(sequence[i]) && params[i])
+                profit += params[i][0];
         }
         return {
             start: 0,
@@ -2203,6 +2210,22 @@ class ColonyManager
         // efficient pruner/harvester, like a naked L-system rule???
         let c = this.colonies[this.actionGangsta[0]][this.actionGangsta[1]];
         let id = this.actionGangsta[2];
+        if(!c)
+        {
+            this.actionGangsta = null;
+            return;
+        }
+        if(PLANT_DATA[c.id].actions[id].killColony)
+        {
+            if(id == 0)
+                currency.value += c.profit * BigNumber.from(c.population) *
+                theory.publicationMultiplier;
+            this.killColony(plot, index);
+            this.actionGangsta = null;
+            theory.invalidateSecondaryEquation();
+            theory.invalidateQuaternaryValues();
+            return;
+        }
         // derive and calc stats (possibly ancestree if future actions require
         // checking adjacency)
         if(!('derivation' in this.actionDeriveTask) ||
@@ -2214,23 +2237,34 @@ class ColonyManager
         }
         if(!this.actionDeriveTask.derivation.length)
         {
+            if(id == 0)
+                currency.value += c.profit * BigNumber.from(c.population) *
+                theory.publicationMultiplier;
             this.killColony(...this.actionGangsta);
             this.actionDeriveTask =
             {
                 start: 0
             };
             this.actionGangsta = null;
+            theory.invalidateSecondaryEquation();
+            theory.invalidateQuaternaryValues();
+            return;
         }
-        c.sequence = this.actionDeriveTask.derivation;
-        c.params = this.actionDeriveTask.parameters;
         if(!('synthRate' in this.actionCalcTask) ||
         ('synthRate' in this.actionCalcTask && this.actionCalcTask.start))
         {
-            this.actionCalcTask = this.calculateStats(c, this.actionCalcTask);
+            this.actionCalcTask = this.calculateStats(c, this.actionCalcTask,
+            this.actionDeriveTask);
             return;
         }
+
+        if(id == 0)
+            currency.value += c.profit * BigNumber.from(c.population) *
+            theory.publicationMultiplier;
         c.synthRate = this.actionCalcTask.synthRate;
         c.profit = this.actionCalcTask.profit;
+        c.sequence = this.actionDeriveTask.derivation;
+        c.params = this.actionDeriveTask.parameters;
         this.actionDeriveTask =
         {
             start: 0
@@ -2247,21 +2281,10 @@ class ColonyManager
     {
         if(!this.colonies[plot][index])
             return;
-        let c = this.colonies[plot][index];
         let action = [plot, index, id];
         if(this.actionGangsta)
         {
             this.actionQueue.enqueue(action);
-            return;
-        }
-        // Harvest is always id 0.
-        if(id == 0)
-            currency.value += c.profit * BigNumber.from(c.population) *
-            theory.publicationMultiplier;
-
-        if(PLANT_DATA[c.id].actions[id].killColony)
-        {
-            this.killColony(plot, index);
             return;
         }
         this.actionGangsta = action;
@@ -2269,6 +2292,11 @@ class ColonyManager
     evolve()
     {
         let c = this.colonies[this.gangsta[0]][this.gangsta[1]];
+        if(!c)
+        {
+            this.gangsta = null;
+            return;
+        }
         // Ancestree, derive and calc stats
         if(!('ancestors' in this.ancestreeTask) ||
         ('ancestors' in this.ancestreeTask && this.ancestreeTask.start))
@@ -2297,15 +2325,21 @@ class ColonyManager
                 start: 0
             };
             this.gangsta = null;
+            theory.invalidateSecondaryEquation();
+            theory.invalidateQuaternaryValues();
+            return;
         }
-        c.sequence = this.deriveTask.derivation;
-        c.params = this.deriveTask.parameters;
         if(!('synthRate' in this.calcTask) ||
         ('synthRate' in this.calcTask && this.calcTask.start))
         {
-            this.calcTask = this.calculateStats(c, this.calcTask);
+            this.calcTask = this.calculateStats(c, this.calcTask,
+            this.deriveTask);
             return;
         }
+
+        c.growth -= PLANT_DATA[c.id].growthCost * c.sequence.length;
+        c.sequence = this.deriveTask.derivation;
+        c.params = this.deriveTask.parameters;
         c.synthRate = this.calcTask.synthRate;
         c.profit = this.calcTask.profit;
         ++c.stage;
@@ -2558,9 +2592,9 @@ var init = () =>
         };
         plotPerma.maxLevel = maxPlots;
     }
-    theory.createPublicationUpgrade(1, currency, 1);
-    theory.createBuyAllUpgrade(2, currency, 1);
-    theory.createAutoBuyerUpgrade(3, currency, 1);
+    theory.createPublicationUpgrade(1, currency, permaCosts[0]);
+    theory.createBuyAllUpgrade(2, currency, permaCosts[1]);
+    theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
     // To do: challenge plot (-1)
     // Next: plant unlocks and milestones
 
@@ -2573,7 +2607,8 @@ var updateAvailability = () =>
     if(!finishedTutorial)
         finishedTutorial = plants[0][0].level > 0;
     viewColony.isAvailable = finishedTutorial;
-    switchColony.isAvailable = finishedTutorial;
+    switchColony.isAvailable = finishedTutorial &&
+    manager.colonies[plot].length > 1;
     for(let i = 0; i < plotPerma.level; ++i)
     {
         switchPlant[i].isAvailable = i == plot && !manager.colonies[i].length;
