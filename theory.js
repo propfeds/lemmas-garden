@@ -42,6 +42,7 @@ let graphMode = 1;
 let plot = 0;
 let colonyIdx = new Array(maxPlots).fill(0);
 let plantIdx = new Array(maxPlots).fill(0);
+let finishedTutorial = false;
 let tmpCurrency;
 
 // Balance parameters
@@ -49,10 +50,9 @@ let tmpCurrency;
 const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(1000)));
 
 const taxRate = .12;
-const tauRateN = 10;   // e30 = 100 tau, e45 = end
-const tauRateD = 3;
+const tauRate = 1;   // e30 = 100 tau, e45 = end, but tau rate 1 = better design
 
-const pubExp = .03;
+const pubExp = .1;
 var getPublicationMultiplier = (tau) => tau.max(BigNumber.ONE).pow(pubExp *
 tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
 var getPublicationMultiplierFormula = (symbol) =>
@@ -80,19 +80,23 @@ const locStrings =
     {
         versionName: 'v0, in never',
 
-        plotTitle: `\\text{{Plot }}{{{0}}}`,
-        unlockPlot: `\\text{{plot }}{{{0}}}`,
-        unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         tax: 'Publishing tax',
-
-        switchColony: 'Switch colony',
-        switchColonyInfo: 'Cycles through the list of colonies',
-
+        
         btnView: 'View',
         btnHarvest: 'Harvest',
         btnHarvestKill: 'Harvest\\\\(kill)',
         btnPrune: 'Prune',
         btnPruneKill: 'Prune\\\\(kill)',
+        labelActions: 'Actions: ',
+
+        plotTitle: `\\text{{Plot }}{{{0}}}`,
+        unlockPlot: `\\text{{plot }}{{{0}}}`,
+        unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
+
+        viewColony: 'View colony',
+        viewColonyInfo: 'Displays the colony\'s description',
+        switchColony: 'Switch colony',
+        switchColonyInfo: 'Cycles through the list of colonies',
 
         switchPlant: 'Switch plant (Plot {0})',
         switchPlantInfo: 'Cycles through the list of plants',
@@ -2337,48 +2341,14 @@ let globalRNG = new Xorshift(Date.now());
 
 let quaternaryEntries =
 [
-    new QuaternaryEntry('\\text{p}_1', '0'),
-    new QuaternaryEntry('\\text{p}_2', '0'),
-    new QuaternaryEntry('\\text{p}_3', '0'),
-    new QuaternaryEntry('\\text{p}_4', '0'),
-    new QuaternaryEntry('\\text{p}_5', '0'),
-    new QuaternaryEntry('\\text{p}_6', '0'),
+    new QuaternaryEntry('\\text{p}_1', null),
+    new QuaternaryEntry('\\text{p}_2', null),
+    new QuaternaryEntry('\\text{p}_3', null),
+    new QuaternaryEntry('\\text{p}_4', null),
+    new QuaternaryEntry('\\text{p}_5', null),
+    new QuaternaryEntry('\\text{p}_6', null),
 ];
 
-const LSFrame = ui.createFrame
-({
-    column: 2,
-    cornerRadius: 1,
-    horizontalOptions: LayoutOptions.START,
-    verticalOptions: LayoutOptions.START,
-    hasShadow: true,
-    heightRequest: getImageSize(ui.screenWidth),
-    widthRequest: getImageSize(ui.screenWidth),
-    content: ui.createImage
-    ({
-        source: ImageSource.EYE,
-        aspect: Aspect.ASPECT_FIT,
-        useTint: false
-    }),
-    onTouched: (e) =>
-    {
-        if(e.type == TouchType.SHORTPRESS_RELEASED ||
-        e.type == TouchType.LONGPRESS_RELEASED)
-        {
-            Sound.playClick();
-        }
-    }
-});
-// const LSLabel = ui.createLatexLabel
-// ({
-//     column: 0,
-//     horizontalOptions: LayoutOptions.START,
-//     verticalOptions: LayoutOptions.START,
-//     margin: new Thickness(0, 30, 0, 0),
-//     text: getLoc('btnView'),
-//     fontSize: 9,
-//     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
-// });
 const harvestFrame = ui.createFrame
 ({
     column: 1,
@@ -2441,7 +2411,7 @@ const pruneFrame = ui.createFrame
 });
 // const pruneLabel = ui.createLatexLabel
 // ({
-//     column: 2,
+//     column: 0,
 //     horizontalOptions: LayoutOptions.START,
 //     verticalOptions: LayoutOptions.START,
 //     margin: new Thickness(0, 30, 0, 0),
@@ -2456,13 +2426,13 @@ const actionsLabel = ui.createLatexLabel
     column: 1,
     horizontalOptions: LayoutOptions.END,
     verticalOptions: LayoutOptions.START,
-    margin: new Thickness(0, 14, 120, 0),
-    text: 'Actions: ',
+    margin: new Thickness(0, 14, 78, 0),
+    text: getLoc('labelActions'),
     fontSize: 10,
     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
 });
 
-var switchColony;
+var viewColony, switchColony;
 
 var switchPlant = new Array(maxPlots);
 var plants = Array.from({length: maxPlots}, (_) => []);
@@ -2474,17 +2444,31 @@ var currency;
 var init = () =>
 {
     currency = theory.createCurrency('p');
+
+    /* View colony
+    Essential in learning the game.
+    */
+    {
+        viewColony = theory.createSingularUpgrade(0, currency, new FreeCost);
+        viewColony.description = getLoc('viewColony');
+        viewColony.info = getLoc('viewColonyInfo');
+        viewColony.bought = (_) =>
+        {
+            viewColony.level = 0;
+        };
+        viewColony.isVisible = false;
+    }
     /* Switch colony
     Moduloe
     */
     {
-        switchColony = theory.createSingularUpgrade(0, currency, new FreeCost);
+        switchColony = theory.createSingularUpgrade(1, currency, new FreeCost);
         switchColony.description = getLoc('switchColony');
         switchColony.info = getLoc('switchColonyInfo');
         switchColony.bought = (_) =>
         {
             switchColony.level = 0;
-            if(!manager.colonies[plot].length)
+            if(manager.colonies[plot].length < 2)
                 return;
 
             colonyIdx[plot] = (colonyIdx[plot] + 1) %
@@ -2492,6 +2476,7 @@ var init = () =>
             let c = manager.colonies[plot][colonyIdx[plot]];
             renderer.colony = c;
         };
+        switchColony.isVisible = false;
     }
 
     /* Free penny
@@ -2506,6 +2491,8 @@ var init = () =>
         free_penny.isAvailable = false;
     }
 
+    /* Plants & switch plants
+    */
     for(let i = 0; i < maxPlots; ++i)
     {
         for(let j = 0; j < PLANT_DATA.length; ++j)
@@ -2564,9 +2551,10 @@ var init = () =>
             getLoc('unlockPlots'), plotPerma.level + 1,
             plotPerma.level + amount));
         }
-        plotPerma.bought = (_) => {
-            theory.invalidatePrimaryEquation();
-            updateAvailability()
+        plotPerma.bought = (_) =>
+        {
+            theory.invalidateQuaternaryValues();
+            updateAvailability();
         };
         plotPerma.maxLevel = maxPlots;
     }
@@ -2582,6 +2570,10 @@ var init = () =>
 
 var updateAvailability = () =>
 {
+    if(!finishedTutorial)
+        finishedTutorial = plants[0][0].level > 0;
+    viewColony.isAvailable = finishedTutorial;
+    switchColony.isAvailable = finishedTutorial;
     for(let i = 0; i < plotPerma.level; ++i)
     {
         switchPlant[i].isAvailable = i == plot && !manager.colonies[i].length;
@@ -2646,14 +2638,12 @@ var getEquationOverlay = () =>
                 true : false,
                 row: 0, column: 1,
                 margin: new Thickness(9),
-                columnSpacing: 16,
+                columnSpacing: 14,
                 horizontalOptions: LayoutOptions.END,
                 inputTransparent: true,
                 cascadeInputTransparent: false,
                 children:
                 [
-                    LSFrame,
-                    // LSLabel,
                     harvestFrame,
                     // harvestLabel,
                     pruneFrame,
@@ -2676,7 +2666,7 @@ var getPrimaryEquation = () =>
 var getSecondaryEquation = () =>
 {
     let finalBit = `${theory.latexSymbol}=
-    \\max\\,\\text{p}^{${tauRateN}/${tauRateD}}`;
+    \\max\\,\\text{p}`;
     let c = manager.colonies[plot][colonyIdx[plot]];
     if(!c)
         return finalBit;
@@ -2700,6 +2690,9 @@ var getTertiaryEquation = () =>
 
 var getQuaternaryEntries = () =>
 {
+    if(!plotPerma.level)
+        return quaternaryEntries.slice(0, 1);
+
     for(let i = 0; i < plotPerma.level; ++i)
     {
         let sum = BigNumber.ZERO;
@@ -2714,11 +2707,11 @@ var getQuaternaryEntries = () =>
     return quaternaryEntries.slice(0, plotPerma.level);
 }
 
-var getTau = () => currency.value.max(BigNumber.ZERO).pow(tauRateN / tauRateD);
+var getTau = () => currency.value.max(BigNumber.ZERO).pow(tauRate);
 
 var getCurrencyFromTau = (tau) =>
 [
-    tau.max(BigNumber.ONE).pow(tauRateD / tauRateN),
+    tau,
     currency.symbol
 ];
 
@@ -2771,6 +2764,7 @@ var getInternalState = () => JSON.stringify
     plot: plot,
     colonyIdx: colonyIdx,
     plantIdx: plantIdx,
+    finishedTutorial: finishedTutorial,
     manager: manager.object
 }, bigStringify);
 
@@ -2814,13 +2808,15 @@ var setInternalState = (stateStr) =>
         growthIntegral = time / 2 + 36 * Math.sin(time * Math.PI / 72) /
         Math.PI;
     }
-    
+
     if('plot' in state)
         plot = state.plot;
     if('colonyIdx' in state)
         colonyIdx = state.colonyIdx;
     if('plantIdx' in state)
         plantIdx = state.plantIdx;
+    if('finishedTutorial' in state)
+        finishedTutorial = state.finishedTutorial;
 
     if('manager' in state)
         manager = new ColonyManager(state.manager.colonies, state.manager.time,
@@ -2832,7 +2828,7 @@ var setInternalState = (stateStr) =>
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     theory.invalidateTertiaryEquation();
-    // theory.invalidateQuaternaryValues();
+    theory.invalidateQuaternaryValues();
     updateAvailability();
 }
 
