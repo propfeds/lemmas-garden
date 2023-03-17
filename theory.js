@@ -63,7 +63,7 @@ let plot = 0;
 let colonyIdx = new Array(maxPlots).fill(0);
 let plantIdx = new Array(maxPlots).fill(0);
 let finishedTutorial = false;
-let actuallyPlanting = false;
+let actuallyPlanting = true;
 let tmpCurrency;
 let tmpLevels;
 
@@ -3384,6 +3384,7 @@ var setInternalState = (stateStr) =>
         manager = new ColonyManager(state.manager.colonies, state.manager.time,
         state.manager.timeRemainder);
 
+    actuallyPlanting = false;
     tmpLevels = Array.from({length: maxPlots}, (_) => []);
     for(let i = 0; i < maxPlots; ++i)
     {
