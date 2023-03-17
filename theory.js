@@ -7,6 +7,26 @@ import { LayoutOptions } from '../api/ui/properties/LayoutOptions';
 import { TextAlignment } from '../api/ui/properties/TextAlignment';
 import { Thickness } from '../api/ui/properties/Thickness';
 import { Vector3 } from '../api/Vector3';
+import { FreeCost } from '../api/Costs';
+import { theory } from '../api/Theory';
+import { Utils } from '../api/Utils';
+import { Vector3 } from '../api/Vector3';
+import { ui } from '../api/ui/UI';
+import { Color } from '../api/ui/properties/Color';
+import { FontFamily } from '../api/ui/properties/FontFamily';
+import { Keyboard } from '../api/ui/properties/Keyboard';
+import { LayoutOptions } from '../api/ui/properties/LayoutOptions';
+import { TextAlignment } from '../api/ui/properties/TextAlignment';
+import { Thickness } from '../api/ui/properties/Thickness';
+import { TouchType } from '../api/ui/properties/TouchType';
+import { Localization } from '../api/Localization';
+import { MathExpression } from '../api/MathExpression';
+import { ClearButtonVisibility } from '../api/ui/properties/ClearButtonVisibility';
+import { LineBreakMode } from '../api/ui/properties/LineBreakMode';
+import { BigNumber } from '../api/BigNumber';
+import { Upgrade } from '../api/Upgrades';
+import { Button } from '../api/ui/Button';
+import { Frame } from '../api/ui/Frame';
 
 var id = 'lemmas_garden';
 var getName = (language) =>
@@ -45,30 +65,12 @@ let plantIdx = new Array(maxPlots).fill(0);
 let finishedTutorial = false;
 let tmpCurrency;
 
-// Balance parameters
-
-const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(1000)));
-const permaCosts =
-[
-    BigNumber.from(60),
-    BigNumber.from(1e30),
-    BigNumber.from(1e45)
-]
-
-const taxRate = .12;
-const tauRate = 1;   // e30 = 100 tau, e45 = end, but tau rate 1 = better design
-
-const pubExp = .1;
-var getPublicationMultiplier = (tau) => tau.max(BigNumber.ONE).pow(pubExp *
-tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
-var getPublicationMultiplierFormula = (symbol) =>
-`\\begin{array}{c}{${symbol}}^{${pubExp}\\ln({\\ln{${symbol}})}}\\\\
-(\\text{${getLoc('tax')}}\\colon\\enspace${taxRate}\\times\\max\\,\\text{p})
-\\end{array}`;
-// Need a better place to write this
-
 // Other constants
 
+const cDispColour = new Map();
+cDispColour.set(Theme.STANDARD, 'c0c0c0');
+cDispColour.set(Theme.DARK, 'b5b5b5');
+cDispColour.set(Theme.LIGHT, '434343');
 const TRIM_SP = /\s+/g;
 const LS_RULE = /([^:]+)(:(.+))?=(.*)/;
 // Context doesn't need to check for nested brackets!
@@ -88,11 +90,13 @@ const locStrings =
 
         tax: 'Publishing tax',
         
-        btnView: 'View',
+        btnView: 'View L-system',
         btnHarvest: 'Harvest',
         btnHarvestKill: 'Harvest\\\\(kill)',
         btnPrune: 'Prune',
         btnPruneKill: 'Prune\\\\(kill)',
+        btnClose: 'Close',
+
         labelActions: 'Actions: ',
 
         plotTitle: `\\text{{Plot }}{{{0}}}`,
@@ -104,13 +108,24 @@ const locStrings =
         switchColony: 'Switch colony',
         switchColonyInfo: 'Cycles through the list of colonies',
 
-        switchPlant: 'Switch plant (Plot {0})',
+        colony: '{0} of {1}, stage {2}',
+        switchPlant: 'Switch plant (plot {0})',
         switchPlantInfo: 'Cycles through the list of plants',
-        plant: 'Plot {0}: {1}',
-        plantInfo:
+        plotPlant: 'Plot {0}: {1}',
+        plants:
         [
-            'Testing my arrow weeds'
+            {
+                name: 'Arrow weed',
+                info: 'Testing my arrow weeds',
+                details: `Arrow weed is the friend of all dogs.
+- The symbol A represents a rising shoot (apex), while F represents the stem body.
+- The Prune command cuts every stem and kills the whole colony.
+- The Harvest command calculates the sum of every apex and returns as profit.`
+            }
         ],
+        plantStats: `Cost: {0}
+Growth rate (max. at night): {1}
+Growth cost: {2}`,
 
         resetRenderer: 'You are about to reset the renderer.'
     }
@@ -194,11 +209,6 @@ let getSmallBtnSize = (width) =>
 
     return 32;
 }
-
-const cDispColour = new Map();
-cDispColour.set(Theme.STANDARD, 'c0c0c0');
-cDispColour.set(Theme.DARK, 'b5b5b5');
-cDispColour.set(Theme.LIGHT, '434343');
 
 /**
  * What else do you expect?
@@ -2013,57 +2023,6 @@ class Renderer
     }
 }
 
-const PLANT_DATA =
-[
-    {
-        name: 'Arrow weed',
-        system: new LSystem('A(1)', [
-            'F(l)=F(l*2)',
-            'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t/2)'
-        ], 30),
-        cost: new FirstFreeCost(new ExponentialCost(1, 1)),
-        growthRate: BigNumber.ONE,
-        growthCost: BigNumber.from(45),
-        actions:
-        [
-            {   // Always a harvest
-                symbols: new Set('A'),
-                system: new LSystem('', ['A=']),
-                killColony: false
-            },
-            {   // Always a prune
-                system: new LSystem('', ['F=']),
-                killColony: true
-            }
-        ],
-        camera: (stage) =>
-        {
-            return {
-                scale: 2 ** stage,
-                // cameraMode: 0,
-                // followFactor: 0.15,
-                x: 2 ** stage,
-                y: 0,
-                Z: 0,
-                upright: false
-            };
-        },
-        stroke: (stage) =>
-        {
-            return {
-                tickLength: stage < 3 ? 2 : 1,
-                // initDelay: 0,
-                // loadModels: true,
-                // quickDraw: false,
-                // quickBacktrack: false,
-                // backtrackTail: true,
-                // hesitateApex: true,
-                // hesitateFork: true,
-            };
-        }
-    }
-]
-
 /**
  * This is not ECS, I'm not good enough to understand ECS.
 */
@@ -2273,6 +2232,23 @@ class ColonyManager
         {
             start: 0
         };
+        // Roll back transaction!
+        if(this.gangsta && this.gangsta[0] == this.actionGangsta[0] &&
+        this.gangsta[1] == this.actionGangsta[1])
+        {
+            this.ancestreeTask =
+            {
+                start: 0
+            };
+            this.deriveTask =
+            {
+                start: 0
+            };
+            this.calcTask =
+            {
+                start: 0
+            };
+        }
         this.actionGangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
@@ -2362,6 +2338,78 @@ class ColonyManager
         theory.invalidateQuaternaryValues();
     }
 }
+
+// Balance parameters
+
+const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(1000)));
+const permaCosts =
+[
+    BigNumber.from(24),
+    BigNumber.from(1e30),
+    BigNumber.from(1e45)
+];
+
+const taxRate = .12;
+const tauRate = 1;   // e30 = 100 tau, e45 = end, but tau rate 1 = better design
+
+const pubExp = .1;
+var getPublicationMultiplier = (tau) => tau.max(BigNumber.ONE).pow(pubExp *
+tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
+var getPublicationMultiplierFormula = (symbol) =>
+`\\begin{array}{c}{${symbol}}^{${pubExp}\\ln({\\ln{${symbol}})}}\\\\
+(\\text{${getLoc('tax')}}\\colon\\enspace${taxRate}\\times\\max\\,\\text{p})
+\\end{array}`;
+// Need a better place to write this
+
+const PLANT_DATA =
+[
+    {   // Arrow weed
+        system: new LSystem('A(1)', [
+            'F(l)=F(l*2)',
+            'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t/2)'
+        ], 30),
+        cost: new FirstFreeCost(new ExponentialCost(1, 1)),
+        growthRate: BigNumber.ONE,
+        growthCost: BigNumber.from(45),
+        actions:
+        [
+            {   // Always a harvest
+                symbols: new Set('A'),
+                system: new LSystem('', ['A=']),
+                killColony: false
+            },
+            {   // Always a prune
+                system: new LSystem('', ['F=']),
+                killColony: true
+            }
+        ],
+        camera: (stage) =>
+        {
+            return {
+                scale: 2 ** stage,
+                // cameraMode: 0,
+                // followFactor: 0.15,
+                x: 2 ** stage,
+                y: 0,
+                Z: 0,
+                upright: false
+            };
+        },
+        stroke: (stage) =>
+        {
+            return {
+                tickLength: stage < 3 ? 2 : 1,
+                // initDelay: 0,
+                // loadModels: true,
+                // quickDraw: false,
+                // quickBacktrack: false,
+                // backtrackTail: true,
+                // hesitateApex: true,
+                // hesitateFork: true,
+            };
+        }
+    }
+]
 
 // const sidewayQuat = new Quaternion(1, 0, 0, 0);
 const uprightQuat = new Quaternion(-Math.sqrt(2)/2, 0, 0, Math.sqrt(2)/2);
@@ -2489,6 +2537,11 @@ var init = () =>
         viewColony.bought = (_) =>
         {
             viewColony.level = 0;
+            let c = manager.colonies[plot][colonyIdx[plot]];
+            if(!c)
+                return;
+            let seqMenu = createSeqViewMenu(c);
+            seqMenu.show();
         };
         viewColony.isVisible = false;
     }
@@ -2534,8 +2587,8 @@ var init = () =>
             plants[i][j] = theory.createUpgrade(i * 100 + j, currency,
             PLANT_DATA[j].cost);
             plants[i][j].description = Localization.format(
-            getLoc('plant'), i + 1, PLANT_DATA[j].name);
-            plants[i][j].info = getLoc('plantInfo')[j];
+            getLoc('plotPlant'), i + 1, getLoc('plants')[j].name);
+            plants[i][j].info = getLoc('plants')[j].info;
             plants[i][j].bought = (amount) =>
             {
                 manager.addColony(i, j, amount);
@@ -2622,16 +2675,17 @@ var tick = (elapsedTime, multiplier) =>
 {
     for(let i = 0; i < maxPlots; ++i)
         switchPlant[i].isAutoBuyable = false;
-    // https://www.desmos.com/calculator/pfku4nopgy
+    // Without the multiplier, one year is 14.6 hours
     let dt = elapsedTime * multiplier;
     time += dt;
+    // https://www.desmos.com/calculator/pfku4nopgy
     // insolation = max(0, -cos(x*pi/72))
     // Help me check my integral maths
     let cycles = time / 144;
     days = Math.floor(cycles);
     let phase = Math.max(0, Math.min(cycles - days - 0.25, 0.5));
     let newII = days * 144 / Math.PI - 72 *
-    (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI ;
+    (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
     let di = newII - insolationIntegral;
     insolationIntegral = newII;
     // universal growth factor = cos(x*pi/72)/2 + 1/2
@@ -2700,15 +2754,14 @@ var getPrimaryEquation = () =>
 
 var getSecondaryEquation = () =>
 {
-    let finalBit = `${theory.latexSymbol}=
-    \\max\\,\\text{p}`;
+    let finalBit = `${theory.latexSymbol}=\\max\\,\\text{p}`;
     let c = manager.colonies[plot][colonyIdx[plot]];
     if(!c)
         return finalBit;
-    let result = `${c.population}\\times
-    \\text{${PLANT_DATA[c.id].name}, stage ${c.stage}}\\\\E=${c.energy}\\enspace
+    let result = `\\text{${Localization.format(getLoc('colony'), c.population,
+    getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy}\\enspace
     g=${c.growth}/${PLANT_DATA[c.id].growthCost * c.sequence.length}\\\\
-    r_s=${c.synthRate}\\enspace p=${c.profit}\\\\`;
+    r_s=${c.synthRate}\\enspace p=${c.profit}\\text{p}\\\\`;
     return result + finalBit;
 }
 
@@ -2740,6 +2793,106 @@ var getQuaternaryEntries = () =>
         quaternaryEntries[i].value = sum;
     }
     return quaternaryEntries.slice(0, plotPerma.level);
+}
+
+let createSeqViewMenu = (colony) =>
+{
+    let reconstructionTask =
+    {
+        start: 0
+    };
+    let updateReconstruction = () =>
+    {
+        if(!('result' in reconstructionTask) ||
+        ('result' in reconstructionTask && reconstructionTask.start))
+        {
+            reconstructionTask = PLANT_DATA[colony.id].system.reconstruct(
+            colony.sequence, colony.params, reconstructionTask);
+        }
+        return reconstructionTask.result;
+    }
+    let pageTitle = ui.createLatexLabel
+    ({
+        text: getLoc('plants')[colony.id].details,
+        margin: new Thickness(0, 4),
+        fontSize: 12,
+        horizontalTextAlignment: TextAlignment.START,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let pageContents = ui.createLabel
+    ({
+        fontFamily: FontFamily.CMU_REGULAR,
+        fontSize: 16,
+        text: () => updateReconstruction(),
+        lineBreakMode: LineBreakMode.CHARACTER_WRAP
+    });
+    let viewButton = ui.createButton
+    ({
+        text: getLoc('btnView'),
+        row: 0,
+        column: 0,
+        onClicked: () =>
+        {
+            Sound.playClick();
+            let statsMenu = createStatisticsMenu(colony.id);
+            statsMenu.show();
+        }
+    });
+    let closeButton = ui.createButton
+    ({
+        text: getLoc('btnClose'),
+        row: 0,
+        column: 1,
+        onClicked: () =>
+        {
+            Sound.playClick();
+            menu.hide();
+        }
+    });
+
+    let menu = ui.createPopup
+    ({
+        title: Localization.format(getLoc('colony'), colony.population,
+        getLoc('plants')[colony.id].name, colony.stage),
+        isPeekable: true,
+        content: ui.createStackLayout
+        ({
+            children:
+            [
+                pageTitle,
+                ui.createFrame
+                ({
+                    padding: new Thickness(8, 6),
+                    heightRequest: ui.screenHeight * 0.16,
+                    content: ui.createScrollView
+                    ({
+                        content: ui.createStackLayout
+                        ({
+                            children:
+                            [
+                                pageContents
+                            ]
+                        })
+                    })
+                }),
+                ui.createBox
+                ({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                ui.createGrid
+                ({
+                    columnDefinitions: ['50*', '50*'],
+                    children:
+                    [
+                        viewButton,
+                        closeButton
+                    ]
+                })
+            ]
+        })
+    });
+    return menu;
 }
 
 var getTau = () => currency.value.max(BigNumber.ZERO).pow(tauRate);

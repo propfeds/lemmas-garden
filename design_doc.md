@@ -18,8 +18,6 @@ Playstyle: slow, semi active, timing required, reading of plant descriptions
   - [Problems](#problems)
     - [1. I don't know gardening.](#1-i-dont-know-gardening)
     - [2. Limitations.](#2-limitations)
-    - [3. Quirks.](#3-quirks)
-    - [4. Gameplay flow.](#4-gameplay-flow)
   - [Progression](#progression)
     - [1. Cumulative UX](#1-cumulative-ux)
     - [2. Episodic UX](#2-episodic-ux)
@@ -41,28 +39,16 @@ Playstyle: slow, semi active, timing required, reading of plant descriptions
 
 ### 1. I don't know gardening.
 
-- Just **try watching a lot** of gardening footage to get a general feeling
+- No cure for this one.
 
 ### 2. Limitations.
 
 - Plants may evolve quickly but **L-system rendering might be too slow** to
 update growth in real time
-- **Long internal state**?
-  - Store version number in it
 - L-system can only be used for modelling of **individual plants**,
 **not populations**
-- Cumulative rho: use `prePublish()` and `postPublish()` to transfer so it won't
-reset
 
-### 3. Quirks.
-
-- **Gameplay pattern is unique** from every other theory:
-  - All other theories revolve around ever-increasing rho
-  - Growth and publish **timing is consistent**, but might be a bit slow
-
-### 4. Gameplay flow.
-
-- Need plant **interactions** with each other, with the seasons, day/night, etc.
+- Lack plant **interactions** with each other, with the seasons, day/night, etc.
 
 ## Progression
 
