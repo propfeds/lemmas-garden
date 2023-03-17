@@ -91,7 +91,7 @@ const locStrings =
         versionName: 'v0, in never',
 
         tax: 'Publishing tax',
-        
+
         btnView: 'View L-system',
         btnHarvest: 'Harvest',
         btnHarvestKill: 'Harvest\\\\(kill)',
@@ -2528,9 +2528,8 @@ const actionsLabel = ui.createLatexLabel
     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
 });
 
-var viewColony, switchColony;
+var switchPlant, viewColony, switchColony;
 
-var switchPlant = new Array(maxPlots);
 var plants = Array.from({length: maxPlots}, (_) => []);
 
 var plotPerma;
@@ -2541,11 +2540,29 @@ var init = () =>
 {
     currency = theory.createCurrency('p');
 
+    /* Switch plant
+    Moduloose
+    */
+    {
+        switchPlant = theory.createSingularUpgrade(0, currency, new FreeCost);
+        switchPlant.getDescription = () => Localization.format(
+        getLoc('switchPlant'), plot + 1);
+        switchPlant.info = getLoc('switchPlantInfo');
+        switchPlant.bought = (_) =>
+        {
+            switchPlant.level = 0;
+            if(manager.colonies[plot].length)
+                return;
+            plantIdx[plot] = (plantIdx[plot] + 1) % PLANT_DATA.length;
+            updateAvailability();
+        };
+        switchPlant.isAvailable = false;
+    }
     /* View colony
     Essential in learning the game.
     */
     {
-        viewColony = theory.createSingularUpgrade(0, currency, new FreeCost);
+        viewColony = theory.createSingularUpgrade(1, currency, new FreeCost);
         viewColony.description = getLoc('viewColony');
         viewColony.info = getLoc('viewColonyInfo');
         viewColony.bought = (_) =>
@@ -2557,13 +2574,13 @@ var init = () =>
             let seqMenu = createColonyViewMenu(c);
             seqMenu.show();
         };
-        viewColony.isVisible = false;
+        viewColony.isAvailable = false;
     }
     /* Switch colony
-    Moduloe
+    Modulow
     */
     {
-        switchColony = theory.createSingularUpgrade(1, currency, new FreeCost);
+        switchColony = theory.createSingularUpgrade(2, currency, new FreeCost);
         switchColony.description = getLoc('switchColony');
         switchColony.info = getLoc('switchColonyInfo');
         switchColony.bought = (_) =>
@@ -2577,7 +2594,7 @@ var init = () =>
             let c = manager.colonies[plot][colonyIdx[plot]];
             renderer.colony = c;
         };
-        switchColony.isVisible = false;
+        switchColony.isAvailable = false;
     }
 
     /* Free penny
@@ -2611,28 +2628,9 @@ var init = () =>
                     return;
                 }
                 manager.addColony(i, j, amount);
-                switchPlant[i].isAvailable = false;
             };
             plants[i][j].isAvailable = false;
         }
-
-        switchPlant[i] = theory.createUpgrade(i * 100 + 99, currency,
-        new FreeCost);
-        switchPlant[i].description = Localization.format(
-        getLoc('switchPlant'), i + 1);
-        switchPlant[i].info = getLoc('switchPlantInfo');
-        switchPlant[i].bought = (_) =>
-        {
-            switchPlant[i].level = 0;
-            if(switchPlant[i].isAutoBuyable)
-                return;
-            if(manager.colonies[i].length)
-                return;
-            plantIdx[i] = (plantIdx[i] + 1) % PLANT_DATA.length;
-            updateAvailability();
-        };
-        switchPlant[i].isAutoBuyable = false;
-        switchPlant[i].isAvailable = false;
     }
     /* Plot unlock
     Before you can plant any plants, you have to switch tab and unlock plot 0.
@@ -2678,12 +2676,14 @@ var updateAvailability = () =>
 {
     if(!finishedTutorial)
         finishedTutorial = plants[0][0].level > 0;
-    viewColony.isAvailable = finishedTutorial;
-    switchColony.isAvailable = finishedTutorial &&
-    manager.colonies[plot].length > 1;
+    else
+    {
+        switchPlant.isAvailable = !manager.colonies[plot].length;
+        viewColony.isAvailable = manager.colonies[plot].length > 0;
+        switchColony.isAvailable = manager.colonies[plot].length > 1;
+    }
     for(let i = 0; i < plotPerma.level; ++i)
     {
-        switchPlant[i].isAvailable = i == plot && !manager.colonies[i].length;
         for(let j = 0; j < PLANT_DATA.length; ++j)
             plants[i][j].isAvailable = j == plantIdx[i] ||
             plants[i][j].level > 0;
@@ -2692,8 +2692,6 @@ var updateAvailability = () =>
 
 var tick = (elapsedTime, multiplier) =>
 {
-    for(let i = 0; i < maxPlots; ++i)
-        switchPlant[i].isAutoBuyable = false;
     // Without the multiplier, one year is 14.6 hours
     let dt = elapsedTime * multiplier;
     time += dt;
