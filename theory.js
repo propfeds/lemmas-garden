@@ -101,6 +101,8 @@ const locStrings =
         btnVar: 'Variables',
 
         labelActions: 'Actions: ',
+        labelSettings: 'Settings: ',
+
         labelAxiom: 'Axiom: ',
         labelAngle: 'Turning angle (°): ',
         labelRules: 'Production rules: {0}',
@@ -116,8 +118,7 @@ const locStrings =
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
 
         colony: '{0} of {1}, stage {2}',
-        dateTime: `\\text{{Year }}{0}\\text{{ day }}{1},\\enspace{2}
-        \\colon{3}`,
+        dateTime: `\\text{{Year }}{0}\\text{{ day }}{1},\\enspace{2}\\colon{3}`,
         dateTimeTax: `{0}\\text{{y }}{1}\\text{{d}},\\enspace{2}
         \\colon{3}\\, - \\,\\text{{Tax\\colon}}\\enspace{4}\\text{{p}}`,
 
@@ -2453,9 +2454,21 @@ let quaternaryEntries =
     new QuaternaryEntry('\\text{p}_6', null),
 ];
 
+const actionsLabel = ui.createLatexLabel
+({
+    isVisible: () => manager.colonies[plot][colonyIdx[plot]] ?
+    true : false,
+    column: 1,
+    horizontalOptions: LayoutOptions.END,
+    verticalOptions: LayoutOptions.START,
+    margin: new Thickness(0, 14, 80, 0),
+    text: getLoc('labelActions'),
+    fontSize: 10,
+    textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
+});
 const harvestFrame = ui.createFrame
 ({
-    column: 1,
+    column: 2,
     cornerRadius: 1,
     margin: new Thickness(4, 0),
     horizontalOptions: LayoutOptions.START,
@@ -2479,19 +2492,45 @@ const harvestFrame = ui.createFrame
         }
     }
 });
-// const harvestLabel = ui.createLatexLabel
-// ({
-//     column: 1,
-//     horizontalOptions: LayoutOptions.START,
-//     verticalOptions: LayoutOptions.START,
-//     margin: new Thickness(0, 30, 0, 0),
-//     text: getLoc('btnHarvest'),
-//     fontSize: 9,
-//     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
-// });
+const settingsFrame = ui.createFrame
+({
+    column: 1,
+    cornerRadius: 1,
+    margin: new Thickness(9),
+    horizontalOptions: LayoutOptions.END,
+    verticalOptions: LayoutOptions.END,
+    hasShadow: true,
+    heightRequest: getImageSize(ui.screenWidth),
+    widthRequest: getImageSize(ui.screenWidth),
+    content: ui.createImage
+    ({
+        source: ImageSource.SETTINGS,
+        aspect: Aspect.ASPECT_FIT,
+        useTint: false
+    }),
+    onTouched: (e) =>
+    {
+        if(e.type == TouchType.SHORTPRESS_RELEASED ||
+        e.type == TouchType.LONGPRESS_RELEASED)
+        {
+            Sound.playClick();
+        }
+    }
+});
+const settingsLabel = ui.createLatexLabel
+({
+    column: 1,
+    horizontalOptions: LayoutOptions.END,
+    verticalOptions: LayoutOptions.END,
+    margin: new Thickness(0, 0, 40, 14),
+    text: getLoc('labelSettings'),
+    fontSize: 10,
+    textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
+});
+
 const pruneFrame = ui.createFrame
 ({
-    column: 0,
+    column: 1,
     cornerRadius: 1,
     margin: new Thickness(4, 0),
     horizontalOptions: LayoutOptions.START,
@@ -2514,28 +2553,6 @@ const pruneFrame = ui.createFrame
             manager.performAction(plot, colonyIdx[plot], 1);
         }
     }
-});
-// const pruneLabel = ui.createLatexLabel
-// ({
-//     column: 0,
-//     horizontalOptions: LayoutOptions.START,
-//     verticalOptions: LayoutOptions.START,
-//     margin: new Thickness(0, 30, 0, 0),
-//     text: getLoc('btnPrune'),
-//     fontSize: 9,
-//     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
-// });
-const actionsLabel = ui.createLatexLabel
-({
-    isVisible: () => manager.colonies[plot][colonyIdx[plot]] ?
-    true : false,
-    column: 1,
-    horizontalOptions: LayoutOptions.END,
-    verticalOptions: LayoutOptions.START,
-    margin: new Thickness(0, 14, 80, 0),
-    text: getLoc('labelActions'),
-    fontSize: 10,
-    textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
 });
 
 var switchPlant, viewColony, switchColony;
@@ -2765,7 +2782,9 @@ var getEquationOverlay = () =>
                     // pruneLabel
                 ]
             }),
-            actionsLabel
+            actionsLabel,
+            settingsFrame,
+            settingsLabel
         ]
     });
     return result;
