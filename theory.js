@@ -2792,13 +2792,13 @@ var getEquationOverlay = () =>
 
 var getPrimaryEquation = () =>
 {
-    if(!plotPerma.level)
-        return '';
     return Localization.format(getLoc('plotTitle'), plot + 1);
 }
 
 var getSecondaryEquation = () =>
 {
+    if(!plotPerma.level)
+        return '';
     let finalBit = `${theory.latexSymbol}=\\max\\,\\text{p}`;
     let c = manager.colonies[plot][colonyIdx[plot]];
     if(!c)
