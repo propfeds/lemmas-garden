@@ -63,7 +63,9 @@ let plot = 0;
 let colonyIdx = new Array(maxPlots).fill(0);
 let plantIdx = new Array(maxPlots).fill(0);
 let finishedTutorial = false;
+let actuallyPlanting = false;
 let tmpCurrency;
+let tmpLevels;
 
 // Other constants
 
@@ -105,17 +107,16 @@ const locStrings =
         labelIgnored: 'Turtle-ignored: ',
         labelCtxIgnored: 'Context-ignored: ',
         labelTropism: 'Tropism (gravity): ',
-        labelSeed: 'Seed: ',
+        labelSeed: 'Random seed: ',
         menuVariables: 'Defined Variables',
         labelVars: 'Variables: {0}',
-
 
         plotTitle: `\\text{{Plot }}{{{0}}}`,
         unlockPlot: `\\text{{plot }}{{{0}}}`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
 
         viewColony: 'View colony',
-        viewColonyInfo: 'Displays the colony\'s description',
+        viewColonyInfo: 'Displays details about the colony',
         switchColony: 'Switch colony',
         switchColonyInfo: 'Cycles through the list of colonies',
 
@@ -132,7 +133,7 @@ const locStrings =
 `symbol A represents a rising shoot (apex), while F represents the stem body.` +
 `\\\\- The Prune command cuts every stem and kills the colony.\\\\- The ` +
 `Harvest command calculates the sum of every apex and returns as profit.`,
-                cost: 'First free level, then 2 ** (level - 2)'
+                cost: '2p ** (level - 2) (first seed is free)'
             }
         ],
         plantStats: `Cost: {0}\\\\Growth rate: {1} (at night)\\\\Growth ` +
@@ -2604,6 +2605,11 @@ var init = () =>
             plants[i][j].info = getLoc('plants')[j].info;
             plants[i][j].bought = (amount) =>
             {
+                if(!actuallyPlanting)
+                {
+                    plants[i][j].level -= amount;
+                    return;
+                }
                 manager.addColony(i, j, amount);
                 switchPlant[i].isAvailable = false;
             };
@@ -3226,12 +3232,32 @@ var getCurrencyFromTau = (tau) =>
 var prePublish = () =>
 {
     tmpCurrency = currency.value;
+    tmpLevels = Array.from({length: maxPlots}, (_) => []);
+    for(let i = 0; i < maxPlots; ++i)
+    {
+        for(let j = 0; j < PLANT_DATA.length; ++j)
+            tmpLevels[i][j] = 0;
+
+        for(let j = 0; j < manager.colonies[i].length; ++j)
+        {
+            let c = manager.colonies[i][j];
+            tmpLevels[i][c.id] += c.population;
+        }
+    }
 }
 
 // You can be in debt for this lol
 var postPublish = () =>
 {
     currency.value = tmpCurrency - getCurrencyFromTau(theory.tau)[0] * taxRate;
+    actuallyPlanting = false;
+    for(let i = 0; i < maxPlots; ++i)
+    {
+        for(let j = 0; j < PLANT_DATA.length; ++j)
+            plants[i][j].level = tmpLevels[i][j];
+    }
+    actuallyPlanting = true;
+
     theory.invalidateQuaternaryValues();
 }
 
@@ -3329,6 +3355,22 @@ var setInternalState = (stateStr) =>
     if('manager' in state)
         manager = new ColonyManager(state.manager.colonies, state.manager.time,
         state.manager.timeRemainder);
+
+    tmpLevels = Array.from({length: maxPlots}, (_) => []);
+    for(let i = 0; i < maxPlots; ++i)
+    {
+        for(let j = 0; j < PLANT_DATA.length; ++j)
+            tmpLevels[i][j] = 0;
+
+        for(let j = 0; j < manager.colonies[i].length; ++j)
+        {
+            let c = manager.colonies[i][j];
+            tmpLevels[i][c.id] += c.population;
+        }
+        for(let j = 0; j < PLANT_DATA.length; ++j)
+            plants[i][j].level = tmpLevels[i][j];
+    }
+    actuallyPlanting = true;
 
     let c = manager.colonies[plot][colonyIdx[plot]];
     if(c)
