@@ -90,7 +90,7 @@ const locStrings =
     {
         versionName: 'v0, in never',
 
-        tax: 'Publishing tax',
+        pubTax: 'Publishing tax',
 
         btnView: 'View L-system',
         btnHarvest: 'Harvest',
@@ -115,15 +115,20 @@ const locStrings =
         unlockPlot: `\\text{{plot }}{{{0}}}`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
 
+        colony: '{0} of {1}, stage {2}',
+        dateTime: `\\text{{Year }}{0}\\text{{ day }}{1},\\enspace{2}
+        \\colon{3}`,
+        dateTimeTax: `{0}\\text{{y }}{1}\\text{{d}},\\enspace{2}
+        \\colon{3}\\, - \\,\\text{{Tax\\colon}}\\enspace{4}\\text{{p}}`,
+
+        switchPlant: 'Switch plant (plot {0})',
+        switchPlantInfo: 'Cycles through the list of plants',
+        plotPlant: 'Plot {0}: {1}',
         viewColony: 'View colony',
         viewColonyInfo: 'Displays details about the colony',
         switchColony: 'Switch colony',
         switchColonyInfo: 'Cycles through the list of colonies',
 
-        colony: '{0} of {1}, stage {2}',
-        switchPlant: 'Switch plant (plot {0})',
-        switchPlantInfo: 'Cycles through the list of plants',
-        plotPlant: 'Plot {0}: {1}',
         plants:
         [
             {
@@ -131,8 +136,9 @@ const locStrings =
                 info: 'Testing my arrow weeds',
                 details: `Arrow weed is the friend of all dogs.\\\\- The ` +
 `symbol A represents a rising shoot (apex), while F represents the stem body.` +
-`\\\\- The Prune command cuts every stem and kills the colony.\\\\- The ` +
-`Harvest command calculates the sum of every apex and returns as profit.`,
+`\\\\- The photo-synthesis rate r\\_s is the sum of all apices.\\\\- The ` +
+`Prune command cuts all stems and kills the colony.\\\\- The Harvest command ` +
+`calculates the sum of every apex and returns as profit.`,
                 cost: '2p ** (level - 2) (first seed is free)'
             }
         ],
@@ -1441,6 +1447,8 @@ class Renderer
      */
     set colony(colony)
     {
+        if(graphMode)
+            return;
         this.system = PLANT_DATA[colony.id].system;
         this.configure(colony.sequence, colony.params,
         PLANT_DATA[colony.id].camera(colony.stage),
@@ -2371,7 +2379,7 @@ var getPublicationMultiplier = (tau) => tau.max(BigNumber.ONE).pow(pubExp *
 tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
 var getPublicationMultiplierFormula = (symbol) =>
 `\\begin{array}{c}{${symbol}}^{${pubExp}\\ln({\\ln{${symbol}})}}\\\\
-(\\text{${getLoc('tax')}}\\colon\\enspace${taxRate}\\times\\max\\,\\text{p})
+(\\text{${getLoc('pubTax')}}\\colon\\enspace${taxRate}\\times\\max\\,\\text{p})
 \\end{array}`;
 // Need a better place to write this
 
@@ -2449,6 +2457,7 @@ const harvestFrame = ui.createFrame
 ({
     column: 1,
     cornerRadius: 1,
+    margin: new Thickness(4, 0),
     horizontalOptions: LayoutOptions.START,
     verticalOptions: LayoutOptions.START,
     hasShadow: true,
@@ -2484,6 +2493,7 @@ const pruneFrame = ui.createFrame
 ({
     column: 0,
     cornerRadius: 1,
+    margin: new Thickness(4, 0),
     horizontalOptions: LayoutOptions.START,
     verticalOptions: LayoutOptions.START,
     hasShadow: true,
@@ -2522,7 +2532,7 @@ const actionsLabel = ui.createLatexLabel
     column: 1,
     horizontalOptions: LayoutOptions.END,
     verticalOptions: LayoutOptions.START,
-    margin: new Thickness(0, 14, 78, 0),
+    margin: new Thickness(0, 14, 80, 0),
     text: getLoc('labelActions'),
     fontSize: 10,
     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
@@ -2693,8 +2703,8 @@ var updateAvailability = () =>
 var tick = (elapsedTime, multiplier) =>
 {
     // Without the multiplier, one year is 14.6 hours
-    let dt = elapsedTime * multiplier;
-    time += dt;
+    // let dt = elapsedTime * multiplier;
+    time += elapsedTime;
     // https://www.desmos.com/calculator/pfku4nopgy
     // insolation = max(0, -cos(x*pi/72))
     // Help me check my integral maths
@@ -2743,8 +2753,7 @@ var getEquationOverlay = () =>
                 isVisible: () => manager.colonies[plot][colonyIdx[plot]] ?
                 true : false,
                 row: 0, column: 1,
-                margin: new Thickness(9),
-                columnSpacing: 14,
+                margin: new Thickness(6, 9),
                 horizontalOptions: LayoutOptions.END,
                 inputTransparent: true,
                 cascadeInputTransparent: false,
@@ -2785,13 +2794,15 @@ var getSecondaryEquation = () =>
 
 var getTertiaryEquation = () =>
 {
+    let years = Math.floor(days / 365);
     let timeofDay = time % 144;
     let hour = Math.floor(timeofDay / 6);
+    let min = Math.round((timeofDay % 6) * 10);
 
-    return `\\text{Day }${days + 1},\\enspace${hour}\\text{ o' clock}
-    ${theory.canPublish && theory.publicationUpgrade.level ? `\\, - \\,
-    \\text{Tax\\colon}\\enspace${getCurrencyFromTau(theory.tau)[0] * taxRate}
-    \\text{p}` : ''}`;
+    return Localization.format(getLoc(theory.canPublish &&
+    theory.publicationUpgrade.level ? 'dateTimeTax' : 'dateTime'), years + 1,
+    days + 1, hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'),
+    getCurrencyFromTau(theory.tau)[0] * taxRate);
 }
 
 var getQuaternaryEntries = () =>
