@@ -96,8 +96,19 @@ const locStrings =
         btnPrune: 'Prune',
         btnPruneKill: 'Prune\\\\(kill)',
         btnClose: 'Close',
+        btnVar: 'Variables',
 
         labelActions: 'Actions: ',
+        labelAxiom: 'Axiom: ',
+        labelAngle: 'Turning angle (°): ',
+        labelRules: 'Production rules: {0}',
+        labelIgnored: 'Turtle-ignored: ',
+        labelCtxIgnored: 'Context-ignored: ',
+        labelTropism: 'Tropism (gravity): ',
+        labelSeed: 'Seed: ',
+        menuVariables: 'Defined Variables',
+        labelVars: 'Variables: {0}',
+
 
         plotTitle: `\\text{{Plot }}{{{0}}}`,
         unlockPlot: `\\text{{plot }}{{{0}}}`,
@@ -117,15 +128,15 @@ const locStrings =
             {
                 name: 'Arrow weed',
                 info: 'Testing my arrow weeds',
-                details: `Arrow weed is the friend of all dogs.
-- The symbol A represents a rising shoot (apex), while F represents the stem body.
-- The Prune command cuts every stem and kills the whole colony.
-- The Harvest command calculates the sum of every apex and returns as profit.`
+                details: `Arrow weed is the friend of all dogs.\\\\- The ` +
+`symbol A represents a rising shoot (apex), while F represents the stem body.` +
+`\\\\- The Prune command cuts every stem and kills the colony.\\\\- The ` +
+`Harvest command calculates the sum of every apex and returns as profit.`,
+                cost: 'First free level, then 2 ** (level - 2)'
             }
         ],
-        plantStats: `Cost: {0}
-Growth rate (max. at night): {1}
-Growth cost: {2}`,
+        plantStats: `Cost: {0}\\\\Growth rate: {1} (at night)\\\\Growth ` +
+`cost: {2} * length`,
 
         resetRenderer: 'You are about to reset the renderer.'
     }
@@ -2086,7 +2097,8 @@ class ColonyManager
             params: PLANT_DATA[id].system.axiomParams,
             stage: 0,
 
-            energy: BigNumber.HUNDRED,
+            energy: BigNumber.from(PLANT_DATA[id].system.axiom.length) *
+            PLANT_DATA[id].growthCost,
             growth: BigNumber.ZERO
         };
         let stats = this.calculateStats(c);
@@ -2126,7 +2138,7 @@ class ColonyManager
                 c.energy -= maxdg;
 
                 if(!this.gangsta && c.growth >= PLANT_DATA[c.id].growthCost *
-                c.sequence.length)
+                BigNumber.from(c.sequence.length))
                 {
                     this.gangsta = [i, j];
                 }
@@ -2313,7 +2325,8 @@ class ColonyManager
             return;
         }
 
-        c.growth -= PLANT_DATA[c.id].growthCost * c.sequence.length;
+        c.growth -= PLANT_DATA[c.id].growthCost *
+        BigNumber.from(c.sequence.length);
         c.sequence = this.deriveTask.derivation;
         c.params = this.deriveTask.parameters;
         c.synthRate = this.calcTask.synthRate;
@@ -2540,7 +2553,7 @@ var init = () =>
             let c = manager.colonies[plot][colonyIdx[plot]];
             if(!c)
                 return;
-            let seqMenu = createSeqViewMenu(c);
+            let seqMenu = createColonyViewMenu(c);
             seqMenu.show();
         };
         viewColony.isVisible = false;
@@ -2759,9 +2772,10 @@ var getSecondaryEquation = () =>
     if(!c)
         return finalBit;
     let result = `\\text{${Localization.format(getLoc('colony'), c.population,
-    getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy}\\enspace
-    g=${c.growth}/${PLANT_DATA[c.id].growthCost * c.sequence.length}\\\\
-    r_s=${c.synthRate}\\enspace p=${c.profit}\\text{p}\\\\`;
+    getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
+    g=${c.growth}/${PLANT_DATA[c.id].growthCost *
+    BigNumber.from(c.sequence.length)}\\\\
+    r_s=${c.synthRate}/\\text{s},\\enspace p=${c.profit}\\text{p}\\\\\\\\`;
     return result + finalBit;
 }
 
@@ -2795,7 +2809,313 @@ var getQuaternaryEntries = () =>
     return quaternaryEntries.slice(0, plotPerma.level);
 }
 
-let createSeqViewMenu = (colony) =>
+let createVariableMenu = (variables) =>
+{
+    // Q: Does Object.entries mean that its contents are references, and 
+    // therefore overwritable from afar?
+    let varEntries = [];
+    for(let i = 0; i < variables.length; ++i)
+    {
+        varEntries.push(ui.createEntry
+        ({
+            row: i,
+            column: 0,
+            text: variables[i][0]
+        }));
+        varEntries.push(ui.createLatexLabel
+        ({
+            text: '=',
+            row: i,
+            column: 1,
+            horizontalTextAlignment: TextAlignment.CENTER,
+            verticalTextAlignment: TextAlignment.CENTER
+        }));
+        varEntries.push(ui.createEntry
+        ({
+            row: i,
+            column: 2,
+            text: variables[i][1],
+            horizontalTextAlignment: TextAlignment.END
+        }));
+    }
+    let varsLabel = ui.createLatexLabel
+    ({
+        text: Localization.format(getLoc('labelVars'), variables.length),
+        verticalTextAlignment: TextAlignment.CENTER,
+        // margin: new Thickness(0, 12)
+        heightRequest: getSmallBtnSize(ui.screenWidth)
+    });
+    let varStack = ui.createGrid
+    ({
+        columnDefinitions: ['50*', '20*', '30*'],
+        children: varEntries
+    });
+
+    let menu = ui.createPopup
+    ({
+        title: getLoc('menuVariables'),
+        content: ui.createStackLayout
+        ({
+            children:
+            [
+                ui.createGrid
+                ({
+                    columnDefinitions: ['70*', '30*'],
+                    children:
+                    [
+                        varsLabel
+                    ]
+                }),
+                ui.createScrollView
+                ({
+                    content: varStack
+                }),
+                ui.createBox
+                ({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                ui.createButton
+                ({
+                    text: getLoc('btnClose'),
+                    onClicked: () =>
+                    {
+                        Sound.playClick();
+                        menu.hide();
+                    }
+                })
+            ]
+        })
+    });
+    return menu;
+}
+
+let createSystemMenu = (id) =>
+{
+    let values = PLANT_DATA[id].system.object;
+
+    let tmpAxiom = values.axiom;
+    let axiomEntry = ui.createEntry
+    ({
+        text: tmpAxiom,
+        row: 0,
+        column: 1
+    });
+    let tmpVars = Object.entries(values.variables);
+    let varButton = ui.createButton
+    ({
+        text: getLoc('btnVar'),
+        row: 0,
+        column: 2,
+        heightRequest: getSmallBtnSize(ui.screenWidth),
+        onClicked: () =>
+        {
+            Sound.playClick();
+            let varMenu = createVariableMenu(tmpVars);
+            varMenu.show();
+        }
+    });
+    let tmpRules = [];
+    for(let i = 0; i < values.rules.length; ++i)
+        tmpRules[i] = values.rules[i];
+    let ruleEntries = [];
+    for(let i = 0; i < tmpRules.length; ++i)
+    {
+        ruleEntries.push(ui.createEntry
+        ({
+            row: i,
+            text: tmpRules[i]
+        }));
+    }
+    let rulesLabel = ui.createLatexLabel
+    ({
+        text: Localization.format(getLoc('labelRules'), ruleEntries.length),
+        verticalTextAlignment: TextAlignment.CENTER,
+        // margin: new Thickness(0, 12),
+        heightRequest: getSmallBtnSize(ui.screenWidth)
+    });
+    let ruleStack = ui.createGrid
+    ({
+        children: ruleEntries
+    });
+
+    let tmpIgnore = values.ignoreList || '';
+    let ignoreEntry = ui.createEntry
+    ({
+        text: tmpIgnore,
+        row: 0,
+        column: 1,
+        horizontalTextAlignment: TextAlignment.END
+    });
+    let tmpCI = values.ctxIgnoreList || '';
+    let CIEntry = ui.createEntry
+    ({
+        text: tmpCI,
+        row: 1,
+        column: 1,
+        horizontalTextAlignment: TextAlignment.END
+    });
+    let tmpAngle = values.turnAngle || '0';
+    let angleEntry = ui.createEntry
+    ({
+        text: tmpAngle.toString(),
+        row: 2,
+        column: 1,
+        horizontalTextAlignment: TextAlignment.END
+    });
+    let tmpTropism = values.tropism || '0';
+    let tropismEntry = ui.createEntry
+    ({
+        text: tmpTropism.toString(),
+        row: 3,
+        column: 1,
+        horizontalTextAlignment: TextAlignment.END
+    });
+    let tmpSeed = values.seed || '0';
+    let seedLabel = ui.createGrid
+    ({
+        row: 4,
+        column: 0,
+        columnDefinitions: ['40*', '30*'],
+        children:
+        [
+            ui.createLatexLabel
+            ({
+                text: getLoc('labelSeed'),
+                column: 0,
+                verticalTextAlignment: TextAlignment.CENTER
+            })
+        ]
+    });
+    let seedEntry = ui.createEntry
+    ({
+        text: tmpSeed.toString(),
+        keyboard: Keyboard.NUMERIC,
+        row: 4,
+        column: 1,
+        horizontalTextAlignment: TextAlignment.END
+    });
+
+    let menu = ui.createPopup
+    ({
+        title: getLoc('plants')[id].name,
+        isPeekable: true,
+        content: ui.createStackLayout
+        ({
+            children:
+            [
+                ui.createScrollView
+                ({
+                    // heightRequest: ui.screenHeight * 0.32,
+                    content: ui.createStackLayout
+                    ({
+                        children:
+                        [
+                            ui.createLatexLabel
+                            ({
+                                text: Localization.format(getLoc('plantStats'),
+                                getLoc('plants')[id].cost,
+                                PLANT_DATA[id].growthRate,
+                                PLANT_DATA[id].growthCost),
+                                margin: new Thickness(0, 6),
+                                horizontalTextAlignment: TextAlignment.START,
+                                verticalTextAlignment: TextAlignment.CENTER
+                            }),
+                            ui.createGrid
+                            ({
+                                columnDefinitions: ['20*', '50*', '30*'],
+                                children:
+                                [
+                                    ui.createLatexLabel
+                                    ({
+                                        text: getLoc('labelAxiom'),
+                                        row: 0,
+                                        column: 0,
+                                        verticalTextAlignment:
+                                        TextAlignment.CENTER
+                                    }),
+                                    axiomEntry,
+                                    varButton
+                                ]
+                            }),
+                            ui.createGrid
+                            ({
+                                columnDefinitions: ['70*', '30*'],
+                                children:
+                                [
+                                    rulesLabel
+                                ]
+                            }),
+                            ruleStack,
+                            ui.createGrid
+                            ({
+                                columnDefinitions: ['70*', '30*'],
+                                children:
+                                [
+                                    ui.createLatexLabel
+                                    ({
+                                        text: getLoc('labelIgnored'),
+                                        row: 0,
+                                        column: 0,
+                                        verticalTextAlignment:
+                                        TextAlignment.CENTER
+                                    }),
+                                    ignoreEntry,
+                                    ui.createLatexLabel
+                                    ({
+                                        text: getLoc('labelCtxIgnored'),
+                                        row: 1,
+                                        column: 0,
+                                        verticalTextAlignment:
+                                        TextAlignment.CENTER
+                                    }),
+                                    CIEntry,
+                                    ui.createLatexLabel
+                                    ({
+                                        text: getLoc('labelAngle'),
+                                        row: 2,
+                                        column: 0,
+                                        verticalTextAlignment:
+                                        TextAlignment.CENTER
+                                    }),
+                                    angleEntry,
+                                    ui.createLatexLabel
+                                    ({
+                                        text: getLoc('labelTropism'),
+                                        row: 3,
+                                        column: 0,
+                                        verticalTextAlignment:
+                                        TextAlignment.CENTER
+                                    }),
+                                    tropismEntry,
+                                    seedLabel,
+                                    seedEntry
+                                ]
+                            })
+                        ]
+                    })
+                }),
+                ui.createBox
+                ({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                ui.createButton
+                ({
+                    text: getLoc('btnClose'),
+                    onClicked: () =>
+                    {
+                        Sound.playClick();
+                        menu.hide();
+                    }
+                })
+            ]
+        })
+    });
+    return menu;
+}
+
+let createColonyViewMenu = (colony) =>
 {
     let reconstructionTask =
     {
@@ -2814,8 +3134,7 @@ let createSeqViewMenu = (colony) =>
     let pageTitle = ui.createLatexLabel
     ({
         text: getLoc('plants')[colony.id].details,
-        margin: new Thickness(0, 4),
-        fontSize: 12,
+        margin: new Thickness(0, 6),
         horizontalTextAlignment: TextAlignment.START,
         verticalTextAlignment: TextAlignment.CENTER
     });
@@ -2834,7 +3153,7 @@ let createSeqViewMenu = (colony) =>
         onClicked: () =>
         {
             Sound.playClick();
-            let statsMenu = createStatisticsMenu(colony.id);
+            let statsMenu = createSystemMenu(colony.id);
             statsMenu.show();
         }
     });
@@ -2882,6 +3201,7 @@ let createSeqViewMenu = (colony) =>
                 }),
                 ui.createGrid
                 ({
+                    minimumHeightRequest: getBtnSize(ui.screenWidth),
                     columnDefinitions: ['50*', '50*'],
                     children:
                     [
