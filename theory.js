@@ -2667,12 +2667,8 @@ var init = () =>
             plants[i][j].info = getLoc('plants')[j].info;
             plants[i][j].bought = (amount) =>
             {
-                if(!actuallyPlanting)
-                {
-                    plants[i][j].level -= amount;
-                    return;
-                }
-                manager.addColony(i, j, amount);
+                if(actuallyPlanting)
+                    manager.addColony(i, j, amount);
             };
             plants[i][j].isAvailable = false;
         }
