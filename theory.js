@@ -2820,7 +2820,8 @@ var getTertiaryEquation = () =>
 
     return Localization.format(getLoc(theory.canPublish &&
     theory.publicationUpgrade.level ? 'dateTimeTax' : 'dateTime'), years + 1,
-    days + 1, hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'),
+    (days % 365) + 1, hour.toString().padStart(2, '0'),
+    min.toString().padStart(2, '0'),
     getCurrencyFromTau(theory.tau)[0] * taxRate);
 }
 
