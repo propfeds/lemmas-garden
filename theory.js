@@ -2375,7 +2375,7 @@ const permaCosts =
 const taxRate = .12;
 const tauRate = 1;   // e30 = 100 tau, e45 = end, but tau rate 1 = better design
 
-const pubExp = .1;
+const pubExp = .15;
 var getPublicationMultiplier = (tau) => tau.max(BigNumber.ONE).pow(pubExp *
 tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
 var getPublicationMultiplierFormula = (symbol) =>
