@@ -70,10 +70,16 @@ let tmpLevels;
 
 // Other constants
 
-const cDispColour = new Map();
-cDispColour.set(Theme.STANDARD, 'c0c0c0');
-cDispColour.set(Theme.DARK, 'b5b5b5');
-cDispColour.set(Theme.LIGHT, '434343');
+const eq1Colour = new Map();
+eq1Colour.set(Theme.STANDARD, 'ffffff');
+eq1Colour.set(Theme.DARK, 'ffffff');
+eq1Colour.set(Theme.LIGHT, '000000');
+
+const eq2Colour = new Map();
+eq2Colour.set(Theme.STANDARD, 'c0c0c0');
+eq2Colour.set(Theme.DARK, 'b5b5b5');
+eq2Colour.set(Theme.LIGHT, '434343');
+
 const TRIM_SP = /\s+/g;
 const LS_RULE = /([^:]+)(:(.+))?=(.*)/;
 // Context doesn't need to check for nested brackets!
@@ -2492,7 +2498,7 @@ const actionsLabel = ui.createLatexLabel
     margin: new Thickness(0, 14, 80, 0),
     text: getLoc('labelActions'),
     fontSize: 10,
-    textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
+    textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
 });
 const harvestFrame = ui.createStackLayout
 ({
@@ -2567,7 +2573,7 @@ const settingsLabel = ui.createLatexLabel
     margin: new Thickness(0, 0, 40, 14),
     text: getLoc('labelSettings'),
     fontSize: 10,
-    textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
+    textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
 });
 
 const pruneFrame = ui.createStackLayout
@@ -2740,7 +2746,7 @@ var init = () =>
     // Next: plant unlocks and milestones
 
     theory.primaryEquationScale = 0.96;
-    theory.secondaryEquationHeight = 100;
+    theory.secondaryEquationHeight = 108;
 }
 
 var updateAvailability = () =>
@@ -2862,33 +2868,35 @@ var getSecondaryEquation = () =>
             c.population, getLoc('plants')[c.id].name, c.stage, c.growth *
             BigNumber.HUNDRED / (PLANT_DATA[c.id].growthCost *
             BigNumber.from(c.sequence.length)))}}\\\\
-            \\text{${getLoc('plants')[c.id].stages[c.stage]}}`;
+            \\text{${getLoc('plants')[c.id].stages[c.stage]}}\\\\
+            (${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})`;
         case 1:
             return `\\text{${Localization.format(getLoc('colony'), c.population,
             getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
             g=${c.growth}/${PLANT_DATA[c.id].growthCost *
             BigNumber.from(c.sequence.length)}\\\\
-            r_s=${c.synthRate}/\\text{s},\\enspace p=${c.profit}\\text{p}`;
+            r_s=${c.synthRate}/\\text{s},\\enspace p=${c.profit}\\text{p}\\\\
+            (${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})`;
         case 2:
             let result = '';
             for(let i = 0; i < colonyIdx[plotIdx]; ++i)
             {
                 let d = manager.colonies[plotIdx][i];
-                result += `\\qquad\\text{${Localization.format(getLoc('colonyProg'),
+                result += `\\text{${Localization.format(getLoc('colonyProg'),
                 d.population, getLoc('plants')[d.id].name, d.stage, d.growth *
                 BigNumber.HUNDRED / (PLANT_DATA[d.id].growthCost *
                 BigNumber.from(d.sequence.length)))}}\\\\`;
             }
-            result += `\\rightarrow\\text{ ${Localization.format(
+            result += `\\underline{\\text{${Localization.format(
             getLoc('colonyProg'), c.population, getLoc('plants')[c.id].name,
             c.stage, c.growth * BigNumber.HUNDRED /
             (PLANT_DATA[c.id].growthCost *
-            BigNumber.from(c.sequence.length)))}}\\\\`;
+            BigNumber.from(c.sequence.length)))}}}\\\\`;
             for(let i = colonyIdx[plotIdx] + 1;
             i < manager.colonies[plotIdx].length; ++i)
             {
                 let d = manager.colonies[plotIdx][i];
-                result += `\\qquad\\text{${Localization.format(getLoc('colonyProg'),
+                result += `\\text{${Localization.format(getLoc('colonyProg'),
                 d.population, getLoc('plants')[d.id].name, d.stage, d.growth *
                 BigNumber.HUNDRED / (PLANT_DATA[d.id].growthCost *
                 BigNumber.from(d.sequence.length)))}}\\\\`;
@@ -3366,6 +3374,32 @@ let createWorldMenu = () =>
             GMSlider.value = tmpGM;
         }
     });
+    let tmpCM = colonyMode;
+    let CMLabel = ui.createLatexLabel
+    ({
+        text: getLoc('colonyModes')[tmpCM],
+        row: 1,
+        column: 0,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let CMSlider = ui.createSlider
+    ({
+        row: 1,
+        column: 1,
+        minimum: 0,
+        maximum: 3,
+        value: tmpCM,
+        onValueChanged: () =>
+        {
+            tmpCM = Math.round(CMSlider.value);
+            CMLabel.text = getLoc('colonyModes')[tmpCM];
+        },
+        onDragCompleted: () =>
+        {
+            Sound.playClick();
+            CMSlider.value = tmpCM;
+        }
+    });
 
     let menu = ui.createPopup
     ({
@@ -3377,11 +3411,17 @@ let createWorldMenu = () =>
                 ui.createGrid
                 ({
                     columnDefinitions: ['70*', '30*'],
-                    // rowDefinitions: [40, 40, 40, 40],
+                    rowDefinitions:
+                    [
+                        getSmallBtnSize(ui.screenWidth),
+                        getSmallBtnSize(ui.screenWidth)
+                    ],
                     children:
                     [
                         GMLabel,
-                        GMSlider
+                        GMSlider,
+                        CMLabel,
+                        CMSlider
                     ]
                 }),
                 ui.createBox
@@ -3396,6 +3436,7 @@ let createWorldMenu = () =>
                     {
                         Sound.playClick();
                         graphMode = tmpGM;
+                        colonyMode = tmpCM;
                         menu.hide();
                     }
                 })
