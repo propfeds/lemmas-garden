@@ -119,7 +119,7 @@ const locStrings =
 
         colony: '{0} of {1}, stage {2}',
         dateTime: `\\text{{Year }}{0}\\text{{ day }}{1},\\enspace{2}\\colon{3}`,
-        dateTimeTax: `{0}\\text{{y }}{1}\\text{{d}},\\enspace{2}
+        dateTimeTax: `\\text{{Y}}{0}\\text{{ d}}{1},\\enspace{2}
         \\colon{3}\\, - \\,\\text{{Tax\\colon}}\\enspace{4}\\text{{p}}`,
 
         switchPlant: 'Switch plant (plot {0})',
