@@ -58,13 +58,13 @@ let time = 0;
 let days = 0;
 let insolationIntegral = 0;
 let growthIntegral = 0;
-let plot = 0;
+let plotIdx = 0;
 let colonyIdx = new Array(maxPlots).fill(0);
 let plantIdx = new Array(maxPlots).fill(0);
 let finishedTutorial = false;
 let actuallyPlanting = true;
 let graphMode = 0;
-let colonyMode = 0;
+let colonyMode = 2;
 let tmpCurrency;
 let tmpLevels;
 
@@ -120,6 +120,7 @@ const locStrings =
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
 
         colony: '{0} of {1}, stage {2}',
+        colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
         dateTime: `\\text{{Year }}{0}\\text{{ day }}{1},\\enspace{2}\\colon{3}`,
         dateTimeTax: `\\text{{Y}}{0}\\text{{ d}}{1},\\enspace{2}
         \\colon{3}\\, - \\,\\text{{Tax\\colon}}\\enspace{4}\\text{{p}}`,
@@ -161,7 +162,7 @@ const locStrings =
                 stages:
                 {
                     0: 'The first shoot rises. Harvestable.',
-                    1: 'The shoot splits in three. The stem lengthens.',
+                    1: 'The shoot splits in three.\\\\The stem lengthens.',
                     2: 'The shoots continue to divide.',
                     4: 'What do you expect? It\'s a fractal.'
                 }
@@ -2165,7 +2166,7 @@ class ColonyManager
 
         for(let i = 0; i < this.colonies.length; ++i)
         {
-            for(let j = 0; j < this.colonies[i].length; ++i)
+            for(let j = 0; j < this.colonies[i].length; ++j)
             {
                 let c = this.colonies[i][j];
                 c.energy += di * c.synthRate;
@@ -2381,7 +2382,7 @@ class ColonyManager
         {
             start: 0
         };
-        if(this.gangsta[0] == plot && this.gangsta[1] == colonyIdx[plot])
+        if(this.gangsta[0] == plotIdx && this.gangsta[1] == colonyIdx[plotIdx])
             renderer.colony = c;
         this.gangsta = null;
         theory.invalidateSecondaryEquation();
@@ -2483,7 +2484,7 @@ let quaternaryEntries =
 
 const actionsLabel = ui.createLatexLabel
 ({
-    isVisible: () => manager.colonies[plot][colonyIdx[plot]] ?
+    isVisible: () => manager.colonies[plotIdx][colonyIdx[plotIdx]] ?
     true : false,
     column: 1,
     horizontalOptions: LayoutOptions.END,
@@ -2521,7 +2522,7 @@ const harvestFrame = ui.createStackLayout
         e.type == TouchType.LONGPRESS_RELEASED)
         {
             Sound.playClick();
-            manager.performAction(plot, colonyIdx[plot], 0);
+            manager.performAction(plotIdx, colonyIdx[plotIdx], 0);
         }
     }
 });
@@ -2597,7 +2598,7 @@ const pruneFrame = ui.createStackLayout
         e.type == TouchType.LONGPRESS_RELEASED)
         {
             Sound.playClick();
-            manager.performAction(plot, colonyIdx[plot], 1);
+            manager.performAction(plotIdx, colonyIdx[plotIdx], 1);
         }
     },
 });
@@ -2620,14 +2621,14 @@ var init = () =>
     {
         switchPlant = theory.createSingularUpgrade(0, currency, new FreeCost);
         switchPlant.getDescription = () => Localization.format(
-        getLoc('switchPlant'), plot + 1);
+        getLoc('switchPlant'), plotIdx + 1);
         switchPlant.info = getLoc('switchPlantInfo');
         switchPlant.bought = (_) =>
         {
             switchPlant.level = 0;
-            if(manager.colonies[plot].length)
+            if(manager.colonies[plotIdx].length)
                 return;
-            plantIdx[plot] = (plantIdx[plot] + 1) % PLANT_DATA.length;
+            plantIdx[plotIdx] = (plantIdx[plotIdx] + 1) % PLANT_DATA.length;
             updateAvailability();
         };
         switchPlant.isAvailable = false;
@@ -2642,7 +2643,7 @@ var init = () =>
         viewColony.bought = (_) =>
         {
             viewColony.level = 0;
-            let c = manager.colonies[plot][colonyIdx[plot]];
+            let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
             if(!c)
                 return;
             let seqMenu = createColonyViewMenu(c);
@@ -2660,12 +2661,12 @@ var init = () =>
         switchColony.bought = (_) =>
         {
             switchColony.level = 0;
-            if(manager.colonies[plot].length < 2)
+            if(manager.colonies[plotIdx].length < 2)
                 return;
 
-            colonyIdx[plot] = (colonyIdx[plot] + 1) %
-            manager.colonies[plot].length;
-            let c = manager.colonies[plot][colonyIdx[plot]];
+            colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) %
+            manager.colonies[plotIdx].length;
+            let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
             renderer.colony = c;
         };
         switchColony.isAvailable = false;
@@ -2748,9 +2749,9 @@ var updateAvailability = () =>
         finishedTutorial = plants[0][0].level > 0;
     else
     {
-        switchPlant.isAvailable = !manager.colonies[plot].length;
-        viewColony.isAvailable = manager.colonies[plot].length > 0;
-        switchColony.isAvailable = manager.colonies[plot].length > 1;
+        switchPlant.isAvailable = !manager.colonies[plotIdx].length;
+        viewColony.isAvailable = manager.colonies[plotIdx].length > 0;
+        switchColony.isAvailable = manager.colonies[plotIdx].length > 1;
     }
     for(let i = 0; i < plotPerma.level; ++i)
     {
@@ -2811,7 +2812,7 @@ var getEquationOverlay = () =>
             }),
             ui.createGrid
             ({
-                isVisible: () => manager.colonies[plot][colonyIdx[plot]] ?
+                isVisible: () => manager.colonies[plotIdx][colonyIdx[plotIdx]] ?
                 true : false,
                 row: 0, column: 1,
                 margin: new Thickness(6, 9),
@@ -2836,7 +2837,7 @@ var getEquationOverlay = () =>
 
 var getPrimaryEquation = () =>
 {
-    return Localization.format(getLoc('plotTitle'), plot + 1);
+    return Localization.format(getLoc('plotTitle'), plotIdx + 1);
 }
 
 var getSecondaryEquation = () =>
@@ -2844,7 +2845,7 @@ var getSecondaryEquation = () =>
     if(!plotPerma.level)
         return '';
     let finalBit = `${theory.latexSymbol}=\\max\\,\\text{p}`;
-    let c = manager.colonies[plot][colonyIdx[plot]];
+    let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
     if(!c)
         return finalBit;
     // colonyModes:
@@ -2856,9 +2857,11 @@ var getSecondaryEquation = () =>
     // ],
     switch(colonyMode)
     {
-        case 0: // TODO: implement percentage
-            return `\\text{${Localization.format(getLoc('colony'), c.population,
-            getLoc('plants')[c.id].name, c.stage)}}\\\\
+        case 0:
+            return `\\text{${Localization.format(getLoc('colonyProg'),
+            c.population, getLoc('plants')[c.id].name, c.stage, c.growth *
+            BigNumber.HUNDRED / (PLANT_DATA[c.id].growthCost *
+            BigNumber.from(c.sequence.length)))}}\\\\
             \\text{${getLoc('plants')[c.id].stages[c.stage]}}`;
         case 1:
             return `\\text{${Localization.format(getLoc('colony'), c.population,
@@ -2866,11 +2869,31 @@ var getSecondaryEquation = () =>
             g=${c.growth}/${PLANT_DATA[c.id].growthCost *
             BigNumber.from(c.sequence.length)}\\\\
             r_s=${c.synthRate}/\\text{s},\\enspace p=${c.profit}\\text{p}`;
-        case 2: // TODO: implement list, also percentage
-            return `\\text{${Localization.format(getLoc('colony'), c.population,
-            getLoc('plants')[c.id].name, c.stage)}}\\enspace(${c.growth}/
-            ${PLANT_DATA[c.id].growthCost *
-            BigNumber.from(c.sequence.length)})`;
+        case 2:
+            let result = '';
+            for(let i = 0; i < colonyIdx[plotIdx]; ++i)
+            {
+                let d = manager.colonies[plotIdx][i];
+                result += `\\qquad\\text{${Localization.format(getLoc('colonyProg'),
+                d.population, getLoc('plants')[d.id].name, d.stage, d.growth *
+                BigNumber.HUNDRED / (PLANT_DATA[d.id].growthCost *
+                BigNumber.from(d.sequence.length)))}}\\\\`;
+            }
+            result += `\\rightarrow\\text{ ${Localization.format(
+            getLoc('colonyProg'), c.population, getLoc('plants')[c.id].name,
+            c.stage, c.growth * BigNumber.HUNDRED /
+            (PLANT_DATA[c.id].growthCost *
+            BigNumber.from(c.sequence.length)))}}\\\\`;
+            for(let i = colonyIdx[plotIdx] + 1;
+            i < manager.colonies[plotIdx].length; ++i)
+            {
+                let d = manager.colonies[plotIdx][i];
+                result += `\\qquad\\text{${Localization.format(getLoc('colonyProg'),
+                d.population, getLoc('plants')[d.id].name, d.stage, d.growth *
+                BigNumber.HUNDRED / (PLANT_DATA[d.id].growthCost *
+                BigNumber.from(d.sequence.length)))}}\\\\`;
+            }
+            return result;
         case 3:
             return '';
     }
@@ -3428,23 +3451,23 @@ var getResetStageMessage = () => getLoc('resetRenderer');
 
 var resetStage = () => renderer.reset();
 
-var canGoToPreviousStage = () => plotPerma.level > 0 && plot > 0;
+var canGoToPreviousStage = () => plotPerma.level > 0 && plotIdx > 0;
 
 var goToPreviousStage = () =>
 {
-    --plot;
-    let c = manager.colonies[plot][colonyIdx[plot]];
+    --plotIdx;
+    let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
     if(c)
         renderer.colony = c;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     updateAvailability();
 };
-var canGoToNextStage = () => plot < plotPerma.level - 1;
+var canGoToNextStage = () => plotIdx < plotPerma.level - 1;
 var goToNextStage = () =>
 {
-    ++plot;
-    let c = manager.colonies[plot][colonyIdx[plot]];
+    ++plotIdx;
+    let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
     if(c)
         renderer.colony = c;
     theory.invalidatePrimaryEquation();
@@ -3478,12 +3501,13 @@ var getInternalState = () => JSON.stringify
 ({
     version: version,
     time: time,
-    plot: plot,
+    plotIdx: plotIdx,
     colonyIdx: colonyIdx,
     plantIdx: plantIdx,
     finishedTutorial: finishedTutorial,
     manager: manager.object,
-    graphMode: graphMode
+    graphMode: graphMode,
+    colonyMode: colonyMode,
 }, bigStringify);
 
 var setInternalState = (stateStr) =>
@@ -3505,8 +3529,8 @@ var setInternalState = (stateStr) =>
         Math.PI;
     }
 
-    if('plot' in state)
-        plot = state.plot;
+    if('plotIdx' in state)
+        plotIdx = state.plotIdx;
     if('colonyIdx' in state)
         colonyIdx = state.colonyIdx;
     if('plantIdx' in state)
@@ -3520,6 +3544,8 @@ var setInternalState = (stateStr) =>
     
     if('graphMode' in state)
         graphMode = state.graphMode;
+    if('colonyMode' in state)
+        colonyMode = state.colonyMode;
 
     actuallyPlanting = false;
     tmpLevels = Array.from({length: maxPlots}, (_) => []);
@@ -3538,7 +3564,7 @@ var setInternalState = (stateStr) =>
     }
     actuallyPlanting = true;
 
-    let c = manager.colonies[plot][colonyIdx[plot]];
+    let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
     if(c)
         renderer.colony = c;
     theory.invalidatePrimaryEquation();
