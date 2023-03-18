@@ -2466,22 +2466,28 @@ const actionsLabel = ui.createLatexLabel
     fontSize: 10,
     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
 });
-const harvestFrame = ui.createFrame
+const harvestFrame = ui.createStackLayout
 ({
     column: 2,
-    cornerRadius: 1,
-    margin: new Thickness(4, 0),
     horizontalOptions: LayoutOptions.START,
     verticalOptions: LayoutOptions.START,
-    hasShadow: true,
-    heightRequest: getImageSize(ui.screenWidth),
-    widthRequest: getImageSize(ui.screenWidth),
-    content: ui.createImage
-    ({
-        source: ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cornucopia.png'),
-        aspect: Aspect.ASPECT_FIT,
-        useTint: false
-    }),
+    children:
+    [
+        ui.createFrame
+        ({
+            cornerRadius: 1,
+            margin: new Thickness(4, 0),
+            hasShadow: true,
+            heightRequest: getImageSize(ui.screenWidth),
+            widthRequest: getImageSize(ui.screenWidth),
+            content: ui.createImage
+            ({
+                source: ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cornucopia.png'),
+                aspect: Aspect.ASPECT_FIT,
+                useTint: false
+            })
+        })
+    ],
     onTouched: (e) =>
     {
         if(e.type == TouchType.SHORTPRESS_RELEASED ||
@@ -2492,22 +2498,28 @@ const harvestFrame = ui.createFrame
         }
     }
 });
-const settingsFrame = ui.createFrame
+const settingsFrame = ui.createStackLayout
 ({
     column: 1,
-    cornerRadius: 1,
-    margin: new Thickness(9),
     horizontalOptions: LayoutOptions.END,
     verticalOptions: LayoutOptions.END,
-    hasShadow: true,
-    heightRequest: getImageSize(ui.screenWidth),
-    widthRequest: getImageSize(ui.screenWidth),
-    content: ui.createImage
-    ({
-        source: ImageSource.SETTINGS,
-        aspect: Aspect.ASPECT_FIT,
-        useTint: false
-    }),
+    children:
+    [
+        ui.createFrame
+        ({
+            cornerRadius: 1,
+            margin: new Thickness(9),
+            hasShadow: true,
+            heightRequest: getImageSize(ui.screenWidth),
+            widthRequest: getImageSize(ui.screenWidth),
+            content: ui.createImage
+            ({
+                source: ImageSource.SETTINGS,
+                aspect: Aspect.ASPECT_FIT,
+                useTint: false
+            })
+        })
+    ],
     onTouched: (e) =>
     {
         if(e.type == TouchType.SHORTPRESS_RELEASED ||
@@ -2528,22 +2540,28 @@ const settingsLabel = ui.createLatexLabel
     textColor: () => Color.fromHex(cDispColour.get(game.settings.theme))
 });
 
-const pruneFrame = ui.createFrame
+const pruneFrame = ui.createStackLayout
 ({
     column: 1,
-    cornerRadius: 1,
-    margin: new Thickness(4, 0),
     horizontalOptions: LayoutOptions.START,
     verticalOptions: LayoutOptions.START,
-    hasShadow: true,
-    heightRequest: getImageSize(ui.screenWidth),
-    widthRequest: getImageSize(ui.screenWidth),
-    content: ui.createImage
-    ({
-        source: ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.png'),
-        aspect: Aspect.ASPECT_FIT,
-        useTint: false
-    }),
+    children:
+    [
+        ui.createFrame
+        ({
+            cornerRadius: 1,
+            margin: new Thickness(4, 0),
+            hasShadow: true,
+            heightRequest: getImageSize(ui.screenWidth),
+            widthRequest: getImageSize(ui.screenWidth),
+            content: ui.createImage
+            ({
+                source: ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.png'),
+                aspect: Aspect.ASPECT_FIT,
+                useTint: false
+            })
+        })
+    ],
     onTouched: (e) =>
     {
         if(e.type == TouchType.SHORTPRESS_RELEASED ||
@@ -2552,7 +2570,7 @@ const pruneFrame = ui.createFrame
             Sound.playClick();
             manager.performAction(plot, colonyIdx[plot], 1);
         }
-    }
+    },
 });
 
 var switchPlant, viewColony, switchColony;
