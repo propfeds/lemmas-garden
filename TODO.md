@@ -3,10 +3,12 @@
 ## v0: Axiom 
 
 - [ ] Make at least 2 plants
-- [ ] Stage specific desc?
 - [ ] Settings menu
   - Graph mode
   - Colony view: compact (list), detailed (1), none (only renderer)
+    - [ ] TODO: grab binary search from old collatz
+    - [ ] Stage specific desc?
+      - [ ] Also include the first line don't 
 - [ ] Final bit (tau exp line) only shows when no colony
 
 ## v0: Completed

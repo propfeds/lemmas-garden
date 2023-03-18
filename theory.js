@@ -58,12 +58,13 @@ let time = 0;
 let days = 0;
 let insolationIntegral = 0;
 let growthIntegral = 0;
-let graphMode = 1;
 let plot = 0;
 let colonyIdx = new Array(maxPlots).fill(0);
 let plantIdx = new Array(maxPlots).fill(0);
 let finishedTutorial = false;
 let actuallyPlanting = true;
+let graphMode = 0;
+let colonyMode = 0;
 let tmpCurrency;
 let tmpLevels;
 
@@ -93,12 +94,13 @@ const locStrings =
         pubTax: 'Publishing tax',
 
         btnView: 'View L-system',
+        btnVar: 'Variables',
         btnHarvest: 'Harvest',
         btnHarvestKill: 'Harvest\\\\(kill)',
         btnPrune: 'Prune',
         btnPruneKill: 'Prune\\\\(kill)',
         btnClose: 'Close',
-        btnVar: 'Variables',
+        btnSave: 'Save',
 
         labelActions: 'Actions: ',
         labelSettings: 'Settings: ',
@@ -130,6 +132,21 @@ const locStrings =
         switchColony: 'Switch colony',
         switchColonyInfo: 'Cycles through the list of colonies',
 
+        menuTheory: 'Theory Settings',
+        graphModes:
+        [
+            'Graph mode: L-system',
+            'Graph mode: Photo-synthesis',
+            'Graph mode: Growth'
+        ],
+        colonyModes:
+        [
+            'Colony view: Stage desc.',
+            'Colony view: Stats',
+            'Colony view: Compact',
+            'Colony view: Off'
+        ],
+
         plants:
         [
             {
@@ -140,7 +157,14 @@ const locStrings =
 `\\\\- The photo-synthesis rate r\\_s is the sum of all apices.\\\\- The ` +
 `Prune command cuts all stems and kills the colony.\\\\- The Harvest command ` +
 `calculates the sum of every apex and returns as profit.`,
-                cost: '2p ** (level - 2) (first seed is free)'
+                cost: '2p ** (level - 2) (first seed is free)',
+                stages:
+                {
+                    0: 'The first shoot rises. Harvestable.',
+                    1: 'The shoot splits in three. The stem lengthens.',
+                    2: 'The shoots continue to divide.',
+                    4: 'What do you expect? It\'s a fractal.'
+                }
             }
         ],
         plantStats: `Cost: {0}\\\\Growth rate: {1} (at night)\\\\Growth ` +
@@ -2529,6 +2553,8 @@ const settingsFrame = ui.createStackLayout
         e.type == TouchType.LONGPRESS_RELEASED)
         {
             Sound.playClick();
+            let worldMenu = createWorldMenu();
+            worldMenu.show();
         }
     }
 });
@@ -2755,7 +2781,8 @@ var tick = (elapsedTime, multiplier) =>
     growthIntegral = newGI;
 
     manager.growAll(BigNumber.from(di), BigNumber.from(dg));
-    renderer.draw();
+    if(!graphMode)
+        renderer.draw();
     theory.invalidateSecondaryEquation();
     theory.invalidateTertiaryEquation();
 }
@@ -2820,12 +2847,33 @@ var getSecondaryEquation = () =>
     let c = manager.colonies[plot][colonyIdx[plot]];
     if(!c)
         return finalBit;
-    let result = `\\text{${Localization.format(getLoc('colony'), c.population,
-    getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
-    g=${c.growth}/${PLANT_DATA[c.id].growthCost *
-    BigNumber.from(c.sequence.length)}\\\\
-    r_s=${c.synthRate}/\\text{s},\\enspace p=${c.profit}\\text{p}\\\\\\\\`;
-    return result + finalBit;
+    // colonyModes:
+    // [
+    //     'Colony view: Stage desc.',
+    //     'Colony view: Stats',
+    //     'Colony view: Compact',
+    //     'Colony view: Off'
+    // ],
+    switch(colonyMode)
+    {
+        case 0: // TODO: implement percentage
+            return `\\text{${Localization.format(getLoc('colony'), c.population,
+            getLoc('plants')[c.id].name, c.stage)}}\\\\
+            \\text{${getLoc('plants')[c.id].stages[c.stage]}}`;
+        case 1:
+            return `\\text{${Localization.format(getLoc('colony'), c.population,
+            getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
+            g=${c.growth}/${PLANT_DATA[c.id].growthCost *
+            BigNumber.from(c.sequence.length)}\\\\
+            r_s=${c.synthRate}/\\text{s},\\enspace p=${c.profit}\\text{p}`;
+        case 2: // TODO: implement list, also percentage
+            return `\\text{${Localization.format(getLoc('colony'), c.population,
+            getLoc('plants')[c.id].name, c.stage)}}\\enspace(${c.growth}/
+            ${PLANT_DATA[c.id].growthCost *
+            BigNumber.from(c.sequence.length)})`;
+        case 3:
+            return '';
+    }
 }
 
 var getTertiaryEquation = () =>
@@ -3267,6 +3315,73 @@ let createColonyViewMenu = (colony) =>
     return menu;
 }
 
+let createWorldMenu = () =>
+{
+    let tmpGM = graphMode;
+    let GMLabel = ui.createLatexLabel
+    ({
+        text: getLoc('graphModes')[tmpGM],
+        row: 0,
+        column: 0,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let GMSlider = ui.createSlider
+    ({
+        row: 0,
+        column: 1,
+        minimum: 0,
+        maximum: 2,
+        value: tmpGM,
+        onValueChanged: () =>
+        {
+            tmpGM = Math.round(GMSlider.value);
+            GMLabel.text = getLoc('graphModes')[tmpGM];
+        },
+        onDragCompleted: () =>
+        {
+            Sound.playClick();
+            GMSlider.value = tmpGM;
+        }
+    });
+
+    let menu = ui.createPopup
+    ({
+        title: getLoc('menuTheory'),
+        content: ui.createStackLayout
+        ({
+            children:
+            [
+                ui.createGrid
+                ({
+                    columnDefinitions: ['70*', '30*'],
+                    // rowDefinitions: [40, 40, 40, 40],
+                    children:
+                    [
+                        GMLabel,
+                        GMSlider
+                    ]
+                }),
+                ui.createBox
+                ({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                ui.createButton
+                ({
+                    text: getLoc('btnSave'),
+                    onClicked: () =>
+                    {
+                        Sound.playClick();
+                        graphMode = tmpGM;
+                        menu.hide();
+                    }
+                })
+            ]
+        })
+    });
+    return menu;
+}
+
 var getTau = () => currency.value.max(BigNumber.ZERO).pow(tauRate);
 
 var getCurrencyFromTau = (tau) =>
@@ -3337,17 +3452,6 @@ var goToNextStage = () =>
     updateAvailability();
 };
 
-var getInternalState = () => JSON.stringify
-({
-    version: version,
-    time: time,
-    plot: plot,
-    colonyIdx: colonyIdx,
-    plantIdx: plantIdx,
-    finishedTutorial: finishedTutorial,
-    manager: manager.object
-}, bigStringify);
-
 // Copied from the ol Oiler's Formula
 var bigStringify = (_, val) =>
 {
@@ -3369,6 +3473,18 @@ var unBigStringify = (_, val) =>
     }
     return val;
 }
+
+var getInternalState = () => JSON.stringify
+({
+    version: version,
+    time: time,
+    plot: plot,
+    colonyIdx: colonyIdx,
+    plantIdx: plantIdx,
+    finishedTutorial: finishedTutorial,
+    manager: manager.object,
+    graphMode: graphMode
+}, bigStringify);
 
 var setInternalState = (stateStr) =>
 {
@@ -3401,6 +3517,9 @@ var setInternalState = (stateStr) =>
     if('manager' in state)
         manager = new ColonyManager(state.manager.colonies, state.manager.time,
         state.manager.timeRemainder);
+    
+    if('graphMode' in state)
+        graphMode = state.graphMode;
 
     actuallyPlanting = false;
     tmpLevels = Array.from({length: maxPlots}, (_) => []);
