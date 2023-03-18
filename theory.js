@@ -2120,10 +2120,11 @@ class ColonyManager
     }
     killColony(plot, index)
     {
-        if(!this.colonies[plot][index])
+        let c = this.colonies[plot][index];
+        if(!c)
             return;
-        plants[plot][index].level -= Math.min(plants[plot][index].level,
-        this.colonies[plot][index].population);
+        plants[plot][c.id].level -= Math.min(plants[plot][c.id].level,
+        c.population);
         this.colonies[plot].splice(index, 1);
         updateAvailability();
     }

@@ -6,7 +6,8 @@
 - [ ] Stage specific desc?
 - [ ] Settings menu
   - Graph mode
-  - 
+  - Colony view: compact (list), detailed (1), none (only renderer)
+- [ ] Final bit (tau exp line) only shows when no colony
 
 ## v0: Completed
 
