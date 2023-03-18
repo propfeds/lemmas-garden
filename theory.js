@@ -2125,6 +2125,8 @@ class ColonyManager
             return;
         plants[plot][c.id].level -= Math.min(plants[plot][c.id].level,
         c.population);
+        if(index == this.colonies[plot].length - 1)
+            switchColony.buy(1);
         this.colonies[plot].splice(index, 1);
         updateAvailability();
     }
