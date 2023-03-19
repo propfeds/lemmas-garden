@@ -159,19 +159,19 @@ const locStrings =
             {
                 name: 'Arrow weed',
                 info: 'Testing my arrow weeds',
-                details: `Arrow weed is the friend of all dogs.\\\\- The ` +
-`symbol A represents a rising shoot (apex), while F represents the stem body.` +
-`\\\\- The photo-synthesis rate r\\_s is the sum of all apices.\\\\- The ` +
-`Prune command cuts all stems and kills the colony.\\\\- The Harvest command ` +
-`calculates the sum of every apex and returns as profit.`,
+                details: `Arrow weed is the friend of all dogs.\\\\`,
+                LsDetails: `The symbol A represents a rising shoot (apex), ` +
+`while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
+`F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
+`kills the colony.`,
                 cost: '2p ** (level - 2) (first seed is free)',
                 stages:
-                {
-                    0: 'The first shoot rises. Harvestable.',
-                    1: 'The shoot splits in three.\\\\The stem lengthens.',
-                    2: 'The shoots continue to divide.',
-                    4: 'What do you expect? It\'s a fractal.'
-                }
+                [
+                    [0, 'The first shoot rises. Harvestable.'],
+                    [1, 'The shoot splits in three.\\\\The stem lengthens.'],
+                    [2, 'The shoots continue to divide.'],
+                    [4, 'What do you expect? It\'s a fractal.']
+                ]
             }
         ],
         plantStats: `Cost: {0}\\\\Growth rate: {1} (at night)\\\\Growth ` +
@@ -2158,6 +2158,8 @@ class ColonyManager
         c.population);
         if(index == this.colonies[plot].length - 1)
             switchColony.buy(1);
+        if(this.gangsta && plot == gangsta[0])
+            this.gangsta = null;
         this.colonies[plot].splice(index, 1);
         updateAvailability();
     }
@@ -2396,6 +2398,21 @@ class ColonyManager
     }
 }
 
+let binarySearch = (arr, target) =>
+{
+    let l = 0;
+    let r = arr.length - 1;
+    while(l < r)
+    {
+        let m = Math.floor((l + r) / 2);
+        if(arr[m][0] < target)
+            l = m + 1;
+        else
+            r = m;
+    }
+    return arr[l][1];
+}
+
 // Balance parameters
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(1000)));
@@ -2423,21 +2440,21 @@ const PLANT_DATA =
     {   // Arrow weed
         system: new LSystem('A(1)', [
             'F(l)=F(l*2)',
-            'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t/2)'
+            'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t)'
         ], 30),
         cost: new FirstFreeCost(new ExponentialCost(1, 1)),
-        growthRate: BigNumber.ONE,
+        growthRate: BigNumber.TWO,
         growthCost: BigNumber.from(45),
         actions:
         [
             {   // Always a harvest
                 symbols: new Set('A'),
                 system: new LSystem('', ['A=']),
-                killColony: false
+                killColony: true
             },
             {   // Always a prune
                 system: new LSystem('', ['F=']),
-                killColony: true
+                killColony: false
             }
         ],
         camera: (stage) =>
@@ -2488,6 +2505,58 @@ let quaternaryEntries =
     new QuaternaryEntry('\\text{p}_6', null),
 ];
 
+let createFramedButton = (params, margin, callback, image) =>
+{
+    let frame = ui.createFrame
+    ({
+        cornerRadius: 1,
+        margin: new Thickness(margin),
+        padding: new Thickness(1),
+        hasShadow: true,
+        heightRequest: getImageSize(ui.screenWidth),
+        widthRequest: getImageSize(ui.screenWidth),
+        content: ui.createImage
+        ({
+            source: image,
+            aspect: Aspect.ASPECT_FIT,
+            useTint: false
+        }),
+        borderColor: Color.BORDER
+    });
+    return ui.createStackLayout
+    ({
+        ...params,
+        children:
+        [
+            frame
+        ],
+        onTouched: (e) =>
+        {
+            if(e.type == TouchType.PRESSED)
+            {
+                frame.borderColor = Color.TRANSPARENT;
+                frame.hasShadow = false;
+                frame.content.isVisible = false;
+            }
+            else if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            e.type == TouchType.LONGPRESS_RELEASED)
+            {
+                Sound.playClick();
+                frame.borderColor = Color.BORDER;
+                frame.hasShadow = true;
+                frame.content.isVisible = true;
+                callback();
+            }
+            else if(e.type == TouchType.CANCELLED)
+            {
+                frame.borderColor = Color.BORDER;
+                frame.hasShadow = true;
+                frame.content.isVisible = true;
+            }
+        }
+    });
+}
+
 const actionsLabel = ui.createLatexLabel
 ({
     isVisible: () => manager.colonies[plotIdx][colonyIdx[plotIdx]] ?
@@ -2500,71 +2569,19 @@ const actionsLabel = ui.createLatexLabel
     fontSize: 10,
     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
 });
-const harvestFrame = ui.createStackLayout
+const harvestFrame = createFramedButton
 ({
     column: 2,
-    horizontalOptions: LayoutOptions.START,
-    verticalOptions: LayoutOptions.START,
-    children:
-    [
-        ui.createFrame
-        ({
-            cornerRadius: 1,
-            margin: new Thickness(4, 0),
-            hasShadow: true,
-            heightRequest: getImageSize(ui.screenWidth),
-            widthRequest: getImageSize(ui.screenWidth),
-            content: ui.createImage
-            ({
-                source: ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cornucopia.png'),
-                aspect: Aspect.ASPECT_FIT,
-                useTint: false
-            })
-        })
-    ],
-    onTouched: (e) =>
-    {
-        if(e.type == TouchType.SHORTPRESS_RELEASED ||
-        e.type == TouchType.LONGPRESS_RELEASED)
-        {
-            Sound.playClick();
-            manager.performAction(plotIdx, colonyIdx[plotIdx], 0);
-        }
-    }
-});
-const settingsFrame = ui.createStackLayout
+    verticalOptions: LayoutOptions.START
+}, 3, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 0),
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/herbs-bundle.png'));
+const pruneFrame = createFramedButton
 ({
     column: 1,
-    horizontalOptions: LayoutOptions.END,
-    verticalOptions: LayoutOptions.END,
-    children:
-    [
-        ui.createFrame
-        ({
-            cornerRadius: 1,
-            margin: new Thickness(9),
-            hasShadow: true,
-            heightRequest: getImageSize(ui.screenWidth),
-            widthRequest: getImageSize(ui.screenWidth),
-            content: ui.createImage
-            ({
-                source: ImageSource.SETTINGS,
-                aspect: Aspect.ASPECT_FIT,
-                useTint: false
-            })
-        })
-    ],
-    onTouched: (e) =>
-    {
-        if(e.type == TouchType.SHORTPRESS_RELEASED ||
-        e.type == TouchType.LONGPRESS_RELEASED)
-        {
-            Sound.playClick();
-            let worldMenu = createWorldMenu();
-            worldMenu.show();
-        }
-    }
-});
+    verticalOptions: LayoutOptions.START
+}, 3, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 1),
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.png'));
+
 const settingsLabel = ui.createLatexLabel
 ({
     column: 1,
@@ -2575,39 +2592,11 @@ const settingsLabel = ui.createLatexLabel
     fontSize: 10,
     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
 });
-
-const pruneFrame = ui.createStackLayout
+const settingsFrame = createFramedButton
 ({
-    column: 1,
-    horizontalOptions: LayoutOptions.START,
-    verticalOptions: LayoutOptions.START,
-    children:
-    [
-        ui.createFrame
-        ({
-            cornerRadius: 1,
-            margin: new Thickness(4, 0),
-            hasShadow: true,
-            heightRequest: getImageSize(ui.screenWidth),
-            widthRequest: getImageSize(ui.screenWidth),
-            content: ui.createImage
-            ({
-                source: ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.png'),
-                aspect: Aspect.ASPECT_FIT,
-                useTint: false
-            })
-        })
-    ],
-    onTouched: (e) =>
-    {
-        if(e.type == TouchType.SHORTPRESS_RELEASED ||
-        e.type == TouchType.LONGPRESS_RELEASED)
-        {
-            Sound.playClick();
-            manager.performAction(plotIdx, colonyIdx[plotIdx], 1);
-        }
-    },
-});
+    column: 0,
+    verticalOptions: LayoutOptions.END
+}, 3, () => createWorldMenu().show(), ImageSource.SETTINGS);
 
 var switchPlant, viewColony, switchColony;
 
@@ -2821,7 +2810,7 @@ var getEquationOverlay = () =>
                 isVisible: () => manager.colonies[plotIdx][colonyIdx[plotIdx]] ?
                 true : false,
                 row: 0, column: 1,
-                margin: new Thickness(6, 9),
+                margin: new Thickness(5),
                 horizontalOptions: LayoutOptions.END,
                 inputTransparent: true,
                 cascadeInputTransparent: false,
@@ -2834,7 +2823,19 @@ var getEquationOverlay = () =>
                 ]
             }),
             actionsLabel,
-            settingsFrame,
+            ui.createGrid
+            ({
+                row: 0, column: 1,
+                margin: new Thickness(5),
+                horizontalOptions: LayoutOptions.END,
+                verticalOptions: LayoutOptions.END,
+                inputTransparent: true,
+                cascadeInputTransparent: false,
+                children:
+                [
+                    settingsFrame
+                ]
+            }),
             settingsLabel
         ]
     });
@@ -2868,7 +2869,7 @@ var getSecondaryEquation = () =>
             c.population, getLoc('plants')[c.id].name, c.stage, c.growth *
             BigNumber.HUNDRED / (PLANT_DATA[c.id].growthCost *
             BigNumber.from(c.sequence.length)))}}\\\\
-            \\text{${getLoc('plants')[c.id].stages[c.stage]}}\\\\
+            \\text{${binarySearch(getLoc('plants')[c.id].stages, c.stage)}}\\\\
             (${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})`;
         case 1:
             return `\\text{${Localization.format(getLoc('colony'), c.population,
@@ -3144,10 +3145,7 @@ let createSystemMenu = (id) =>
                         [
                             ui.createLatexLabel
                             ({
-                                text: Localization.format(getLoc('plantStats'),
-                                getLoc('plants')[id].cost,
-                                PLANT_DATA[id].growthRate,
-                                PLANT_DATA[id].growthCost),
+                                text: getLoc('plants')[id].LsDetails,
                                 margin: new Thickness(0, 6),
                                 horizontalTextAlignment: TextAlignment.START,
                                 verticalTextAlignment: TextAlignment.CENTER
@@ -3264,7 +3262,9 @@ let createColonyViewMenu = (colony) =>
     }
     let pageTitle = ui.createLatexLabel
     ({
-        text: getLoc('plants')[colony.id].details,
+        text: `${getLoc('plants')[colony.id].details}\\\\${Localization.format(
+        getLoc('plantStats'), getLoc('plants')[colony.id].cost,
+        PLANT_DATA[colony.id].growthRate, PLANT_DATA[colony.id].growthCost)}`,
         margin: new Thickness(0, 6),
         horizontalTextAlignment: TextAlignment.START,
         verticalTextAlignment: TextAlignment.CENTER

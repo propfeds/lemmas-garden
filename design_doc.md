@@ -107,6 +107,7 @@ between tau not feeling bloated and pub multipliers not too small)
 - Seasonal plants
   - Intro plant must be seasonal to introduce any timing mechanic
 - https://homeguides.sfgate.com/plants-grow-fastest-seeds-53378.html
+- Leap years spawn hopleeks!
 
 ### 2. Space
 

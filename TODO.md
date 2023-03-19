@@ -6,10 +6,12 @@
 - [x] Settings menu
   - Graph mode
   - Colony view: compact (list), detailed (1), none (only renderer)
-    - [ ] TODO: grab binary search from old collatz
-    - [ ] Stage specific desc?
+    - [x] Stage specific desc?
+      - [ ] Change binary search direction
+      - [x] TODO: grab binary search from old collatz
       - [x] Also include the first line don't 
 - [x] Final bit (tau exp line) only shows when no colony
+- [ ] Gangsta should actually store the colony reference?
 
 ## v0: Completed
 
