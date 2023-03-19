@@ -2404,11 +2404,11 @@ let binarySearch = (arr, target) =>
     let r = arr.length - 1;
     while(l < r)
     {
-        let m = Math.floor((l + r) / 2);
-        if(arr[m][0] < target)
-            l = m + 1;
+        let m = Math.ceil((l + r) / 2);
+        if(arr[m][0] <= target)
+            l = m;
         else
-            r = m;
+            r = m - 1;
     }
     return arr[l][1];
 }
@@ -2535,23 +2535,20 @@ let createFramedButton = (params, margin, callback, image) =>
             if(e.type == TouchType.PRESSED)
             {
                 frame.borderColor = Color.TRANSPARENT;
-                frame.hasShadow = false;
-                frame.content.isVisible = false;
+                // frame.hasShadow = false;
             }
             else if(e.type == TouchType.SHORTPRESS_RELEASED ||
             e.type == TouchType.LONGPRESS_RELEASED)
             {
                 Sound.playClick();
                 frame.borderColor = Color.BORDER;
-                frame.hasShadow = true;
-                frame.content.isVisible = true;
+                // frame.hasShadow = true;
                 callback();
             }
             else if(e.type == TouchType.CANCELLED)
             {
                 frame.borderColor = Color.BORDER;
-                frame.hasShadow = true;
-                frame.content.isVisible = true;
+                // frame.hasShadow = true;
             }
         }
     });

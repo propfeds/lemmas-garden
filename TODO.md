@@ -7,7 +7,7 @@
   - Graph mode
   - Colony view: compact (list), detailed (1), none (only renderer)
     - [x] Stage specific desc?
-      - [ ] Change binary search direction
+      - [x] Change binary search direction
       - [x] TODO: grab binary search from old collatz
       - [x] Also include the first line don't 
 - [x] Final bit (tau exp line) only shows when no colony
