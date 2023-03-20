@@ -127,8 +127,11 @@ const locStrings =
 
         colony: '{0} of {1}, stage {2}',
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
-        dateTime: `\\text{{Year }}{0}\\text{{ day }}{1},\\enspace{2}\\colon{3}`,
-        dateTimeTax: `\\text{{Y}}{0}\\text{{ d}}{1},\\enspace{2}
+        dateTime: 'Year {0} day {1}\\\\{2}:{3}',
+        dateTimeTax: 'Y{0} d{1}, {2}:{3}\\\\Tax: {4}p',
+        dateTimeL: `\\text{{Year }}{0}\\text{{ day }}{1},\\enspace{2}
+        \\colon{3}`,
+        dateTimeTaxL: `\\text{{Y}}{0}\\text{{ d}}{1},\\enspace{2}
         \\colon{3}\\, - \\,\\text{{Tax\\colon}}\\enspace{4}\\text{{p}}`,
 
         switchPlant: 'Switch plant (plot {0})',
@@ -2578,24 +2581,24 @@ const harvestLabel = ui.createLatexLabel
     row: 0, column: 1,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
-    margin: new Thickness(0, 8),
+    margin: new Thickness(0, 9),
     text: getLoc('btnHarvest'),
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
 const pruneFrame = createFramedButton
 ({
-    row: 1, column: 0,
+    row: 0, column: 2,
 }, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 1),
 game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands-dark.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.png'));
 const pruneLabel = ui.createLatexLabel
 ({
-    row: 1, column: 1,
+    row: 0, column: 3,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
-    margin: new Thickness(0, 8),
+    margin: new Thickness(0, 9),
     text: getLoc('btnPrune'),
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
@@ -2757,7 +2760,7 @@ var init = () =>
 
     // theory.primaryEquationHeight = 48;
     theory.primaryEquationScale = 0.96;
-    theory.secondaryEquationHeight = 108;
+    theory.secondaryEquationHeight = 102;
 }
 
 var updateAvailability = () =>
@@ -2802,7 +2805,7 @@ var tick = (elapsedTime, multiplier) =>
     if(!graphMode)
         renderer.draw();
     theory.invalidateSecondaryEquation();
-    theory.invalidateTertiaryEquation();
+    // theory.invalidateTertiaryEquation();
 }
 
 var getEquationOverlay = () =>
@@ -2821,11 +2824,20 @@ var getEquationOverlay = () =>
             ui.createLatexLabel
             ({
                 row: 0, column: 0,
-                horizontalTextAlignment: TextAlignment.CENTER,
                 verticalTextAlignment: TextAlignment.START,
                 margin: new Thickness(8, 4),
                 text: getLoc('versionName'),
                 fontSize: 9,
+                textColor: Color.TEXT_MEDIUM
+            }),
+            ui.createLatexLabel
+            ({
+                row: 0, column: 0,
+                horizontalTextAlignment: TextAlignment.CENTER,
+                verticalTextAlignment: TextAlignment.START,
+                margin: new Thickness(10, 4),
+                text: getTimeString,
+                fontSize: 10,
                 textColor: Color.TEXT_MEDIUM
             }),
             ui.createGrid
@@ -2835,8 +2847,13 @@ var getEquationOverlay = () =>
                 row: 0, column: 0,
                 margin: new Thickness(6),
                 horizontalOptions: LayoutOptions.START,
-                verticalOptions: LayoutOptions.START,
-                columnDefinitions: ['auto', 'auto'],
+                verticalOptions: LayoutOptions.END,
+                columnDefinitions:
+                [
+                    'auto', 'auto',
+                    'auto', 'auto',
+                    'auto', 'auto'
+                ],
                 inputTransparent: true,
                 cascadeInputTransparent: false,
                 children:
@@ -2894,14 +2911,16 @@ var getSecondaryEquation = () =>
             c.population, getLoc('plants')[c.id].name, c.stage, c.growth *
             BigNumber.HUNDRED / (PLANT_DATA[c.id].growthCost *
             BigNumber.from(c.sequence.length)))}}\\\\
-            \\text{${binarySearch(getLoc('plants')[c.id].stages, c.stage)}}\\\\
+            \\text{${binarySearch(getLoc('plants')[c.id].stages, c.stage)}}
+            \\\\\\\\
             (${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})`;
         case 1:
             return `\\text{${Localization.format(getLoc('colony'), c.population,
             getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
             g=${c.growth}/${PLANT_DATA[c.id].growthCost *
             BigNumber.from(c.sequence.length)}\\\\
-            r_s=${c.synthRate}/\\text{s},\\enspace p=${c.profit}\\text{p}\\\\
+            r_s=${c.synthRate}/\\text{s},\\enspace p=${c.profit}\\text{p}
+            \\\\\\\\
             (${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})`;
         case 2:
             let result = '';
@@ -2933,7 +2952,7 @@ var getSecondaryEquation = () =>
     }
 }
 
-var getTertiaryEquation = () =>
+let getTimeString = () =>
 {
     let years = Math.floor(days / 365);
     let timeofDay = time % 144;
@@ -2946,6 +2965,21 @@ var getTertiaryEquation = () =>
     min.toString().padStart(2, '0'),
     getCurrencyFromTau(theory.tau)[0] * taxRate);
 }
+
+// var getTertiaryEquation = () =>
+// {
+//     return '_';
+//     let years = Math.floor(days / 365);
+//     let timeofDay = time % 144;
+//     let hour = Math.floor(timeofDay / 6);
+//     let min = Math.round((timeofDay % 6) * 10);
+
+//     return Localization.format(getLoc(theory.canPublish &&
+//     theory.publicationUpgrade.level ? 'dateTimeTaxL' : 'dateTimeL'), years + 1,
+//     (days % 365) + 1, hour.toString().padStart(2, '0'),
+//     min.toString().padStart(2, '0'),
+//     getCurrencyFromTau(theory.tau)[0] * taxRate);
+// }
 
 var getQuaternaryEntries = () =>
 {
@@ -3636,7 +3670,7 @@ var setInternalState = (stateStr) =>
         renderer.colony = c;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
-    theory.invalidateTertiaryEquation();
+    // theory.invalidateTertiaryEquation();
     theory.invalidateQuaternaryValues();
     updateAvailability();
 }
