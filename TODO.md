@@ -1,5 +1,9 @@
 # To-do List
 
+- [To-do List](#to-do-list)
+  - [v0: Axiom](#v0-axiom)
+  - [v0: Completed](#v0-completed)
+
 ## v0: Axiom 
 
 - [ ] Make at least 2 plants

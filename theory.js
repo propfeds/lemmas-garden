@@ -175,7 +175,7 @@ const locStrings =
             }
         ],
         plantStats: `Cost: {0}\\\\Growth rate: {1} (at night)\\\\Growth ` +
-`cost: {2} * length`,
+`cost: {2} * length\\\\Length: {3}`,
 
         resetRenderer: 'You are about to reset the renderer.'
     }
@@ -3261,7 +3261,8 @@ let createColonyViewMenu = (colony) =>
     ({
         text: `${getLoc('plants')[colony.id].details}\\\\${Localization.format(
         getLoc('plantStats'), getLoc('plants')[colony.id].cost,
-        PLANT_DATA[colony.id].growthRate, PLANT_DATA[colony.id].growthCost)}`,
+        PLANT_DATA[colony.id].growthRate, PLANT_DATA[colony.id].growthCost,
+        colony.sequence.length)}`,
         margin: new Thickness(0, 6),
         horizontalTextAlignment: TextAlignment.START,
         verticalTextAlignment: TextAlignment.CENTER
