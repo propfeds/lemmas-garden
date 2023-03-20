@@ -2595,7 +2595,9 @@ const settingsFrame = createFramedButton
 ({
     column: 0,
     verticalOptions: LayoutOptions.END
-}, 3, () => createWorldMenu().show(), ImageSource.SETTINGS);
+}, 3, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog-dark.png') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog-dark.png'));
 
 var switchPlant, viewColony, switchColony;
 
