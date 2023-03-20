@@ -95,20 +95,20 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0, in never',
+        versionName: 'v0.0, Axiom',
 
         pubTax: 'Publishing tax',
 
         btnView: 'View L-system',
         btnVar: 'Variables',
-        btnHarvest: 'Harvest',
-        btnHarvestKill: 'Harvest\\\\(kill)',
-        btnPrune: 'Prune',
-        btnPruneKill: 'Prune\\\\(kill)',
         btnClose: 'Close',
         btnSave: 'Save',
 
         labelActions: 'Actions: ',
+        btnHarvest: 'Harvest',
+        btnHarvestKill: 'Harvest\\\\(kill)',
+        btnPrune: 'Prune',
+        btnPruneKill: 'Prune\\\\(kill)',
         labelSettings: 'Settings: ',
 
         labelAxiom: 'Axiom: ',
@@ -2568,18 +2568,38 @@ let createFramedButton = (params, margin, callback, image) =>
 // });
 const harvestFrame = createFramedButton
 ({
-    row: 0
-}, 3, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 0),
+    row: 0, column: 1,
+}, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 0),
 game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/herbs-bundle-dark.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/herbs-bundle.png'));
+const harvestLabel = ui.createLatexLabel
+({
+    row: 0, column: 0,
+    horizontalOptions: LayoutOptions.END,
+    verticalTextAlignment: TextAlignment.START,
+    margin: new Thickness(0, 8),
+    text: getLoc('btnHarvest'),
+    fontSize: 10,
+    textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
+});
 const pruneFrame = createFramedButton
 ({
-    row: 1
-}, 3, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 1),
+    row: 1, column: 1,
+}, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 1),
 game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands-dark.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.png'));
+const pruneLabel = ui.createLatexLabel
+({
+    row: 1, column: 0,
+    horizontalOptions: LayoutOptions.END,
+    verticalTextAlignment: TextAlignment.START,
+    margin: new Thickness(0, 8),
+    text: getLoc('btnPrune'),
+    fontSize: 10,
+    textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
+});
 
 const settingsLabel = ui.createLatexLabel
 ({
@@ -2597,7 +2617,7 @@ const settingsFrame = createFramedButton
     verticalOptions: LayoutOptions.END
 }, 3, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog-dark.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog-dark.png'));
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog.png'));
 
 var switchPlant, viewColony, switchColony;
 
@@ -2746,7 +2766,7 @@ var updateAvailability = () =>
     else
     {
         switchPlant.isAvailable = !manager.colonies[plotIdx].length;
-        viewColony.isAvailable = manager.colonies[plotIdx].length > 0;
+        viewColony.isAvailable = manager.colonies[plotIdx].length == 1;
         switchColony.isAvailable = manager.colonies[plotIdx].length > 1;
     }
     for(let i = 0; i < plotPerma.level; ++i)
@@ -2797,31 +2817,32 @@ var getEquationOverlay = () =>
             // For reference
             // ui.createFrame({row: 0, column: 2}),
             // ui.createFrame({row: 1, column: 2}),
-            // ui.createLatexLabel
-            // ({
-            //     row: 0, column: 0,
-            //     verticalTextAlignment: TextAlignment.START,
-            //     margin: new Thickness(8, 4),
-            //     text: getLoc('versionName'),
-            //     fontSize: 9,
-            //     textColor: Color.TEXT_MEDIUM
-            // }),
+            ui.createLatexLabel
+            ({
+                row: 0, column: 0,
+                verticalTextAlignment: TextAlignment.START,
+                margin: new Thickness(8, 4),
+                text: getLoc('versionName'),
+                fontSize: 9,
+                textColor: Color.TEXT_MEDIUM
+            }),
             ui.createGrid
             ({
                 isVisible: () => manager.colonies[plotIdx][colonyIdx[plotIdx]] ?
                 true : false,
                 row: 0, column: 0,
-                margin: new Thickness(5),
-                horizontalOptions: LayoutOptions.START,
+                margin: new Thickness(6),
+                horizontalOptions: LayoutOptions.END,
                 verticalOptions: LayoutOptions.START,
+                columnDefinitions: ['auto', 'auto'],
                 inputTransparent: true,
                 cascadeInputTransparent: false,
                 children:
                 [
                     harvestFrame,
-                    // harvestLabel,
+                    harvestLabel,
                     pruneFrame,
-                    // pruneLabel
+                    pruneLabel
                 ]
             }),
             // actionsLabel,
