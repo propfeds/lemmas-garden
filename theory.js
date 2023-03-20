@@ -2568,49 +2568,49 @@ let createFramedButton = (params, margin, callback, image) =>
 // });
 const harvestFrame = createFramedButton
 ({
-    row: 0, column: 1,
+    row: 0, column: 0,
 }, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 0),
 game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/herbs-bundle-dark.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/herbs-bundle.png'));
 const harvestLabel = ui.createLatexLabel
 ({
-    row: 0, column: 0,
-    horizontalOptions: LayoutOptions.END,
+    row: 0, column: 1,
+    // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 8),
     text: getLoc('btnHarvest'),
     fontSize: 10,
-    textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
+    textColor: Color.TEXT_MEDIUM
 });
 const pruneFrame = createFramedButton
 ({
-    row: 1, column: 1,
+    row: 1, column: 0,
 }, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 1),
 game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands-dark.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.png'));
 const pruneLabel = ui.createLatexLabel
 ({
-    row: 1, column: 0,
-    horizontalOptions: LayoutOptions.END,
+    row: 1, column: 1,
+    // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 8),
     text: getLoc('btnPrune'),
     fontSize: 10,
-    textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
+    textColor: Color.TEXT_MEDIUM
 });
 
-const settingsLabel = ui.createLatexLabel
-({
-    column: 0,
-    horizontalOptions: LayoutOptions.END,
-    verticalOptions: LayoutOptions.END,
-    margin: new Thickness(0, 0, 40, 14),
-    text: getLoc('labelSettings'),
-    fontSize: 10,
-    textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
-});
+// const settingsLabel = ui.createLatexLabel
+// ({
+//     column: 0,
+//     horizontalOptions: LayoutOptions.END,
+//     verticalOptions: LayoutOptions.END,
+//     margin: new Thickness(0, 0, 40, 14),
+//     text: getLoc('labelSettings'),
+//     fontSize: 10,
+//     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
+// });
 const settingsFrame = createFramedButton
 ({
     column: 0,
@@ -2755,6 +2755,7 @@ var init = () =>
     // To do: challenge plot (-1)
     // Next: plant unlocks and milestones
 
+    // theory.primaryEquationHeight = 48;
     theory.primaryEquationScale = 0.96;
     theory.secondaryEquationHeight = 108;
 }
@@ -2809,7 +2810,7 @@ var getEquationOverlay = () =>
     let result = ui.createGrid
     ({
         // rowDefinitions: ['1*', '1*'],
-        columnDefinitions: ['68*', '32*'],
+        // columnDefinitions: ['68*', '32*'],
         inputTransparent: true,
         cascadeInputTransparent: false,
         children:
@@ -2820,6 +2821,7 @@ var getEquationOverlay = () =>
             ui.createLatexLabel
             ({
                 row: 0, column: 0,
+                horizontalTextAlignment: TextAlignment.CENTER,
                 verticalTextAlignment: TextAlignment.START,
                 margin: new Thickness(8, 4),
                 text: getLoc('versionName'),
@@ -2832,7 +2834,7 @@ var getEquationOverlay = () =>
                 true : false,
                 row: 0, column: 0,
                 margin: new Thickness(6),
-                horizontalOptions: LayoutOptions.END,
+                horizontalOptions: LayoutOptions.START,
                 verticalOptions: LayoutOptions.START,
                 columnDefinitions: ['auto', 'auto'],
                 inputTransparent: true,
@@ -2848,7 +2850,7 @@ var getEquationOverlay = () =>
             // actionsLabel,
             ui.createGrid
             ({
-                row: 0, column: 1,
+                row: 0, column: 0,
                 margin: new Thickness(5),
                 horizontalOptions: LayoutOptions.END,
                 verticalOptions: LayoutOptions.END,
