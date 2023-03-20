@@ -2554,34 +2554,36 @@ let createFramedButton = (params, margin, callback, image) =>
     });
 }
 
-const actionsLabel = ui.createLatexLabel
-({
-    isVisible: () => manager.colonies[plotIdx][colonyIdx[plotIdx]] ?
-    true : false,
-    column: 1,
-    horizontalOptions: LayoutOptions.END,
-    verticalOptions: LayoutOptions.START,
-    margin: new Thickness(0, 14, 80, 0),
-    text: getLoc('labelActions'),
-    fontSize: 10,
-    textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
-});
+// const actionsLabel = ui.createLatexLabel
+// ({
+//     isVisible: () => manager.colonies[plotIdx][colonyIdx[plotIdx]] ?
+//     true : false,
+//     column: 0,
+//     horizontalOptions: LayoutOptions.END,
+//     verticalOptions: LayoutOptions.START,
+//     margin: new Thickness(0, 14, 80, 0),
+//     text: getLoc('labelActions'),
+//     fontSize: 10,
+//     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
+// });
 const harvestFrame = createFramedButton
 ({
-    column: 2,
-    verticalOptions: LayoutOptions.START
+    row: 0
 }, 3, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 0),
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/herbs-bundle.png'));
+game.settings.theme == Theme.LIGHT ?
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/grain-bundle-dark.svg') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/grain-bundle.svg'));
 const pruneFrame = createFramedButton
 ({
-    column: 1,
-    verticalOptions: LayoutOptions.START
+    row: 1
 }, 3, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 1),
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.png'));
+game.settings.theme == Theme.LIGHT ?
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands-dark.svg') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.svg'));
 
 const settingsLabel = ui.createLatexLabel
 ({
-    column: 1,
+    column: 0,
     horizontalOptions: LayoutOptions.END,
     verticalOptions: LayoutOptions.END,
     margin: new Thickness(0, 0, 40, 14),
@@ -2785,7 +2787,7 @@ var getEquationOverlay = () =>
     let result = ui.createGrid
     ({
         // rowDefinitions: ['1*', '1*'],
-        columnDefinitions: ['1*', '1*'],
+        columnDefinitions: ['68*', '32*'],
         inputTransparent: true,
         cascadeInputTransparent: false,
         children:
@@ -2793,22 +2795,23 @@ var getEquationOverlay = () =>
             // For reference
             // ui.createFrame({row: 0, column: 2}),
             // ui.createFrame({row: 1, column: 2}),
-            ui.createLatexLabel
-            ({
-                row: 0, column: 0,
-                verticalTextAlignment: TextAlignment.START,
-                margin: new Thickness(8, 4),
-                text: getLoc('versionName'),
-                fontSize: 9,
-                textColor: Color.TEXT_MEDIUM
-            }),
+            // ui.createLatexLabel
+            // ({
+            //     row: 0, column: 0,
+            //     verticalTextAlignment: TextAlignment.START,
+            //     margin: new Thickness(8, 4),
+            //     text: getLoc('versionName'),
+            //     fontSize: 9,
+            //     textColor: Color.TEXT_MEDIUM
+            // }),
             ui.createGrid
             ({
                 isVisible: () => manager.colonies[plotIdx][colonyIdx[plotIdx]] ?
                 true : false,
-                row: 0, column: 1,
+                row: 0, column: 0,
                 margin: new Thickness(5),
-                horizontalOptions: LayoutOptions.END,
+                horizontalOptions: LayoutOptions.START,
+                verticalOptions: LayoutOptions.START,
                 inputTransparent: true,
                 cascadeInputTransparent: false,
                 children:
@@ -2819,7 +2822,7 @@ var getEquationOverlay = () =>
                     // pruneLabel
                 ]
             }),
-            actionsLabel,
+            // actionsLabel,
             ui.createGrid
             ({
                 row: 0, column: 1,
@@ -2833,7 +2836,7 @@ var getEquationOverlay = () =>
                     settingsFrame
                 ]
             }),
-            settingsLabel
+            // settingsLabel
         ]
     });
     return result;
@@ -2935,7 +2938,7 @@ var getQuaternaryEntries = () =>
         }
         quaternaryEntries[i].value = sum;
     }
-    return quaternaryEntries.slice(0, plotPerma.level);
+    return quaternaryEntries//.slice(0, plotPerma.level);
 }
 
 let createVariableMenu = (variables) =>

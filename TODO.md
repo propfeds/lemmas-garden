@@ -7,6 +7,9 @@
 ## v0: Axiom 
 
 - [ ] Make at least 2 plants
+- [ ] Icons
+  - [ ] SVG?
+  - [ ] Theme-dependent colour?
 - [x] Settings menu
   - Graph mode
   - Colony view: compact (list), detailed (1), none (only renderer)
