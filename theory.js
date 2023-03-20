@@ -49,7 +49,7 @@ Today, it will do weatherly.`,
 
     return descs[language] || descs.en;
 }
-var authors = 'propfeds';
+var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
 var version = 0;
 
 const maxPlots = 6;
@@ -2571,15 +2571,15 @@ const harvestFrame = createFramedButton
     row: 0
 }, 3, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 0),
 game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/grain-bundle-dark.svg') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/grain-bundle.svg'));
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/herbs-bundle-dark.png') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/herbs-bundle.png'));
 const pruneFrame = createFramedButton
 ({
     row: 1
 }, 3, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 1),
 game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands-dark.svg') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.svg'));
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands-dark.png') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.png'));
 
 const settingsLabel = ui.createLatexLabel
 ({
