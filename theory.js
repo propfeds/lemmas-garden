@@ -2524,12 +2524,12 @@ let globalRNG = new Xorshift(Date.now());
 
 let quaternaryEntries =
 [
-    new QuaternaryEntry('\\varphi_1', null),
-    new QuaternaryEntry('\\varphi_2', null),
-    new QuaternaryEntry('\\varphi_3', null),
-    new QuaternaryEntry('\\varphi_4', null),
-    new QuaternaryEntry('\\varphi_5', null),
-    new QuaternaryEntry('\\varphi_6', null),
+    new QuaternaryEntry('p_1', null),
+    new QuaternaryEntry('p_2', null),
+    new QuaternaryEntry('p_3', null),
+    new QuaternaryEntry('p_4', null),
+    new QuaternaryEntry('p_5', null),
+    new QuaternaryEntry('p_6', null),
 ];
 
 let createFramedButton = (params, margin, callback, image) =>
@@ -2673,7 +2673,7 @@ var currency;
 
 var init = () =>
 {
-    currency = theory.createCurrency('φ', '\\varphi');
+    currency = theory.createCurrency('𝑝', 'p');
 
     /* Switch plant
     Moduloose
@@ -2947,9 +2947,9 @@ var getSecondaryEquation = () =>
     if(!plotPerma.level)
         return '';
     let tauInfo = `\\begin{array}{c}\\text{${getLoc('pubTax')}}\\colon\\enspace
-    ${taxRate}\\times\\max\\varphi\\\\
-    =${getCurrencyFromTau(theory.tau)[0] * taxRate}\\,\\varphi\\\\\\\\
-    ${theory.latexSymbol}=\\max\\varphi\\end{array}`;
+    ${taxRate}\\times\\max p\\\\
+    =${getCurrencyFromTau(theory.tau)[0] * taxRate}p\\\\\\\\
+    ${theory.latexSymbol}=\\max p\\end{array}`;
     let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
     if(!c)
         return tauInfo;
@@ -2969,7 +2969,7 @@ var getSecondaryEquation = () =>
             getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
             g=${c.growth}/${PLANT_DATA[c.id].growthCost *
             BigNumber.from(c.sequence.length)}\\\\
-            r_s=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\,\\varphi
+            r_s=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}p
             \\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
             \\\\`;
         case 2:
