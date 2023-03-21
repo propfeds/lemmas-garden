@@ -1,12 +1,25 @@
 # To-do List
 
 - [To-do List](#to-do-list)
+  - [v0.1: Sine of the Seasons](#v01-sine-of-the-seasons)
   - [v0: Axiom](#v0-axiom)
   - [v0: Completed](#v0-completed)
 
+## v0.1: Sine of the Seasons
+
+- [ ] Leap years and hopleeks
+  - [ ] How to design hopleeks so they won't be annoying?
+- [ ] Newspapers
+- [ ] Colour schemes?
+
 ## v0: Axiom 
 
+- [ ] Lock pruning behind perma
 - [ ] Make at least 2 plants
+  - [ ] Early 10-minute flower
+  - [ ] An idleable plant
+    - Idleable plant must exceed early flower's income unless player knows how
+    to prune the flower
 - [x] Icons
   - [ ] SVG?
   - [x] Theme-dependent colour?

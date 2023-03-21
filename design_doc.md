@@ -163,6 +163,7 @@ between tau not feeling bloated and pub multipliers not too small)
 
 - Research more: https://hellohomestead.com/dandelions-mint-other-edible-plants-that-spread-and-take-over/
 - Snapdragon / toadflax
+- Striga
 
 ## Tools
 
@@ -250,3 +251,6 @@ would brush her hands over the sunflower's face...
 Even if to her, every meaning had already lost.
 (lost -> more like failed)
 - Story about **coin toss** to determine who's husband (thanks J Draper)
+  - In Ireland and Britain, it is a tradition that women may propose marriage
+  only in leap years
+  - Story time lol

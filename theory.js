@@ -65,6 +65,8 @@ let finishedTutorial = false;
 let actuallyPlanting = true;
 let graphMode = 0;
 let colonyMode = 2;
+let textColor = 'ffccff';
+
 let tmpCurrency;
 let tmpLevels;
 
@@ -128,7 +130,7 @@ const locStrings =
         colony: '{0} of {1}, stage {2}',
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
         dateTime: 'Year {0} day {1}\\\\{2}:{3}',
-        dateTimeTax: 'Y{0} d{1}, {2}:{3}\\\\Tax: {4}p',
+        dateTimeTax: 'Y{0}/{1}, {2}:{3}\\\\Tax: {4}p',
         dateTimeL: `\\text{{Year }}{0}\\text{{ day }}{1},\\enspace{2}
         \\colon{3}`,
         dateTimeTaxL: `\\text{{Y}}{0}\\text{{ d}}{1},\\enspace{2}
@@ -268,35 +270,50 @@ let getSmallBtnSize = (width) =>
  */
 class Queue
 {
-    constructor()
+    constructor(object = {})
     {
-        this._oldestIndex = 1;
-        this._newestIndex = 1;
-        this._storage = {};
+        this.oldestIndex = object.oldestIndex || 0;
+        this.newestIndex = object.newestIndex || 0;
+        this.storage = object.storage || {};
     }
 
     get length()
     {
-        return this._newestIndex - this._oldestIndex;
+        let result = this.newestIndex - this.oldestIndex;
+        if(!result)
+        {
+            this.oldestIndex = 0;
+            this.newestIndex = 0;
+        }
+        return result;
     };
+
+    get object()
+    {
+        return {
+            oldestIndex: this.oldestIndex,
+            newestIndex: this.newestIndex,
+            storage: this.storage
+        };
+    }
 
     enqueue(data)
     {
-        this._storage[this._newestIndex] = data;
-        this._newestIndex++;
+        this.storage[this.newestIndex] = data;
+        this.newestIndex++;
     };
 
     dequeue()
     {
-        var oldestIndex = this._oldestIndex,
-            newestIndex = this._newestIndex,
+        var oldestIndex = this.oldestIndex,
+            newestIndex = this.newestIndex,
             deletedData;
 
         if (oldestIndex !== newestIndex)
         {
-            deletedData = this._storage[oldestIndex];
-            delete this._storage[oldestIndex];
-            this._oldestIndex++;
+            deletedData = this.storage[oldestIndex];
+            delete this.storage[oldestIndex];
+            this.oldestIndex++;
 
             return deletedData;
         }
@@ -2083,33 +2100,34 @@ class Renderer
 */
 class ColonyManager
 {
-    constructor(colonies)
+    constructor(object = {})
     {
         // 6*inf
-        this.colonies = colonies || Array.from({length: maxPlots}, (_) => []);
+        this.colonies = object.colonies ||
+        Array.from({length: maxPlots}, (_) => []);
 
         // Everyone gangsta until a colony starts evolving
-        this.gangsta = null;
-        this.ancestreeTask =
+        this.gangsta = object.gangsta;
+        this.ancestreeTask = object.ancestreeTask ||
         {
             start: 0
         };
-        this.deriveTask =
+        this.deriveTask = object.deriveTask ||
         {
             start: 0
         };
-        this.calcTask =
+        this.calcTask = object.calcTask ||
         {
             start: 0
         };
         // Processed before regular gangsta
-        this.actionQueue = new Queue();
-        this.actionGangsta = null;
-        this.actionDeriveTask =
+        this.actionQueue = new Queue(object.actionQueue);
+        this.actionGangsta = object.actionGangsta;
+        this.actionDeriveTask = object.actionDeriveTask ||
         {
             start: 0
         };
-        this.actionCalcTask =
+        this.actionCalcTask = object.actionCalcTask ||
         {
             start: 0
         };
@@ -2118,7 +2136,15 @@ class ColonyManager
     get object()
     {
         return {
-            colonies: this.colonies
+            colonies: this.colonies,
+            gangsta: this.gangsta,
+            ancestreeTask: this.ancestreeTask,
+            deriveTask: this.deriveTask,
+            calcTask: this.calcTask,
+            actionQueue: this.actionQueue.object,
+            actionGangsta: this.actionGangsta,
+            actionDeriveTask: this.actionDeriveTask,
+            actionCalcTask: this.actionCalcTask,
         };
     }
 
@@ -2426,17 +2452,15 @@ const permaCosts =
     BigNumber.from(1e45)
 ];
 
-const taxRate = .12;
-const tauRate = 1;   // e30 = 100 tau, e45 = end, but tau rate 1 = better design
+const taxRate = BigNumber.from(.12);
+const tauRate = BigNumber.ONE;
+// e30 = 100 tau, e45 = end, but tau rate 1 = better design
 
-const pubExp = .15;
+const pubExp = BigNumber.from(.15);
 var getPublicationMultiplier = (tau) => tau.max(BigNumber.ONE).pow(pubExp *
 tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
 var getPublicationMultiplierFormula = (symbol) =>
-`\\begin{array}{c}{${symbol}}^{${pubExp}\\ln({\\ln{${symbol}})}}\\\\
-(\\text{${getLoc('pubTax')}}\\colon\\enspace${taxRate}\\times\\max\\,\\text{p})
-\\end{array}`;
-// Need a better place to write this
+`{${symbol}}^{${pubExp}\\ln({\\ln{${symbol}})}}`;
 
 const PLANT_DATA =
 [
@@ -2500,12 +2524,12 @@ let globalRNG = new Xorshift(Date.now());
 
 let quaternaryEntries =
 [
-    new QuaternaryEntry('\\text{p}_1', null),
-    new QuaternaryEntry('\\text{p}_2', null),
-    new QuaternaryEntry('\\text{p}_3', null),
-    new QuaternaryEntry('\\text{p}_4', null),
-    new QuaternaryEntry('\\text{p}_5', null),
-    new QuaternaryEntry('\\text{p}_6', null),
+    new QuaternaryEntry('\\varphi_1', null),
+    new QuaternaryEntry('\\varphi_2', null),
+    new QuaternaryEntry('\\varphi_3', null),
+    new QuaternaryEntry('\\varphi_4', null),
+    new QuaternaryEntry('\\varphi_5', null),
+    new QuaternaryEntry('\\varphi_6', null),
 ];
 
 let createFramedButton = (params, margin, callback, image) =>
@@ -2581,7 +2605,7 @@ const harvestLabel = ui.createLatexLabel
     row: 0, column: 1,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
-    margin: new Thickness(0, 9),
+    margin: new Thickness(0, 9, 1, 9),
     text: getLoc('btnHarvest'),
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
@@ -2598,8 +2622,25 @@ const pruneLabel = ui.createLatexLabel
     row: 0, column: 3,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
-    margin: new Thickness(0, 9),
+    margin: new Thickness(0, 9, 1, 9),
     text: getLoc('btnPrune'),
+    fontSize: 10,
+    textColor: Color.TEXT_MEDIUM
+});
+const mutateFrame = createFramedButton
+({
+    row: 0, column: 4,
+}, 2, () => log('Mootation!'),
+game.settings.theme == Theme.LIGHT ?
+ImageSource.THEORY :
+ImageSource.THEORY);
+const mutateLabel = ui.createLatexLabel
+({
+    row: 0, column: 5,
+    // horizontalOptions: LayoutOptions.END,
+    verticalTextAlignment: TextAlignment.START,
+    margin: new Thickness(0, 9, 1, 9),
+    text: 'Mutate',
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
@@ -2618,7 +2659,7 @@ const settingsFrame = createFramedButton
 ({
     column: 0,
     verticalOptions: LayoutOptions.END
-}, 3, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
+}, 2, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog-dark.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog.png'));
 
@@ -2632,7 +2673,7 @@ var currency;
 
 var init = () =>
 {
-    currency = theory.createCurrency('p');
+    currency = theory.createCurrency('φ', '\\varphi');
 
     /* Switch plant
     Moduloose
@@ -2812,7 +2853,7 @@ var getEquationOverlay = () =>
 {
     let result = ui.createGrid
     ({
-        // rowDefinitions: ['1*', '1*'],
+        rowDefinitions: ['1*', '1*'],
         // columnDefinitions: ['68*', '32*'],
         inputTransparent: true,
         cascadeInputTransparent: false,
@@ -2842,43 +2883,55 @@ var getEquationOverlay = () =>
             }),
             ui.createGrid
             ({
-                isVisible: () => manager.colonies[plotIdx][colonyIdx[plotIdx]] ?
-                true : false,
-                row: 0, column: 0,
-                margin: new Thickness(6),
-                horizontalOptions: LayoutOptions.START,
-                verticalOptions: LayoutOptions.END,
-                columnDefinitions:
-                [
-                    'auto', 'auto',
-                    'auto', 'auto',
-                    'auto', 'auto'
-                ],
+                row: 1, column: 0,
+                columnDefinitions: ['68*', '32*'],
                 inputTransparent: true,
                 cascadeInputTransparent: false,
                 children:
                 [
-                    harvestFrame,
-                    harvestLabel,
-                    pruneFrame,
-                    pruneLabel
+                    ui.createGrid
+                    ({
+                        isVisible: () => manager.colonies[plotIdx].length > 0,
+                        row: 0, column: 0,
+                        margin: new Thickness(4, 2),
+                        horizontalOptions: LayoutOptions.START,
+                        verticalOptions: LayoutOptions.END,
+                        columnDefinitions:
+                        [
+                            'auto', 'auto',
+                            'auto', 'auto',
+                            'auto', 'auto'
+                        ],
+                        inputTransparent: true,
+                        cascadeInputTransparent: false,
+                        children:
+                        [
+                            harvestFrame,
+                            harvestLabel,
+                            pruneFrame,
+                            pruneLabel,
+                            // mutateFrame,
+                            // mutateLabel
+                        ]
+                    }),
+                    // actionsLabel,
+                    ui.createGrid
+                    ({
+                        row: 0, column: 1,
+                        margin: new Thickness(4, 2),
+                        horizontalOptions: LayoutOptions.END,
+                        verticalOptions: LayoutOptions.END,
+                        inputTransparent: true,
+                        cascadeInputTransparent: false,
+                        children:
+                        [
+                            settingsFrame
+                        ]
+                    }),
+                    // settingsLabel
                 ]
-            }),
-            // actionsLabel,
-            ui.createGrid
-            ({
-                row: 0, column: 0,
-                margin: new Thickness(5),
-                horizontalOptions: LayoutOptions.END,
-                verticalOptions: LayoutOptions.END,
-                inputTransparent: true,
-                cascadeInputTransparent: false,
-                children:
-                [
-                    settingsFrame
-                ]
-            }),
-            // settingsLabel
+            })
+            
         ]
     });
     return result;
@@ -2893,17 +2946,14 @@ var getSecondaryEquation = () =>
 {
     if(!plotPerma.level)
         return '';
-    let finalBit = `${theory.latexSymbol}=\\max\\,\\text{p}`;
+    let tauInfo = `\\begin{array}{c}\\text{${getLoc('pubTax')}}\\colon\\enspace
+    ${taxRate}\\times\\max\\varphi\\\\
+    =${getCurrencyFromTau(theory.tau)[0] * taxRate}\\varphi\\\\\\\\
+    ${theory.latexSymbol}=\\max\\varphi\\end{array}`;
     let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
     if(!c)
-        return finalBit;
-    // colonyModes:
-    // [
-    //     'Colony view: Stage desc.',
-    //     'Colony view: Stats',
-    //     'Colony view: Compact',
-    //     'Colony view: Off'
-    // ],
+        return tauInfo;
+
     switch(colonyMode)
     {
         case 0:
@@ -2911,17 +2961,17 @@ var getSecondaryEquation = () =>
             c.population, getLoc('plants')[c.id].name, c.stage, c.growth *
             BigNumber.HUNDRED / (PLANT_DATA[c.id].growthCost *
             BigNumber.from(c.sequence.length)))}}\\\\
-            \\text{${binarySearch(getLoc('plants')[c.id].stages, c.stage)}}
-            \\\\\\\\
-            (${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})`;
+            \\text{${binarySearch(getLoc('plants')[c.id].stages, c.stage)}}\\\\
+            (${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
+            \\\\`;
         case 1:
             return `\\text{${Localization.format(getLoc('colony'), c.population,
             getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
             g=${c.growth}/${PLANT_DATA[c.id].growthCost *
             BigNumber.from(c.sequence.length)}\\\\
-            r_s=${c.synthRate}/\\text{s},\\enspace p=${c.profit}\\text{p}
-            \\\\\\\\
-            (${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})`;
+            r_s=${c.synthRate}/\\text{s},\\enspace p=${c.profit}\\varphi\\\\
+            (${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
+            \\\\`;
         case 2:
             let result = '';
             for(let i = 0; i < colonyIdx[plotIdx]; ++i)
@@ -2959,11 +3009,8 @@ let getTimeString = () =>
     let hour = Math.floor(timeofDay / 6);
     let min = Math.round((timeofDay % 6) * 10);
 
-    return Localization.format(getLoc(theory.canPublish &&
-    theory.publicationUpgrade.level ? 'dateTimeTax' : 'dateTime'), years + 1,
-    (days % 365) + 1, hour.toString().padStart(2, '0'),
-    min.toString().padStart(2, '0'),
-    getCurrencyFromTau(theory.tau)[0] * taxRate);
+    return Localization.format(getLoc('dateTime'), years + 1, (days % 365) + 1,
+    hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'));
 }
 
 // var getTertiaryEquation = () =>
@@ -3640,8 +3687,7 @@ var setInternalState = (stateStr) =>
         finishedTutorial = state.finishedTutorial;
 
     if('manager' in state)
-        manager = new ColonyManager(state.manager.colonies, state.manager.time,
-        state.manager.timeRemainder);
+        manager = new ColonyManager(state.manager);
     
     if('graphMode' in state)
         graphMode = state.graphMode;
