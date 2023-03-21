@@ -2948,7 +2948,7 @@ var getSecondaryEquation = () =>
         return '';
     let tauInfo = `\\begin{array}{c}\\text{${getLoc('pubTax')}}\\colon\\enspace
     ${taxRate}\\times\\max\\varphi\\\\
-    =${getCurrencyFromTau(theory.tau)[0] * taxRate}\\varphi\\\\\\\\
+    =${getCurrencyFromTau(theory.tau)[0] * taxRate}\\,\\varphi\\\\\\\\
     ${theory.latexSymbol}=\\max\\varphi\\end{array}`;
     let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
     if(!c)
@@ -2969,8 +2969,8 @@ var getSecondaryEquation = () =>
             getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
             g=${c.growth}/${PLANT_DATA[c.id].growthCost *
             BigNumber.from(c.sequence.length)}\\\\
-            r_s=${c.synthRate}/\\text{s},\\enspace p=${c.profit}\\varphi\\\\
-            (${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
+            r_s=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\,\\varphi
+            \\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
             \\\\`;
         case 2:
             let result = '';
