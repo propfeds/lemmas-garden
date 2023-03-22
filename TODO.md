@@ -9,17 +9,24 @@
 
 - [ ] Leap years and hopleeks
   - [ ] How to design hopleeks so they won't be annoying?
+    - [ ] Rabbits hate marigold's smell
 - [ ] Newspapers
 - [ ] Colour schemes?
+- [ ] View menu has filter function that only shows certain symbols
 
 ## v0: Axiom 
 
-- [ ] Lock pruning behind perma
+- [ ] Binary search can consume a lot of resources per turn
+- [ ] Cap colony count to 5 per plot, unless?
+- [ ] Buy All upgrade unlocks maxLevel config
 - [ ] Make at least 2 plants
-  - [ ] Early 10-minute flower
+  - [ ] Early fast/annual plant
+    - Candidate: basil (4 weeks/48 mins)
+    - Reason: other theories are way faster than this lol
+    - Drawback: includes a fucking inflorescence section that is giant and 
+    noob-unfriendly
   - [ ] An idleable plant
-    - Idleable plant must exceed early flower's income unless player knows how
-    to prune the flower
+    - Marigold is probably best candidate here
 - [x] Icons
   - [ ] SVG?
   - [x] Theme-dependent colour?

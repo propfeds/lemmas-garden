@@ -153,9 +153,9 @@ const locStrings =
         ],
         colonyModes:
         [
-            'Colony view: Stage desc.',
-            'Colony view: Stats',
-            'Colony view: Compact',
+            'Colony view: Commentary',
+            'Colony view: Statistics',
+            'Colony view: List',
             'Colony view: Off'
         ],
 
@@ -171,12 +171,13 @@ const locStrings =
 `kills the colony.`,
                 cost: '2p ** (level - 2) (first seed is free)',
                 stages:
-                [
-                    [0, 'The first shoot rises. Harvestable.'],
-                    [1, 'The shoot splits in three.\\\\The stem lengthens.'],
-                    [2, 'The shoots continue to divide.'],
-                    [4, 'What do you expect? It\'s a fractal.']
-                ]
+                {
+                    0: 'The first shoot rises. Harvestable.',
+                    1: 'The shoot splits in three.\\\\The stem lengthens.',
+                    2: 'The shoots continue to divide.',
+                    3: 'The shoots continue to divide.',
+                    4: 'What do you expect? It\'s a fractal.'
+                }
             }
         ],
         plantStats: `Cost: {0}\\\\Growth rate: {1} (at night)\\\\Growth ` +
@@ -1670,22 +1671,7 @@ class Renderer
                                 this.system.tropism);
                             break;
                         case '~':
-                            if(!this.system.models.has(
-                            this.models[this.models.length - 1][
-                            this.mdi[this.mdi.length - 1] + 1]))
-                                break;
-
-                            ++this.mdi[this.mdi.length - 1];
-                            let model = this.system.deriveModel(this.models[
-                            this.models.length - 1][
-                            this.mdi[this.mdi.length - 1]], this.modelParams[
-                            this.models.length - 1][
-                            this.mdi[this.mdi.length - 1]]);
-
-                            this.models.push(model.result);
-                            this.modelParams.push(model.params);
-                            this.mdi.push(0);
-                            return;
+                            break;
                         case '[':
                             this.idxStack.push(this.stack.length);
                             this.stack.push([this.state, this.ori]);
@@ -1755,10 +1741,24 @@ class Renderer
                                 return;
                             }
 
-                            let ignored = this.system.ignoreList.has(
+                            if(this.loadModels && this.system.models.has(
                             this.models[this.models.length - 1][
-                            this.mdi[this.mdi.length - 1]]) ||
-                            this.loadModels && this.system.models.has(
+                            this.mdi[this.mdi.length - 1]]))
+                            {
+                                let model = this.system.deriveModel(this.models[
+                                this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]],
+                                this.modelParams[this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]]);
+
+                                this.models.push(model.result);
+                                this.modelParams.push(model.params);
+                                this.mdi.push(0);
+                                ++this.mdi[this.mdi.length - 2];
+                                return;
+                            }
+
+                            let ignored = this.system.ignoreList.has(
                             this.models[this.models.length - 1][
                             this.mdi[this.mdi.length - 1]]);
                             let breakAhead = BACKTRACK_LIST.has(
@@ -1901,18 +1901,7 @@ class Renderer
                             this.system.tropism);
                         break;
                     case '~':
-                        if(!this.loadModels || !this.system.models.has(
-                        this.sequence[this.i + 1]))
-                            break;
-
-                        ++this.i;
-                        let model = this.system.deriveModel(this.sequence[
-                        this.i], this.params[this.i]);
-
-                        this.models.push(model.result);
-                        this.modelParams.push(model.params);
-                        this.mdi.push(0);
-                        return;
+                        break;
                     case '[':
                         this.idxStack.push(this.stack.length);
                         this.stack.push([this.state, this.ori]);
@@ -1982,9 +1971,20 @@ class Renderer
                             return;
                         }
 
+                        if(this.loadModels && this.system.models.has(
+                        this.sequence[this.i]))
+                        {
+                            let model = this.system.deriveModel(this.sequence[
+                            this.i], this.params[this.i]);
+    
+                            this.models.push(model.result);
+                            this.modelParams.push(model.params);
+                            this.mdi.push(0);
+                            ++this.i;
+                            return;
+                        }
                         let ignored = this.system.ignoreList.has(
-                        this.sequence[this.i]) || this.loadModels &&
-                        this.system.models.has(this.sequence[this.i]);
+                        this.sequence[this.i]);
                         let breakAhead = BACKTRACK_LIST.has(
                         this.sequence[this.i + 1]);
                         let btAhead = this.sequence[this.i + 1] == ']' ||
@@ -2167,8 +2167,7 @@ class ColonyManager
             params: PLANT_DATA[id].system.axiomParams,
             stage: 0,
 
-            energy: BigNumber.from(PLANT_DATA[id].system.axiom.length) *
-            PLANT_DATA[id].growthCost,
+            energy: BigNumber.ZERO,
             growth: BigNumber.ZERO
         };
         let stats = this.calculateStats(c);
@@ -2825,8 +2824,8 @@ var updateAvailability = () =>
 var tick = (elapsedTime, multiplier) =>
 {
     // Without the multiplier, one year is 14.6 hours
-    // let dt = elapsedTime * multiplier;
-    time += elapsedTime;
+    let dt = elapsedTime * multiplier;
+    time += dt;
     // https://www.desmos.com/calculator/pfku4nopgy
     // insolation = max(0, -cos(x*pi/72))
     // Help me check my integral maths
@@ -2961,7 +2960,7 @@ var getSecondaryEquation = () =>
             c.population, getLoc('plants')[c.id].name, c.stage, c.growth *
             BigNumber.HUNDRED / (PLANT_DATA[c.id].growthCost *
             BigNumber.from(c.sequence.length)))}}\\\\
-            \\text{${binarySearch(getLoc('plants')[c.id].stages, c.stage)}}\\\\
+            \\text{${getLoc('plants')[c.id].stages[c.stage]}}\\\\
             (${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
             \\\\`;
         case 1:
