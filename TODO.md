@@ -1,21 +1,23 @@
 # To-do List
 
 - [To-do List](#to-do-list)
-  - [v0.2: Augmented](#v02-augmented)
+  - [v0.2: They Breed Like Rabbits!](#v02-they-breed-like-rabbits)
   - [v0.1: Sine of the Seasons](#v01-sine-of-the-seasons)
   - [v0: Axiom](#v0-axiom)
   - [v0: Completed](#v0-completed)
 
-## v0.2: Augmented
+## v0.2: They Breed Like Rabbits!
 
 - [ ] Sunflower that powers nearby colonies' photo-synthesis
 - [ ] Thyme that speeds up nearby growth?
+- [ ] Spreadable plants
 
 ## v0.1: Sine of the Seasons
 
 - [ ] Leap years and hopleeks
   - [ ] How to design hopleeks so they won't be annoying?
     - [ ] Rabbits hate marigold's smell
+    - [ ] Extra energy protects colonies from rabbit bites
 - [ ] Newspapers
 - [ ] Colour schemes?
 - [ ] View menu has filter function that only shows certain symbols
@@ -37,7 +39,7 @@
     - Reason: other theories are way faster than this lol
     - Drawback: includes a fucking inflorescence section that is giant and 
     noob-unfriendly
-    - [ ] TODO: draw models for flowers and signal direction, separate sections
+    - [ ] TODO: separate sections, rebalance A period (nerf to 3?)
 - [x] Icons
   - [ ] SVG?
   - [x] Theme-dependent colour?

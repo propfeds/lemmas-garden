@@ -2530,10 +2530,10 @@ const PLANT_DATA =
         system: new LSystem('BA(0.12, 0)', [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<2 = A(r+0.06, t+1)',
-            'A(r, t) = F(1.2)[+(42)L(0.06, min(r+0.06, maxLeafp), 0)]/(180)[+(42)T(0.1)L(0.06, min(r+0.06, maxLeafp), 0)]/(90)I(0)A(r+0.06, 0)',
+            'A(r, t) = F(1.2)[+(42)L(0.06, min(r+0.06, maxLeafp), 0)]/(180)[+(42)TL(0.06, min(r+0.06, maxLeafp), 0)]/(90)I(0)A(r+0.06, 0)',
             'I(t): t<4 = I(t+1)',
-            'I(t) = F(0.6)[+T(0.1)L(0.06, maxLeafp/5, 0)]/(180)[+L(0.06, maxLeafp/5, 0)]',
-            'F < K(t): t>=signalThreshold && t<=signalThreshold = S(0)K(t)',
+            'I(t) = F(0.48)[+TL(0.06, maxLeafp/6, 0)]/(180)[+L(0.06, maxLeafp/6, 0)]',
+            'F < K(t): t>=signalThreshold && t<=signalThreshold = S(0)[+$K(0)][-$K(0)]K(t)',
             'K(t): t-2 = K(t+1)',
             'K(t) = K(t+1)K(0)',
             '~> K(t) = /(90)F(sqrt(t/10)){[k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//]}',
@@ -2542,19 +2542,19 @@ const PLANT_DATA =
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
             'S(type) < L(p, lim, s): s<1 = L(p, p, s+1)',
             'L(p, lim, s): s>=1 && p>0 = L(p-0.12, lim, s)',
-            '~> L(p, lim, s): s<1 = {\\(90)F(p).T(sqrt(p)+0.4)[--F(sqrt(p)).+&F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[&F(sqrt(p))[&F(sqrt(p)).].].].].[++F(sqrt(p)).-&F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[&F(sqrt(p))[&F(sqrt(p)).].].].]}',
+            '~> L(p, lim, s): s<1 = {\\(90)F(p).T(p+0.7)[-(48)F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}',
             '~> L(p, lim, s): s>=1 = {\\(90)F(sqrt(lim)).T(sqrt(lim)+0.6)[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
             'F(l) > S(type): type<=0 = S(type)F(l)',
             'S(type) < F(l): type>=1 = F(l)S(type)',
             'S(type) =',
             'B > S(type): type<=0 = BS(1)'
-        ], 30, 0, 'SIA', '+-&^/\\T', 0.4, {
+        ], 30, 0, 'SIA', '+-&^/\\T', 0.06, {
             'flowerThreshold': '1.2',
-            'maxLeafp': '0.6',
+            'maxLeafp': '0.72',
             'signalThreshold': '4'
         }),
         cost: new FirstFreeCost(new ExponentialCost(1, 1)),
-        growthRate: BigNumber.THREE,
+        growthRate: BigNumber.FOUR,
         growthCost: BigNumber.THREE,
         actions:
         [
