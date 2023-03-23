@@ -1528,8 +1528,8 @@ class Renderer
         this.modelParams = [];
         this.mdi = [];
         this.i = 0;
-        this.elapsed = -this.initDelay;
-        this.cooldown = 0;
+        this.elapsed = -1;
+        this.cooldown = 1 + this.initDelay;
         this.polygonMode = 0;
     }
 
@@ -1547,9 +1547,9 @@ class Renderer
         this.models = [];
         this.modelParams = [];
         this.mdi = [];
-        this.cooldown = 0;
+        this.cooldown = 1 + this.initDelay;
         this.polygonMode = 0;
-        this.elapsed = -this.initDelay;
+        this.elapsed = -1;
         if(clearGraph)
         {
             theory.clearGraph();
@@ -2557,7 +2557,7 @@ const PLANT_DATA =
         }),
         cost: new FirstFreeCost(new ExponentialCost(1, 1)),
         growthRate: BigNumber.THREE,
-        growthCost: BigNumber.from(12),
+        growthCost: BigNumber.EIGHT,
         actions:
         [
             {   // Always a harvest
