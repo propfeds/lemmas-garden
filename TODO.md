@@ -1,9 +1,15 @@
 # To-do List
 
 - [To-do List](#to-do-list)
+  - [v0.2: Augmented](#v02-augmented)
   - [v0.1: Sine of the Seasons](#v01-sine-of-the-seasons)
   - [v0: Axiom](#v0-axiom)
   - [v0: Completed](#v0-completed)
+
+## v0.2: Augmented
+
+- [ ] Sunflower that powers nearby colonies' photo-synthesis
+- [ ] Thyme that speeds up nearby growth?
 
 ## v0.1: Sine of the Seasons
 
@@ -13,20 +19,25 @@
 - [ ] Newspapers
 - [ ] Colour schemes?
 - [ ] View menu has filter function that only shows certain symbols
+  - [ ] Also option to view seq without params
 
 ## v0: Axiom 
 
-- [ ] Binary search can consume a lot of resources per turn
+- [x] Binary search can consume a lot of resources per turn
 - [ ] Cap colony count to 5 per plot, unless?
 - [ ] Buy All upgrade unlocks maxLevel config
 - [ ] Make at least 2 plants
-  - [ ] Early fast/annual plant
+  - [ ] First single flower
+    - Tulip?
+    - Caps at 6 using the recursive formula
+  - [ ] An idleable plant
+    - Marigold is probably best candidate here
+  - [ ] Third fast/annual plant
     - Candidate: basil (4 weeks/48 mins)
     - Reason: other theories are way faster than this lol
     - Drawback: includes a fucking inflorescence section that is giant and 
     noob-unfriendly
-  - [ ] An idleable plant
-    - Marigold is probably best candidate here
+    - [ ] TODO: draw models for flowers and signal direction, separate sections
 - [x] Icons
   - [ ] SVG?
   - [x] Theme-dependent colour?

@@ -1,5 +1,5 @@
 import { BigNumber } from '../api/BigNumber';
-import { ExponentialCost, FirstFreeCost, FreeCost } from '../api/Costs';
+import { CompositeCost, ConstantCost, ExponentialCost, FirstFreeCost, FreeCost } from '../api/Costs';
 import { Localization } from '../api/Localization';
 import { QuaternaryEntry, theory } from '../api/Theory';
 import { ImageSource } from '../api/ui/properties/ImageSource';
@@ -64,7 +64,7 @@ let plantIdx = new Array(maxPlots).fill(0);
 let finishedTutorial = false;
 let actuallyPlanting = true;
 let graphMode = 0;
-let colonyMode = 2;
+let colonyMode = 0;
 let textColor = 'ffccff';
 
 let tmpCurrency;
@@ -161,6 +161,23 @@ const locStrings =
 
         plants:
         [
+            {
+                name: 'Basil',
+                info: 'A fast growing herb',
+                details: `Basil is the friend of all dogs.\\\\`,
+                LsDetails: `The symbol A represents a rising shoot (apex), ` +
+`while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
+`F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
+`kills the colony.`,
+                cost: '2p ** (level - 2) (first seed is free)',
+                stages:
+                {
+                    0: 'The first shoot rises. Harvestable.',
+                    1: 'The shoot splits in three.\\\\The stem lengthens.',
+                    2: 'The shoots continue to divide.',
+                    4: 'What do you expect? It\'s a fractal.'
+                }
+            },
             {
                 name: 'Arrow weed',
                 info: 'Testing my arrow weeds',
@@ -2218,6 +2235,8 @@ class ColonyManager
         c.synthRate = stats.synthRate;
         c.profit = stats.profit;
         this.colonies[plot].push(c);
+        if(plot == plotIdx && colonyIdx[plot] == this.colonies[plot].length - 1)
+            renderer.colony = c;
         theory.invalidateQuaternaryValues();
         updateAvailability();
     }
@@ -2488,6 +2507,8 @@ let binarySearch = (arr, target) =>
 // Balance parameters
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(1000)));
+const plantUnlockCosts = new CompositeCost(1, new ConstantCost(1800),
+new ConstantCost(1900));
 const permaCosts =
 [
     BigNumber.from(24),
@@ -2507,6 +2528,65 @@ var getPublicationMultiplierFormula = (symbol) =>
 
 const PLANT_DATA =
 [
+    {   // Basil
+        system: new LSystem('BA(0.12, 0)', [
+            'A(r, t): r>=flowerThreshold = K(0)',
+            'A(r, t): t<2 = A(r+0.06, t+1)',
+            'A(r, t) = F(1.2)[+(42)L(0.06, min(r+0.06, maxLeafp), 0)]/(180)[+(42)T(0.1)L(0.06, min(r+0.06, maxLeafp), 0)]/(90)I(0)A(r+0.06, 0)',
+            'I(t): t<4 = I(t+1)',
+            'I(t) = F(0.6)[+T(0.1)L(0.06, maxLeafp/5, 0)]/(180)[+L(0.06, maxLeafp/5, 0)]',
+            'F < K(t): t>=signalThreshold && t<=signalThreshold = S(0)K(t)',
+            'K(t): t-2 = K(t+1)',
+            'K(t) = K(t+1)K(0)',
+            '~> K(t) = /(90)F(sqrt(t/10)){[k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//]}',
+            '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
+            '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
+            'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
+            'S(type) < L(p, lim, s): s<1 = L(p, p, s+1)',
+            'L(p, lim, s): s>=1 && p>0 = L(p-0.12, lim, s)',
+            '~> L(p, lim, s): s<1 = {\\(90)F(p).T(sqrt(p)+0.4)[--F(sqrt(p)).+&F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[&F(sqrt(p))[&F(sqrt(p)).].].].].[++F(sqrt(p)).-&F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[&F(sqrt(p))[&F(sqrt(p)).].].].]}',
+            '~> L(p, lim, s): s>=1 = {\\(90)F(sqrt(lim)).T(sqrt(lim)+0.6)[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
+            'F(l) > S(type): type<=0 = S(type)F(l)',
+            'S(type) < F(l): type>=1 = F(l)S(type)',
+            'S(type) =',
+            'B > S(type): type<=0 = BS(1)'
+        ], 30, 0, 'SIA', '+-&^/\\T', 0.4, {
+            'flowerThreshold': '1.2',
+            'maxLeafp': '0.6',
+            'signalThreshold': '4'
+        }),
+        cost: new FirstFreeCost(new ExponentialCost(1, 1)),
+        growthRate: BigNumber.THREE,
+        growthCost: BigNumber.from(12),
+        actions:
+        [
+            {   // Always a harvest
+                symbols: new Set('L'),
+                system: new LSystem('', ['L=']),
+                killColony: true
+            },
+            {   // Always a prune
+                system: new LSystem('', ['K=']),
+                killColony: false
+            }
+        ],
+        camera: (stage) =>
+        {
+            return {
+                scale: 8,
+                x: 0,
+                y: Math.max(5, stage / 3),
+                Z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) =>
+        {
+            return {
+                tickLength: 1
+            };
+        }
+    },
     {   // Arrow weed
         system: new LSystem('A(1)', [
             'F(l)=F(l*2)',
@@ -2710,7 +2790,7 @@ var switchPlant, viewColony, switchColony;
 
 var plants = Array.from({length: maxPlots}, (_) => []);
 
-var plotPerma;
+var plotPerma, plantPerma;
 
 var currency;
 
@@ -2731,7 +2811,8 @@ var init = () =>
             switchPlant.level = 0;
             if(manager.colonies[plotIdx].length)
                 return;
-            plantIdx[plotIdx] = (plantIdx[plotIdx] + 1) % PLANT_DATA.length;
+            plantIdx[plotIdx] = (plantIdx[plotIdx] + 1) %
+            (plantPerma.level + 1);
             updateAvailability();
         };
         switchPlant.isAvailable = false;
@@ -2836,6 +2917,37 @@ var init = () =>
         };
         plotPerma.maxLevel = maxPlots;
     }
+    /* Plant unlock
+    What do I do if I have other plants to unlock with other means?.
+    */
+    {
+        plantPerma = theory.createPermanentUpgrade(4, currency,
+        plantUnlockCosts);
+        plantPerma.getDescription = (amount) =>
+        {
+            if(amount == 1)
+                return Localization.getUpgradeUnlockDesc(`\\text
+                {${getLoc('plants')[plantPerma.level + 1].name}}`);
+            return Localization.getUpgradeUnlockDesc(`\\text
+            {${getLoc('plants')[plantPerma.level + 1].name}~${getLoc('plants')[
+            plantPerma.level + amount].name}}`);
+        }
+        plantPerma.getInfo = (amount) =>
+        {
+            if(amount == 1)
+                return Localization.getUpgradeUnlockInfo(`\\text
+                {${getLoc('plants')[plantPerma.level + 1].name}}`);
+            return Localization.getUpgradeUnlockInfo(`\\text
+            {${getLoc('plants')[plantPerma.level + 1].name}~${getLoc('plants')[
+            plantPerma.level + amount].name}}`);
+        }
+        plantPerma.bought = (_) =>
+        {
+            updateAvailability();
+        };
+        plantPerma.maxLevel = PLANT_DATA.length - 1;
+    }
+
     theory.createPublicationUpgrade(1, currency, permaCosts[0]);
     theory.createBuyAllUpgrade(2, currency, permaCosts[1]);
     theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
@@ -2860,8 +2972,8 @@ var updateAvailability = () =>
     for(let i = 0; i < plotPerma.level; ++i)
     {
         for(let j = 0; j < PLANT_DATA.length; ++j)
-            plants[i][j].isAvailable = j == plantIdx[i] ||
-            plants[i][j].level > 0;
+            plants[i][j].isAvailable = plants[i][j].level > 0 ||
+            (j == plantIdx[i] && j > plantPerma.level - 1);
     }
 }
 
