@@ -1528,8 +1528,8 @@ class Renderer
         this.modelParams = [];
         this.mdi = [];
         this.i = 0;
-        this.elapsed = -1;
-        this.cooldown = 1 + this.initDelay;
+        this.elapsed = -this.initDelay;
+        this.cooldown = 1;
         this.polygonMode = 0;
     }
 
@@ -1547,9 +1547,9 @@ class Renderer
         this.models = [];
         this.modelParams = [];
         this.mdi = [];
-        this.cooldown = 1 + this.initDelay;
+        this.cooldown = 1;
         this.polygonMode = 0;
-        this.elapsed = -1;
+        this.elapsed = -this.initDelay;
         if(clearGraph)
         {
             theory.clearGraph();
@@ -3756,7 +3756,7 @@ var canResetStage = () => true;
 
 var getResetStageMessage = () => getLoc('resetRenderer');
 
-var resetStage = () => renderer.reset(false);
+var resetStage = () => renderer.reset();
 
 var canGoToPreviousStage = () => plotPerma.level > 0 && plotIdx > 0;
 
