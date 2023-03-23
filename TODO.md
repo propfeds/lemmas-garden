@@ -39,7 +39,6 @@
     - Reason: other theories are way faster than this lol
     - Drawback: includes a fucking inflorescence section that is giant and 
     noob-unfriendly
-    - [ ] TODO: separate sections, rebalance A period (nerf to 3?)
 - [x] Icons
   - [ ] SVG?
   - [x] Theme-dependent colour?
