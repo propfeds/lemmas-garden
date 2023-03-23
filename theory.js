@@ -163,7 +163,7 @@ const locStrings =
         [
             {
                 name: 'Basil',
-                info: 'A fast growing herb',
+                info: 'A fast growing herb, regularly used for spicing.',
                 details: `Basil is the friend of all dogs.\\\\`,
                 LsDetails: `The symbol A represents a rising shoot (apex), ` +
 `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
@@ -1891,7 +1891,7 @@ class Renderer
                         break;
                     case '+':
                         if(this.params[this.i])
-                            this.ori = this.ori.rotate(this.levelParams[
+                            this.ori = this.ori.rotate(this.params[
                             this.i][0].toNumber(), '+');
                         else
                             this.ori = this.system.rotations.get('+').mul(
@@ -1899,7 +1899,7 @@ class Renderer
                         break;
                     case '-':
                         if(this.params[this.i])
-                            this.ori = this.ori.rotate(this.levelParams[
+                            this.ori = this.ori.rotate(this.params[
                             this.i][0].toNumber(), '-');
                         else
                             this.ori = this.system.rotations.get('-').mul(
@@ -1907,7 +1907,7 @@ class Renderer
                         break;
                     case '&':
                         if(this.params[this.i])
-                            this.ori = this.ori.rotate(this.levelParams[
+                            this.ori = this.ori.rotate(this.params[
                             this.i][0].toNumber(), '&');
                         else
                             this.ori = this.system.rotations.get('&').mul(
@@ -1915,7 +1915,7 @@ class Renderer
                         break;
                     case '^':
                         if(this.params[this.i])
-                            this.ori = this.ori.rotate(this.levelParams[
+                            this.ori = this.ori.rotate(this.params[
                             this.i][0].toNumber(), '^');
                         else
                             this.ori = this.system.rotations.get('^').mul(
@@ -1923,7 +1923,7 @@ class Renderer
                         break;
                     case '\\':
                         if(this.params[this.i])
-                            this.ori = this.ori.rotate(this.levelParams[
+                            this.ori = this.ori.rotate(this.params[
                             this.i][0].toNumber(), '\\');
                         else
                             this.ori = this.system.rotations.get('\\').mul(
@@ -1931,7 +1931,7 @@ class Renderer
                         break;
                     case '/':
                         if(this.params[this.i])
-                            this.ori = this.ori.rotate(this.levelParams[
+                            this.ori = this.ori.rotate(this.params[
                             this.i][0].toNumber(), '/');
                         else
                             this.ori = this.system.rotations.get('/').mul(
