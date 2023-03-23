@@ -3101,13 +3101,17 @@ var getSecondaryEquation = () =>
 {
     if(!plotPerma.level)
         return '';
-    let tauInfo = `\\begin{array}{c}\\text{${getLoc('pubTax')}}\\colon\\enspace
-    ${taxRate}\\times\\max p\\\\
-    =${getCurrencyFromTau(theory.tau)[0] * taxRate}p\\\\\\\\
-    ${theory.latexSymbol}=\\max p\\end{array}`;
+
     let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
     if(!c)
-        return tauInfo;
+    {
+        let taxInfo = `\\text{${getLoc('pubTax')}}\\colon\\enspace
+        ${taxRate}\\times\\max p\\\\
+        =${getCurrencyFromTau(theory.tau)[0] * taxRate}p\\\\\\\\`;
+        let tauInfo = `${theory.latexSymbol}=\\max p`;
+        return `\\begin{array}{c}${theory.publicationUpgrade.level &&
+        theory.canPublish ? taxInfo : ''}${tauInfo}\\end{array}`;
+    }
 
     switch(colonyMode)
     {
