@@ -1561,8 +1561,6 @@ class Renderer
      */
     set colony(colony)
     {
-        if(graphMode)
-            return;
         this.system = PLANT_DATA[colony.id].system;
         this.configure(colony.sequence, colony.params,
         PLANT_DATA[colony.id].camera(colony.stage),
@@ -2557,7 +2555,7 @@ const PLANT_DATA =
         }),
         cost: new FirstFreeCost(new ExponentialCost(1, 1)),
         growthRate: BigNumber.THREE,
-        growthCost: BigNumber.EIGHT,
+        growthCost: BigNumber.THREE,
         actions:
         [
             {   // Always a harvest
@@ -2962,7 +2960,9 @@ var init = () =>
 var updateAvailability = () =>
 {
     if(!finishedTutorial)
-        finishedTutorial = plants[0][0].level > 0;
+    {
+        finishedTutorial = plotPerma.level > 0;
+    }
     else
     {
         switchPlant.isAvailable = !manager.colonies[plotIdx].length;
@@ -3756,7 +3756,7 @@ var canResetStage = () => true;
 
 var getResetStageMessage = () => getLoc('resetRenderer');
 
-var resetStage = () => renderer.reset();
+var resetStage = () => renderer.reset(false);
 
 var canGoToPreviousStage = () => plotPerma.level > 0 && plotIdx > 0;
 
