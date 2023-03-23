@@ -2796,7 +2796,7 @@ var currency;
 
 var init = () =>
 {
-    currency = theory.createCurrency('𝑝', 'p');
+    currency = theory.createCurrency('p', 'p');
 
     /* Switch plant
     Moduloose
