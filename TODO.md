@@ -25,6 +25,9 @@
 
 ## v0: Axiom 
 
+- [ ] Almanac containing plants, L-system help, etc.
+- [ ] Separate 2D & 3D graph options
+  - [ ] Renderer does not clear graph if 2D graph is enabled
 - [x] Binary search can consume a lot of resources per turn
 - [ ] Cap colony count to 5 per plot, unless?
 - [ ] Buy All upgrade unlocks maxLevel config
@@ -34,7 +37,7 @@
     - Caps at 6 using the recursive formula
   - [ ] An idleable plant
     - Marigold is probably best candidate here
-  - [ ] Third fast/annual plant
+  - [x] Third fast/annual plant
     - Candidate: basil (4 weeks/48 mins)
     - Reason: other theories are way faster than this lol
     - Drawback: includes a fucking inflorescence section that is giant and 

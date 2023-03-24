@@ -2547,7 +2547,7 @@ const PLANT_DATA =
             '~> K(t) = /(90)F(sqrt(t/10)){[k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//]}',
             '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
-            '~> L(p, lim, s): s<1 = {\\(90)F(p).T(p+0.7)[-(48)F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}',
+            '~> L(p, lim, s): s<1 = {\\(90)F(p).T(p+0.7)[-(48)F(sqrt(p)).+F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}',
             '~> L(p, lim, s): s>=1 = {\\(90)F(sqrt(lim)).T(sqrt(lim)+0.6)[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
         ], 30, 0, 'SIA', '+-&^/\\T', 0.06, {
             'flowerThreshold': '1.2',
@@ -3107,9 +3107,9 @@ var getSecondaryEquation = () =>
     if(!c)
     {
         let taxInfo = `\\text{${getLoc('pubTax')}}\\colon\\enspace
-        ${taxRate}\\times\\max p\\\\
-        =${getCurrencyFromTau(theory.tau)[0] * taxRate}p\\\\\\\\`;
-        let tauInfo = `${theory.latexSymbol}=\\max p`;
+        ${taxRate}\\times\\max\\text{p}\\\\
+        =${getCurrencyFromTau(theory.tau)[0] * taxRate}\\text{p}\\\\\\\\`;
+        let tauInfo = `${theory.latexSymbol}=\\max\\text{p}`;
         return `\\begin{array}{c}${theory.publicationUpgrade.level &&
         theory.canPublish ? taxInfo : ''}${tauInfo}\\end{array}`;
     }
@@ -3129,7 +3129,7 @@ var getSecondaryEquation = () =>
             getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
             g=${c.growth}/${PLANT_DATA[c.id].growthCost *
             BigNumber.from(c.sequence.length)}\\\\
-            r_s=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}p
+            r_s=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}
             \\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
             \\\\`;
         case 2:
