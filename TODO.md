@@ -11,9 +11,12 @@
 - [ ] Sunflower that powers nearby colonies' photo-synthesis
 - [ ] Thyme that speeds up nearby growth?
 - [ ] Spreadable plants
+- [ ] Cap colony count to 5 per plot, unless?
 
 ## v0.1: Sine of the Seasons
 
+- [ ] Almanac containing plants, L-system help, etc.
+- [ ] Buy All upgrade unlocks maxLevel config
 - [ ] Leap years and hopleeks
   - [ ] How to design hopleeks so they won't be annoying?
     - [ ] Rabbits hate marigold's smell
@@ -25,12 +28,9 @@
 
 ## v0: Axiom 
 
-- [ ] Almanac containing plants, L-system help, etc.
-- [ ] Separate 2D & 3D graph options
-  - [ ] Renderer does not clear graph if 2D graph is enabled
+- [x] Separate 2D & 3D graph options
+  - [x] Renderer does not clear graph if 2D graph is enabled
 - [x] Binary search can consume a lot of resources per turn
-- [ ] Cap colony count to 5 per plot, unless?
-- [ ] Buy All upgrade unlocks maxLevel config
 - [ ] Make at least 2 plants
   - [ ] First single flower
     - Tulip?

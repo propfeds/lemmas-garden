@@ -63,8 +63,9 @@ let colonyIdx = new Array(maxPlots).fill(0);
 let plantIdx = new Array(maxPlots).fill(0);
 let finishedTutorial = false;
 let actuallyPlanting = true;
-let graphMode = 0;
-let colonyMode = 0;
+let graphMode2D = 1;
+let graphMode3D = true;
+let colonyMode = 1;
 let textColor = 'ffccff';
 
 let tmpCurrency;
@@ -145,18 +146,19 @@ const locStrings =
         switchColonyInfo: 'Cycles through the list of colonies',
 
         menuTheory: 'Theory Settings',
-        graphModes:
+        graphMode3D: '3D graph: ',
+        graphModes2D:
         [
-            'Graph mode: L-system',
-            'Graph mode: Photo-synthesis',
-            'Graph mode: Growth'
+            '2D graph: Off',
+            '2D graph: Photo-synthesis',
+            '2D graph: Growth'
         ],
         colonyModes:
         [
+            'Colony view: Off',
             'Colony view: Commentary',
             'Colony view: Statistics',
             'Colony view: List',
-            'Colony view: Off'
         ],
 
         plants:
@@ -1590,7 +1592,7 @@ class Renderer
         this.sequence = sequence;
         this.params = params;
 
-        this.reset();
+        this.reset(!graphMode2D);
     }
     /**
      * Moves the cursor forward.
@@ -2397,6 +2399,9 @@ class ColonyManager
                 start: 0
             };
         }
+        if(this.actionGangsta[0] == plotIdx &&
+        this.actionGangsta[1] == colonyIdx[plotIdx])
+            renderer.colony = c;
         this.actionGangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
@@ -3000,7 +3005,7 @@ var tick = (elapsedTime, multiplier) =>
     growthIntegral = newGI;
 
     manager.growAll(BigNumber.from(di), BigNumber.from(dg));
-    if(!graphMode)
+    if(graphMode3D)
         renderer.draw();
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
@@ -3117,7 +3122,7 @@ var getSecondaryEquation = () =>
 
     switch(colonyMode)
     {
-        case 0:
+        case 1:
             let commentary = getLoc('plants')[c.id].stages[c.stage];
             return `\\text{${Localization.format(getLoc('colonyProg'),
             c.population, getLoc('plants')[c.id].name, c.stage, c.growth *
@@ -3126,7 +3131,7 @@ var getSecondaryEquation = () =>
             \\text{${commentary ? commentary : getLoc('stageNotFound')}}\\\\
             (${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
             \\\\`;
-        case 1:
+        case 2:
             return `\\text{${Localization.format(getLoc('colony'), c.population,
             getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
             g=${c.growth}/${PLANT_DATA[c.id].growthCost *
@@ -3134,7 +3139,7 @@ var getSecondaryEquation = () =>
             r_s=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}
             \\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
             \\\\`;
-        case 2:
+        case 3:
             let result = '';
             for(let i = 0; i < colonyIdx[plotIdx]; ++i)
             {
@@ -3159,7 +3164,7 @@ var getSecondaryEquation = () =>
                 BigNumber.from(d.sequence.length)))}}\\\\`;
             }
             return result;
-        case 3:
+        default:
             return '';
     }
 }
@@ -3617,44 +3622,63 @@ let createColonyViewMenu = (colony) =>
 
 let createWorldMenu = () =>
 {
-    let tmpGM = graphMode;
-    let GMLabel = ui.createLatexLabel
+    let tmpGM3 = graphMode3D;
+    let GM3Label = ui.createLatexLabel
     ({
-        text: getLoc('graphModes')[tmpGM],
-        row: 0,
-        column: 0,
+        text: getLoc('graphMode3D'),
+        row: 0, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let GMSlider = ui.createSlider
+    let GM3Switch = ui.createSwitch
     ({
-        row: 0,
-        column: 1,
+        isToggled: tmpGM3,
+        row: 0, column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        onTouched: (e) =>
+        {
+            if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            e.type == TouchType.LONGPRESS_RELEASED)
+            {
+                Sound.playClick();
+                tmpGM3 = !tmpGM3;
+                GM3Switch.isToggled = tmpGM3;
+            }
+        }
+    });
+    let tmpGM2 = graphMode2D;
+    let GM2Label = ui.createLatexLabel
+    ({
+        text: getLoc('graphModes2D')[tmpGM2],
+        row: 1, column: 0,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let GM2Slider = ui.createSlider
+    ({
+        row: 1, column: 1,
         minimum: 0,
         maximum: 2,
-        value: tmpGM,
+        value: tmpGM2,
         onValueChanged: () =>
         {
-            tmpGM = Math.round(GMSlider.value);
-            GMLabel.text = getLoc('graphModes')[tmpGM];
+            tmpGM2 = Math.round(GM2Slider.value);
+            GM2Label.text = getLoc('graphModes2D')[tmpGM2];
         },
         onDragCompleted: () =>
         {
             Sound.playClick();
-            GMSlider.value = tmpGM;
+            GM2Slider.value = tmpGM2;
         }
     });
     let tmpCM = colonyMode;
     let CMLabel = ui.createLatexLabel
     ({
         text: getLoc('colonyModes')[tmpCM],
-        row: 1,
-        column: 0,
+        row: 2, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let CMSlider = ui.createSlider
     ({
-        row: 1,
-        column: 1,
+        row: 2, column: 1,
         minimum: 0,
         maximum: 3,
         value: tmpCM,
@@ -3683,12 +3707,15 @@ let createWorldMenu = () =>
                     rowDefinitions:
                     [
                         getSmallBtnSize(ui.screenWidth),
+                        getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth)
                     ],
                     children:
                     [
-                        GMLabel,
-                        GMSlider,
+                        GM3Label,
+                        GM3Switch,
+                        GM2Label,
+                        GM2Slider,
                         CMLabel,
                         CMSlider
                     ]
@@ -3704,7 +3731,8 @@ let createWorldMenu = () =>
                     onClicked: () =>
                     {
                         Sound.playClick();
-                        graphMode = tmpGM;
+                        graphMode3D = tmpGM3;
+                        graphMode2D = tmpGM2;
                         colonyMode = tmpCM;
                         menu.hide();
                     }
@@ -3816,7 +3844,8 @@ var getInternalState = () => JSON.stringify
     plantIdx: plantIdx,
     finishedTutorial: finishedTutorial,
     manager: manager.object,
-    graphMode: graphMode,
+    graphMode2D: graphMode2D,
+    graphMode3D: graphMode3D,
     colonyMode: colonyMode,
 }, bigStringify);
 
@@ -3851,8 +3880,10 @@ var setInternalState = (stateStr) =>
     if('manager' in state)
         manager = new ColonyManager(state.manager);
     
-    if('graphMode' in state)
-        graphMode = state.graphMode;
+    if('graphMode2D' in state)
+        graphMode2D = state.graphMode2D;
+    if('graphMode3D' in state)
+        graphMode3D = state.graphMode3D;
     if('colonyMode' in state)
         colonyMode = state.colonyMode;
 
@@ -3885,7 +3916,7 @@ var setInternalState = (stateStr) =>
 
 var get2DGraphValue = () =>
 {
-    switch(graphMode)
+    switch(graphMode2D)
     {
         case 0:
             return 0;
