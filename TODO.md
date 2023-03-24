@@ -42,6 +42,7 @@
     - Reason: other theories are way faster than this lol
     - Drawback: includes a fucking inflorescence section that is giant and 
     noob-unfriendly
+    - [ ] Write description, LS description and commentary
 - [x] Icons
   - [ ] SVG?
   - [x] Theme-dependent colour?
