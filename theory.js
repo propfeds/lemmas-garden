@@ -2269,16 +2269,38 @@ class ColonyManager
             for(let j = 0; j < this.colonies[i].length; ++j)
             {
                 let c = this.colonies[i][j];
-                c.energy += di * c.synthRate;
-
-                let maxdg = c.energy.min(dg * PLANT_DATA[c.id].growthRate);
-                c.growth += maxdg;
-                c.energy -= maxdg;
-
-                if(!this.gangsta && c.growth >= PLANT_DATA[c.id].growthCost *
+                if(c.growth >= PLANT_DATA[c.id].growthCost *
                 BigNumber.from(c.sequence.length))
                 {
-                    this.gangsta = [i, j];
+                    if(!this.gangsta)
+                        this.gangsta = [i, j];
+
+                    if(!c.diReserve)
+                        c.diReserve = BigNumber.ZERO;
+                    c.diReserve += di;
+
+                    if(!c.dgReserve)
+                        c.dgReserve = BigNumber.ZERO;
+                    c.dgReserve += dg;
+                }
+                else if(this.actionGangsta && this.actionGangsta[0] == i &&
+                this.actionGangsta[1] == j)
+                {
+                    if(!c.diReserve)
+                        c.diReserve = BigNumber.ZERO;
+                    c.diReserve += di;
+
+                    if(!c.dgReserve)
+                        c.dgReserve = BigNumber.ZERO;
+                    c.dgReserve += dg;
+                }
+                else
+                {
+                    c.energy += di * c.synthRate;
+
+                    let maxdg = c.energy.min(dg * PLANT_DATA[c.id].growthRate);
+                    c.growth += maxdg;
+                    c.energy -= maxdg;
                 }
             }
         }
@@ -2374,6 +2396,14 @@ class ColonyManager
         c.profit = this.actionCalcTask.profit;
         c.sequence = this.actionDeriveTask.derivation;
         c.params = this.actionDeriveTask.parameters;
+
+        c.energy += c.diReserve * c.synthRate;
+        let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
+        c.growth += maxdg;
+        c.energy -= maxdg;
+        c.diReserve = BigNumber.ZERO;
+        c.dgReserve = BigNumber.ZERO;
+
         this.actionDeriveTask =
         {
             start: 0
@@ -2472,6 +2502,14 @@ class ColonyManager
         c.params = this.deriveTask.parameters;
         c.synthRate = this.calcTask.synthRate;
         c.profit = this.calcTask.profit;
+
+        c.energy += c.diReserve * c.synthRate;
+        let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
+        c.growth += maxdg;
+        c.energy -= maxdg;
+        c.diReserve = BigNumber.ZERO;
+        c.dgReserve = BigNumber.ZERO;
+
         ++c.stage;
         this.ancestreeTask =
         {
@@ -2536,7 +2574,7 @@ const PLANT_DATA =
         system: new LSystem('BA(0.12, 0)', [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<2 = A(r+0.06, t+1)',
-            'A(r, t) = F(1.2)[+(42)L(0.06, min(r+0.06, maxLeafp), 0)]/(180)[+(42)TL(0.06, min(r+0.06, maxLeafp), 0)]/(90)I(0)A(r+0.06, 0)',
+            'A(r, t) = F(1.2)[+L(0.06, min(r+0.06, maxLeafp), 0)]/(180)[+TL(0.06, min(r+0.06, maxLeafp), 0)]/(90)I(0)A(r+0.06, 0)',
             'I(t): t<4 = I(t+1)',
             'I(t) = F(0.48)[+TL(0.06, maxLeafp/6, 0)]/(180)[+L(0.06, maxLeafp/6, 0)]',
             'F < K(t): t>=signalThreshold && t<=signalThreshold = S(0)[+$K(0)][-$K(0)]K(t)',
@@ -2544,7 +2582,7 @@ const PLANT_DATA =
             'K(t) = K(t+1)K(0)',
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
             'S(type) < L(p, lim, s): s<1 = L(p, p, s+1)',
-            'L(p, lim, s): s>=1 && p>0 = L(p-0.12, lim, s)',
+            'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
             'F(l) > S(type): type<=0 = S(type)F(l)',
             'S(type) < F(l): type>=1 = F(l)S(type)',
             'S(type) =',

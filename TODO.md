@@ -10,11 +10,13 @@
 
 - [ ] Sunflower that powers nearby colonies' photo-synthesis
 - [ ] Thyme that speeds up nearby growth?
-- [ ] Spreadable plants
+- [ ] Spreadable plants: Infinite basil! (steeply increase cost to compensate)
+  - [ ] Don't forget: flower gender
 - [ ] Cap colony count to 5 per plot, unless?
 
 ## v0.1: Sine of the Seasons
 
+- [ ] Revamp PLANT_DATA structure and the unlocking of new plants
 - [ ] Almanac containing plants, L-system help, etc.
 - [ ] Buy All upgrade unlocks maxLevel config
 - [ ] Leap years and hopleeks
