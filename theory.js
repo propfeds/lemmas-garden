@@ -163,8 +163,8 @@ const locStrings =
         ],
 
         plants:
-        [
-            {
+        {
+            2: {
                 name: 'Basil',
                 info: 'A fast growing herb, regularly used for spicing.',
                 details: `Basil is the friend of all dogs.\\\\`,
@@ -181,7 +181,7 @@ const locStrings =
                     4: 'What do you expect? It\'s a fractal.'
                 }
             },
-            {
+            9001: {
                 name: 'Arrow weed',
                 info: 'Testing my arrow weeds',
                 details: `Arrow weed is the friend of all dogs.\\\\`,
@@ -199,7 +199,7 @@ const locStrings =
                     4: 'What do you expect? It\'s a fractal.'
                 }
             }
-        ],
+        },
         plantStats: `Cost: {0}\\\\Growth rate: {1} (at night)\\\\Growth ` +
 `cost: {2} * length\\\\Length: {3}`,
         stageNotFound: 'No commentary.',
@@ -2247,6 +2247,7 @@ class ColonyManager
         let c = this.colonies[plot][index];
         if(!c)
             return;
+
         plants[plot][c.id].level -= Math.min(plants[plot][c.id].level,
         c.population);
         if(index == this.colonies[plot].length - 1)
@@ -2550,6 +2551,7 @@ let binarySearch = (arr, target) =>
 // Balance parameters
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(1000)));
+const plantUnlocks = [2, 9001];
 const plantUnlockCosts = new CompositeCost(1, new ConstantCost(1800),
 new ConstantCost(1900));
 const permaCosts =
@@ -2570,8 +2572,8 @@ var getPublicationMultiplierFormula = (symbol) =>
 `{${symbol}}^{${pubExp}\\ln({\\ln{${symbol}})}}`;
 
 const PLANT_DATA =
-[
-    {   // Basil
+{
+    2: {   // Basil
         system: new LSystem('BA(0.12, 0)', [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<2 = A(r+0.06, t+1)',
@@ -2631,7 +2633,7 @@ const PLANT_DATA =
             };
         }
     },
-    {   // Arrow weed
+    9001: {   // Arrow weed
         system: new LSystem('A(1)', [
             'F(l)=F(l*2)',
             'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t)'
@@ -2677,7 +2679,7 @@ const PLANT_DATA =
             };
         }
     }
-]
+}
 
 // const sidewayQuat = new Quaternion(1, 0, 0, 0);
 const uprightQuat = new Quaternion(-Math.sqrt(2)/2, 0, 0, Math.sqrt(2)/2);
@@ -2832,7 +2834,7 @@ ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/tr
 
 var switchPlant, viewColony, switchColony;
 
-var plants = Array.from({length: maxPlots}, (_) => []);
+var plants = Array.from({length: maxPlots}, (_) => {return {};});
 
 var plotPerma, plantPerma;
 
@@ -2916,19 +2918,20 @@ var init = () =>
     */
     for(let i = 0; i < maxPlots; ++i)
     {
-        for(let j = 0; j < PLANT_DATA.length; ++j)
+        for(let j = 0; j < plantUnlocks.length; ++j)
         {
-            plants[i][j] = theory.createUpgrade(i * 100 + j, currency,
-            PLANT_DATA[j].cost);
-            plants[i][j].description = Localization.format(
-            getLoc('plotPlant'), i + 1, getLoc('plants')[j].name);
-            plants[i][j].info = getLoc('plants')[j].info;
-            plants[i][j].bought = (amount) =>
+            plants[i][plantUnlocks[j]] = theory.createUpgrade(i * 100 + j,
+            currency, PLANT_DATA[plantUnlocks[j]].cost);
+            plants[i][plantUnlocks[j]].description = Localization.format(
+            getLoc('plotPlant'), i + 1, getLoc('plants')[plantUnlocks[j]].name);
+            plants[i][plantUnlocks[j]].info = getLoc('plants')[
+            plantUnlocks[j]].info;
+            plants[i][plantUnlocks[j]].bought = (amount) =>
             {
                 if(actuallyPlanting)
-                    manager.addColony(i, j, amount);
+                    manager.addColony(i, plantUnlocks[j], amount);
             };
-            plants[i][j].isAvailable = false;
+            plants[i][plantUnlocks[j]].isAvailable = false;
         }
     }
     /* Plot unlock
@@ -2993,7 +2996,7 @@ var init = () =>
         {
             updateAvailability();
         };
-        plantPerma.maxLevel = PLANT_DATA.length - 1;
+        plantPerma.maxLevel = plantUnlocks.length - 1;
     }
 
     theory.createPublicationUpgrade(1, currency, permaCosts[0]);
@@ -3021,8 +3024,9 @@ var updateAvailability = () =>
     }
     for(let i = 0; i < plotPerma.level; ++i)
     {
-        for(let j = 0; j < PLANT_DATA.length; ++j)
-            plants[i][j].isAvailable = plants[i][j].level > 0 ||
+        for(let j = 0; j < plantUnlocks.length; ++j)
+            plants[i][plantUnlocks[j]].isAvailable =
+            plants[i][plantUnlocks[j]].level > 0 ||
             (j == plantIdx[i] && j <= plantPerma.level);
     }
 }
@@ -3798,28 +3802,26 @@ var prePublish = () =>
 {
     tmpCurrency = currency.value;
     tmpLevels = Array.from({length: maxPlots}, (_) => []);
-    for(let i = 0; i < maxPlots; ++i)
-    {
-        for(let j = 0; j < PLANT_DATA.length; ++j)
-            tmpLevels[i][j] = 0;
-
-        for(let j = 0; j < manager.colonies[i].length; ++j)
-        {
-            let c = manager.colonies[i][j];
-            tmpLevels[i][c.id] += c.population;
-        }
-    }
 }
 
 // You can be in debt for this lol
 var postPublish = () =>
 {
     currency.value = tmpCurrency - getCurrencyFromTau(theory.tau)[0] * taxRate;
+
     actuallyPlanting = false;
+    tmpLevels = Array.from({length: maxPlots}, (_) => {return {};});
     for(let i = 0; i < maxPlots; ++i)
     {
-        for(let j = 0; j < PLANT_DATA.length; ++j)
-            plants[i][j].level = tmpLevels[i][j];
+        for(let j = 0; j < manager.colonies[i].length; ++j)
+        {
+            let c = manager.colonies[i][j];
+            if(!tmpLevels[i][c.id])
+                tmpLevels[i][c.id] = 0;
+            tmpLevels[i][c.id] += c.population;
+        }
+        for(let j = 0; j < plantUnlocks.length; ++j)
+            plants[i][plantUnlocks[j]].level = tmpLevels[i][plantUnlocks[j]];
     }
     actuallyPlanting = true;
 
@@ -3931,19 +3933,18 @@ var setInternalState = (stateStr) =>
         colonyMode = state.colonyMode;
 
     actuallyPlanting = false;
-    tmpLevels = Array.from({length: maxPlots}, (_) => []);
+    tmpLevels = Array.from({length: maxPlots}, (_) => {return {};});
     for(let i = 0; i < maxPlots; ++i)
     {
-        for(let j = 0; j < PLANT_DATA.length; ++j)
-            tmpLevels[i][j] = 0;
-
         for(let j = 0; j < manager.colonies[i].length; ++j)
         {
             let c = manager.colonies[i][j];
+            if(!tmpLevels[i][c.id])
+                tmpLevels[i][c.id] = 0;
             tmpLevels[i][c.id] += c.population;
         }
-        for(let j = 0; j < PLANT_DATA.length; ++j)
-            plants[i][j].level = tmpLevels[i][j];
+        for(let j = 0; j < plantUnlocks.length; ++j)
+            plants[i][plantUnlocks[j]].level = tmpLevels[i][plantUnlocks[j]];
     }
     actuallyPlanting = true;
 
