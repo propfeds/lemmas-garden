@@ -2576,7 +2576,7 @@ const PLANT_DATA =
             'A(r, t): t<2 = A(r+0.06, t+1)',
             'A(r, t) = F(1.2)[+L(0.06, min(r+0.06, maxLeafp), 0)]/(180)[+TL(0.06, min(r+0.06, maxLeafp), 0)]/(90)I(0)A(r+0.06, 0)',
             'I(t): t<4 = I(t+1)',
-            'I(t) = F(0.48)[+TL(0.06, maxLeafp/6, 0)]/(180)[+L(0.06, maxLeafp/6, 0)]',
+            'I(t) = F(0.48)[+TL(0.06, maxLeafp/4, 0)]/(180)[+L(0.06, maxLeafp/4, 0)]',
             'F < K(t): t>=signalThreshold && t<=signalThreshold = S(0)[+$K(0)][-$K(0)]K(t)',
             'K(t): t-2 = K(t+1)',
             'K(t) = K(t+1)K(0)',
