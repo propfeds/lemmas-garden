@@ -127,6 +127,7 @@ const locStrings =
         plotTitle: `\\text{{Plot }}{{{0}}}`,
         unlockPlot: `\\text{{plot }}{{{0}}}`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
+        unlockPlant: `\\text{{a new plant}}`,
 
         colony: '{0} of {1}, stage {2}',
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
@@ -2968,6 +2969,8 @@ var init = () =>
         plantUnlockCosts);
         plantPerma.getDescription = (amount) =>
         {
+            if(plantPerma.level == plantPerma.maxLevel)
+                return Localization.getUpgradeUnlockDesc(getLoc('unlockPlant'));
             if(amount == 1)
                 return Localization.getUpgradeUnlockDesc(`\\text
                 {${getLoc('plants')[plantPerma.level + 1].name}}`);
@@ -2977,6 +2980,8 @@ var init = () =>
         }
         plantPerma.getInfo = (amount) =>
         {
+            if(plantPerma.level == plantPerma.maxLevel)
+                return Localization.getUpgradeUnlockInfo(getLoc('unlockPlant'));
             if(amount == 1)
                 return Localization.getUpgradeUnlockInfo(`\\text
                 {${getLoc('plants')[plantPerma.level + 1].name}}`);
@@ -3018,7 +3023,7 @@ var updateAvailability = () =>
     {
         for(let j = 0; j < PLANT_DATA.length; ++j)
             plants[i][j].isAvailable = plants[i][j].level > 0 ||
-            (j == plantIdx[i] && j > plantPerma.level - 1);
+            (j == plantIdx[i] && j <= plantPerma.level);
     }
 }
 

@@ -37,6 +37,7 @@
   - [ ] First single flower
     - Tulip?
     - Caps at 6 using the recursive formula
+    - Trillium: caps at 3, goes from 1 + 0.5x
   - [ ] An idleable plant
     - Marigold is probably best candidate here
   - [x] Third fast/annual plant
