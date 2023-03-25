@@ -1565,6 +1565,11 @@ class Renderer
      */
     set colony(colony)
     {
+        if(!colony)
+        {
+            this.configure('', []);
+            return;
+        }
         this.system = PLANT_DATA[colony.id].system;
         this.configure(colony.sequence, colony.params,
         PLANT_DATA[colony.id].camera(colony.stage),
@@ -2253,8 +2258,24 @@ class ColonyManager
         if(index == this.colonies[plot].length - 1)
             switchColony.buy(1);
         if(this.gangsta && plot == gangsta[0])
+        {
+            this.ancestreeTask =
+            {
+                start: 0
+            };
+            this.deriveTask =
+            {
+                start: 0
+            };
+            this.calcTask =
+            {
+                start: 0
+            };
             this.gangsta = null;
+        }
         this.colonies[plot].splice(index, 1);
+        if(plot == plotIdx && !this.colonies[plot].length)
+            renderer.colony = null;
         updateAvailability();
     }
     growAll(di, dg)
@@ -2573,13 +2594,13 @@ var getPublicationMultiplierFormula = (symbol) =>
 
 const PLANT_DATA =
 {
-    2: {   // Basil
+    2: {    // Basil
         system: new LSystem('BA(0.12, 0)', [
             'A(r, t): r>=flowerThreshold = K(0)',
-            'A(r, t): t<2 = A(r+0.06, t+1)',
-            'A(r, t) = F(1.2)[+L(0.06, min(r+0.06, maxLeafp), 0)]/(180)[+TL(0.06, min(r+0.06, maxLeafp), 0)]/(90)I(0)A(r+0.06, 0)',
-            'I(t): t<4 = I(t+1)',
-            'I(t) = F(0.48)[+TL(0.06, maxLeafp/4, 0)]/(180)[+L(0.06, maxLeafp/4, 0)]',
+            'A(r, t): t<3 = A(r+0.06, t+1)',
+            'A(r, t) = F(1.2)[+L(0.03, min(r+0.06, maxLeafp), 0)]/(180)[+TL(0.03, min(r+0.06, maxLeafp), 0)]/(90)I(0)A(r+0.06, 0)',
+            'I(t): t<2 = I(t+1)',
+            'I(t) = F(0.42)[+TL(0.06, maxLeafp/4, 0)]/(180)[+L(0.06, maxLeafp/4, 0)]',
             'F < K(t): t>=signalThreshold && t<=signalThreshold = S(0)[+$K(0)][-$K(0)]K(t)',
             'K(t): t-2 = K(t+1)',
             'K(t) = K(t+1)K(0)',
@@ -2591,13 +2612,13 @@ const PLANT_DATA =
             'S(type) =',
             'B > S(type): type<=0 = BS(1)',
             '~> *= Model specification',
-            '~> K(t) = /(90)F(sqrt(t/10)){[k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//]}',
+            '~> K(t) = /(90)F(sqrt(t/4)){[k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//]}',
             '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
-            '~> L(p, lim, s): s<1 = {\\(90)F(p).T(p+0.2)[-(48)F(sqrt(p)).+F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}',
+            '~> L(p, lim, s): s<1 = {\\(90)F(sqrt(p)).T(sqrt(p)+0.2)[-(48)F(sqrt(p)).+F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}',
             '~> L(p, lim, s): s>=1 = {\\(90)F(sqrt(lim)).T(sqrt(lim)+0.4)[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
-        ], 30, 0, 'SIA', '+-&^/\\T', 0.06, {
-            'flowerThreshold': '1.2',
+        ], 30, 0, 'BASIL', '+-&^/\\T', 0.06, {
+            'flowerThreshold': '1.32',
             'maxLeafp': '0.72',
             'signalThreshold': '4'
         }),
@@ -2621,7 +2642,7 @@ const PLANT_DATA =
             return {
                 scale: 8,
                 x: 0,
-                y: Math.max(5, stage / 3),
+                y: Math.max(5, stage / 4),
                 Z: 0,
                 upright: true
             };
@@ -2633,7 +2654,7 @@ const PLANT_DATA =
             };
         }
     },
-    9001: {   // Arrow weed
+    9001: {     // Arrow weed
         system: new LSystem('A(1)', [
             'F(l)=F(l*2)',
             'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t)'
@@ -2900,6 +2921,20 @@ var init = () =>
             renderer.colony = c;
         };
         switchColony.isAvailable = false;
+    }
+
+    /* Warp one
+    For testing purposes
+    */
+    {
+        warpOne = theory.createSingularUpgrade(9001, currency, new FreeCost);
+        warpOne.description = 'Warp one day';
+        warpOne.info = 'Warps forward by 144 time units';
+        warpOne.bought = (_) =>
+        {
+            warpOne.level = 0;
+            tick(144, 1);
+        };
     }
 
     /* Free penny

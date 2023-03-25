@@ -16,7 +16,7 @@
 
 ## v0.1: Sine of the Seasons
 
-- [ ] Revamp PLANT_DATA structure and the unlocking of new plants
+- [x] Revamp PLANT_DATA structure and the unlocking of new plants
 - [ ] Almanac containing plants, L-system help, etc.
 - [ ] Buy All upgrade unlocks maxLevel config
 - [ ] Leap years and hopleeks
