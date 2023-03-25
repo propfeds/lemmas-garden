@@ -203,7 +203,7 @@ const locStrings =
 `cost: {2} * length\\\\Length: {3}`,
         stageNotFound: 'No commentary.',
 
-        resetRenderer: 'You are about to reset the renderer.'
+        resetRenderer: 'You are about to reset the graph.'
     }
 };
 
@@ -3093,7 +3093,7 @@ var getEquationOverlay = () =>
                     ({
                         isVisible: () => manager.colonies[plotIdx].length > 0,
                         row: 0, column: 0,
-                        margin: new Thickness(4, 2),
+                        margin: new Thickness(4),
                         horizontalOptions: LayoutOptions.START,
                         verticalOptions: LayoutOptions.END,
                         columnDefinitions:
@@ -3118,7 +3118,7 @@ var getEquationOverlay = () =>
                     ui.createGrid
                     ({
                         row: 0, column: 1,
-                        margin: new Thickness(4, 2),
+                        margin: new Thickness(4),
                         horizontalOptions: LayoutOptions.END,
                         verticalOptions: LayoutOptions.END,
                         inputTransparent: true,
