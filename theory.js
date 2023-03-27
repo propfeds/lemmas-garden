@@ -175,10 +175,12 @@ const locStrings =
                 cost: '2p ** (level - 2) (first seed is free)',
                 stages:
                 {
+                    index: [0, 1, 2, 4, 21],
                     0: 'The first shoot rises. Harvestable.',
                     1: 'The shoot splits in three.\\\\The stem lengthens.',
                     2: 'The shoots continue to divide.',
-                    4: 'What do you expect? It\'s a fractal.'
+                    4: 'What do you expect? It\'s a fractal.',
+                    21: 'The first flower appears.',
                 }
             },
             9001: {
@@ -192,6 +194,7 @@ const locStrings =
                 cost: '2p ** (level - 2) (first seed is free)',
                 stages:
                 {
+                    index: [0, 1, 2, 3, 4],
                     0: 'The first shoot rises. Harvestable.',
                     1: 'The shoot splits in three.\\\\The stem lengthens.',
                     2: 'The shoots continue to divide.',
@@ -2561,12 +2564,12 @@ let binarySearch = (arr, target) =>
     while(l < r)
     {
         let m = Math.ceil((l + r) / 2);
-        if(arr[m][0] <= target)
+        if(arr[m] <= target)
             l = m;
         else
             r = m - 1;
     }
-    return arr[l][1];
+    return arr[l];
 }
 
 // Balance parameters
@@ -3205,12 +3208,13 @@ var getSecondaryEquation = () =>
     switch(colonyMode)
     {
         case 1:
-            let commentary = getLoc('plants')[c.id].stages[c.stage];
+            let stages = getLoc('plants')[c.id].stages;
+            let commentary = stages[c.stage] ? stages[c.stage] :
+            binarySearch(stages.index, c.stage);
             return `\\text{${Localization.format(getLoc('colonyProg'),
             c.population, getLoc('plants')[c.id].name, c.stage, c.growth *
             BigNumber.HUNDRED / (PLANT_DATA[c.id].growthCost *
-            BigNumber.from(c.sequence.length)))}}\\\\
-            \\text{${commentary ? commentary : getLoc('stageNotFound')}}\\\\
+            BigNumber.from(c.sequence.length)))}}\\\\\\text{${commentary}}\\\\
             (${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
             \\\\`;
         case 2:
