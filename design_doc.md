@@ -29,8 +29,7 @@ Playstyle: slow, semi active, timing required, reading of plant descriptions
     - [2. Mid-game](#2-mid-game)
     - [3. Late-game](#3-late-game)
     - [4. Misc](#4-misc)
-  - [Tools](#tools)
-  - [UI](#ui)
+  - [Permas \& Milestones](#permas--milestones)
   - [Writing](#writing)
     - [1. Achievements:](#1-achievements)
     - [2. Chapters:](#2-chapters)
@@ -72,6 +71,9 @@ between tau not feeling bloated and pub multipliers not too small)
   - Spend all money once per month (at any day), which then unlocks the publish
   - Like me, Lemma doesn't stick to a schedule other than a basic alarm clock
   - This will reduce player freedom
+- Current: tau based on **maximum p**
+  - Simpler to track than cumulative p
+  - Harder to progress
 
 ### 2. Episodic UX
 
@@ -90,14 +92,17 @@ between tau not feeling bloated and pub multipliers not too small)
 
 - Day night cycles
   - https://www.youtube.com/watch?v=9LgVqx-pV2k
-  - Daily harvest schedule for Lemma (10 AM)
-  - Day is longer and more active?
 - If **1 tick was a minute**, each day would be 1440 ticks (2:24)
-  - 1 month in-game = 72 minutes (publish)
-  - 1 year in-game ~= 14.6 hours
+  - 1 month in-game = 72 minutes IRL
+  - 1 year in-game ~= 14.6 hours IRL
   - 5 years in-game ~= 3.0416 days IRL
-  - Takes about 4~5 years for a big tree to begin bearing fruit
-- Clock: **only shows hour of day** and not minutes?
+- If **1 tick was 1.5 minutes** due to ad reward:
+  - 1 day = 1:36 (960 ticks)
+  - 1 week = 11:12
+  - 1 month = 48:00
+  - 1 year = 9:44:00
+  - 5 years = 2d 00:40:00 (not counting leap years)
+- Clock: **only shows hour of day** and not minutes? If game looks too fast
 - Well that's too long, we should really at least **double the speed**?
   - 36 minutes per publish isn't coffee-break either, but that's the best we got
   - It could enable fast-paced active play of the leeks
@@ -114,43 +119,58 @@ between tau not feeling bloated and pub multipliers not too small)
 - **Six plots**, with 5 locked at the beginning
   - First plot unlock comes early
 - Different plots may have **different properties**?
-  - Might be **too complicated** and **inelegant** - this is not a normal game
-  - Also a **river** for diverse gameplay
+  - Might be **too complicated** and **inelegant** - this is not a realistic
+  - simulation
+- Also a **river** for diverse gameplay
 - **Plot 0** is a wild forest
-  - Contains all sorts of plants that can spread into plots 1~6
-  - Not harvestable, but instead has challenges
-    - Beating them will unlock new plant types
-    - Ideas: 5x+1 Cotton Conjecture, ~~Botched~~ Bloated Linden (lol)
+  - Spawns all sorts of plants that can spread into plots 1~6
+  - Cannot be viewed
+- **Challenge plots** (negative): not harvestable
+  - Beating them will unlock new plant types
+  - Ideas: 5x+1 Cotton Conjecture, ~~Botched~~ Bloated Linden (lol)
 
 ## Plants
 
-- Growth is **based on sequence length** times a per-plant constant?
+- Growth is **based on sequence length** times a per-plant constant
 
 ### 1. Early-game
 
-- **Quick flower bush** that can grow bigger but slows down of course
-  - First free cost
-- **Root veggies** that make you guess how big they are?
+- **Easy solitary flower/capitulum**?
+- **Idle inflorescence** that can grow bigger but slows down
+  - Calendula! The name means 'first day of the month'.
+  - Has a good smell that ~~attracts~~ bunnies (lol)
+    - Prevents bunnies from entering the lawn at all if placed at plot 1
+- **Fast active herb**: Basil
+  - Drawback: includes a fucking inflorescence section that is giant and 
+  noob-unfriendly
+  - Spreadable like mint but weaker??? Infinite basil
 
 ### 2. Mid-game
 
 - **Sunflowers** & sunflower batteries!
   - This cultivar of sunflowers is dysfunctional. They cannot turn their heads to face the sun, even when they're young. Regardless, Lemma often brushes over their heads as if they were her children.
-  - Accelerate plant growth in adjacent plots
   - Its ability to head towards the sun will get weaker as it gets older,
   and the flowers can only stay heading east
+  - Without milestone: very high synthesis rate
+  - With milestone: accelerate plant growth in adjacent plots by distributing
+  its energy
+    - Can technically make it immortal since it stops growing!
   - GIANT SUN FLOWERS LATE GAME
-  - Fact: plants actually grow faster at night, as they photosynthesise in
-  daylight, and use the stored energy at night
-  - Snow buttercups can face sun too - mini snow batteries?
 - **Invasive species** that can slow nearby growth
-  - **Three cornered leek** that spreads at a certain population number
+  - **Three cornered leek** that spreads to nearby plots
     - Rewards active play
   - https://invasiveweedsolutions.co.uk/invasive-weeds/non-native/three-cornered-garlic/
   - Remixed as Hopleek (Bunny Leek) in-game with a weird fictional L-system?
-    - Hopleek nibbles other plants at night when player is offline?
-    - Or when not focusing on the plot with hopleeks?
-      - Nibbles the string from right to left
+    - Only spawns on leap years, from Y8 onwards
+    - Hopleek **nibbles** other plants **when**:
+      - Player is offline at night?
+      - Player is not focusing on the plot with hopleeks?
+      - It evolves?
+    - Bite strength is based on colony size
+    - Nibbles the string from right to left
+    - Avoids marigold/calendula
+    - Extra energy can shield a colony from rabbit bites (sunflower gud)
+    - Bites off basil flowers first!
 
 ### 3. Late-game
 
@@ -162,14 +182,23 @@ between tau not feeling bloated and pub multipliers not too small)
 ### 4. Misc
 
 - Research more: https://hellohomestead.com/dandelions-mint-other-edible-plants-that-spread-and-take-over/
-- Snapdragon / toadflax
-- Striga
+- **Snapdragon** / **toadflax**
+- **Striga**
+- **Buttercup** that reflects light, distributing synthesised energy
+  - Sunflower ripoff
+- **Tulip**, for an easy tutorial-worthy L-system
+- **Root veggies** that make you guess how big they are?
+  - Doesn't work since you can see the income at all times
+- **Thyme** that warps time? PvZ ripoff
+- **Rhizomes?**
+- **Flower gender** mechanic?
 
-## Tools
+## Permas & Milestones
 
+- Pruning can also get seeds?
 - Other plant parts also useful for growth? Like fertilisers
 - Beehives that can spread flowers to adjacent plots
-- Burn plots and torchure plants (very in character)
+- **Burn plots** and **torchure plants** (very in character)
   - Fire spreads too, of course
   - Sunflower is immune
   - Tap repeatedly to extinguish with the nearby river?
@@ -182,42 +211,9 @@ between tau not feeling bloated and pub multipliers not too small)
   - Cutting leaves or harvesting fruits will have the same notation:
   - 24 of Hopleek (20, 30, 35) x Dog rose (48, 59, etc.)
 
-## UI
-
-- Settings:
-  - Reset graph on renderer reset
-  - Performance mode: turns off renderer, make a 2d graph instead
-    - 2d 'screensaver' settings: insolation, growth integrals
-- Top-left overlay: version
-- Previous/next arrows: switch plot
-- Primary: Plot N - Plant name (pollinated, invaded 250)
-- Secondary: x growing, y flowering, z harvestable, w dead
-- Tertiary: Year 1, 1th Jan, HH:MM
-- Quaternary: six plots, displaying harvestable profit
-- Currencies: tau, p, cum p (hidden, or maybe not a currency but a global)
-- Variables:
-  - Change text display mode: L-system, short description, close inspection
-  - Choose plant (only one type of plant per plot, unless leek/mint is
-  spreading)
-  - Plant
-  - Harvest grown plants
-    - Idea: harvest with refunds? probably doesn't work but
-  - Set up auto-harvest
-  - Burn plot (if leek fucks up your plot)
-  - ID order:
-    - (Plot 1) Harvest (when plot 1 is chosen)
-    - (Plot 2~6) Harvest (hidden)
-    - (Plot 1) Choose plant (refundable)
-    - (Plot 2~6) Choose plant
-    - (Plot 1) Plant X (currently chosen)
-    - (Plot 1) Other plants (hidden)
-    - (Plot 2~6) Plant Y (currently chosen) (for autobuy purposes)
-- Perma upgrades:
-  - Alarm clock? In the 18th century? Unlocks auto-harvest and auto-buy.
-  - Fire: can burn all plants on a plot, can spread
-  - Beehive: boosts spreading of flowers, affected by fire smoke?
-  - Settings for the game
 - Milestones:
+  - Marigold (calendula) generates gold (p) passively
+  - Sunflower battery
 
 ## Writing
 
@@ -239,7 +235,7 @@ Minus the sales tax, maintenance, dog food, *plant* food... I wonder why it'd
 always miraculously add up to {0}% each time? Lemma, can [you] prove this?'
 We called it the weather's toll. Just to stop worrying about it too much.
 - **Clickable headlines** (singular upgrade) after certain points:
-  - Hopleek spawning
+  - Hopleek spawning (anticipation on Y4)
   - Published adverts
 - **e100 tau**: Today marked an extraordinary milestone for the eternal farm.
 For the first time, Lemma hosted an excursion with the students from the
