@@ -164,10 +164,29 @@ const locStrings =
 
         plants:
         {
+            1: {
+                name: 'Calendula',
+                info: 'A classic flower to start the month.',
+                details: `Calendula is the friend of all rabbits.`,
+                LsDetails: `The symbol A represents a rising shoot (apex), ` +
+`while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
+`F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
+`kills the colony.`,
+                cost: '2p ** (level - 2) (first seed is free)',
+                stages:
+                {
+                    index: [0, 1, 2, 4, 21],
+                    0: 'The first shoot rises. Harvestable.',
+                    1: 'The shoot splits in three.\\\\The stem lengthens.',
+                    2: 'The shoots continue to divide.',
+                    4: 'What do you expect? It\'s a fractal.',
+                    21: 'The first flower appears.',
+                }
+            },
             2: {
                 name: 'Basil',
                 info: 'A fast growing herb, regularly used for spicing.',
-                details: `Basil is the friend of all dogs.\\\\`,
+                details: `Basil is the friend of all dogs.`,
                 LsDetails: `The symbol A represents a rising shoot (apex), ` +
 `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
 `F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
@@ -186,7 +205,7 @@ const locStrings =
             9001: {
                 name: 'Arrow weed',
                 info: 'Testing my arrow weeds',
-                details: `Arrow weed is the friend of all dogs.\\\\`,
+                details: `Arrow weed is the friend of all dogs.`,
                 LsDetails: `The symbol A represents a rising shoot (apex), ` +
 `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
 `F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
@@ -2575,9 +2594,9 @@ let binarySearch = (arr, target) =>
 // Balance parameters
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(1000)));
-const plantUnlocks = [2, 9001];
+const plantUnlocks = [1, 2, 9001];
 const plantUnlockCosts = new CompositeCost(1, new ConstantCost(1800),
-new ConstantCost(1900));
+new ConstantCost(1e9));
 const permaCosts =
 [
     BigNumber.from(24),
@@ -2597,18 +2616,77 @@ var getPublicationMultiplierFormula = (symbol) =>
 
 const PLANT_DATA =
 {
+    1: {     // Calendula
+        system: new LSystem('+A(0.12, 0)',
+        [
+            'A(r, t): t>=2 && r>=flowerThreshold = K(0)',
+            'A(r, t): r>=flowerThreshold = [++A(r-0.15, 0)][--I(0)]',
+            'A(r, t): t<2 = A(r+0.06, t+1)',
+            'A(r, t) = F(1.5)T[++L(0.06, maxLeafSize)]/(180)[++L(0.06, maxLeafSize)]/(90)A(r, -2)',
+            'I(t): t<4 = F(0.6)T[++L(0.03, maxLeafSize/4)]/(180)[++L(0.03, maxLeafSize/4)]/(90)I(t+1)',
+            'I(t) = K(0)',
+            'K(p): p<maxFlowerSize = K(p+0.25)',
+            'L(r, lim): r<lim = L(r+0.03)',
+            '~> *= Model specification',
+            '~> K(p): p<1.25 = {[w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)]F(min(p, 1.25))[k(min(p, 1.5), p*18)k(min(p, 1.5), p*18)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)]}',
+            '~> K(p): p<2 = {[w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)]F(min(p, 1.25))[k(min(p, 1.5), p*18)k(min(p, 1.5), p*18)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.92, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-9)k(min(p, 1.5)*0.92, p*18-15)][o(min(p, 1.5)*1.75, p*17.5)]}',
+            '~> K(p) = {[w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))]F(min(p, 1.25))[k(min(p, 1.5), p*18)k(min(p, 1.5), p*18)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.92, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-9)k(min(p, 1.5)*0.92, p*18-15)k(min(p, 1.5)*0.92, p*18-15)k(min(p, 1.5)*0.92, p*18-15)k(min(p, 1.5)*0.92, p*18-18)k(min(p, 1.5)*0.92, p*18-18)k(min(p, 1.5)*0.92, p*18-18)k(min(p, 1.5)*0.92, p*18-18)k(min(p, 1.5)*0.92, p*18-18)k(min(p, 1.5)*0.96, p*18-18)][o(min(p, 1.5)*2, p*22.5)o(min(p, 1.5)*1.75, p*17.5)o(min(p, 1.5)*1.5, p*10)]}',
+            '~> w(p, a): p<0.75 = [--(a)F.+++F.&+(a)F.]\\[--(a)F+++F.&+(a)F.]\\[--(a)F+++F.&+(a)F.]\\[--(a)F[+++F.].]',
+            '~> w(p, a): p<1.25 = [--(a)F(p).++F(p).&+F(p).]\\[--(a)F(p)++F(p).&+F(p).]\\[--(a)F(p)++F(p).&+F(p).]\\[--(a)F(p)[++F(p).].]',
+            '~> w(p, a) = [--(a)F(p).++F(p).&-F(p).]\\[--(a)F(p)++F(p).&-F(p).]\\[--(a)F(p)++F(p).&-F(p).]\\[--(a)F(p)[++F(p).].]',
+            '~> k(p, a): p<1.75 = [---(a)F(p/2).+&F(p*2).+^F(p).][---(a)F(p/2)[+^F(p*2)[+&F(p).].].]\\(137.508)',
+            '~> k(p, a) = [---(a)F(p/2).+&F(p*2).-^F(p).][---(a)F(p/2)[+^F(p*2)[-&F(p).].].]\\(137.508)',
+            '~> o(p, a) = [-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]',
+            '~> L(p, lim) = {\\(90)F(sqrt(p)).[-(48)F(sqrt(p)).+F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}'
+        ], 15, 0, '', '', -0.16, {
+            'flowerThreshold': '0.9',
+            'maxFlowerSize': '3',
+            'maxLeafSize': '0.6'
+        }),
+        cost: new FirstFreeCost(new ExponentialCost(1.5, 1)),
+        growthRate: BigNumber.THREE,
+        growthCost: BigNumber.FIVE,
+        actions:
+        [
+            {   // Always a harvest
+                symbols: new Set('K'),
+                system: new LSystem('', ['K=']),
+                killColony: true
+            },
+            {   // Always a prune
+                system: new LSystem('', ['L=']),
+                killColony: false
+            }
+        ],
+        camera: (stage) =>
+        {
+            return {
+                scale: 8,
+                x: 0,
+                y: Math.min(Math.max(5, stage / 4), 9),
+                Z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) =>
+        {
+            return {
+                tickLength: 1,
+            };
+        }
+    },
     2: {    // Basil
-        system: new LSystem('BA(0.12, 0)', [
+        system: new LSystem('BA(0.15, 0)', [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(1.2)[+L(0.03, min(r+0.06, maxLeafp), 0)]/(180)[+TL(0.03, min(r+0.06, maxLeafp), 0)]/(90)I(0)A(r+0.06, 0)',
+            'A(r, t) = F(1.2)[+L(0.03, min(r+0.06, maxLeafSize), 0)]/(180)[+TL(0.03, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
             'I(t): t<2 = I(t+1)',
-            'I(t) = F(0.42)[+TL(0.06, maxLeafp/4, 0)]/(180)[+L(0.06, maxLeafp/4, 0)]',
+            'I(t) = F(0.42)[+TL(0.06, maxLeafSize/4, 0)]/(180)[+L(0.06, maxLeafSize/4, 0)]',
             'F < K(t): t>=signalThreshold && t<=signalThreshold = S(0)[+$K(0)][-$K(0)]K(t)',
             'K(t): t-2 = K(t+1)',
             'K(t) = K(t+1)K(0)',
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
-            'S(type) < L(p, lim, s): s<1 = L(p, p, s+1)',
+            'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
             'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
             'F(l) > S(type): type<=0 = S(type)F(l)',
             'S(type) < F(l): type>=1 = F(l)S(type)',
@@ -2621,18 +2699,18 @@ const PLANT_DATA =
             '~> L(p, lim, s): s<1 = {\\(90)F(sqrt(p)).T(sqrt(p)+0.2)[-(48)F(sqrt(p)).+F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}',
             '~> L(p, lim, s): s>=1 = {\\(90)F(sqrt(lim)).T(sqrt(lim)+0.4)[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
         ], 30, 0, 'BASIL', '+-&^/\\T', 0.06, {
-            'flowerThreshold': '1.32',
-            'maxLeafp': '0.72',
+            'flowerThreshold': '1.35',
+            'maxLeafSize': '0.72',
             'signalThreshold': '4'
         }),
-        cost: new FirstFreeCost(new ExponentialCost(1, 1)),
+        cost: new ExponentialCost(6, 1.5),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.THREE,
         actions:
         [
             {   // Always a harvest
                 symbols: new Set('L'),
-                system: new LSystem('', ['L=']),
+                // system: new LSystem('', ['L=']),
                 killColony: true
             },
             {   // Always a prune
@@ -2645,7 +2723,7 @@ const PLANT_DATA =
             return {
                 scale: 8,
                 x: 0,
-                y: Math.max(5, stage / 4),
+                y: Math.min(Math.max(5, stage / 4), 9),
                 Z: 0,
                 upright: true
             };
@@ -2657,61 +2735,7 @@ const PLANT_DATA =
             };
         }
     },
-    9001: {     // Calendula
-        system: new LSystem('F(4)A(4)K(1)',
-        [
-            'A =',
-            'K(p): p<3 = K(p+0.25)',
-            '~> K(p): p<1.25 = {[w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)]F(min(p, 1.25))[k(min(p, 1.5), p*18)k(min(p, 1.5), p*18)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)]}',
-            '~> K(p): p<2 = {[w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)]F(min(p, 1.25))[k(min(p, 1.5), p*18)k(min(p, 1.5), p*18)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.92, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-9)k(min(p, 1.5)*0.92, p*18-15)][o(min(p, 1.5)*1.75, p*17.5)]}',
-            '~> K(p) = {[w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))]F(min(p, 1.25))[k(min(p, 1.5), p*18)k(min(p, 1.5), p*18)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.92, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-9)k(min(p, 1.5)*0.92, p*18-15)k(min(p, 1.5)*0.92, p*18-15)k(min(p, 1.5)*0.92, p*18-15)k(min(p, 1.5)*0.92, p*18-18)k(min(p, 1.5)*0.92, p*18-18)k(min(p, 1.5)*0.92, p*18-18)k(min(p, 1.5)*0.92, p*18-18)k(min(p, 1.5)*0.92, p*18-18)k(min(p, 1.5)*0.96, p*18-18)][o(min(p, 1.5)*2, p*22.5)o(min(p, 1.5)*1.75, p*17.5)o(min(p, 1.5)*1.5, p*10)]}',
-            '~> w(p, a): p<0.75 = [--(a)F.+++F.&+(a)F.]\\[--(a)F+++F.&+(a)F.]\\[--(a)F+++F.&+(a)F.]\\[--(a)F[+++F.].]',
-            '~> w(p, a): p<1.25 = [--(a)F(p).++F(p).&+F(p).]\\[--(a)F(p)++F(p).&+F(p).]\\[--(a)F(p)++F(p).&+F(p).]\\[--(a)F(p)[++F(p).].]',
-            '~> w(p, a) = [--(a)F(p).++F(p).&-F(p).]\\[--(a)F(p)++F(p).&-F(p).]\\[--(a)F(p)++F(p).&-F(p).]\\[--(a)F(p)[++F(p).].]',
-            '~> k(p, a): p<1.75 = [---(a)F(p/2).+&F(p*2).+^F(p).][---(a)F(p/2)[+^F(p*2)[+&F(p).].].]\\(137.508)',
-            '~> k(p, a) = [---(a)F(p/2).+&F(p*2).-^F(p).][---(a)F(p/2)[+^F(p*2)[-&F(p).].].]\\(137.508)',
-            '~> o(p, a) = [-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]'
-        ], 15, 0, '', '', 0, {}),
-        cost: new FirstFreeCost(new ExponentialCost(1, 1)),
-        growthRate: BigNumber.ONE,
-        growthCost: BigNumber.from(30),
-        actions:
-        [
-            {   // Always a harvest
-                symbols: new Set('B'),
-                system: new LSystem('', ['K(p): p>0 = K(p-0.25)']),
-                killColony: false
-            },
-            {   // Always a prune
-                system: new LSystem('', ['K(p): p<3 = K(p+0.25)']),
-                killColony: false
-            }
-        ],
-        camera: (stage) =>
-        {
-            return {
-                scale: 12,
-                x: 0,
-                y: 6,
-                Z: 0,
-                upright: true
-            };
-        },
-        stroke: (stage) =>
-        {
-            return {
-                tickLength: 1,
-                // initDelay: 0,
-                // loadModels: true,
-                // quickDraw: false,
-                // quickBacktrack: false,
-                // backtrackTail: true,
-                // hesitateApex: true,
-                // hesitateFork: true,
-            };
-        }
-    },
-    9002: {     // Arrow weed
+    9001: {     // Arrow weed
         system: new LSystem('A(1)', [
             'F(l)=F(l*2)',
             'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t)'
@@ -2980,32 +3004,6 @@ var init = () =>
         switchColony.isAvailable = false;
     }
 
-    /* Warp one
-    For testing purposes
-    */
-    {
-        warpOne = theory.createSingularUpgrade(9001, currency, new FreeCost);
-        warpOne.description = 'Warp one day';
-        warpOne.info = 'Warps forward by 144 time units';
-        warpOne.bought = (_) =>
-        {
-            warpOne.level = 0;
-            tick(144, 1);
-        };
-    }
-
-    /* Free penny
-    For testing purposes
-    */
-    {
-        let free_penny = theory.createUpgrade(9001, currency, new FreeCost);
-        free_penny.description = 'Get 1 penny for free';
-        free_penny.info = 'Yields 1 penny';
-        free_penny.bought = (_) => currency.value += BigNumber.ONE;
-        free_penny.isAutoBuyable = false;
-        free_penny.isAvailable = false;
-    }
-
     /* Plants & switch plants
     */
     for(let i = 0; i < maxPlots; ++i)
@@ -3067,22 +3065,22 @@ var init = () =>
             if(plantPerma.level == plantPerma.maxLevel)
                 return Localization.getUpgradeUnlockDesc(getLoc('unlockPlant'));
             if(amount == 1)
-                return Localization.getUpgradeUnlockDesc(`\\text
-                {${getLoc('plants')[plantPerma.level + 1].name}}`);
-            return Localization.getUpgradeUnlockDesc(`\\text
-            {${getLoc('plants')[plantPerma.level + 1].name}~${getLoc('plants')[
-            plantPerma.level + amount].name}}`);
+                return Localization.getUpgradeUnlockDesc(`\\text{${
+                getLoc('plants')[plantUnlocks[plantPerma.level + 1]].name}}`);
+            return Localization.getUpgradeUnlockDesc(`\\text{${
+            getLoc('plants')[plantUnlocks[plantPerma.level + 1]].name}~${
+            getLoc('plants')[plantUnlocks[plantPerma.level + amount]].name}}`);
         }
         plantPerma.getInfo = (amount) =>
         {
             if(plantPerma.level == plantPerma.maxLevel)
                 return Localization.getUpgradeUnlockInfo(getLoc('unlockPlant'));
             if(amount == 1)
-                return Localization.getUpgradeUnlockInfo(`\\text
-                {${getLoc('plants')[plantPerma.level + 1].name}}`);
-            return Localization.getUpgradeUnlockInfo(`\\text
-            {${getLoc('plants')[plantPerma.level + 1].name}~${getLoc('plants')[
-            plantPerma.level + amount].name}}`);
+                return Localization.getUpgradeUnlockInfo(`\\text{${
+                getLoc('plants')[plantUnlocks[plantPerma.level + 1]].name}}`);
+            return Localization.getUpgradeUnlockInfo(`\\text{${
+            getLoc('plants')[plantUnlocks[plantPerma.level + 1]].name}~${
+            getLoc('plants')[plantUnlocks[plantPerma.level + amount]].name}}`);
         }
         plantPerma.bought = (_) =>
         {
@@ -3094,6 +3092,50 @@ var init = () =>
     theory.createPublicationUpgrade(1, currency, permaCosts[0]);
     theory.createBuyAllUpgrade(2, currency, permaCosts[1]);
     theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
+
+    /* Free penny
+    For testing purposes
+    */
+    {
+        let freePenny = theory.createPermanentUpgrade(9001, currency,
+        new FreeCost);
+        freePenny.description = 'Get 1 penny for free';
+        freePenny.info = 'Yields 1 penny';
+        freePenny.bought = (_) => currency.value += BigNumber.ONE;
+        freePenny.isAutoBuyable = false;
+        freePenny.isAvailable = false;
+    }
+    /* Warp zero
+    For testing purposes
+    */
+    {
+        let warpZero = theory.createPermanentUpgrade(9002, currency,
+        new FreeCost);
+        warpZero.description = 'Warp to day 1';
+        warpZero.info = 'Warps backward';
+        warpZero.bought = (_) =>
+        {
+            warpZero.level = 0;
+            time = 0;
+            insolationIntegral = 0;
+            growthIntegral = 0;
+        };
+    }
+    /* Warp one
+    For testing purposes
+    */
+    {
+        let warpOne = theory.createPermanentUpgrade(9003, currency,
+        new FreeCost);
+        warpOne.description = 'Warp one day';
+        warpOne.info = 'Warps forward by 144 time units';
+        warpOne.bought = (_) =>
+        {
+            warpOne.level = 0;
+            tick(144, 1);
+        };
+    }
+
     // To do: challenge plot (-1)
     // Next: plant unlocks and milestones
 
