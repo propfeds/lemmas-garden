@@ -203,8 +203,8 @@ const locStrings =
                 }
             }
         },
-        plantStats: `Cost: {0}\\\\Growth rate: {1} (at night)\\\\Growth ` +
-`cost: {2} * length\\\\Length: {3}`,
+        plantStats: `{0}\\\\—\\\\Cost: {1}\\\\Growth rate: {2} (at night)\\\\` +
+`Growth cost: {3} * length\\\\Length: {4}`,
         stageNotFound: 'No commentary.',
 
         resetRenderer: 'You are about to reset the graph.'
@@ -2389,7 +2389,7 @@ class ColonyManager
         ('derivation' in this.actionDeriveTask && this.actionDeriveTask.start))
         {
             this.actionDeriveTask = PLANT_DATA[c.id].actions[id].system.derive(
-            c.sequence, c.params, null, null, this.actionDeriveTask);
+            c.sequence, c.params, [], [], this.actionDeriveTask);
             return;
         }
         if(!this.actionDeriveTask.derivation.length)
@@ -2657,7 +2657,55 @@ const PLANT_DATA =
             };
         }
     },
-    9001: {     // Arrow weed
+    9001: {     // Calendula
+        system: new LSystem('F(4)A(4)K(1)',
+        [
+            'A =',
+            'K(p): p<3 = K(p+0.25)',
+            '~> K(p) = {[w(1, p*20)w(1, p*20)w(1, p*20)w(1, p*20)w(1, p*20)w(1, p*20)w(1, p*20)w(1, p*20)]F[k(min(p, 1.5), p*20)k(min(p, 1.5), p*20)k(min(p, 1.5), p*20-3)k(min(p, 1.5), p*20-3)k(min(p, 1.5), p*20-6)k(min(p, 1.5), p*20-3)k(min(p, 1.5)*0.96, p*20-9)k(min(p, 1.5)*0.96, p*20-6)k(min(p, 1.5)*0.96, p*20-6)k(min(p, 1.5)*0.92, p*20-9)k(min(p, 1.5)*0.96, p*20-12)k(min(p, 1.5)*0.96, p*20-9)k(min(p, 1.5)*0.92, p*20-15)k(min(p, 1.5)*0.92, p*20-15)k(min(p, 1.5)*0.92, p*20-15)k(min(p, 1.5)*0.92, p*20-18)k(min(p, 1.5)*0.92, p*20-18)k(min(p, 1.5)*0.92, p*20-18)k(min(p, 1.5)*0.92, p*20-21)k(min(p, 1.5)*0.92, p*20-21)k(min(p, 1.5)*0.96, p*20-21)][o(min(p, 1.5)*2, p*25)o(min(p, 1.5)*1.75, p*18.75)o(min(p, 1.5)*1.5, p*12.5)]}',
+            '~> w(p, a) = [--(a)F(p).++F(p).&-F(p).]\\[--(a)F(p)++F(p).&-F(p).]\\[--(a)F(p)++F(p).&-F(p).]\\[--(a)F(p)[++F(p).].]',
+            '~> k(p, a) = [---(a)F(p/2).+&F(p*2).-^F(p).][---(a)F(p/2)[+^F(p*2)[-&F(p).].].]\\(137.508)','~> o(p, a) = [-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]'
+        ], 15, 0, '', '', 0, {}),
+        cost: new FirstFreeCost(new ExponentialCost(1, 1)),
+        growthRate: BigNumber.ONE,
+        growthCost: BigNumber.from(30),
+        actions:
+        [
+            {   // Always a harvest
+                symbols: new Set('B'),
+                system: new LSystem('', ['K(p)=K(p-0.25)']),
+                killColony: false
+            },
+            {   // Always a prune
+                system: new LSystem('', ['K(p): p<3 = K(p+0.25)']),
+                killColony: false
+            }
+        ],
+        camera: (stage) =>
+        {
+            return {
+                scale: 12,
+                x: 0,
+                y: 6,
+                Z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) =>
+        {
+            return {
+                tickLength: 1,
+                // initDelay: 0,
+                // loadModels: true,
+                // quickDraw: false,
+                // quickBacktrack: false,
+                // backtrackTail: true,
+                // hesitateApex: true,
+                // hesitateFork: true,
+            };
+        }
+    },
+    9002: {     // Arrow weed
         system: new LSystem('A(1)', [
             'F(l)=F(l*2)',
             'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t)'
@@ -3209,7 +3257,7 @@ var getSecondaryEquation = () =>
     {
         case 1:
             let stages = getLoc('plants')[c.id].stages;
-            let commentary = stages[c.stage] ? stages[c.stage] :
+            let commentary = stages[c.stage] ||
             binarySearch(stages.index, c.stage);
             return `\\text{${Localization.format(getLoc('colonyProg'),
             c.population, getLoc('plants')[c.id].name, c.stage, c.growth *
@@ -3621,10 +3669,10 @@ let createColonyViewMenu = (colony) =>
     }
     let pageTitle = ui.createLatexLabel
     ({
-        text: `${getLoc('plants')[colony.id].details}\\\\${Localization.format(
-        getLoc('plantStats'), getLoc('plants')[colony.id].cost,
+        text: Localization.format(getLoc('plantStats'),
+        getLoc('plants')[colony.id].details, getLoc('plants')[colony.id].cost,
         PLANT_DATA[colony.id].growthRate, PLANT_DATA[colony.id].growthCost,
-        colony.sequence.length)}`,
+        colony.sequence.length),
         margin: new Thickness(0, 6),
         horizontalTextAlignment: TextAlignment.START,
         verticalTextAlignment: TextAlignment.CENTER
