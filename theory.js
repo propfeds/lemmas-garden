@@ -66,6 +66,8 @@ let actuallyPlanting = true;
 let graphMode2D = 1;
 let graphMode3D = true;
 let colonyMode = 1;
+let colonyViewFilter = '';
+let colonyViewParams = true;
 let textColor = 'ffccff';
 
 let tmpCurrency;
@@ -114,6 +116,8 @@ const locStrings =
         btnPruneKill: 'Prune\\\\(kill)',
         labelSettings: 'Settings: ',
 
+        labelFilter: 'Filter: ',
+        labelParams: 'Parameters: ',
         labelAxiom: 'Axiom: ',
         labelAngle: 'Turning angle (°): ',
         labelRules: 'Production rules: {0}',
@@ -1438,8 +1442,24 @@ class LSystem
         };
     }
 
-    reconstruct(sequence, params, task = {})
+    /**
+     * Reconstructs the string representation of a sequence.
+     * @param {string} sequence the sequence.
+     * @param {any[]} params parameters (optional).
+     * @param {string} filter the filter.
+     * @param {{start: number, result: string}} task the current task.
+     * @returns {{start: number, result: string}}
+     */
+    reconstruct(sequence, params = null, filter = '', task = {})
     {
+        if(!params && !filter)
+        {
+            return {
+                start: 0,
+                result: sequence
+            };
+        }
+        let filterSet = new Set(filter);
         let result = task.result || '';
         let i = task.start || 0;
         for(; i < sequence.length; ++i)
@@ -1451,9 +1471,12 @@ class LSystem
                     result: result
                 }
             }
-            result += sequence[i];
-            if(params[i])
-                result += `(${params[i].join(', ')})`;
+            if(!filter || filterSet.has(sequence[i]))
+            {
+                result += sequence[i];
+                if(params && params[i])
+                    result += `(${params[i].join(', ')})`;
+            }
         }
         return {
             start: 0,
@@ -2622,12 +2645,12 @@ const PLANT_DATA =
             'A(r, t): t>=2 && r>=flowerThreshold = K(0)',
             'A(r, t): r>=flowerThreshold = [++A(r-0.15, 0)][--I(0)]',
             'A(r, t): t<2 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.48, 1.5)T[++L(0.06, maxLeafSize)]/(180)[++L(0.06, maxLeafSize)]/(90)A(r, -2)',
-            'I(t): t<3 = F(0.24, 0.72)T[++L(0.03, maxLeafSize/4)]/(180)[++L(0.03, maxLeafSize/4)]/(90)I(t+1)',
+            'A(r, t) = F(0.48, 1.44)T[++L(0.06, maxLeafSize)]/(180)[++L(0.06, maxLeafSize)]/(90)A(r, -2)',
+            'I(t): t<3 = F(0.24, 0.84)T[++L(0.03, maxLeafSize/4)]/(180)[++L(0.03, maxLeafSize/4)]/(90)I(t+1)',
             'I(t) = K(0)',
             'K(p): p<maxFlowerSize = K(p+0.25)',
             'L(r, lim): r<lim = L(r+0.03, lim)',
-            'F(l, lim): l<lim = F(l+0.06, lim)',
+            'F(l, lim): l<lim = F(l+0.12, lim)',
             '~> *= Model specification',
             '~> K(p): p<1.25 = {[w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)]F(min(p, 1.25))[k(min(p, 1.5), p*18)k(min(p, 1.5), p*18)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)]}',
             '~> K(p): p<2 = {[w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)]F(min(p, 1.25))[k(min(p, 1.5), p*18)k(min(p, 1.5), p*18)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.92, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-9)k(min(p, 1.5)*0.92, p*18-15)][o(min(p, 1.5)*1.75, p*17.5)]}',
@@ -2646,7 +2669,7 @@ const PLANT_DATA =
         }),
         cost: new FirstFreeCost(new ExponentialCost(0.5, Math.log2(3))),
         growthRate: BigNumber.THREE,
-        growthCost: BigNumber.FOUR,
+        growthCost: BigNumber.THREE,
         actions:
         [
             {   // Always a harvest
@@ -2680,9 +2703,9 @@ const PLANT_DATA =
         system: new LSystem('BA(0.15, 0)', [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.54, 1.5)[+L(0.03, min(r+0.06, maxLeafSize), 0)]/(180)[+TL(0.03, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
+            'A(r, t) = F(0.54, 1.5)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+TL(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
             'I(t): t<4 = I(t+1)',
-            'I(t) = F(0.18, 0.42)[+TL(0.06, maxLeafSize/4, 0)]/(180)[+L(0.06, maxLeafSize/4, 0)]',
+            'I(t) = F(0.18, 0.42)[+TL(0.03, maxLeafSize/4, 0)]/(180)[+L(0.03, maxLeafSize/4, 0)]',
             'F < K(t): t>=signalThreshold && t<=signalThreshold = S(0)[+$K(0)][-$K(0)]K(t)',
             'K(t): t-2 = K(t+1)',
             'K(t) = K(t+1)K(0)',
@@ -2693,7 +2716,7 @@ const PLANT_DATA =
             'S(type) < F(l, lim): type>=1 = F(l, lim)S(type)',
             'S(type) =',
             'B > S(type): type<=0 = BS(1)',
-            'F(l, lim): l<lim = F(l+0.06, lim)',
+            'F(l, lim): l<lim = F(l+0.12, lim)',
             '~> *= Model specification',
             '~> K(t) = /(90)F(sqrt(t/4)){[k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//]}',
             '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
@@ -3722,13 +3745,47 @@ let createColonyViewMenu = (colony) =>
     {
         start: 0
     };
+    let filterEntry = ui.createEntry
+    ({
+        text: colonyViewFilter,
+        column: 1,
+        onTextChanged: (ot, nt) =>
+        {
+            colonyViewFilter = nt;
+            reconstructionTask =
+            {
+                start: 0
+            };
+        }
+    });
+    let paramSwitch = ui.createSwitch
+    ({
+        isToggled: colonyViewParams,
+        column: 3,
+        horizontalOptions: LayoutOptions.CENTER,
+        onTouched: (e) =>
+        {
+            if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            e.type == TouchType.LONGPRESS_RELEASED)
+            {
+                Sound.playClick();
+                colonyViewParams = !colonyViewParams;
+                paramSwitch.isToggled = colonyViewParams;
+                reconstructionTask =
+                {
+                    start: 0
+                };
+            }
+        }
+    });
     let updateReconstruction = () =>
     {
         if(!('result' in reconstructionTask) ||
         ('result' in reconstructionTask && reconstructionTask.start))
         {
             reconstructionTask = PLANT_DATA[colony.id].system.reconstruct(
-            colony.sequence, colony.params, reconstructionTask);
+            colony.sequence, colonyViewParams ? colony.params : null,
+            colonyViewFilter, reconstructionTask);
         }
         return reconstructionTask.result;
     }
@@ -3752,8 +3809,7 @@ let createColonyViewMenu = (colony) =>
     let viewButton = ui.createButton
     ({
         text: getLoc('btnView'),
-        row: 0,
-        column: 0,
+        row: 0, column: 0,
         onClicked: () =>
         {
             Sound.playClick();
@@ -3764,8 +3820,7 @@ let createColonyViewMenu = (colony) =>
     let closeButton = ui.createButton
     ({
         text: getLoc('btnClose'),
-        row: 0,
-        column: 1,
+        row: 0, column: 1,
         onClicked: () =>
         {
             Sound.playClick();
@@ -3797,6 +3852,28 @@ let createColonyViewMenu = (colony) =>
                             ]
                         })
                     })
+                }),
+                ui.createGrid
+                ({
+                    columnDefinitions: ['20*', '30*', '30*', '20*'],
+                    children:
+                    [
+                        ui.createLatexLabel
+                        ({
+                            text: getLoc('labelFilter'),
+                            column: 0,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        }),
+                        filterEntry,
+                        ui.createLatexLabel
+                        ({
+                            text: getLoc('labelParams'),
+                            column: 2,
+                            horizontalOptions: LayoutOptions.END,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        }),
+                        paramSwitch
+                    ]
                 }),
                 ui.createBox
                 ({
@@ -4044,6 +4121,8 @@ var getInternalState = () => JSON.stringify
     graphMode2D: graphMode2D,
     graphMode3D: graphMode3D,
     colonyMode: colonyMode,
+    colonyViewFilter: colonyViewFilter,
+    colonyViewParams: colonyViewParams
 }, bigStringify);
 
 var setInternalState = (stateStr) =>
@@ -4083,6 +4162,10 @@ var setInternalState = (stateStr) =>
         graphMode3D = state.graphMode3D;
     if('colonyMode' in state)
         colonyMode = state.colonyMode;
+    if('colonyViewFilter' in state)
+        colonyViewFilter = state.colonyViewFilter;
+    if('colonyViewParams' in state)
+        colonyViewParams = state.colonyViewParams;
 
     actuallyPlanting = false;
     tmpLevels = Array.from({length: maxPlots}, (_) => {return {};});

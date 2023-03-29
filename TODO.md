@@ -17,11 +17,11 @@
 - [ ] Almanac containing plants, L-system help, etc.
 - [ ] Buy All upgrade unlocks maxLevel config
 - [ ] Colour schemes?
-- [ ] View menu has filter function that only shows certain symbols
-  - [ ] Also option to view seq without params
 
 ## v0: Axiom 
 
+- [x] View menu has filter function that only shows certain symbols
+  - [x] Also option to view seq without params
 - [x] Revamp PLANT_DATA structure and the unlocking of new plants
 - [x] Separate 2D & 3D graph options
   - [x] Renderer does not clear graph if 2D graph is enabled
