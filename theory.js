@@ -203,9 +203,9 @@ const locStrings =
                 }
             },
             9001: {
-                name: 'Arrow weed',
+                name: 'Arrow weed (test)',
                 info: 'Testing my arrow weeds',
-                details: `Arrow weed is the friend of all dogs.`,
+                details: `Arrow weed is the friend of all mathematicians.`,
                 LsDetails: `The symbol A represents a rising shoot (apex), ` +
 `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
 `F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
@@ -2617,16 +2617,17 @@ var getPublicationMultiplierFormula = (symbol) =>
 const PLANT_DATA =
 {
     1: {     // Calendula
-        system: new LSystem('+A(0.12, 0)',
+        system: new LSystem('-(9)A(0.12, 0)',
         [
             'A(r, t): t>=2 && r>=flowerThreshold = K(0)',
             'A(r, t): r>=flowerThreshold = [++A(r-0.15, 0)][--I(0)]',
             'A(r, t): t<2 = A(r+0.06, t+1)',
-            'A(r, t) = F(1.5)T[++L(0.06, maxLeafSize)]/(180)[++L(0.06, maxLeafSize)]/(90)A(r, -2)',
-            'I(t): t<4 = F(0.6)T[++L(0.03, maxLeafSize/4)]/(180)[++L(0.03, maxLeafSize/4)]/(90)I(t+1)',
+            'A(r, t) = F(0.42, 1.5)T[++L(0.06, maxLeafSize)]/(180)[++L(0.06, maxLeafSize)]/(90)A(r, -2)',
+            'I(t): t<5 = F(0.18, 0.72)T[++L(0.03, maxLeafSize/4)]/(180)[++L(0.03, maxLeafSize/4)]/(90)I(t+1)',
             'I(t) = K(0)',
             'K(p): p<maxFlowerSize = K(p+0.25)',
-            'L(r, lim): r<lim = L(r+0.03)',
+            'L(r, lim): r<lim = L(r+0.03, lim)',
+            'F(l, lim): l<lim = F(l+0.06, lim)',
             '~> *= Model specification',
             '~> K(p): p<1.25 = {[w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)]F(min(p, 1.25))[k(min(p, 1.5), p*18)k(min(p, 1.5), p*18)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)]}',
             '~> K(p): p<2 = {[w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)]F(min(p, 1.25))[k(min(p, 1.5), p*18)k(min(p, 1.5), p*18)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.92, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-9)k(min(p, 1.5)*0.92, p*18-15)][o(min(p, 1.5)*1.75, p*17.5)]}',
@@ -2638,14 +2639,14 @@ const PLANT_DATA =
             '~> k(p, a) = [---(a)F(p/2).+&F(p*2).-^F(p).][---(a)F(p/2)[+^F(p*2)[-&F(p).].].]\\(137.508)',
             '~> o(p, a) = [-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]',
             '~> L(p, lim) = {\\(90)F(sqrt(p)).[-(48)F(sqrt(p)).+F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}'
-        ], 15, 0, '', '', -0.16, {
+        ], 15, 0, 'A', '', -0.16, {
             'flowerThreshold': '0.9',
             'maxFlowerSize': '3',
             'maxLeafSize': '0.6'
         }),
-        cost: new FirstFreeCost(new ExponentialCost(1.5, 1)),
+        cost: new FirstFreeCost(new ExponentialCost(2, Math.log2(3))),
         growthRate: BigNumber.THREE,
-        growthCost: BigNumber.FIVE,
+        growthCost: BigNumber.FOUR,
         actions:
         [
             {   // Always a harvest
@@ -2679,19 +2680,20 @@ const PLANT_DATA =
         system: new LSystem('BA(0.15, 0)', [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(1.2)[+L(0.03, min(r+0.06, maxLeafSize), 0)]/(180)[+TL(0.03, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
+            'A(r, t) = F(0.42, 1.5)[+L(0.03, min(r+0.06, maxLeafSize), 0)]/(180)[+TL(0.03, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
             'I(t): t<2 = I(t+1)',
-            'I(t) = F(0.42)[+TL(0.06, maxLeafSize/4, 0)]/(180)[+L(0.06, maxLeafSize/4, 0)]',
+            'I(t) = F(0.12, 0.42)[+TL(0.06, maxLeafSize/4, 0)]/(180)[+L(0.06, maxLeafSize/4, 0)]',
             'F < K(t): t>=signalThreshold && t<=signalThreshold = S(0)[+$K(0)][-$K(0)]K(t)',
             'K(t): t-2 = K(t+1)',
             'K(t) = K(t+1)K(0)',
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
             'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
             'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
-            'F(l) > S(type): type<=0 = S(type)F(l)',
-            'S(type) < F(l): type>=1 = F(l)S(type)',
+            'F(l, lim) > S(type): type<=0 = S(type)F(l, lim)',
+            'S(type) < F(l, lim): type>=1 = F(l, lim)S(type)',
             'S(type) =',
             'B > S(type): type<=0 = BS(1)',
+            'F(l, lim): l<lim = F(l+0.06, lim)',
             '~> *= Model specification',
             '~> K(t) = /(90)F(sqrt(t/4)){[k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//]}',
             '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
@@ -2703,7 +2705,7 @@ const PLANT_DATA =
             'maxLeafSize': '0.72',
             'signalThreshold': '4'
         }),
-        cost: new ExponentialCost(6, 1.5),
+        cost: new ExponentialCost(6, 1),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.THREE,
         actions:
@@ -3102,8 +3104,6 @@ var init = () =>
         freePenny.description = 'Get 1 penny for free';
         freePenny.info = 'Yields 1 penny';
         freePenny.bought = (_) => currency.value += BigNumber.ONE;
-        freePenny.isAutoBuyable = false;
-        freePenny.isAvailable = false;
     }
     /* Warp zero
     For testing purposes
@@ -3111,14 +3111,17 @@ var init = () =>
     {
         let warpZero = theory.createPermanentUpgrade(9002, currency,
         new FreeCost);
-        warpZero.description = 'Warp to day 1';
+        warpZero.description = 'Warp to day 1 (press 5 times to confirm)';
         warpZero.info = 'Warps backward';
         warpZero.bought = (_) =>
         {
-            warpZero.level = 0;
-            time = 0;
-            insolationIntegral = 0;
-            growthIntegral = 0;
+            if(warpZero.level > 4)
+            {
+                warpZero.level = 0;
+                time = 0;
+                insolationIntegral = 0;
+                growthIntegral = 0;
+            }
         };
     }
     /* Warp one
@@ -3133,6 +3136,20 @@ var init = () =>
         {
             warpOne.level = 0;
             tick(144, 1);
+        };
+    }
+    /* Warp tick
+    For testing purposes
+    */
+    {
+        let warpTick = theory.createPermanentUpgrade(9004, currency,
+        new FreeCost);
+        warpTick.description = 'Warp one tick';
+        warpTick.info = 'Warps forward by 1.5 time units';
+        warpTick.bought = (_) =>
+        {
+            warpTick.level = 0;
+            tick(1, 1.5);
         };
     }
 
