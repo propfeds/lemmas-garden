@@ -66,8 +66,7 @@ let actuallyPlanting = true;
 let graphMode2D = 1;
 let graphMode3D = true;
 let colonyMode = 1;
-let colonyViewFilter = '';
-let colonyViewParams = true;
+let colonyViewConfig = {};
 let textColor = 'ffccff';
 
 let tmpCurrency;
@@ -3741,17 +3740,25 @@ let createSystemMenu = (id) =>
 
 let createColonyViewMenu = (colony) =>
 {
+    if(!colonyViewConfig[colony.id])
+    {
+        colonyViewConfig[colony.id] =
+        {
+            filter: '',
+            params: true
+        };
+    }
     let reconstructionTask =
     {
         start: 0
     };
     let filterEntry = ui.createEntry
     ({
-        text: colonyViewFilter,
+        text: colonyViewConfig[colony.id].filter,
         column: 1,
         onTextChanged: (ot, nt) =>
         {
-            colonyViewFilter = nt;
+            colonyViewConfig[colony.id].filter = nt;
             reconstructionTask =
             {
                 start: 0
@@ -3760,7 +3767,7 @@ let createColonyViewMenu = (colony) =>
     });
     let paramSwitch = ui.createSwitch
     ({
-        isToggled: colonyViewParams,
+        isToggled: colonyViewConfig[colony.id].params,
         column: 3,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e) =>
@@ -3769,8 +3776,9 @@ let createColonyViewMenu = (colony) =>
             e.type == TouchType.LONGPRESS_RELEASED)
             {
                 Sound.playClick();
-                colonyViewParams = !colonyViewParams;
-                paramSwitch.isToggled = colonyViewParams;
+                colonyViewConfig[colony.id].params =
+                !colonyViewConfig[colony.id].params;
+                paramSwitch.isToggled = colonyViewConfig[colony.id].params;
                 reconstructionTask =
                 {
                     start: 0
@@ -3784,8 +3792,9 @@ let createColonyViewMenu = (colony) =>
         ('result' in reconstructionTask && reconstructionTask.start))
         {
             reconstructionTask = PLANT_DATA[colony.id].system.reconstruct(
-            colony.sequence, colonyViewParams ? colony.params : null,
-            colonyViewFilter, reconstructionTask);
+            colony.sequence, colonyViewConfig[colony.id].params ?
+            colony.params : null, colonyViewConfig[colony.id].filter,
+            reconstructionTask);
         }
         return reconstructionTask.result;
     }
@@ -4121,8 +4130,7 @@ var getInternalState = () => JSON.stringify
     graphMode2D: graphMode2D,
     graphMode3D: graphMode3D,
     colonyMode: colonyMode,
-    colonyViewFilter: colonyViewFilter,
-    colonyViewParams: colonyViewParams
+    colonyViewConfig: colonyViewConfig
 }, bigStringify);
 
 var setInternalState = (stateStr) =>
@@ -4162,10 +4170,8 @@ var setInternalState = (stateStr) =>
         graphMode3D = state.graphMode3D;
     if('colonyMode' in state)
         colonyMode = state.colonyMode;
-    if('colonyViewFilter' in state)
-        colonyViewFilter = state.colonyViewFilter;
-    if('colonyViewParams' in state)
-        colonyViewParams = state.colonyViewParams;
+    if('colonyViewConfig' in state)
+        colonyViewConfig = state.colonyViewConfig;
 
     actuallyPlanting = false;
     tmpLevels = Array.from({length: maxPlots}, (_) => {return {};});

@@ -22,6 +22,7 @@
 
 - [x] View menu has filter function that only shows certain symbols
   - [x] Also option to view seq without params
+  - [x] Save plant-dependent filter configs
 - [x] Revamp PLANT_DATA structure and the unlocking of new plants
 - [x] Separate 2D & 3D graph options
   - [x] Renderer does not clear graph if 2D graph is enabled
@@ -31,6 +32,9 @@
     - Tulip?
     - Buttercup
   - [ ] Idleable plant: calendula
+    - [ ] Fix flower model size
+    - [ ] Model leaves
+    - [ ] Write description, LS description and commentary
   - [x] Fast 'active' plant: basil
     - [ ] Write description, LS description and commentary
 - [x] Icons
