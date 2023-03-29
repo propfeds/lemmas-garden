@@ -175,7 +175,6 @@ const locStrings =
 `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
 `F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
 `kills the colony.`,
-                cost: '2p ** (level - 2) (first seed is free)',
                 stages:
                 {
                     index: [0, 1, 2, 4, 21],
@@ -194,7 +193,6 @@ const locStrings =
 `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
 `F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
 `kills the colony.`,
-                cost: '2p ** (level - 2) (first seed is free)',
                 stages:
                 {
                     index: [0, 1, 2, 4, 21],
@@ -213,7 +211,6 @@ const locStrings =
 `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
 `F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
 `kills the colony.`,
-                cost: '2p ** (level - 2) (first seed is free)',
                 stages:
                 {
                     index: [0, 1, 2, 3, 4],
@@ -225,8 +222,8 @@ const locStrings =
                 }
             }
         },
-        plantStats: `{0}\\\\—\\\\Cost: {1}\\\\Growth rate: {2} (at night)\\\\` +
-`Growth cost: {3} * length\\\\Length: {4}`,
+        plantStats: `{0}\\\\—\\\\Growth rate: {1} (at night)\\\\` +
+`Growth cost: {2} * {3} (length)`,
         stageNotFound: 'No commentary.',
 
         resetRenderer: 'You are about to reset the graph.'
@@ -2301,7 +2298,7 @@ class ColonyManager
         c.population);
         if(index == this.colonies[plot].length - 1)
             switchColony.buy(1);
-        if(this.gangsta && plot == gangsta[0])
+        if(this.gangsta && plot == this.gangsta[0])
         {
             this.ancestreeTask =
             {
@@ -2615,9 +2612,9 @@ let binarySearch = (arr, target) =>
 
 // Balance parameters
 
-const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(1000)));
+const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(100)));
 const plantUnlocks = [1, 2, 9001];
-const plantUnlockCosts = new CompositeCost(1, new ConstantCost(1800),
+const plantUnlockCosts = new CompositeCost(1, new ConstantCost(900),
 new ConstantCost(1e9));
 const permaCosts =
 [
@@ -2641,27 +2638,28 @@ const PLANT_DATA =
     1: {     // Calendula
         system: new LSystem('-(9)A(0.12, 0)',
         [
-            'A(r, t): t>=2 && r>=flowerThreshold = K(0)',
+            'A(r, t): t>=2 && r>=flowerThreshold = F(0.48, 1.2)K(0)',
             'A(r, t): r>=flowerThreshold = [++A(r-0.15, 0)][--I(0)]',
             'A(r, t): t<2 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.48, 1.44)T[++L(0.06, maxLeafSize)]/(180)[++L(0.06, maxLeafSize)]/(90)A(r, -2)',
-            'I(t): t<3 = F(0.24, 0.84)T[++L(0.03, maxLeafSize/4)]/(180)[++L(0.03, maxLeafSize/4)]/(90)I(t+1)',
-            'I(t) = K(0)',
+            'A(r, t) = F(0.36, 0.96)T[++L(0.06, maxLeafSize)]/(180)[++L(0.06, maxLeafSize)]/(90)A(r, -2)',
+            'I(t): t<3 = F(0.36, 0.96)T[++L(0.03, maxLeafSize/5)]/(180)[++L(0.03, maxLeafSize/5)]/(90)I(t+1)',
+            'I(t) = F(0.48, 1.2)K(0)',
             'K(p): p<maxFlowerSize = K(p+0.25)',
             'L(r, lim): r<lim = L(r+0.03, lim)',
             'F(l, lim): l<lim = F(l+0.12, lim)',
             '~> *= Model specification',
-            '~> K(p): p<1.25 = {[w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)w(p, 36)]F(min(p, 1.25))[k(min(p, 1.5), p*18)k(min(p, 1.5), p*18)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)]}',
-            '~> K(p): p<2 = {[w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)w(1, 36)]F(min(p, 1.25))[k(min(p, 1.5), p*18)k(min(p, 1.5), p*18)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.92, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-9)k(min(p, 1.5)*0.92, p*18-15)][o(min(p, 1.5)*1.75, p*17.5)]}',
-            '~> K(p) = {[w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))w(1, max(p*18, 42))]F(min(p, 1.25))[k(min(p, 1.5), p*18)k(min(p, 1.5), p*18)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5), p*18-3)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.92, p*18-6)k(min(p, 1.5)*0.96, p*18-6)k(min(p, 1.5)*0.96, p*18-9)k(min(p, 1.5)*0.92, p*18-15)k(min(p, 1.5)*0.92, p*18-15)k(min(p, 1.5)*0.92, p*18-15)k(min(p, 1.5)*0.92, p*18-18)k(min(p, 1.5)*0.92, p*18-18)k(min(p, 1.5)*0.92, p*18-18)k(min(p, 1.5)*0.92, p*18-18)k(min(p, 1.5)*0.92, p*18-18)k(min(p, 1.5)*0.96, p*18-18)][o(min(p, 1.5)*2, p*22.5)o(min(p, 1.5)*1.75, p*17.5)o(min(p, 1.5)*1.5, p*10)]}',
-            '~> w(p, a): p<0.75 = [--(a)F.+++F.&+(a)F.]\\[--(a)F+++F.&+(a)F.]\\[--(a)F+++F.&+(a)F.]\\[--(a)F[+++F.].]',
-            '~> w(p, a): p<1.25 = [--(a)F(p).++F(p).&+F(p).]\\[--(a)F(p)++F(p).&+F(p).]\\[--(a)F(p)++F(p).&+F(p).]\\[--(a)F(p)[++F(p).].]',
+            '~> K(p): p<1.25 = {[w(p/4, 42)w(p/4, 42)w(p/4, 42)w(p/4, 42)w(p/4, 42)w(p/4, 42)w(p/4, 42)w(p/4, 42)]F(min(p, 1.25)/4)[k(min(p, 1.5)/4, p*18)k(min(p, 1.5)/4, p*18)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)*0.24, p*18-6)k(min(p, 1.5)*0.24, p*18-6)]}',
+            '~> K(p): p<2 = {[w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)]F(min(p, 1.25)/4)[k(min(p, 1.5)/4, p*18)k(min(p, 1.5)/4, p*18)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)*0.24, p*18-6)k(min(p, 1.5)*0.24, p*18-6)k(min(p, 1.5)*0.24, p*18-6)k(min(p, 1.5)*0.23, p*18-6)k(min(p, 1.5)*0.24, p*18-6)k(min(p, 1.5)*0.24, p*18-9)k(min(p, 1.5)*0.23, p*18-15)][o(min(p, 1.5)*0.22, p*17.5)]}',
+            '~> K(p) = {[w(0.5, max(p*18, 42))w(0.5, max(p*18, 42))w(0.5, max(p*18, 42))w(0.5, max(p*18, 42))w(0.5, max(p*18, 42))w(0.5, max(p*18, 42))w(0.5, max(p*18, 42))w(0.5, max(p*18, 42))]F(min(p, 1.25)/4)[k(min(p, 1.5)/4, p*18)k(min(p, 1.5)/4, p*18)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)*0.24, p*18-6)k(min(p, 1.5)*0.24, p*18-6)k(min(p, 1.5)*0.24, p*18-6)k(min(p, 1.5)*0.23, p*18-6)k(min(p, 1.5)*0.24, p*18-6)k(min(p, 1.5)*0.24, p*18-9)k(min(p, 1.5)*0.23, p*18-15)k(min(p, 1.5)*0.23, p*18-15)k(min(p, 1.5)*0.23, p*18-15)k(min(p, 1.5)*0.23, p*18-18)k(min(p, 1.5)*0.23, p*18-18)k(min(p, 1.5)*0.23, p*18-18)k(min(p, 1.5)*0.23, p*18-18)k(min(p, 1.5)*0.23, p*18-18)k(min(p, 1.5)*0.24, p*18-18)][o(min(p, 1.5)/4, p*22.5)o(min(p, 1.5)*0.22, p*17.5)o(min(p, 1.5)*0.18, p*10)]}',
+            '~> w(p, a): p<0.25 = [--(a)F(0.5).++(a)F(0.5).&+(a)F(0.5).]\\[--(a)F(0.5)++(a)F(0.5).&+(a)F(0.5).]\\[--(a)F(0.5)++(a)F(0.5).&+(a)F(0.5).]\\[--(a)F(0.5)[++(a)F(0.5).].]',
+            '~> w(p, a): p<0.5 = [--(a)F(p).++F(p).&+F(p).]\\[--(a)F(p)++F(p).&+F(p).]\\[--(a)F(p)++F(p).&+F(p).]\\[--(a)F(p)[++F(p).].]',
             '~> w(p, a) = [--(a)F(p).++F(p).&-F(p).]\\[--(a)F(p)++F(p).&-F(p).]\\[--(a)F(p)++F(p).&-F(p).]\\[--(a)F(p)[++F(p).].]',
-            '~> k(p, a): p<1.75 = [---(a)F(p/2).+&F(p*2).+^F(p).][---(a)F(p/2)[+^F(p*2)[+&F(p).].].]\\(137.508)',
+            '~> k(p, a): p<0.5 = [---(a)F(p/2).+&F(p*2).+^F(p).][---(a)F(p/2)[+^F(p*2)[+&F(p).].].]\\(137.508)',
+            '~> k(p, a): p<0.75 = [---(a)F(p/2).+&F(p*2).^F(p).][---(a)F(p/2)[+^F(p*2)[&F(p).].].]\\(137.508)',
             '~> k(p, a) = [---(a)F(p/2).+&F(p*2).-^F(p).][---(a)F(p/2)[+^F(p*2)[-&F(p).].].]\\(137.508)',
-            '~> o(p, a) = [-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]\\\\[-(a)F(p/2).]',
+            '~> o(p, a) = [-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]',
             '~> L(p, lim) = {\\(90)F(sqrt(p)).[-(48)F(sqrt(p)).+F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}'
-        ], 15, 0, 'A', '', -0.16, {
+        ], 15, 0, 'A', '', -0.24, {
             'flowerThreshold': '0.9',
             'maxFlowerSize': '3',
             'maxLeafSize': '0.6'
@@ -2720,8 +2718,8 @@ const PLANT_DATA =
             '~> K(t) = /(90)F(sqrt(t/4)){[k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//]}',
             '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
-            '~> L(p, lim, s): s<1 = {\\(90)F(sqrt(p)).T(sqrt(p)+0.2)[-(48)F(sqrt(p)).+F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}',
-            '~> L(p, lim, s): s>=1 = {\\(90)F(sqrt(lim)).T(sqrt(lim)+0.4)[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
+            '~> L(p, lim, s): s<1 = {\\(90)F(sqrt(p)).T(p*2)[-(48)F(sqrt(p)).+F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}',
+            '~> L(p, lim, s): s>=1 = {\\(90)F(sqrt(lim)).T(lim*3)[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
         ], 30, 0, 'BASIL', '+-&^/\\T', 0.06, {
             'flowerThreshold': '1.35',
             'maxLeafSize': '0.72',
@@ -3345,7 +3343,7 @@ var getSecondaryEquation = () =>
         case 1:
             let stages = getLoc('plants')[c.id].stages;
             let commentary = stages[c.stage] ||
-            binarySearch(stages.index, c.stage);
+            stages[binarySearch(stages.index, c.stage)];
             return `\\text{${Localization.format(getLoc('colonyProg'),
             c.population, getLoc('plants')[c.id].name, c.stage, c.growth *
             BigNumber.HUNDRED / (PLANT_DATA[c.id].growthCost *
@@ -3801,9 +3799,8 @@ let createColonyViewMenu = (colony) =>
     let pageTitle = ui.createLatexLabel
     ({
         text: Localization.format(getLoc('plantStats'),
-        getLoc('plants')[colony.id].details, getLoc('plants')[colony.id].cost,
-        PLANT_DATA[colony.id].growthRate, PLANT_DATA[colony.id].growthCost,
-        colony.sequence.length),
+        getLoc('plants')[colony.id].details, PLANT_DATA[colony.id].growthRate,
+        PLANT_DATA[colony.id].growthCost, colony.sequence.length),
         margin: new Thickness(0, 6),
         horizontalTextAlignment: TextAlignment.START,
         verticalTextAlignment: TextAlignment.CENTER
