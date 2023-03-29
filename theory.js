@@ -3144,12 +3144,12 @@ var init = () =>
     {
         let warpTick = theory.createPermanentUpgrade(9004, currency,
         new FreeCost);
-        warpTick.description = 'Warp one tick';
-        warpTick.info = 'Warps forward by 1.5 time units';
+        warpTick.description = 'Warp 1.5 minutes';
+        warpTick.info = 'Warps forward by 0.15 time units';
         warpTick.bought = (_) =>
         {
             warpTick.level = 0;
-            tick(1, 1.5);
+            tick(0.15, 1);
         };
     }
 
