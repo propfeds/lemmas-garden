@@ -2622,8 +2622,8 @@ const PLANT_DATA =
             'A(r, t): t>=2 && r>=flowerThreshold = K(0)',
             'A(r, t): r>=flowerThreshold = [++A(r-0.15, 0)][--I(0)]',
             'A(r, t): t<2 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.42, 1.5)T[++L(0.06, maxLeafSize)]/(180)[++L(0.06, maxLeafSize)]/(90)A(r, -2)',
-            'I(t): t<5 = F(0.18, 0.72)T[++L(0.03, maxLeafSize/4)]/(180)[++L(0.03, maxLeafSize/4)]/(90)I(t+1)',
+            'A(r, t) = F(0.54, 1.5)T[++L(0.06, maxLeafSize)]/(180)[++L(0.06, maxLeafSize)]/(90)A(r, -2)',
+            'I(t): t<5 = F(0.24, 0.72)T[++L(0.03, maxLeafSize/4)]/(180)[++L(0.03, maxLeafSize/4)]/(90)I(t+1)',
             'I(t) = K(0)',
             'K(p): p<maxFlowerSize = K(p+0.25)',
             'L(r, lim): r<lim = L(r+0.03, lim)',
@@ -2644,7 +2644,7 @@ const PLANT_DATA =
             'maxFlowerSize': '3',
             'maxLeafSize': '0.6'
         }),
-        cost: new FirstFreeCost(new ExponentialCost(2, Math.log2(3))),
+        cost: new FirstFreeCost(new ExponentialCost(0.5, Math.log2(3))),
         growthRate: BigNumber.THREE,
         growthCost: BigNumber.FOUR,
         actions:
@@ -2680,9 +2680,9 @@ const PLANT_DATA =
         system: new LSystem('BA(0.15, 0)', [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.42, 1.5)[+L(0.03, min(r+0.06, maxLeafSize), 0)]/(180)[+TL(0.03, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
+            'A(r, t) = F(0.54, 1.5)[+L(0.03, min(r+0.06, maxLeafSize), 0)]/(180)[+TL(0.03, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
             'I(t): t<2 = I(t+1)',
-            'I(t) = F(0.12, 0.42)[+TL(0.06, maxLeafSize/4, 0)]/(180)[+L(0.06, maxLeafSize/4, 0)]',
+            'I(t) = F(0.18, 0.42)[+TL(0.06, maxLeafSize/4, 0)]/(180)[+L(0.06, maxLeafSize/4, 0)]',
             'F < K(t): t>=signalThreshold && t<=signalThreshold = S(0)[+$K(0)][-$K(0)]K(t)',
             'K(t): t-2 = K(t+1)',
             'K(t) = K(t+1)K(0)',
