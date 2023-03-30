@@ -13,3 +13,7 @@ T9, the last theory) then enter the picking menu. Press the `+` symbol and
 paste the URL in.
 
 ## Screenshots
+
+![ss1](screenshots/00.png "Kneel to the Basil Tower.")
+
+> Kneel to the Basil Tower.

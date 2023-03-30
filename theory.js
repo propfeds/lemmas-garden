@@ -2517,8 +2517,10 @@ class ColonyManager
     }
     performAction(plot, index, id)
     {
-        if(!this.colonies[plot][index])
+        let c = this.colonies[plot][index];
+        if(!c || !PLANT_DATA[c.id].actions[id])
             return;
+
         let action = [plot, index, id];
         if(this.actionGangsta)
         {
@@ -2673,11 +2675,8 @@ const PLANT_DATA =
                 symbols: new Set('K'),
                 system: new LSystem('', ['K=']),
                 killColony: true
-            },
-            {   // Always a prune
-                system: new LSystem('', ['L=']),
-                killColony: false
             }
+            // No prune
         ],
         camera: (stage) =>
         {
@@ -2719,8 +2718,8 @@ const PLANT_DATA =
             '~> K(t) = /(90)F(sqrt(t/4)){[k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//]}',
             '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
-            '~> L(p, lim, s): s<1 = {\\(90)F(sqrt(p)).T(p*2)[-(48)F(sqrt(p)).+F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}',
-            '~> L(p, lim, s): s>=1 = {\\(90)F(sqrt(lim)).T(lim*3)[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
+            '~> L(p, lim, s): s<1 = {\\(90)T(p*1.6)F(sqrt(p)).[-(48)F(sqrt(p)).+F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}',
+            '~> L(p, lim, s): s>=1 = {\\(90)T(lim*2.4)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
         ], 30, 0, 'BASIL', '+-&^/\\T', 0.06, {
             'flowerThreshold': '1.35',
             'maxLeafSize': '0.72',
@@ -2906,6 +2905,13 @@ const harvestLabel = ui.createLatexLabel
 });
 const pruneFrame = createFramedButton
 ({
+    isVisible: () =>
+    {
+        let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+        if(!c || !PLANT_DATA[c.id].actions[1])
+            return false;
+        return true;
+    },
     row: 0, column: 2,
 }, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 1),
 game.settings.theme == Theme.LIGHT ?
@@ -2913,6 +2919,13 @@ ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/tr
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.png'));
 const pruneLabel = ui.createLatexLabel
 ({
+    isVisible: () =>
+    {
+        let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+        if(!c || !PLANT_DATA[c.id].actions[1])
+            return false;
+        return true;
+    },
     row: 0, column: 3,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
@@ -3356,7 +3369,7 @@ var getSecondaryEquation = () =>
             getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
             g=${c.growth}/${PLANT_DATA[c.id].growthCost *
             BigNumber.from(c.sequence.length)}\\\\
-            r_s=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}
+            P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}
             \\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
             \\\\`;
         case 3:
