@@ -168,16 +168,18 @@ const locStrings =
 
         plants:
         {
-            1: {
+            1:
+            {
                 name: 'Calendula',
                 info: 'A classic flower to start the month.',
-                details: `Also known as pot marigold (not to be confused with
-marigolds of the genus Tagetes), calendulas are fast growing flowers. The 'pot'
-in their name refers to their numerous culinary uses.`,
+                details: `Commonly called pot marigold (not to be confused with
+marigolds of the genus Tagetes), calendulas are fast growing flowers known for
+numerous medicinal and culinary uses. In fact, the 'pot' in its name refers to
+it being an ingredient in soups, stews, broths and teas.`,
                 LsDetails: `Symbols:\\\\A: apex (stem shoot)\\\\F: internode
-\\\\I : flower stem (not internode)\\\\K: flower\\\\L: leaf\\\\—\\\\The Harvest
-command returns profit as the sum of all K.\\\\—\\\\The Model specification
-section can be ignored.`,
+\\\\I : flower stem (not internode)\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest
+returns profit as the sum of all K.\\\\—\\\\The Model specification section can
+be ignored.`,
                 stages:
                 {
                     index:
@@ -188,7 +190,7 @@ section can be ignored.`,
                         19,
                         20,
                         21, 22,
-                        23, 25, 26, 28, 29, 33, 34, 38, 42
+                        23, 25, 26, 28, 29, 33, 37, 38, 42
                     ],
                     0: 'A seedling in its warm slumber.',
                     2: 'An old sentiment in reminiscence.',
@@ -215,30 +217,60 @@ the other stem split again.`,
                     28: 'My wife loved to eat these raw.',
                     29: `Try it!\\\\No, don't. We'll sell them.`,
                     33: 'The first flower matures.',
-                    34: 'The second flower matures.',
+                    37: 'The second flower matures.',
                     38: 'All flowers have reached maturity.',
                     42: `These flowers won't decay if\\\\you leave them be.`,
                 }
             },
-            2: {
+            2:
+            {
                 name: 'Basil',
                 info: 'A fast growing herb, regularly used for spicing.',
-                details: `Basil is the friend of all dogs.`,
-                LsDetails: `The symbol A represents a rising shoot (apex), ` +
-`while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
-`F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
-`kills the colony.`,
+                details: `Hailed as the 'king/queen of herbs' all throughout the
+world, basil is used as a spice in a vast number of recipes. Even dogs can enjoy
+basil.`,
+                LsDetails: `Symbols:\\\\A: apex (stem shoot)\\\\B: base\\\\F:
+internode\\\\I : shortened stem (not internode)\\\\K: flower\\\\L: leaf\\\\—
+\\\\Harvest returns profit as the sum of all L.\\\\Prune cuts off all K.\\\\—
+\\\\The Model specification section can be ignored.`,
                 stages:
                 {
-                    index: [0, 1, 2, 4, 21],
-                    0: 'The first shoot rises. Harvestable.',
-                    1: 'The shoot splits in three.\\\\The stem lengthens.',
-                    2: 'The shoots continue to divide.',
-                    4: 'What do you expect? It\'s a fractal.',
-                    21: 'The first flower appears.',
+                    index:
+                    [
+                        0, 4, 8, 9, 12, 13, 14, 17, 21,
+                        23,
+                        30,
+                        31,
+                        40,
+                        41,
+                        42
+                    ],
+                    0: 'A seedling in its sweet slumber.',
+                    4: 'The first pair of leaves pops up.\\\\A stem, as well.',
+                    8: 'The second pair of leaves appears.',
+                    9: 'Little leaves start to grow over\\\\the first node.',
+                    12: 'The third pair of leaves appears.',
+                    13: 'Little leaves now grow over\\\\the second node.',
+                    14: 'This rhythm will repeat for a while.',
+                    17: `I'll show you what to do when it\\\\flowers, soon.`,
+                    21: `The first flower appears. If you're\\\\to harvest
+later, snip it off now.`,
+                    23: `Once the flower tower reaches a\\\\certain size, the
+leaves will lose\\\\their flavours.`,
+                    30: `Now, if the flowers were still there,\\\\imagine a
+signal sent by them.`,
+                    31: `This signal would travel from top\\\\to bottom, all the
+way to basil base.`,
+                    40: `Basil base catches the signal.\\\\'Basil Base,
+Inflorescence calling.\\\\Go into seed.'`,
+                    41: `Basil base sends a return signal.\\\\This time, to the
+leaves.`,
+                    42: `Leaf Squadron, Basil Base calling.\\\\Prepare to
+self-destruct.`
                 }
             },
-            9001: {
+            9001:
+            {
                 name: 'Arrow weed (test)',
                 info: 'Testing my arrow weeds',
                 details: `Arrow weed is the friend of all mathematicians.`,
@@ -2650,7 +2682,7 @@ class ColonyManager
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(100)));
 const plantUnlocks = [1, 2, 9001];
-const plantUnlockCosts = new CompositeCost(1, new ConstantCost(900),
+const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2200),
 new ConstantCost(1e9));
 const permaCosts =
 [
@@ -2671,7 +2703,8 @@ var getPublicationMultiplierFormula = (symbol) =>
 
 const PLANT_DATA =
 {
-    1: {     // Calendula
+    1:  // Calendula
+    {
         system: new LSystem('-(6)A(0.12, 0)',
         [
             'A(r, t): t>=2 && r>=flowerThreshold = F(0.66, 1.5)K(0)',
@@ -2731,14 +2764,15 @@ const PLANT_DATA =
             };
         }
     },
-    2: {    // Basil
+    2:  // Basil
+    {
         system: new LSystem('BA(0.15, 0)',
         [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.42, 1.5)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
+            'A(r, t) = F(0.48, 1.56)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
             'I(t): t<4 = I(t+1)',
-            'I(t) = F(0.18, 0.42)[+L(0.03, maxLeafSize/4, 0)]/(180)[+L(0.03, maxLeafSize/4, 0)]',
+            'I(t) = F(0.06, 0.42)[+L(0.03, maxLeafSize/4, 0)]/(180)[+L(0.03, maxLeafSize/4, 0)]',
             'F < K(t): t>=signalThreshold && t<=signalThreshold = S(0)[+$K(0)][-$K(0)]K(t)',
             'K(t): t-2 = K(t+1)',
             'K(t) = K(t+1)K(0)',
@@ -2751,7 +2785,7 @@ const PLANT_DATA =
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)',
             '~> *= Model specification',
-            '~> K(t) = /(90)F(sqrt(t/4)){[k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//k(sqrt(t/10))//]}',
+            '~> K(t) = /(90)F(sqrt(t/4)){[k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//]}',
             '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
             '~> L(p, lim, s): s<1 = {\\(90)T(p*1.6)F(sqrt(p)).[-(48)F(sqrt(p)).+F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}',
@@ -2759,7 +2793,7 @@ const PLANT_DATA =
         ], 30, 0, 'BASIL', '+-&^/\\T', 0.06, {
             'flowerThreshold': '1.35',
             'maxLeafSize': '0.72',
-            'signalThreshold': '4'
+            'signalThreshold': '8'
         }),
         cost: new ExponentialCost(6, 1),
         growthRate: BigNumber.FOUR,
@@ -2793,7 +2827,8 @@ const PLANT_DATA =
             };
         }
     },
-    9001: {     // Arrow weed
+    9001:   // Arrow weed (test)
+    {
         system: new LSystem('A(1)', [
             'F(l)=F(l*2)',
             'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t)'
@@ -3186,11 +3221,7 @@ var init = () =>
         new FreeCost);
         warpTick.description = 'Warp 1.5 minutes';
         warpTick.info = 'Warps forward by 0.15 time units';
-        warpTick.bought = (_) =>
-        {
-            warpTick.level = 0;
-            tick(0.15, 1);
-        };
+        warpTick.bought = (_) => tick(0.15, 1);
         warpTick.isAvailable = haxEnabled;
     }
     /* Warp one
@@ -3201,11 +3232,7 @@ var init = () =>
         new FreeCost);
         warpOne.description = 'Warp one day';
         warpOne.info = 'Warps forward by 144 time units';
-        warpOne.bought = (_) =>
-        {
-            warpOne.level = 0;
-            tick(144, 1);
-        };
+        warpOne.bought = (_) => tick(144, 1);
         warpOne.isAvailable = haxEnabled;
     }
     /* Warp zero

@@ -14,6 +14,6 @@ paste the URL in.
 
 ## Screenshots
 
-![ss1](screenshots/00.png "Kneel to the Basil Tower.")
+![ss1](screenshots/00.png "Hail the Basil Tower.")
 
-> Kneel to the Basil Tower.
+> Hail the Basil Tower.

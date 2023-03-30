@@ -2,11 +2,13 @@
 
 - [To-do List](#to-do-list)
   - [v0.1: They Breed Like Rabbits!](#v01-they-breed-like-rabbits)
-  - [v0: Axiom](#v0-axiom)
   - [v0: Completed](#v0-completed)
 
 ## v0.1: They Breed Like Rabbits!
 
+- [ ] Simple solitary flower
+  - Tulip?
+  - Buttercup
 - [ ] Leap years and hopleeks
 - [ ] Sunflower
 - [ ] Spreadable plants
@@ -19,24 +21,18 @@
 - [ ] Colour schemes?
 - [ ] Timer function to measure growth
 
-## v0: Axiom 
-
-- [ ] Make at least 2 plants
-  - [ ] Simple solitary flower
-    - Tulip?
-    - Buttercup
-  - [x] Idleable plant: calendula
-    - [x] Fix flower model size
-    - [x] Model leaves
-    - [x] Write description, LS description and commentary
-  - [x] Fast 'active' plant: basil
-    - [ ] Write description, LS description and commentary
-
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
 
 ## v0: Completed
 
+- [x] Make at least 2 plants
+  - [x] Idleable plant: calendula
+    - [x] Fix flower model size
+    - [x] Model leaves
+    - [x] Write description, LS description and commentary
+  - [x] Fast 'active' plant: basil
+    - [x] Write description, LS description and commentary
 - [x] Icons
   - [ ] SVG? Doesn't work
   - [x] Theme-dependent colour?
