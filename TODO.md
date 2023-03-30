@@ -27,7 +27,7 @@
     - Buttercup
   - [ ] Idleable plant: calendula
     - [x] Fix flower model size
-    - [ ] Model leaves
+    - [x] Model leaves
     - [ ] Write description, LS description and commentary
   - [x] Fast 'active' plant: basil
     - [ ] Write description, LS description and commentary
