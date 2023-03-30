@@ -54,6 +54,7 @@ var version = 0;
 
 const maxPlots = 6;
 
+let haxEnabled = false;
 let time = 0;
 let days = 0;
 let insolationIntegral = 0;
@@ -170,19 +171,53 @@ const locStrings =
             1: {
                 name: 'Calendula',
                 info: 'A classic flower to start the month.',
-                details: `Calendula is the friend of all rabbits.`,
-                LsDetails: `The symbol A represents a rising shoot (apex), ` +
-`while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
-`F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
-`kills the colony.`,
+                details: `Also known as pot marigold (not to be confused with
+marigolds of the genus Tagetes), calendulas are fast growing flowers. The 'pot'
+in their name refers to their numerous culinary uses.`,
+                LsDetails: `Symbols:\\\\A: apex (stem shoot)\\\\F: internode
+\\\\I : flower stem (not internode)\\\\K: flower\\\\L: leaf\\\\—\\\\The Harvest
+command returns profit as the sum of all K.\\\\—\\\\The Model specification
+section can be ignored.`,
                 stages:
                 {
-                    index: [0, 1, 2, 4, 21],
-                    0: 'The first shoot rises. Harvestable.',
-                    1: 'The shoot splits in three.\\\\The stem lengthens.',
-                    2: 'The shoots continue to divide.',
-                    4: 'What do you expect? It\'s a fractal.',
-                    21: 'The first flower appears.',
+                    index:
+                    [
+                        0, 2, 3, 5, 8, 10,
+                        11,
+                        13, 17,
+                        19,
+                        20,
+                        21, 22,
+                        23, 25, 26, 28, 29, 33, 34, 38, 42
+                    ],
+                    0: 'A seedling in its warm slumber.',
+                    2: 'An old sentiment in reminiscence.',
+                    3: 'Hey. A little stem has just risen.',
+                    5: 'The little stem continues to grow.',
+                    8: 'The second pair of leaves appears.',
+                    10: `For this cultivar, each pair of leaves\\\\is rotated
+to 90° against the previous.`,
+                    11: `Other cultivars may generate leaves\\\\by spinning
+around themselves.`,
+                    13: 'The third pair of leaves appears.',
+                    17: `The stem has split in two.\\\\It will start to flower
+soon.`,
+                    19: `When it's about to flower, the stem\\\\will start to
+spiral around itself,\\\\spawning small leaves.`,
+                    20: `The spinning angle is 137.5°,\\\\also known as the
+golden angle.`,
+                    21: 'Look! Our first flower bud.',
+                    22: `Our first bud will start to open soon.\\\\Meanwhile,
+the other stem split again.`,
+                    23: 'Wait for it...',
+                    25: 'A second flower bud appears!',
+                    26: 'The third and final flower appears.',
+                    28: 'My wife loved to eat these raw.',
+                    29: `Try it!\\\\No, don't. We'll sell them.`,
+                    33: 'The first flower matures.',
+                    34: 'The second flower matures.',
+                    38: 'All flowers have reached maturity.',
+                    42: `These flowers won't decay if\\\\you leave them be.`,
                 }
             },
             2: {
@@ -3141,7 +3176,7 @@ var init = () =>
         freePenny.description = 'Get 1 penny for free';
         freePenny.info = 'Yields 1 penny';
         freePenny.bought = (_) => currency.value += BigNumber.ONE;
-        freePenny.isAvailable = false;
+        freePenny.isAvailable = haxEnabled;
     }
     /* Warp tick
     For testing purposes
@@ -3156,7 +3191,7 @@ var init = () =>
             warpTick.level = 0;
             tick(0.15, 1);
         };
-        warpTick.isAvailable = false;
+        warpTick.isAvailable = haxEnabled;
     }
     /* Warp one
     For testing purposes
@@ -3171,7 +3206,7 @@ var init = () =>
             warpOne.level = 0;
             tick(144, 1);
         };
-        warpOne.isAvailable = false;
+        warpOne.isAvailable = haxEnabled;
     }
     /* Warp zero
     For testing purposes
@@ -3191,7 +3226,7 @@ var init = () =>
                 growthIntegral = 0;
             }
         };
-        warpZero.isAvailable = false;
+        warpZero.isAvailable = haxEnabled;
     }
 
     // To do: challenge plot (-1)
@@ -3839,11 +3874,27 @@ let createColonyViewMenu = (colony) =>
             menu.hide();
         }
     });
+    let tmpTitle = Localization.format(getLoc('colony'), colony.population,
+    getLoc('plants')[colony.id].name, colony.stage);
+    let tmpStage = colony.stage;
 
     let menu = ui.createPopup
     ({
-        title: Localization.format(getLoc('colony'), colony.population,
-        getLoc('plants')[colony.id].name, colony.stage),
+        title: () =>
+        {
+            if(tmpStage != colony.stage)
+            {
+                tmpTitle = Localization.format(getLoc('colony'),
+                colony.population, getLoc('plants')[colony.id].name,
+                colony.stage);
+                tmpStage = colony.stage;
+                reconstructionTask =
+                {
+                    start: 0
+                };
+            }
+            return tmpTitle;
+        },
         isPeekable: true,
         content: ui.createStackLayout
         ({
@@ -4124,6 +4175,7 @@ var unBigStringify = (_, val) =>
 var getInternalState = () => JSON.stringify
 ({
     version: version,
+    haxEnabled: haxEnabled,
     time: time,
     plotIdx: plotIdx,
     colonyIdx: colonyIdx,
@@ -4142,6 +4194,15 @@ var setInternalState = (stateStr) =>
         return;
 
     let state = JSON.parse(stateStr, unBigStringify);
+
+    if('haxEnabled' in state)
+    {
+        haxEnabled = state.haxEnabled;
+        freePenny.isAvailable = haxEnabled;
+        warpTick.isAvailable = haxEnabled;
+        warpOne.isAvailable = haxEnabled;
+        warpZero.isAvailable = haxEnabled;
+    }
 
     if('time' in state)
     {
@@ -4220,11 +4281,3 @@ var get3DGraphPoint = () => renderer.cursor;
 var get3DGraphTranslation = () => renderer.camera;
 
 init();
-
-var enableHax = () =>
-{
-    freePenny.isAvailable = true;
-    warpTick.isAvailable = true;
-    warpOne.isAvailable = true;
-    warpZero.isAvailable = true;
-}

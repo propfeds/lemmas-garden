@@ -25,21 +25,21 @@
   - [ ] Simple solitary flower
     - Tulip?
     - Buttercup
-  - [ ] Idleable plant: calendula
+  - [x] Idleable plant: calendula
     - [x] Fix flower model size
     - [x] Model leaves
-    - [ ] Write description, LS description and commentary
+    - [x] Write description, LS description and commentary
   - [x] Fast 'active' plant: basil
     - [ ] Write description, LS description and commentary
-- [x] Icons
-  - [ ] SVG? Doesn't work
-  - [x] Theme-dependent colour?
 
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
 
 ## v0: Completed
 
+- [x] Icons
+  - [ ] SVG? Doesn't work
+  - [x] Theme-dependent colour?
 - [x] View menu has filter function that only shows certain symbols
   - [x] Also option to view seq without params
   - [x] Save plant-dependent filter configs
