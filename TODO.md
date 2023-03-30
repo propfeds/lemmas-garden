@@ -17,8 +17,28 @@
 - [ ] Almanac containing plants, L-system help, etc.
 - [ ] Buy All upgrade unlocks maxLevel config
 - [ ] Colour schemes?
+- [ ] Timer function to measure growth
 
 ## v0: Axiom 
+
+- [ ] Make at least 2 plants
+  - [ ] Simple solitary flower
+    - Tulip?
+    - Buttercup
+  - [ ] Idleable plant: calendula
+    - [x] Fix flower model size
+    - [ ] Model leaves
+    - [ ] Write description, LS description and commentary
+  - [x] Fast 'active' plant: basil
+    - [ ] Write description, LS description and commentary
+- [x] Icons
+  - [ ] SVG? Doesn't work
+  - [x] Theme-dependent colour?
+
+- [ ] Gangsta should actually store the colony reference?
+  - Internal state unfriendly
+
+## v0: Completed
 
 - [x] View menu has filter function that only shows certain symbols
   - [x] Also option to view seq without params
@@ -27,19 +47,6 @@
 - [x] Separate 2D & 3D graph options
   - [x] Renderer does not clear graph if 2D graph is enabled
 - [x] Binary search can consume a lot of resources per turn
-- [ ] Make at least 2 plants
-  - [ ] Simple solitary flower
-    - Tulip?
-    - Buttercup
-  - [ ] Idleable plant: calendula
-    - [ ] Fix flower model size
-    - [ ] Model leaves
-    - [ ] Write description, LS description and commentary
-  - [x] Fast 'active' plant: basil
-    - [ ] Write description, LS description and commentary
-- [x] Icons
-  - [ ] SVG? Doesn't work
-  - [x] Theme-dependent colour?
 - [x] Settings menu
   - Graph mode
   - Colony view: compact (list), detailed (1), none (only renderer)
@@ -48,11 +55,6 @@
       - [x] TODO: grab binary search from old collatz
       - [x] Also include the first line don't 
 - [x] Final bit (tau exp line) only shows when no colony
-- [ ] Gangsta should actually store the colony reference?
-  - Internal state unfriendly
-
-## v0: Completed
-
 - [x] View colony shows L-system and hmm
 - [x] Issue: reloading the theory or something makes the plant levels inaccurate
 - [x] Issue: what if an action is performed when a colony is in the middle of an

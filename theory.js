@@ -2644,7 +2644,7 @@ const PLANT_DATA =
             'A(r, t): r>=flowerThreshold = [++A(r-0.15, 0)][--I(0)]',
             'A(r, t): t<2 = A(r+0.06, t+1)',
             'A(r, t) = F(0.36, 0.96)T[++L(0.06, maxLeafSize)]/(180)[++L(0.06, maxLeafSize)]/(90)A(r, -2)',
-            'I(t): t<3 = F(0.36, 0.96)T[++L(0.03, maxLeafSize/5)]/(180)[++L(0.03, maxLeafSize/5)]/(90)I(t+1)',
+            'I(t): t<3 = F(0.36, 0.96)T[+L(0.03, maxLeafSize/5)]/(137.508)I(t+1)',
             'I(t) = F(0.48, 1.2)K(0)',
             'K(p): p<maxFlowerSize = K(p+0.25)',
             'L(r, lim): r<lim = L(r+0.03, lim)',
@@ -2653,13 +2653,13 @@ const PLANT_DATA =
             '~> K(p): p<1.25 = {[w(p/4, 42)w(p/4, 42)w(p/4, 42)w(p/4, 42)w(p/4, 42)w(p/4, 42)w(p/4, 42)w(p/4, 42)]F(p/4)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)]}',
             '~> K(p): p<2 = {[w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)]F(1.25/4)[k(min(p, 1.5)/4, p*18)k(min(p, 1.5)/4, p*18)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)/4, p*18-3)k(min(p, 1.5)*0.24, p*18-6)k(min(p, 1.5)*0.24, p*18-6)k(min(p, 1.5)*0.24, p*18-6)k(min(p, 1.5)*0.23, p*18-6)k(min(p, 1.5)*0.24, p*18-6)k(min(p, 1.5)*0.24, p*18-9)k(min(p, 1.5)*0.23, p*18-15)][o(min(p, 1.5)*0.22, p*17.5)]}',
             '~> K(p) = {[w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))]F(1.25/4)[k(1.5/4, p*18)k(1.5/4, p*18)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.23, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-9)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.24, p*18-18)][o(1.5/4, p*22.5)o(1.5*0.22, p*17.5)o(1.5*0.18, p*10)]}',
-            '~> w(p, a): p<0.25 = [--(a)F(0.5).++(a)F(0.5).&+(a)F(0.5).]\\[--(a)F(0.5)++(a)F(0.5).&+(a)F(0.5).]\\[--(a)F(0.5)++(a)F(0.5).&+(a)F(0.5).]\\[--(a)F(0.5)[++(a)F(0.5).].]',
-            '~> w(p, a): p<0.5 = [--(a)F(p).++F(p).&+F(p).]\\[--(a)F(p)++F(p).&+F(p).]\\[--(a)F(p)++F(p).&+F(p).]\\[--(a)F(p)[++F(p).].]',
-            '~> w(p, a) = [--(a)F(p).++F(p).&-F(p).]\\[--(a)F(p)++F(p).&-F(p).]\\[--(a)F(p)++F(p).&-F(p).]\\[--(a)F(p)[++F(p).].]',
-            '~> k(p, a): p<0.25 = [---(a)F(p/2).+&F(p*2).+^F(p).][---(a)F(p/2)[+^F(p*2)[+&F(p).].].]\\(137.508)',
-            '~> k(p, a): p<0.35 = [---(a)F(p/2).+&F(p*2).^F(p).][---(a)F(p/2)[+^F(p*2)[&F(p).].].]\\(137.508)',
-            '~> k(p, a) = [---(a)F(p/2).+&F(p*2).-^F(p).][---(a)F(p/2)[+^F(p*2)[-&F(p).].].]\\(137.508)',
-            '~> o(p, a) = [-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]\\\\[-(a)F(p).]',
+            '~> w(p, a): p<0.25 = [--(a)F(0.5).+++(a)F(0.5).^+(a)F(0.5).]/[--(a)F(0.5)+++(a)F(0.5).^+(a)F(0.5).]/[--(a)F(0.5)+++(a)F(0.5).^+(a)F(0.5).]/[--(a)F(0.5)[+++(a)F(0.5).].]',
+            '~> w(p, a): p<0.5 = [--(a)F(p).++F(p).^+F(p).]/[--(a)F(p)++F(p).^+F(p).]/[--(a)F(p)++F(p).^+F(p).]/[--(a)F(p)[++F(p).].]',
+            '~> w(p, a) = [--(a)F(p).++F(p).^-F(p).]/[--(a)F(p)++F(p).^-F(p).]/[--(a)F(p)++F(p).^-F(p).]/[--(a)F(p)[++F(p).].]',
+            '~> k(p, a): p<0.25 = [---(a)F(p/2).+^F(p*2).+&F(p).][---(a)F(p/2)[+&F(p*2)[+^F(p).].].]/(137.508)',
+            '~> k(p, a): p<0.35 = [---(a)F(p/2).+^F(p*2).&F(p).][---(a)F(p/2)[+&F(p*2)[^F(p).].].]/(137.508)',
+            '~> k(p, a) = [---(a)F(p/2).+^F(p*2).-&F(p).][---(a)F(p/2)[+&F(p*2)[-^F(p).].].]/(137.508)',
+            '~> o(p, a) = [-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]',
             '~> L(p, lim) = {\\(90)F(sqrt(p)).[-(48)F(sqrt(p)).+F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}'
         ], 15, 0, 'A', '', -0.24, {
             'flowerThreshold': '0.9',
@@ -2683,7 +2683,7 @@ const PLANT_DATA =
             return {
                 scale: 8,
                 x: 0,
-                y: Math.min(Math.max(5, stage / 4), 9),
+                y: Math.min(Math.max(5, stage / 4), 7),
                 Z: 0,
                 upright: true
             };
@@ -2976,6 +2976,8 @@ var plants = Array.from({length: maxPlots}, (_) => {return {};});
 
 var plotPerma, plantPerma;
 
+var freePenny, warpTick, warpOne, warpZero;
+
 var currency;
 
 var init = () =>
@@ -3133,17 +3135,48 @@ var init = () =>
     For testing purposes
     */
     {
-        let freePenny = theory.createPermanentUpgrade(9001, currency,
+        freePenny = theory.createPermanentUpgrade(9001, currency,
         new FreeCost);
         freePenny.description = 'Get 1 penny for free';
         freePenny.info = 'Yields 1 penny';
         freePenny.bought = (_) => currency.value += BigNumber.ONE;
+        freePenny.isAvailable = false;
+    }
+    /* Warp tick
+    For testing purposes
+    */
+    {
+        warpTick = theory.createPermanentUpgrade(9004, currency,
+        new FreeCost);
+        warpTick.description = 'Warp 1.5 minutes';
+        warpTick.info = 'Warps forward by 0.15 time units';
+        warpTick.bought = (_) =>
+        {
+            warpTick.level = 0;
+            tick(0.15, 1);
+        };
+        warpTick.isAvailable = false;
+    }
+    /* Warp one
+    For testing purposes
+    */
+    {
+        warpOne = theory.createPermanentUpgrade(9003, currency,
+        new FreeCost);
+        warpOne.description = 'Warp one day';
+        warpOne.info = 'Warps forward by 144 time units';
+        warpOne.bought = (_) =>
+        {
+            warpOne.level = 0;
+            tick(144, 1);
+        };
+        warpOne.isAvailable = false;
     }
     /* Warp zero
     For testing purposes
     */
     {
-        let warpZero = theory.createPermanentUpgrade(9002, currency,
+        warpZero = theory.createPermanentUpgrade(9002, currency,
         new FreeCost);
         warpZero.description = 'Warp to day 1 (press 5 times to confirm)';
         warpZero.info = 'Warps backward';
@@ -3157,34 +3190,7 @@ var init = () =>
                 growthIntegral = 0;
             }
         };
-    }
-    /* Warp one
-    For testing purposes
-    */
-    {
-        let warpOne = theory.createPermanentUpgrade(9003, currency,
-        new FreeCost);
-        warpOne.description = 'Warp one day';
-        warpOne.info = 'Warps forward by 144 time units';
-        warpOne.bought = (_) =>
-        {
-            warpOne.level = 0;
-            tick(144, 1);
-        };
-    }
-    /* Warp tick
-    For testing purposes
-    */
-    {
-        let warpTick = theory.createPermanentUpgrade(9004, currency,
-        new FreeCost);
-        warpTick.description = 'Warp 1.5 minutes';
-        warpTick.info = 'Warps forward by 0.15 time units';
-        warpTick.bought = (_) =>
-        {
-            warpTick.level = 0;
-            tick(0.15, 1);
-        };
+        warpZero.isAvailable = false;
     }
 
     // To do: challenge plot (-1)
@@ -3413,21 +3419,6 @@ let getTimeString = () =>
     hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'));
 }
 
-// var getTertiaryEquation = () =>
-// {
-//     return '_';
-//     let years = Math.floor(days / 365);
-//     let timeofDay = time % 144;
-//     let hour = Math.floor(timeofDay / 6);
-//     let min = Math.round((timeofDay % 6) * 10);
-
-//     return Localization.format(getLoc(theory.canPublish &&
-//     theory.publicationUpgrade.level ? 'dateTimeTaxL' : 'dateTimeL'), years + 1,
-//     (days % 365) + 1, hour.toString().padStart(2, '0'),
-//     min.toString().padStart(2, '0'),
-//     getCurrencyFromTau(theory.tau)[0] * taxRate);
-// }
-
 var getQuaternaryEntries = () =>
 {
     if(!plotPerma.level)
@@ -3444,7 +3435,7 @@ var getQuaternaryEntries = () =>
         }
         quaternaryEntries[i].value = sum;
     }
-    return quaternaryEntries//.slice(0, plotPerma.level);
+    return quaternaryEntries;   //.slice(0, plotPerma.level);
 }
 
 let createVariableMenu = (variables) =>
@@ -4228,3 +4219,11 @@ var get3DGraphPoint = () => renderer.cursor;
 var get3DGraphTranslation = () => renderer.camera;
 
 init();
+
+var enableHax = () =>
+{
+    freePenny.isAvailable = true;
+    warpTick.isAvailable = true;
+    warpOne.isAvailable = true;
+    warpZero.isAvailable = true;
+}
