@@ -43,8 +43,7 @@ var getDescription = (language) =>
     let descs =
     {
         en:
-`Last night, Lemma swept away remnants of her old garden.
-Today, it will do weatherly.`,
+`Last night, Lemma swept away the rubbles of her old garden.`,
     };
 
     return descs[language] || descs.en;
