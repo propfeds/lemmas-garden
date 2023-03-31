@@ -2903,8 +2903,8 @@ let createFramedButton = (params, margin, callback, image) =>
         margin: new Thickness(margin),
         padding: new Thickness(1),
         hasShadow: true,
-        heightRequest: getImageSize(ui.screenWidth),
-        widthRequest: getImageSize(ui.screenWidth),
+        heightRequest: getImageSize(360),
+        widthRequest: getImageSize(360),
         content: ui.createImage
         ({
             source: image,
@@ -3534,7 +3534,7 @@ let createVariableMenu = (variables) =>
         text: Localization.format(getLoc('labelVars'), variables.length),
         verticalTextAlignment: TextAlignment.CENTER,
         // margin: new Thickness(0, 12)
-        heightRequest: getSmallBtnSize(ui.screenWidth)
+        heightRequest: getSmallBtnSize(360)
     });
     let varStack = ui.createGrid
     ({
@@ -3598,7 +3598,7 @@ let createSystemMenu = (id) =>
         text: getLoc('btnVar'),
         row: 0,
         column: 2,
-        heightRequest: getSmallBtnSize(ui.screenWidth),
+        heightRequest: getSmallBtnSize(360),
         onClicked: () =>
         {
             Sound.playClick();
@@ -3623,7 +3623,7 @@ let createSystemMenu = (id) =>
         text: Localization.format(getLoc('labelRules'), ruleEntries.length),
         verticalTextAlignment: TextAlignment.CENTER,
         // margin: new Thickness(0, 12),
-        heightRequest: getSmallBtnSize(ui.screenWidth)
+        heightRequest: getSmallBtnSize(360)
     });
     let ruleStack = ui.createGrid
     ({
@@ -3697,7 +3697,7 @@ let createSystemMenu = (id) =>
             [
                 ui.createScrollView
                 ({
-                    // heightRequest: ui.screenHeight * 0.32,
+                    // heightRequest: 540 * 0.32,
                     content: ui.createStackLayout
                     ({
                         children:
@@ -3930,7 +3930,7 @@ let createColonyViewMenu = (colony) =>
                 ui.createFrame
                 ({
                     padding: new Thickness(8, 6),
-                    heightRequest: ui.screenHeight * 0.16,
+                    heightRequest: 540 * 0.16,
                     content: ui.createScrollView
                     ({
                         content: ui.createStackLayout
@@ -3949,7 +3949,7 @@ let createColonyViewMenu = (colony) =>
                 }),
                 ui.createGrid
                 ({
-                    minimumHeightRequest: getSmallBtnSize(ui.screenWidth),
+                    minimumHeightRequest: getSmallBtnSize(360),
                     columnDefinitions: ['20*', '30*', '35*', '15*'],
                     children:
                     [
@@ -3977,7 +3977,7 @@ let createColonyViewMenu = (colony) =>
                 }),
                 ui.createGrid
                 ({
-                    minimumHeightRequest: getBtnSize(ui.screenWidth),
+                    minimumHeightRequest: getBtnSize(360),
                     columnDefinitions: ['50*', '50*'],
                     children:
                     [
@@ -4077,9 +4077,9 @@ let createWorldMenu = () =>
                     columnDefinitions: ['70*', '30*'],
                     rowDefinitions:
                     [
-                        getSmallBtnSize(ui.screenWidth),
-                        getSmallBtnSize(ui.screenWidth),
-                        getSmallBtnSize(ui.screenWidth)
+                        getSmallBtnSize(360),
+                        getSmallBtnSize(360),
+                        getSmallBtnSize(360)
                     ],
                     children:
                     [
