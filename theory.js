@@ -3819,8 +3819,9 @@ let createColonyViewMenu = (colony) =>
     };
     let filterEntry = ui.createEntry
     ({
-        text: colonyViewConfig[colony.id].filter,
         column: 1,
+        text: colonyViewConfig[colony.id].filter,
+        clearButtonVisibility: ClearButtonVisibility.WHILE_EDITING,
         onTextChanged: (ot, nt) =>
         {
             colonyViewConfig[colony.id].filter = nt;
@@ -3832,8 +3833,8 @@ let createColonyViewMenu = (colony) =>
     });
     let paramSwitch = ui.createSwitch
     ({
-        isToggled: colonyViewConfig[colony.id].params,
         column: 3,
+        isToggled: colonyViewConfig[colony.id].params,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e) =>
         {
