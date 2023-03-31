@@ -3942,9 +3942,15 @@ let createColonyViewMenu = (colony) =>
                         })
                     })
                 }),
+                ui.createBox
+                ({
+                    heightRequest: 0,
+                    margin: new Thickness(0)
+                }),
                 ui.createGrid
                 ({
-                    columnDefinitions: ['20*', '30*', '30*', '20*'],
+                    minimumHeightRequest: getSmallBtnSize(ui.screenWidth),
+                    columnDefinitions: ['20*', '30*', '35*', '15*'],
                     children:
                     [
                         ui.createLatexLabel
