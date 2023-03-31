@@ -2679,13 +2679,13 @@ class ColonyManager
 
 // Balance parameters
 
-const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(100)));
+const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(100)));
 const plantUnlocks = [1, 2, 9001];
 const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2200),
 new ConstantCost(1e9));
 const permaCosts =
 [
-    BigNumber.from(24),
+    BigNumber.from(36),
     BigNumber.from(1e30),
     BigNumber.from(1e45)
 ];
