@@ -4023,7 +4023,7 @@ let createNotebookMenu = () =>
     let plantLabels = [];
     let maxLevelEntries = [];
     // let harvestEntries = [];
-    for(let i = 0; i < plantUnlocks.length; ++i)
+    for(let i = 0; i <= plantPerma.level; ++i)
     {
         if(!notebook[plantUnlocks[i]])
         {
@@ -4058,8 +4058,7 @@ let createNotebookMenu = () =>
                         if(c.id == plantUnlocks[i])
                         {
                             count += c.population;
-                            if(count > tmpML)
-                                return;
+                            tmpML = Math.max(tmpML, count);
                         }
                     }
                 }
@@ -4450,7 +4449,12 @@ var setInternalState = (stateStr) =>
             tmpLevels[i][c.id] += c.population;
         }
         for(let j = 0; j < plantUnlocks.length; ++j)
+        {
             plants[i][plantUnlocks[j]].level = tmpLevels[i][plantUnlocks[j]];
+            plants[i][plantUnlocks[j]].maxLevel = Math.max(
+            notebook[plantUnlocks[j]].maxLevel,
+            plants[i][plantUnlocks[j]].level);
+        }
     }
     actuallyPlanting = true;
 
