@@ -107,6 +107,7 @@ const locStrings =
         btnVar: 'Variables',
         btnClose: 'Close',
         btnSave: 'Save',
+        btnReset: 'Reset Graphs',
 
         labelActions: 'Actions: ',
         btnHarvest: 'Harvest',
@@ -3994,7 +3995,6 @@ let createColonyViewMenu = (colony) =>
 
 let createWorldMenu = () =>
 {
-    let tmpGM3 = graphMode3D;
     let GM3Label = ui.createLatexLabel
     ({
         text: getLoc('graphMode3D'),
@@ -4003,7 +4003,7 @@ let createWorldMenu = () =>
     });
     let GM3Switch = ui.createSwitch
     ({
-        isToggled: tmpGM3,
+        isToggled: graphMode3D,
         row: 0, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e) =>
@@ -4012,15 +4012,14 @@ let createWorldMenu = () =>
             e.type == TouchType.LONGPRESS_RELEASED)
             {
                 Sound.playClick();
-                tmpGM3 = !tmpGM3;
-                GM3Switch.isToggled = tmpGM3;
+                graphMode3D = !graphMode3D;
+                GM3Switch.isToggled = graphMode3D;
             }
         }
     });
-    let tmpGM2 = graphMode2D;
     let GM2Label = ui.createLatexLabel
     ({
-        text: getLoc('graphModes2D')[tmpGM2],
+        text: getLoc('graphModes2D')[graphMode2D],
         row: 1, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
@@ -4029,22 +4028,21 @@ let createWorldMenu = () =>
         row: 1, column: 1,
         minimum: 0,
         maximum: 2,
-        value: tmpGM2,
+        value: graphMode2D,
         onValueChanged: () =>
         {
-            tmpGM2 = Math.round(GM2Slider.value);
-            GM2Label.text = getLoc('graphModes2D')[tmpGM2];
+            graphMode2D = Math.round(GM2Slider.value);
+            GM2Label.text = getLoc('graphModes2D')[graphMode2D];
         },
         onDragCompleted: () =>
         {
             Sound.playClick();
-            GM2Slider.value = tmpGM2;
+            GM2Slider.value = graphMode2D;
         }
     });
-    let tmpCM = colonyMode;
     let CMLabel = ui.createLatexLabel
     ({
-        text: getLoc('colonyModes')[tmpCM],
+        text: getLoc('colonyModes')[colonyMode],
         row: 2, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
@@ -4053,21 +4051,22 @@ let createWorldMenu = () =>
         row: 2, column: 1,
         minimum: 0,
         maximum: 3,
-        value: tmpCM,
+        value: colonyMode,
         onValueChanged: () =>
         {
-            tmpCM = Math.round(CMSlider.value);
-            CMLabel.text = getLoc('colonyModes')[tmpCM];
+            colonyMode = Math.round(CMSlider.value);
+            CMLabel.text = getLoc('colonyModes')[colonyMode];
         },
         onDragCompleted: () =>
         {
             Sound.playClick();
-            CMSlider.value = tmpCM;
+            CMSlider.value = colonyMode;
         }
     });
 
     let menu = ui.createPopup
     ({
+        isPeekable: true,
         title: getLoc('menuTheory'),
         content: ui.createStackLayout
         ({
@@ -4097,17 +4096,33 @@ let createWorldMenu = () =>
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
                 }),
-                ui.createButton
+                ui.createGrid
                 ({
-                    text: getLoc('btnSave'),
-                    onClicked: () =>
-                    {
-                        Sound.playClick();
-                        graphMode3D = tmpGM3;
-                        graphMode2D = tmpGM2;
-                        colonyMode = tmpCM;
-                        menu.hide();
-                    }
+                    minimumHeightRequest: getBtnSize(ui.screenWidth),
+                    columnDefinitions: ['50*', '50*'],
+                    children:
+                    [
+                        ui.createButton
+                        ({
+                            column: 0,
+                            text: getLoc('btnClose'),
+                            onClicked: () =>
+                            {
+                                Sound.playClick();
+                                menu.hide();
+                            }
+                        }),
+                        ui.createButton
+                        ({
+                            column: 1,
+                            text: getLoc('btnReset'),
+                            onClicked: () =>
+                            {
+                                Sound.playClick();
+                                renderer.reset();
+                            }
+                        })
+                    ]
                 })
             ]
         })
@@ -4153,7 +4168,7 @@ var postPublish = () =>
     theory.invalidateQuaternaryValues();
 }
 
-var canResetStage = () => true;
+var canResetStage = () => false;
 
 var getResetStageMessage = () => getLoc('resetRenderer');
 
