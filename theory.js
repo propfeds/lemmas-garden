@@ -67,6 +67,8 @@ let graphMode2D = 1;
 let graphMode3D = true;
 let colonyMode = 1;
 let colonyViewConfig = {};
+let notebook = {};
+
 let textColor = 'ffccff';
 
 let tmpCurrency;
@@ -132,6 +134,12 @@ const locStrings =
         unlockPlot: `\\text{{plot }}{{{0}}}`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
+
+        permaNote: 'Notebook',
+        permaNoteInfo: 'Manage populations and harvests',
+        labelPlants: 'Plants',
+        labelMaxLevel: 'Max. level',
+        labelHarvestStage: 'Harvest stage',
 
         colony: '{0} of {1}, stage {2}',
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
@@ -2687,7 +2695,7 @@ new ConstantCost(1e9));
 const permaCosts =
 [
     BigNumber.from(36),
-    BigNumber.from(1e30),
+    BigNumber.from(4800),
     BigNumber.from(1e45)
 ];
 
@@ -3045,7 +3053,7 @@ var switchPlant, viewColony, switchColony;
 
 var plants = Array.from({length: maxPlots}, (_) => {return {};});
 
-var plotPerma, plantPerma;
+var notebookPerma, plotPerma, plantPerma;
 
 var freePenny, warpTick, warpOne, warpZero;
 
@@ -3132,6 +3140,22 @@ var init = () =>
             };
             plants[i][plantUnlocks[j]].isAvailable = false;
         }
+    }
+
+    /* Buy all button
+    */
+    {
+        notebookPerma = theory.createPermanentUpgrade(10, currency,
+        new FreeCost);
+        notebookPerma.description = getLoc('permaNote');
+        notebookPerma.info = getLoc('permaNoteInfo');
+        notebookPerma.bought = (_) =>
+        {
+            notebookPerma.level = 0;
+            let noteMenu = createNotebookMenu();
+            noteMenu.show();
+        }
+        notebookPerma.isAvailable = false;
     }
     /* Plot unlock
     Before you can plant any plants, you have to switch tab and unlock plot 0.
@@ -3283,6 +3307,7 @@ var updateAvailability = () =>
             plants[i][plantUnlocks[j]].level > 0 ||
             (j == plantIdx[i] && j <= plantPerma.level);
     }
+    notebookPerma.isAvailable = theory.isBuyAllAvailable;
 }
 
 var tick = (elapsedTime, multiplier) =>
@@ -3993,6 +4018,130 @@ let createColonyViewMenu = (colony) =>
     return menu;
 }
 
+let createNotebookMenu = () =>
+{
+    let plantLabels = [];
+    let maxLevelEntries = [];
+    // let harvestEntries = [];
+    for(let i = 0; i < plantUnlocks.length; ++i)
+    {
+        if(!notebook[plantUnlocks[i]])
+        {
+            notebook[plantUnlocks[i]] =
+            {
+                maxLevel: 0x7fffffff,
+                harvestStage: 0x7fffffff
+            };
+        }
+        plantLabels.push(ui.createLatexLabel
+        ({
+            text: getLoc('plants')[plantUnlocks[i]].name,
+            row: i, column: 0,
+            verticalTextAlignment: TextAlignment.CENTER
+        }));
+        maxLevelEntries.push(ui.createEntry
+        ({
+            row: i, column: 1,
+            text: notebook[plantUnlocks[i]].maxLevel == 0x7fffffff ? '' :
+            notebook[plantUnlocks[i]].maxLevel.toString(),
+            keyboard: Keyboard.NUMERIC,
+            horizontalTextAlignment: TextAlignment.END,
+            onTextChanged: (ot, nt) =>
+            {
+                let tmpML = Number(nt) || 0x7fffffff;
+                for(let j = 0; j < maxPlots; ++j)
+                {
+                    let count = 0;
+                    for(let k = 0; k < manager.colonies[j].length; ++k)
+                    {
+                        let c = manager.colonies[j][k];
+                        if(c.id == plantUnlocks[i])
+                        {
+                            count += c.population;
+                            if(count > tmpML)
+                                return;
+                        }
+                    }
+                }
+                notebook[plantUnlocks[i]].maxLevel = tmpML;
+                for(let j = 0; j < maxPlots; ++j)
+                    plants[j][plantUnlocks[i]].maxLevel = tmpML;
+            }
+        }));
+        // TODO: Create harvest entry
+    }
+    let noteGrid = ui.createGrid
+    ({
+        columnDefinitions: theory.isAutoBuyerAvailable ? ['40*', '30*', '30*'] :
+        ['70*', '30*'],
+        children: [...plantLabels, ...maxLevelEntries]
+    });
+
+    let menu = ui.createPopup
+    ({
+        title: getLoc('permaNote'),
+        content: ui.createStackLayout
+        ({
+            children:
+            [
+                ui.createGrid
+                ({
+                    heightRequest: theory.isAutoBuyerAvailable ?
+                    getSmallBtnSize(ui.screenWidth) :
+                    getImageSize(ui.screenWidth),
+                    columnDefinitions: theory.isAutoBuyerAvailable ?
+                    ['40*', '30*', '30*'] : ['70*', '30*'],
+                    children:
+                    [
+                        ui.createLatexLabel
+                        ({
+                            text: getLoc('labelPlants'),
+                            row: 0, column: 0,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        }),
+                        ui.createLatexLabel
+                        ({
+                            text: getLoc('labelMaxLevel'),
+                            row: 0, column: 1,
+                            horizontalOptions: LayoutOptions.END,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        }),
+                        ui.createLatexLabel
+                        ({
+                            isVisible: theory.isAutoBuyerAvailable,
+                            text: getLoc('labelHarvestStage'),
+                            row: 0, column: 2,
+                            horizontalOptions: LayoutOptions.CENTER,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        })
+                    ]
+                }),
+                ui.createBox
+                ({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                noteGrid,
+                ui.createBox
+                ({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                ui.createButton
+                ({
+                    text: getLoc('btnClose'),
+                    onClicked: () =>
+                    {
+                        Sound.playClick();
+                        menu.hide();
+                    }
+                }),
+            ]
+        })
+    });
+    return menu;
+}
+
 let createWorldMenu = () =>
 {
     let GM3Label = ui.createLatexLabel
@@ -4104,7 +4253,7 @@ let createWorldMenu = () =>
                     [
                         ui.createButton
                         ({
-                            column: 0,
+                            column: 1,
                             text: getLoc('btnClose'),
                             onClicked: () =>
                             {
@@ -4114,7 +4263,7 @@ let createWorldMenu = () =>
                         }),
                         ui.createButton
                         ({
-                            column: 1,
+                            column: 0,
                             text: getLoc('btnReset'),
                             onClicked: () =>
                             {
@@ -4233,7 +4382,8 @@ var getInternalState = () => JSON.stringify
     graphMode2D: graphMode2D,
     graphMode3D: graphMode3D,
     colonyMode: colonyMode,
-    colonyViewConfig: colonyViewConfig
+    colonyViewConfig: colonyViewConfig,
+    notebook: notebook
 }, bigStringify);
 
 var setInternalState = (stateStr) =>
@@ -4284,6 +4434,9 @@ var setInternalState = (stateStr) =>
         colonyMode = state.colonyMode;
     if('colonyViewConfig' in state)
         colonyViewConfig = state.colonyViewConfig;
+
+    if('notebook' in state)
+        notebook = state.notebook;
 
     actuallyPlanting = false;
     tmpLevels = Array.from({length: maxPlots}, (_) => {return {};});

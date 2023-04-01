@@ -169,7 +169,10 @@ between tau not feeling bloated and pub multipliers not too small)
     - Bite strength is based on colony size
     - Nibbles the string from right to left
     - Avoids marigold/calendula
+      - Can't invade plot if there's calendula there
+      - Can still nibble at it if adjacent
     - Extra energy can shield a colony from rabbit bites (sunflower gud)
+      - Hopleek colony gains energy from a bite, shielded or not
     - Bites off basil flowers first!
 
 ### 3. Late-game

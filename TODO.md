@@ -17,7 +17,8 @@
 - [ ] Newspapers
 
 - [ ] Almanac containing plants, L-system help, etc.
-- [ ] Buy All upgrade unlocks maxLevel config
+- [x] Buy All upgrade unlocks maxLevel config
+- [ ] Autobuy upgrade unlocks harvest stage config
 - [ ] Colour schemes?
 - [ ] Timer function to measure growth
 
