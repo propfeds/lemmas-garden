@@ -2389,19 +2389,24 @@ class ColonyManager
             switchColony.buy(1);
         if(this.gangsta && plot == this.gangsta[0])
         {
-            this.ancestreeTask =
+            if(this.gangsta[1] > index)
+                --this.gangsta[1];
+            else if(this.gangsta[1] == index)
             {
-                start: 0
-            };
-            this.deriveTask =
-            {
-                start: 0
-            };
-            this.calcTask =
-            {
-                start: 0
-            };
-            this.gangsta = null;
+                this.ancestreeTask =
+                {
+                    start: 0
+                };
+                this.deriveTask =
+                {
+                    start: 0
+                };
+                this.calcTask =
+                {
+                    start: 0
+                };
+                this.gangsta = null;
+            }
         }
         this.colonies[plot].splice(index, 1);
         if(plot == plotIdx && !this.colonies[plot].length)

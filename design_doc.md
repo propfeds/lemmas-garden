@@ -230,6 +230,9 @@ I. It's a good opportunity to channel emotions.
 
 ### 2. Chapters:
 
+- **No. Scrap all stuff below.** Have Lemma pass away after about half way.
+All plants afterwards will display 'No commentary'.
+
 - **Introduction**: Yesterday, a small plot of land was registered to Lemma
 Rancher. Today, Lemma's garden does wonderfully. Tomorrow, Madeline would be
 proud.
