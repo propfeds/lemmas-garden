@@ -86,6 +86,7 @@ eq2Colour.set(Theme.STANDARD, 'c0c0c0');
 eq2Colour.set(Theme.DARK, 'b5b5b5');
 eq2Colour.set(Theme.LIGHT, '434343');
 
+const MAX_INT = 0x7fffffff;
 const TRIM_SP = /\s+/g;
 const LS_RULE = /([^:]+)(:(.+))?=(.*)/;
 // Context doesn't need to check for nested brackets!
@@ -101,7 +102,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.0, Axiom',
+        versionName: 'Version: 0.0.1, Axiom',
 
         pubTax: 'Publishing tax',
 
@@ -198,7 +199,7 @@ be ignored.`,
                         19,
                         20,
                         21, 22,
-                        23, 25, 26, 28, 29, 33, 37, 38, 42
+                        23, 25, 26, 28, 29, 33, 37, 38
                     ],
                     0: 'A seedling in its warm slumber.',
                     2: 'An old sentiment in reminiscence.',
@@ -227,7 +228,6 @@ the other stem split again.`,
                     33: 'The first flower matures.',
                     37: 'The second flower matures.',
                     38: 'All flowers have reached maturity.',
-                    42: `These flowers won't decay if\\\\you leave them be.`,
                 }
             },
             2:
@@ -262,7 +262,7 @@ internode\\\\I : shortened stem (not internode)\\\\K: flower\\\\L: leaf\\\\—
                     14: 'This rhythm will repeat for a while.',
                     17: `I'll show you what to do when it\\\\flowers, soon.`,
                     21: `The first flower appears. If you're\\\\to harvest
-later, snip it off now.`,
+later, nip it\\\\in the bud.`,
                     23: `Once the flower tower reaches a\\\\certain size, the
 leaves will lose\\\\their flavours.`,
                     30: `Now, if the flowers were still there,\\\\imagine a
@@ -296,8 +296,8 @@ self-destruct.`
                 }
             }
         },
-        plantStats: `{0}\\\\—\\\\Growth rate: {1} (at night)\\\\` +
-`Growth cost: {2} * {3} (length)`,
+        plantStats: `{0}\\\\—\\\\Max stage: {1}\\\\Growth rate: {2} (at ` +
+`night)\\\\Growth cost: {3} * {4} (length)`,
         stageNotFound: 'No commentary.',
 
         resetRenderer: 'You are about to reset the graph.'
@@ -2427,7 +2427,8 @@ class ColonyManager
             for(let j = 0; j < this.colonies[i].length; ++j)
             {
                 let c = this.colonies[i][j];
-                if(c.growth >= PLANT_DATA[c.id].growthCost *
+                let notMature = c.stage < (PLANT_DATA[c.id].maxStage||MAX_INT);
+                if(notMature && c.growth >= PLANT_DATA[c.id].growthCost *
                 BigNumber.from(c.sequence.length))
                 {
                     if(!this.gangsta)
@@ -2456,9 +2457,13 @@ class ColonyManager
                 {
                     c.energy += di * c.synthRate;
 
-                    let maxdg = c.energy.min(dg * PLANT_DATA[c.id].growthRate);
-                    c.growth += maxdg;
-                    c.energy -= maxdg;
+                    if(notMature)
+                    {
+                        let maxdg = c.energy.min(dg *
+                        PLANT_DATA[c.id].growthRate);
+                        c.growth += maxdg;
+                        c.energy -= maxdg;
+                    }
                 }
             }
         }
@@ -2556,9 +2561,13 @@ class ColonyManager
         c.params = this.actionDeriveTask.parameters;
 
         c.energy += c.diReserve * c.synthRate;
-        let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
-        c.growth += maxdg;
-        c.energy -= maxdg;
+        let notMature = c.stage < (PLANT_DATA[c.id].maxStage||MAX_INT);
+        if(notMature)
+        {
+            let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
+            c.growth += maxdg;
+            c.energy -= maxdg;
+        }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
 
@@ -2664,13 +2673,17 @@ class ColonyManager
         c.profit = this.calcTask.profit;
 
         c.energy += c.diReserve * c.synthRate;
-        let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
-        c.growth += maxdg;
-        c.energy -= maxdg;
+        ++c.stage;
+        let notMature = c.stage < (PLANT_DATA[c.id].maxStage||MAX_INT);
+        if(notMature)
+        {
+            let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
+            c.growth += maxdg;
+            c.energy -= maxdg;
+        }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
 
-        ++c.stage;
         this.ancestreeTask =
         {
             start: 0
@@ -2748,6 +2761,7 @@ const PLANT_DATA =
             'maxFlowerSize': '3',
             'maxLeafSize': '0.6'
         }),
+        maxStage: 38,
         cost: new FirstFreeCost(new ExponentialCost(0.5, Math.log2(3))),
         growthRate: BigNumber.THREE,
         growthCost: BigNumber.THREE,
@@ -3229,6 +3243,7 @@ var init = () =>
 
     theory.createPublicationUpgrade(1, currency, permaCosts[0]);
     theory.createBuyAllUpgrade(2, currency, permaCosts[1]);
+    theory.buyAllUpgrade.bought = (_) => updateAvailability();
     theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
 
     /* Free penny
@@ -3355,15 +3370,15 @@ var getEquationOverlay = () =>
             // For reference
             // ui.createFrame({row: 0, column: 2}),
             // ui.createFrame({row: 1, column: 2}),
-            ui.createLatexLabel
-            ({
-                row: 0, column: 0,
-                verticalTextAlignment: TextAlignment.START,
-                margin: new Thickness(8, 4),
-                text: getLoc('versionName'),
-                fontSize: 9,
-                textColor: Color.TEXT_MEDIUM
-            }),
+            // ui.createLatexLabel
+            // ({
+            //     row: 0, column: 0,
+            //     verticalTextAlignment: TextAlignment.START,
+            //     margin: new Thickness(8, 4),
+            //     text: getLoc('versionName'),
+            //     fontSize: 9,
+            //     textColor: Color.TEXT_MEDIUM
+            // }),
             ui.createLatexLabel
             ({
                 row: 0, column: 0,
@@ -3898,8 +3913,9 @@ let createColonyViewMenu = (colony) =>
     let pageTitle = ui.createLatexLabel
     ({
         text: Localization.format(getLoc('plantStats'),
-        getLoc('plants')[colony.id].details, PLANT_DATA[colony.id].growthRate,
-        PLANT_DATA[colony.id].growthCost, colony.sequence.length),
+        getLoc('plants')[colony.id].details, PLANT_DATA[colony.id].maxStage ||
+        '∞', PLANT_DATA[colony.id].growthRate, PLANT_DATA[colony.id].growthCost,
+        colony.sequence.length),
         margin: new Thickness(0, 6),
         horizontalTextAlignment: TextAlignment.START,
         verticalTextAlignment: TextAlignment.CENTER
@@ -4034,8 +4050,8 @@ let createNotebookMenu = () =>
         {
             notebook[plantUnlocks[i]] =
             {
-                maxLevel: 0x7fffffff,
-                harvestStage: 0x7fffffff
+                maxLevel: MAX_INT,
+                harvestStage: MAX_INT
             };
         }
         plantLabels.push(ui.createLatexLabel
@@ -4047,13 +4063,13 @@ let createNotebookMenu = () =>
         maxLevelEntries.push(ui.createEntry
         ({
             row: i, column: 1,
-            text: notebook[plantUnlocks[i]].maxLevel == 0x7fffffff ? '' :
+            text: notebook[plantUnlocks[i]].maxLevel == MAX_INT ? '' :
             notebook[plantUnlocks[i]].maxLevel.toString(),
             keyboard: Keyboard.NUMERIC,
             horizontalTextAlignment: TextAlignment.END,
             onTextChanged: (ot, nt) =>
             {
-                let tmpML = Number(nt) || 0x7fffffff;
+                let tmpML = Number(nt) || MAX_INT;
                 for(let j = 0; j < maxPlots; ++j)
                 {
                     let count = 0;
@@ -4243,6 +4259,12 @@ let createWorldMenu = () =>
                         CMLabel,
                         CMSlider
                     ]
+                }),
+                ui.createLatexLabel
+                ({
+                    text: getLoc('versionName'),
+                    horizontalOptions: LayoutOptions.CENTER,
+                    verticalTextAlignment: TextAlignment.CENTER
                 }),
                 ui.createBox
                 ({
