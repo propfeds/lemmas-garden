@@ -14,6 +14,8 @@
 - [ ] Spreadable plants
 - [ ] Cap colony count to 5 per plot, unless?
 
+- [ ] Buff basil
+
 - [ ] Newspapers
 
 - [ ] Almanac containing plants, L-system help, etc.

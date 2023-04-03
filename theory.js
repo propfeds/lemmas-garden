@@ -2708,7 +2708,7 @@ class ColonyManager
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(100)));
 const plantUnlocks = [1, 2, 9001];
-const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2200),
+const plantUnlockCosts = new CompositeCost(1, new ConstantCost(21000),
 new ConstantCost(1e9));
 const permaCosts =
 [
@@ -2793,7 +2793,7 @@ const PLANT_DATA =
     },
     2:  // Basil
     {
-        system: new LSystem('BA(0.15, 0)',
+        system: new LSystem('BA(0.18, 0)',
         [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
@@ -2818,11 +2818,11 @@ const PLANT_DATA =
             '~> L(p, lim, s): s<1 = {\\(90)T(p*1.6)F(sqrt(p)).[-(48)F(sqrt(p)).+F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}',
             '~> L(p, lim, s): s>=1 = {\\(90)T(lim*2.4)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
         ], 30, 0, 'BASIL', '+-&^/\\T', 0.06, {
-            'flowerThreshold': '1.35',
+            'flowerThreshold': '1.38',
             'maxLeafSize': '0.72',
             'signalThreshold': '8'
         }),
-        cost: new ExponentialCost(6, 1),
+        cost: new ExponentialCost(4, 1),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.THREE,
         actions:
@@ -4279,7 +4279,7 @@ let createWorldMenu = () =>
                     [
                         ui.createButton
                         ({
-                            column: 1,
+                            column: 0,
                             text: getLoc('btnClose'),
                             onClicked: () =>
                             {
@@ -4289,7 +4289,7 @@ let createWorldMenu = () =>
                         }),
                         ui.createButton
                         ({
-                            column: 0,
+                            column: 1,
                             text: getLoc('btnReset'),
                             onClicked: () =>
                             {
