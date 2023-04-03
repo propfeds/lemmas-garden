@@ -67,6 +67,8 @@ let graphMode2D = 1;
 let graphMode3D = true;
 let colonyMode = 1;
 let colonyViewConfig = {};
+let notebook = {};
+
 let textColor = 'ffccff';
 
 let tmpCurrency;
@@ -84,6 +86,7 @@ eq2Colour.set(Theme.STANDARD, 'c0c0c0');
 eq2Colour.set(Theme.DARK, 'b5b5b5');
 eq2Colour.set(Theme.LIGHT, '434343');
 
+const MAX_INT = 0x7fffffff;
 const TRIM_SP = /\s+/g;
 const LS_RULE = /([^:]+)(:(.+))?=(.*)/;
 // Context doesn't need to check for nested brackets!
@@ -99,7 +102,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'v0.0, Axiom',
+        versionName: 'Version: 0.0.1, Axiom',
 
         pubTax: 'Publishing tax',
 
@@ -107,6 +110,7 @@ const locStrings =
         btnVar: 'Variables',
         btnClose: 'Close',
         btnSave: 'Save',
+        btnReset: 'Reset Graphs',
 
         labelActions: 'Actions: ',
         btnHarvest: 'Harvest',
@@ -131,6 +135,12 @@ const locStrings =
         unlockPlot: `\\text{{plot }}{{{0}}}`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
+
+        permaNote: 'Notebook',
+        permaNoteInfo: 'Manage populations and harvests',
+        labelPlants: 'Plants',
+        labelMaxLevel: 'Max. level',
+        labelHarvestStage: 'Harvest stage',
 
         colony: '{0} of {1}, stage {2}',
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
@@ -189,7 +199,7 @@ be ignored.`,
                         19,
                         20,
                         21, 22,
-                        23, 25, 26, 28, 29, 33, 37, 38, 42
+                        23, 25, 26, 28, 29, 33, 37, 38
                     ],
                     0: 'A seedling in its warm slumber.',
                     2: 'An old sentiment in reminiscence.',
@@ -218,7 +228,6 @@ the other stem split again.`,
                     33: 'The first flower matures.',
                     37: 'The second flower matures.',
                     38: 'All flowers have reached maturity.',
-                    42: `These flowers won't decay if\\\\you leave them be.`,
                 }
             },
             2:
@@ -253,7 +262,7 @@ internode\\\\I : shortened stem (not internode)\\\\K: flower\\\\L: leaf\\\\—
                     14: 'This rhythm will repeat for a while.',
                     17: `I'll show you what to do when it\\\\flowers, soon.`,
                     21: `The first flower appears. If you're\\\\to harvest
-later, snip it off now.`,
+later, nip it\\\\in the bud.`,
                     23: `Once the flower tower reaches a\\\\certain size, the
 leaves will lose\\\\their flavours.`,
                     30: `Now, if the flowers were still there,\\\\imagine a
@@ -287,8 +296,8 @@ self-destruct.`
                 }
             }
         },
-        plantStats: `{0}\\\\—\\\\Growth rate: {1} (at night)\\\\` +
-`Growth cost: {2} * {3} (length)`,
+        plantStats: `{0}\\\\—\\\\Max stage: {1}\\\\Growth rate: {2} (at ` +
+`night)\\\\Growth cost: {3} * {4} (length)`,
         stageNotFound: 'No commentary.',
 
         resetRenderer: 'You are about to reset the graph.'
@@ -2380,19 +2389,24 @@ class ColonyManager
             switchColony.buy(1);
         if(this.gangsta && plot == this.gangsta[0])
         {
-            this.ancestreeTask =
+            if(this.gangsta[1] > index)
+                --this.gangsta[1];
+            else if(this.gangsta[1] == index)
             {
-                start: 0
-            };
-            this.deriveTask =
-            {
-                start: 0
-            };
-            this.calcTask =
-            {
-                start: 0
-            };
-            this.gangsta = null;
+                this.ancestreeTask =
+                {
+                    start: 0
+                };
+                this.deriveTask =
+                {
+                    start: 0
+                };
+                this.calcTask =
+                {
+                    start: 0
+                };
+                this.gangsta = null;
+            }
         }
         this.colonies[plot].splice(index, 1);
         if(plot == plotIdx && !this.colonies[plot].length)
@@ -2413,7 +2427,8 @@ class ColonyManager
             for(let j = 0; j < this.colonies[i].length; ++j)
             {
                 let c = this.colonies[i][j];
-                if(c.growth >= PLANT_DATA[c.id].growthCost *
+                let notMature = c.stage < (PLANT_DATA[c.id].maxStage||MAX_INT);
+                if(notMature && c.growth >= PLANT_DATA[c.id].growthCost *
                 BigNumber.from(c.sequence.length))
                 {
                     if(!this.gangsta)
@@ -2442,9 +2457,13 @@ class ColonyManager
                 {
                     c.energy += di * c.synthRate;
 
-                    let maxdg = c.energy.min(dg * PLANT_DATA[c.id].growthRate);
-                    c.growth += maxdg;
-                    c.energy -= maxdg;
+                    if(notMature)
+                    {
+                        let maxdg = c.energy.min(dg *
+                        PLANT_DATA[c.id].growthRate);
+                        c.growth += maxdg;
+                        c.energy -= maxdg;
+                    }
                 }
             }
         }
@@ -2542,9 +2561,13 @@ class ColonyManager
         c.params = this.actionDeriveTask.parameters;
 
         c.energy += c.diReserve * c.synthRate;
-        let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
-        c.growth += maxdg;
-        c.energy -= maxdg;
+        let notMature = c.stage < (PLANT_DATA[c.id].maxStage||MAX_INT);
+        if(notMature)
+        {
+            let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
+            c.growth += maxdg;
+            c.energy -= maxdg;
+        }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
 
@@ -2650,13 +2673,17 @@ class ColonyManager
         c.profit = this.calcTask.profit;
 
         c.energy += c.diReserve * c.synthRate;
-        let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
-        c.growth += maxdg;
-        c.energy -= maxdg;
+        ++c.stage;
+        let notMature = c.stage < (PLANT_DATA[c.id].maxStage||MAX_INT);
+        if(notMature)
+        {
+            let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
+            c.growth += maxdg;
+            c.energy -= maxdg;
+        }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
 
-        ++c.stage;
         this.ancestreeTask =
         {
             start: 0
@@ -2679,14 +2706,14 @@ class ColonyManager
 
 // Balance parameters
 
-const plotCosts = new FirstFreeCost(new ExponentialCost(100, Math.log2(100)));
+const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(100)));
 const plantUnlocks = [1, 2, 9001];
 const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2200),
 new ConstantCost(1e9));
 const permaCosts =
 [
-    BigNumber.from(24),
-    BigNumber.from(1e30),
+    BigNumber.from(36),
+    BigNumber.from(4800),
     BigNumber.from(1e45)
 ];
 
@@ -2734,6 +2761,7 @@ const PLANT_DATA =
             'maxFlowerSize': '3',
             'maxLeafSize': '0.6'
         }),
+        maxStage: 38,
         cost: new FirstFreeCost(new ExponentialCost(0.5, Math.log2(3))),
         growthRate: BigNumber.THREE,
         growthCost: BigNumber.THREE,
@@ -3044,7 +3072,7 @@ var switchPlant, viewColony, switchColony;
 
 var plants = Array.from({length: maxPlots}, (_) => {return {};});
 
-var plotPerma, plantPerma;
+var notebookPerma, plotPerma, plantPerma;
 
 var freePenny, warpTick, warpOne, warpZero;
 
@@ -3132,6 +3160,22 @@ var init = () =>
             plants[i][plantUnlocks[j]].isAvailable = false;
         }
     }
+
+    /* Buy all button
+    */
+    {
+        notebookPerma = theory.createPermanentUpgrade(10, currency,
+        new FreeCost);
+        notebookPerma.description = getLoc('permaNote');
+        notebookPerma.info = getLoc('permaNoteInfo');
+        notebookPerma.bought = (_) =>
+        {
+            notebookPerma.level = 0;
+            let noteMenu = createNotebookMenu();
+            noteMenu.show();
+        }
+        notebookPerma.isAvailable = false;
+    }
     /* Plot unlock
     Before you can plant any plants, you have to switch tab and unlock plot 0.
     */
@@ -3199,6 +3243,7 @@ var init = () =>
 
     theory.createPublicationUpgrade(1, currency, permaCosts[0]);
     theory.createBuyAllUpgrade(2, currency, permaCosts[1]);
+    theory.buyAllUpgrade.bought = (_) => updateAvailability();
     theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
 
     /* Free penny
@@ -3282,6 +3327,7 @@ var updateAvailability = () =>
             plants[i][plantUnlocks[j]].level > 0 ||
             (j == plantIdx[i] && j <= plantPerma.level);
     }
+    notebookPerma.isAvailable = theory.isBuyAllAvailable;
 }
 
 var tick = (elapsedTime, multiplier) =>
@@ -3324,15 +3370,15 @@ var getEquationOverlay = () =>
             // For reference
             // ui.createFrame({row: 0, column: 2}),
             // ui.createFrame({row: 1, column: 2}),
-            ui.createLatexLabel
-            ({
-                row: 0, column: 0,
-                verticalTextAlignment: TextAlignment.START,
-                margin: new Thickness(8, 4),
-                text: getLoc('versionName'),
-                fontSize: 9,
-                textColor: Color.TEXT_MEDIUM
-            }),
+            // ui.createLatexLabel
+            // ({
+            //     row: 0, column: 0,
+            //     verticalTextAlignment: TextAlignment.START,
+            //     margin: new Thickness(8, 4),
+            //     text: getLoc('versionName'),
+            //     fontSize: 9,
+            //     textColor: Color.TEXT_MEDIUM
+            // }),
             ui.createLatexLabel
             ({
                 row: 0, column: 0,
@@ -3819,8 +3865,9 @@ let createColonyViewMenu = (colony) =>
     };
     let filterEntry = ui.createEntry
     ({
-        text: colonyViewConfig[colony.id].filter,
         column: 1,
+        text: colonyViewConfig[colony.id].filter,
+        clearButtonVisibility: ClearButtonVisibility.WHILE_EDITING,
         onTextChanged: (ot, nt) =>
         {
             colonyViewConfig[colony.id].filter = nt;
@@ -3832,8 +3879,8 @@ let createColonyViewMenu = (colony) =>
     });
     let paramSwitch = ui.createSwitch
     ({
-        isToggled: colonyViewConfig[colony.id].params,
         column: 3,
+        isToggled: colonyViewConfig[colony.id].params,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e) =>
         {
@@ -3866,8 +3913,9 @@ let createColonyViewMenu = (colony) =>
     let pageTitle = ui.createLatexLabel
     ({
         text: Localization.format(getLoc('plantStats'),
-        getLoc('plants')[colony.id].details, PLANT_DATA[colony.id].growthRate,
-        PLANT_DATA[colony.id].growthCost, colony.sequence.length),
+        getLoc('plants')[colony.id].details, PLANT_DATA[colony.id].maxStage ||
+        '∞', PLANT_DATA[colony.id].growthRate, PLANT_DATA[colony.id].growthCost,
+        colony.sequence.length),
         margin: new Thickness(0, 6),
         horizontalTextAlignment: TextAlignment.START,
         verticalTextAlignment: TextAlignment.CENTER
@@ -3942,9 +3990,15 @@ let createColonyViewMenu = (colony) =>
                         })
                     })
                 }),
+                ui.createBox
+                ({
+                    heightRequest: 0,
+                    margin: new Thickness(0)
+                }),
                 ui.createGrid
                 ({
-                    columnDefinitions: ['20*', '30*', '30*', '20*'],
+                    minimumHeightRequest: getSmallBtnSize(ui.screenWidth),
+                    columnDefinitions: ['20*', '30*', '35*', '15*'],
                     children:
                     [
                         ui.createLatexLabel
@@ -3985,9 +4039,131 @@ let createColonyViewMenu = (colony) =>
     return menu;
 }
 
+let createNotebookMenu = () =>
+{
+    let plantLabels = [];
+    let maxLevelEntries = [];
+    // let harvestEntries = [];
+    for(let i = 0; i <= plantPerma.level; ++i)
+    {
+        if(!notebook[plantUnlocks[i]])
+        {
+            notebook[plantUnlocks[i]] =
+            {
+                maxLevel: MAX_INT,
+                harvestStage: MAX_INT
+            };
+        }
+        plantLabels.push(ui.createLatexLabel
+        ({
+            text: getLoc('plants')[plantUnlocks[i]].name,
+            row: i, column: 0,
+            verticalTextAlignment: TextAlignment.CENTER
+        }));
+        maxLevelEntries.push(ui.createEntry
+        ({
+            row: i, column: 1,
+            text: notebook[plantUnlocks[i]].maxLevel == MAX_INT ? '' :
+            notebook[plantUnlocks[i]].maxLevel.toString(),
+            keyboard: Keyboard.NUMERIC,
+            horizontalTextAlignment: TextAlignment.END,
+            onTextChanged: (ot, nt) =>
+            {
+                let tmpML = Number(nt) || MAX_INT;
+                for(let j = 0; j < maxPlots; ++j)
+                {
+                    let count = 0;
+                    for(let k = 0; k < manager.colonies[j].length; ++k)
+                    {
+                        let c = manager.colonies[j][k];
+                        if(c.id == plantUnlocks[i])
+                        {
+                            count += c.population;
+                            tmpML = Math.max(tmpML, count);
+                        }
+                    }
+                }
+                notebook[plantUnlocks[i]].maxLevel = tmpML;
+                for(let j = 0; j < maxPlots; ++j)
+                    plants[j][plantUnlocks[i]].maxLevel = tmpML;
+            }
+        }));
+        // TODO: Create harvest entry
+    }
+    let noteGrid = ui.createGrid
+    ({
+        columnDefinitions: theory.isAutoBuyerAvailable ? ['40*', '30*', '30*'] :
+        ['70*', '30*'],
+        children: [...plantLabels, ...maxLevelEntries]
+    });
+
+    let menu = ui.createPopup
+    ({
+        title: getLoc('permaNote'),
+        content: ui.createStackLayout
+        ({
+            children:
+            [
+                ui.createGrid
+                ({
+                    heightRequest: theory.isAutoBuyerAvailable ?
+                    getSmallBtnSize(ui.screenWidth) :
+                    getImageSize(ui.screenWidth),
+                    columnDefinitions: theory.isAutoBuyerAvailable ?
+                    ['40*', '30*', '30*'] : ['70*', '30*'],
+                    children:
+                    [
+                        ui.createLatexLabel
+                        ({
+                            text: getLoc('labelPlants'),
+                            row: 0, column: 0,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        }),
+                        ui.createLatexLabel
+                        ({
+                            text: getLoc('labelMaxLevel'),
+                            row: 0, column: 1,
+                            horizontalOptions: LayoutOptions.END,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        }),
+                        ui.createLatexLabel
+                        ({
+                            isVisible: theory.isAutoBuyerAvailable,
+                            text: getLoc('labelHarvestStage'),
+                            row: 0, column: 2,
+                            horizontalOptions: LayoutOptions.CENTER,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        })
+                    ]
+                }),
+                ui.createBox
+                ({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                noteGrid,
+                ui.createBox
+                ({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                ui.createButton
+                ({
+                    text: getLoc('btnClose'),
+                    onClicked: () =>
+                    {
+                        Sound.playClick();
+                        menu.hide();
+                    }
+                }),
+            ]
+        })
+    });
+    return menu;
+}
+
 let createWorldMenu = () =>
 {
-    let tmpGM3 = graphMode3D;
     let GM3Label = ui.createLatexLabel
     ({
         text: getLoc('graphMode3D'),
@@ -3996,7 +4172,7 @@ let createWorldMenu = () =>
     });
     let GM3Switch = ui.createSwitch
     ({
-        isToggled: tmpGM3,
+        isToggled: graphMode3D,
         row: 0, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e) =>
@@ -4005,15 +4181,14 @@ let createWorldMenu = () =>
             e.type == TouchType.LONGPRESS_RELEASED)
             {
                 Sound.playClick();
-                tmpGM3 = !tmpGM3;
-                GM3Switch.isToggled = tmpGM3;
+                graphMode3D = !graphMode3D;
+                GM3Switch.isToggled = graphMode3D;
             }
         }
     });
-    let tmpGM2 = graphMode2D;
     let GM2Label = ui.createLatexLabel
     ({
-        text: getLoc('graphModes2D')[tmpGM2],
+        text: getLoc('graphModes2D')[graphMode2D],
         row: 1, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
@@ -4022,22 +4197,21 @@ let createWorldMenu = () =>
         row: 1, column: 1,
         minimum: 0,
         maximum: 2,
-        value: tmpGM2,
+        value: graphMode2D,
         onValueChanged: () =>
         {
-            tmpGM2 = Math.round(GM2Slider.value);
-            GM2Label.text = getLoc('graphModes2D')[tmpGM2];
+            graphMode2D = Math.round(GM2Slider.value);
+            GM2Label.text = getLoc('graphModes2D')[graphMode2D];
         },
         onDragCompleted: () =>
         {
             Sound.playClick();
-            GM2Slider.value = tmpGM2;
+            GM2Slider.value = graphMode2D;
         }
     });
-    let tmpCM = colonyMode;
     let CMLabel = ui.createLatexLabel
     ({
-        text: getLoc('colonyModes')[tmpCM],
+        text: getLoc('colonyModes')[colonyMode],
         row: 2, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
@@ -4046,21 +4220,22 @@ let createWorldMenu = () =>
         row: 2, column: 1,
         minimum: 0,
         maximum: 3,
-        value: tmpCM,
+        value: colonyMode,
         onValueChanged: () =>
         {
-            tmpCM = Math.round(CMSlider.value);
-            CMLabel.text = getLoc('colonyModes')[tmpCM];
+            colonyMode = Math.round(CMSlider.value);
+            CMLabel.text = getLoc('colonyModes')[colonyMode];
         },
         onDragCompleted: () =>
         {
             Sound.playClick();
-            CMSlider.value = tmpCM;
+            CMSlider.value = colonyMode;
         }
     });
 
     let menu = ui.createPopup
     ({
+        isPeekable: true,
         title: getLoc('menuTheory'),
         content: ui.createStackLayout
         ({
@@ -4085,22 +4260,44 @@ let createWorldMenu = () =>
                         CMSlider
                     ]
                 }),
+                ui.createLatexLabel
+                ({
+                    text: getLoc('versionName'),
+                    horizontalOptions: LayoutOptions.CENTER,
+                    verticalTextAlignment: TextAlignment.CENTER
+                }),
                 ui.createBox
                 ({
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
                 }),
-                ui.createButton
+                ui.createGrid
                 ({
-                    text: getLoc('btnSave'),
-                    onClicked: () =>
-                    {
-                        Sound.playClick();
-                        graphMode3D = tmpGM3;
-                        graphMode2D = tmpGM2;
-                        colonyMode = tmpCM;
-                        menu.hide();
-                    }
+                    minimumHeightRequest: getBtnSize(ui.screenWidth),
+                    columnDefinitions: ['50*', '50*'],
+                    children:
+                    [
+                        ui.createButton
+                        ({
+                            column: 1,
+                            text: getLoc('btnClose'),
+                            onClicked: () =>
+                            {
+                                Sound.playClick();
+                                menu.hide();
+                            }
+                        }),
+                        ui.createButton
+                        ({
+                            column: 0,
+                            text: getLoc('btnReset'),
+                            onClicked: () =>
+                            {
+                                Sound.playClick();
+                                renderer.reset();
+                            }
+                        })
+                    ]
                 })
             ]
         })
@@ -4146,7 +4343,7 @@ var postPublish = () =>
     theory.invalidateQuaternaryValues();
 }
 
-var canResetStage = () => true;
+var canResetStage = () => false;
 
 var getResetStageMessage = () => getLoc('resetRenderer');
 
@@ -4211,7 +4408,8 @@ var getInternalState = () => JSON.stringify
     graphMode2D: graphMode2D,
     graphMode3D: graphMode3D,
     colonyMode: colonyMode,
-    colonyViewConfig: colonyViewConfig
+    colonyViewConfig: colonyViewConfig,
+    notebook: notebook
 }, bigStringify);
 
 var setInternalState = (stateStr) =>
@@ -4263,6 +4461,9 @@ var setInternalState = (stateStr) =>
     if('colonyViewConfig' in state)
         colonyViewConfig = state.colonyViewConfig;
 
+    if('notebook' in state)
+        notebook = state.notebook;
+
     actuallyPlanting = false;
     tmpLevels = Array.from({length: maxPlots}, (_) => {return {};});
     for(let i = 0; i < maxPlots; ++i)
@@ -4275,7 +4476,12 @@ var setInternalState = (stateStr) =>
             tmpLevels[i][c.id] += c.population;
         }
         for(let j = 0; j < plantUnlocks.length; ++j)
+        {
             plants[i][plantUnlocks[j]].level = tmpLevels[i][plantUnlocks[j]];
+            plants[i][plantUnlocks[j]].maxLevel = Math.max(
+            notebook[plantUnlocks[j]].maxLevel,
+            plants[i][plantUnlocks[j]].level);
+        }
     }
     actuallyPlanting = true;
 
