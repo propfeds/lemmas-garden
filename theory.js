@@ -49,7 +49,7 @@ var getDescription = (language) =>
     return descs[language] || descs.en;
 }
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
-var version = 0;
+var version = 0.02;
 
 const maxPlots = 6;
 
@@ -102,7 +102,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'Version: 0.0.1, Axiom',
+        versionName: 'Version: 0.0.2, Axiom',
 
         pubTax: 'Publishing tax',
 
@@ -4478,9 +4478,12 @@ var setInternalState = (stateStr) =>
         for(let j = 0; j < plantUnlocks.length; ++j)
         {
             plants[i][plantUnlocks[j]].level = tmpLevels[i][plantUnlocks[j]];
-            plants[i][plantUnlocks[j]].maxLevel = Math.max(
-            notebook[plantUnlocks[j]].maxLevel,
-            plants[i][plantUnlocks[j]].level);
+            if(theory.isBuyAllAvailable && notebook[plantUnlocks[j]])
+            {
+                plants[i][plantUnlocks[j]].maxLevel = Math.max(
+                notebook[plantUnlocks[j]].maxLevel,
+                plants[i][plantUnlocks[j]].level);
+            }
         }
     }
     actuallyPlanting = true;

@@ -161,7 +161,7 @@ between tau not feeling bloated and pub multipliers not too small)
     - Rewards active play
   - https://invasiveweedsolutions.co.uk/invasive-weeds/non-native/three-cornered-garlic/
   - Remixed as Hopleek (Bunny Leek) in-game with a weird fictional L-system?
-    - Only spawns on leap years, from Y8 onwards
+    - Only spawns on leap years, from Y12 onwards
     - Hopleek **nibbles** other plants **when**:
       - Player is offline at night?
       - Player is not focusing on the plot with hopleeks?
