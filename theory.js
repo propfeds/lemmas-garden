@@ -104,7 +104,8 @@ const locStrings =
     {
         versionName: 'Version: 0.0.2, Axiom',
 
-        pubTax: 'Publishing tax',
+        currencyTax: 'p (tax)',
+        pubTax: 'Tax on publish',
 
         btnView: 'View L-system',
         btnVar: 'Variables',
@@ -3076,11 +3077,12 @@ var notebookPerma, plotPerma, plantPerma;
 
 var freePenny, warpTick, warpOne, warpZero;
 
-var currency;
+var currency, taxCurrency;
 
 var init = () =>
 {
     currency = theory.createCurrency('p', 'p');
+    taxCurrency = theory.createCurrency(getLoc('currencyTax'));
 
     /* Switch plant
     Moduloose
@@ -3459,8 +3461,7 @@ var getSecondaryEquation = () =>
     if(!c)
     {
         let taxInfo = `\\text{${getLoc('pubTax')}}\\colon\\enspace
-        ${taxRate}\\times\\max\\text{p}\\\\
-        =${getCurrencyFromTau(theory.tau)[0] * taxRate}\\text{p}\\\\\\\\`;
+        ${taxRate}\\times\\max\\text{p}\\\\\\\\`;
         let tauInfo = `${theory.latexSymbol}=\\max\\text{p}`;
         return `\\begin{array}{c}${theory.publicationUpgrade.level &&
         theory.canPublish ? taxInfo : ''}${tauInfo}\\end{array}`;
@@ -4305,24 +4306,33 @@ let createWorldMenu = () =>
     return menu;
 }
 
+let updateTax = () =>
+{
+    taxCurrency.value = -getCurrencyFromTau(theory.tau)[0] * taxRate;
+    return true;
+}
+
+var isCurrencyVisible = (index) => (index && theory.publicationUpgrade.level &&
+theory.canPublish && updateTax()) || !index;
+
 var getTau = () => currency.value.max(BigNumber.ZERO).pow(tauRate);
 
 var getCurrencyFromTau = (tau) =>
 [
-    tau,
+    tau.pow(1/tauRate),
     currency.symbol
 ];
 
 var prePublish = () =>
 {
-    tmpCurrency = currency.value;
+    tmpCurrency = currency.value + taxCurrency.value;
     tmpLevels = Array.from({length: maxPlots}, (_) => []);
 }
 
 // You can be in debt for this lol
 var postPublish = () =>
 {
-    currency.value = tmpCurrency - getCurrencyFromTau(theory.tau)[0] * taxRate;
+    currency.value = tmpCurrency;
 
     actuallyPlanting = false;
     tmpLevels = Array.from({length: maxPlots}, (_) => {return {};});
