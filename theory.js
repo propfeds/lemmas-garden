@@ -118,7 +118,7 @@ const locStrings =
         btnHarvestKill: 'Harvest\\\\(kill)',
         btnPrune: 'Prune',
         btnPruneKill: 'Prune\\\\(kill)',
-        labelSettings: 'Settings: ',
+        labelSettings: 'Settings',
 
         labelFilter: 'Filter: ',
         labelParams: 'Parameters: ',
@@ -139,6 +139,8 @@ const locStrings =
 
         permaNote: 'Notebook',
         permaNoteInfo: 'Manage populations and harvests',
+        permaSettings: 'Theory settings',
+        permaSettingsInfo: `Decorate your teacher's garden`,
         labelPlants: 'Plants',
         labelMaxLevel: 'Max. level',
         labelHarvestStage: 'Harvest stage',
@@ -160,7 +162,7 @@ const locStrings =
         switchColony: 'Switch colony',
         switchColonyInfo: 'Cycles through the list of colonies',
 
-        menuTheory: 'Theory Settings',
+        menuSettings: 'Theory Settings',
         graphMode3D: '3D graph: ',
         graphModes2D:
         [
@@ -2732,13 +2734,13 @@ const PLANT_DATA =
 {
     1:  // Calendula
     {
-        system: new LSystem('-(6)A(0.12, 0)',
+        system: new LSystem('-(3)A(0.12, 0)',
         [
             'A(r, t): t>=2 && r>=flowerThreshold = F(0.66, 1.5)K(0)',
             'A(r, t): r>=flowerThreshold = [++A(r-0.15, 0)][--I(0)]',
             'A(r, t): t<2 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.24, 0.84)T[-L(0.06, maxLeafSize)]/(180)[-L(0.06, maxLeafSize)]/(90)A(r, -2)',
-            'I(t): t<3 = F(0.24, 0.84)T[-L(0.03, maxLeafSize/3)]/(137.508)I(t+1)',
+            'A(r, t) = F(0.24, 0.72)T[-L(0.06, maxLeafSize)]/(180)[-L(0.06, maxLeafSize)]/(90)A(r, -2)',
+            'I(t): t<3 = F(0.24, 0.72)T[-L(0.03, maxLeafSize/3)]/(137.508)I(t+1)',
             'I(t) = F(0.36, 1.2)K(0)',
             'K(p): p<maxFlowerSize = K(p+0.25)',
             'L(r, lim): r<lim = L(r+0.03, lim)',
@@ -2749,13 +2751,13 @@ const PLANT_DATA =
             '~> K(p) = {[w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))]F(0.25)[k(1.5/4, p*18)k(1.5/4, p*18)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.23, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-9)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.24, p*18-15)][o(1.5/4, p*22.5)o(1.5*0.22, p*17.5)o(1.5*0.18, p*10)]}',
             '~> w(p, a): p<0.2 = [--(a)F(0.2).+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)[+++(a)F(0.2).].]',
             '~> w(p, a): p<0.25 = [--(a)F(p).++F(p).^F(p).]/[--(a)F(p)++F(p).^F(p).]/[--(a)F(p)++F(p).^F(p).]/[--(a)F(p)[++F(p).].]',
-            '~> w(p, a) = [--(a)F(p).++F(p).^-(a)F(p).]/[--(a)F(p)++F(p).^-(a)F(p).]/[--(a)F(p)++F(p).^-(a)F(p).]/[--(a)F(p)[++F(p).].]',
+            '~> w(p, a) = [--(a)F(p).++F(p).^+-(a)F(p).]/[--(a)F(p)++F(p).^+-(a)F(p).]/[--(a)F(p)++F(p).^+-(a)F(p).]/[--(a)F(p)[++F(p).].]',
             '~> k(p, a): p<0.25 = [---(a)F(p/2).+^F(p*2).+&F(p).][---(a)F(p/2)[+&F(p*2)[+^F(p).].].]/(137.508)',
             '~> k(p, a): p<0.35 = [---(a)F(p/2).+^F(p*2).&F(p).][---(a)F(p/2)[+&F(p*2)[^F(p).].].]/(137.508)',
             '~> k(p, a) = [---(a)F(p/2).+^F(p*2).-&F(p).][---(a)F(p/2)[+&F(p*2)[-^F(p).].].]/(137.508)',
             '~> o(p, a) = [-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]',
             '~> L(p, lim): p<=maxLeafSize/4 = {T(p*0.8)[&F(p).F(p).&-F(p).^^-F(p).^F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].].[^F(p).F(p).^-F(p).&&-F(p).&F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].]}',
-            '~> L(p, lim): p<=maxLeafSize/3 = {T(p*1.6)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
+            '~> L(p, lim): p<=maxLeafSize/3 = {T(p*2)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
             '~> L(p, lim) = {T(p*1.6)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
         ], 15, 0, 'AI', '', -0.24, {
             'flowerThreshold': '0.9',
@@ -2798,9 +2800,9 @@ const PLANT_DATA =
         [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.36, 1.44)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
+            'A(r, t) = F(0.24, 1.32)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
             'I(t): t<4 = I(t+1)',
-            'I(t) = F(0.06, 0.42)[+L(0.03, maxLeafSize/3, 0)]/(180)[+L(0.03, maxLeafSize/3, 0)]',
+            'I(t) = F(0.06, 0.42)[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]',
             'F < K(t): t>=signalThreshold && t<=signalThreshold = S(0)[+$K(0)][-$K(0)]K(t)',
             'K(t): t-2 = K(t+1)',
             'K(t) = K(t+1)K(0)',
@@ -2816,11 +2818,11 @@ const PLANT_DATA =
             '~> K(t) = /(90)F(sqrt(t/4)){[k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//]}',
             '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
-            '~> L(p, lim, s): s<1 = {\\(90)T(p*1.2)F(p).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
+            '~> L(p, lim, s): s<1 = {\\(90)T(p*1.2)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
             '~> L(p, lim, s): s>=1 = {\\(90)T(lim*2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
         ], 30, 0, 'BASIL', '+-&^/\\T', 0.06, {
             'flowerThreshold': '1.38',
-            'maxLeafSize': '0.72',
+            'maxLeafSize': '0.66',
             'signalThreshold': '8'
         }),
         cost: new ExponentialCost(4, 1),
@@ -2841,9 +2843,9 @@ const PLANT_DATA =
         camera: (stage) =>
         {
             return {
-                scale: 8,
+                scale: 6,
                 x: 0,
-                y: Math.min(Math.max(5, stage / 4), 9),
+                y: Math.min(Math.max(3.75, stage / 4), 8),
                 Z: 0,
                 upright: true
             };
@@ -2925,7 +2927,7 @@ let quaternaryEntries =
 ];
 let taxQuaternaryEntry =
 [
-    new QuaternaryEntry('_{Tax}', null)
+    new QuaternaryEntry('T_p', null)
 ];
 
 let createFramedButton = (params, margin, callback, image) =>
@@ -3037,38 +3039,37 @@ const pruneLabel = ui.createLatexLabel
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const mutateFrame = createFramedButton
+// const mutateFrame = createFramedButton
+// ({
+//     row: 0, column: 4,
+// }, 2, () => log('Mootation!'),
+// game.settings.theme == Theme.LIGHT ?
+// ImageSource.THEORY :
+// ImageSource.THEORY);
+// const mutateLabel = ui.createLatexLabel
+// ({
+//     row: 0, column: 5,
+//     // horizontalOptions: LayoutOptions.END,
+//     verticalTextAlignment: TextAlignment.START,
+//     margin: new Thickness(0, 9, 1, 9),
+//     text: 'Mutate',
+//     fontSize: 10,
+//     textColor: Color.TEXT_MEDIUM
+// });
+
+const settingsLabel = ui.createLatexLabel
 ({
-    row: 0, column: 4,
-}, 2, () => log('Mootation!'),
-game.settings.theme == Theme.LIGHT ?
-ImageSource.THEORY :
-ImageSource.THEORY);
-const mutateLabel = ui.createLatexLabel
-({
-    row: 0, column: 5,
-    // horizontalOptions: LayoutOptions.END,
+    row: 1, column: 0,
     verticalTextAlignment: TextAlignment.START,
-    margin: new Thickness(0, 9, 1, 9),
-    text: 'Mutate',
+    margin: new Thickness(2, 0),
+    text: getLoc('labelSettings'),
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-
-// const settingsLabel = ui.createLatexLabel
-// ({
-//     column: 0,
-//     horizontalOptions: LayoutOptions.END,
-//     verticalOptions: LayoutOptions.END,
-//     margin: new Thickness(0, 0, 40, 14),
-//     text: getLoc('labelSettings'),
-//     fontSize: 10,
-//     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
-// });
 const settingsFrame = createFramedButton
 ({
     column: 0,
-    verticalOptions: LayoutOptions.END
+    horizontalOptions: LayoutOptions.START
 }, 2, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog-dark.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog.png'));
@@ -3077,7 +3078,7 @@ var switchPlant, viewColony, switchColony;
 
 var plants = Array.from({length: maxPlots}, (_) => {return {};});
 
-var notebookPerma, plotPerma, plantPerma;
+var notebookPerma, settingsPerma, plotPerma, plantPerma;
 
 var freePenny, warpTick, warpOne, warpZero;
 
@@ -3167,7 +3168,8 @@ var init = () =>
         }
     }
 
-    /* Buy all button
+    /* Notebook
+    Unlocks when acquiring Buy All.
     */
     {
         notebookPerma = theory.createPermanentUpgrade(10, currency,
@@ -3182,6 +3184,21 @@ var init = () =>
         }
         notebookPerma.isAvailable = false;
     }
+    /* Settings
+    World menu.
+    */
+    // {
+    //     settingsPerma = theory.createPermanentUpgrade(9000, currency,
+    //     new FreeCost);
+    //     settingsPerma.description = getLoc('permaSettings');
+    //     settingsPerma.info = getLoc('permaSettingsInfo');
+    //     settingsPerma.bought = (_) =>
+    //     {
+    //         settingsPerma.level = 0;
+    //         let settingsMenu = createWorldMenu();
+    //         settingsMenu.show();
+    //     }
+    // }
     /* Plot unlock
     Before you can plant any plants, you have to switch tab and unlock plot 0.
     */
@@ -3397,6 +3414,24 @@ var getEquationOverlay = () =>
             }),
             ui.createGrid
             ({
+                row: 0, column: 0,
+                margin: new Thickness(4),
+                horizontalOptions: LayoutOptions.START,
+                verticalOptions: LayoutOptions.START,
+                rowDefinitions:
+                [
+                    'auto', 'auto'
+                ],
+                inputTransparent: true,
+                cascadeInputTransparent: false,
+                children:
+                [
+                    settingsFrame,
+                    settingsLabel
+                ]
+            }),
+            ui.createGrid
+            ({
                 row: 1, column: 0,
                 columnDefinitions: ['68*', '32*'],
                 inputTransparent: true,
@@ -3429,20 +3464,6 @@ var getEquationOverlay = () =>
                         ]
                     }),
                     // actionsLabel,
-                    ui.createGrid
-                    ({
-                        row: 0, column: 1,
-                        margin: new Thickness(4),
-                        horizontalOptions: LayoutOptions.END,
-                        verticalOptions: LayoutOptions.END,
-                        inputTransparent: true,
-                        cascadeInputTransparent: false,
-                        children:
-                        [
-                            settingsFrame
-                        ]
-                    }),
-                    // settingsLabel
                 ]
             })
             
@@ -3550,6 +3571,7 @@ var getQuaternaryEntries = () =>
     }
     if(theory.publicationUpgrade.level && theory.canPublish)
     {
+        taxCurrency.value = -getCurrencyFromTau(theory.tau)[0] * taxRate;
         taxQuaternaryEntry[0].value = taxCurrency.value;
         return quaternaryEntries.concat(taxQuaternaryEntry);
     }
@@ -4246,7 +4268,7 @@ let createWorldMenu = () =>
     let menu = ui.createPopup
     ({
         isPeekable: true,
-        title: getLoc('menuTheory'),
+        title: getLoc('menuSettings'),
         content: ui.createStackLayout
         ({
             children:
@@ -4315,14 +4337,7 @@ let createWorldMenu = () =>
     return menu;
 }
 
-let updateTax = () =>
-{
-    taxCurrency.value = -getCurrencyFromTau(theory.tau)[0] * taxRate;
-    return false;
-}
-
-var isCurrencyVisible = (index) => (index && theory.publicationUpgrade.level &&
-theory.canPublish && updateTax()) || !index;
+var isCurrencyVisible = (index) => !index;
 
 var getTau = () => currency.value.max(BigNumber.ZERO).pow(tauRate);
 
