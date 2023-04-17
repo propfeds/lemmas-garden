@@ -125,7 +125,7 @@ between tau not feeling bloated and pub multipliers not too small)
 - **Plot 0** is a wild forest
   - Spawns all sorts of plants that can spread into plots 1~6
   - Cannot be viewed
-- **Challenge plots** (negative): not harvestable
+- **Excursions (challenge plots)** (negative): not harvestable
   - Beating them will unlock new plant types
   - Ideas: 5x+1 Cotton Conjecture, ~~Botched~~ Bloated Linden (lol)
 

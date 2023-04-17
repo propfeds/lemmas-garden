@@ -2760,7 +2760,7 @@ const PLANT_DATA =
         ], 15, 0, 'AI', '', -0.24, {
             'flowerThreshold': '0.9',
             'maxFlowerSize': '3',
-            'maxLeafSize': '0.6'
+            'maxLeafSize': '0.48'
         }),
         maxStage: 38,
         cost: new FirstFreeCost(new ExponentialCost(0.5, Math.log2(3))),
@@ -2798,9 +2798,9 @@ const PLANT_DATA =
         [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.48, 1.56)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
+            'A(r, t) = F(0.36, 1.44)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
             'I(t): t<4 = I(t+1)',
-            'I(t) = F(0.06, 0.42)[+L(0.03, maxLeafSize/4, 0)]/(180)[+L(0.03, maxLeafSize/4, 0)]',
+            'I(t) = F(0.06, 0.42)[+L(0.03, maxLeafSize/3, 0)]/(180)[+L(0.03, maxLeafSize/3, 0)]',
             'F < K(t): t>=signalThreshold && t<=signalThreshold = S(0)[+$K(0)][-$K(0)]K(t)',
             'K(t): t-2 = K(t+1)',
             'K(t) = K(t+1)K(0)',
@@ -2816,8 +2816,8 @@ const PLANT_DATA =
             '~> K(t) = /(90)F(sqrt(t/4)){[k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//]}',
             '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
-            '~> L(p, lim, s): s<1 = {\\(90)T(p*1.6)F(sqrt(p)).[-(48)F(sqrt(p)).+F(sqrt(p)).+&F(sqrt(p)).+F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].].[+(48)F(sqrt(p)).-F(sqrt(p)).-&F(sqrt(p)).-F(sqrt(p)).][F(sqrt(p))[&F(sqrt(p))[F(sqrt(p))[^F(sqrt(p)).].].].]}',
-            '~> L(p, lim, s): s>=1 = {\\(90)T(lim*2.4)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
+            '~> L(p, lim, s): s<1 = {\\(90)T(p*1.2)F(p).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
+            '~> L(p, lim, s): s>=1 = {\\(90)T(lim*2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
         ], 30, 0, 'BASIL', '+-&^/\\T', 0.06, {
             'flowerThreshold': '1.38',
             'maxLeafSize': '0.72',
@@ -2922,6 +2922,10 @@ let quaternaryEntries =
     new QuaternaryEntry('p_4', null),
     new QuaternaryEntry('p_5', null),
     new QuaternaryEntry('p_6', null),
+];
+let taxQuaternaryEntry =
+[
+    new QuaternaryEntry('_{Tax}', null)
 ];
 
 let createFramedButton = (params, margin, callback, image) =>
@@ -3543,6 +3547,11 @@ var getQuaternaryEntries = () =>
             theory.publicationMultiplier;
         }
         quaternaryEntries[i].value = sum;
+    }
+    if(theory.publicationUpgrade.level && theory.canPublish)
+    {
+        taxQuaternaryEntry[0].value = taxCurrency.value;
+        return quaternaryEntries.concat(taxQuaternaryEntry);
     }
     return quaternaryEntries;   //.slice(0, plotPerma.level);
 }
@@ -4309,7 +4318,7 @@ let createWorldMenu = () =>
 let updateTax = () =>
 {
     taxCurrency.value = -getCurrencyFromTau(theory.tau)[0] * taxRate;
-    return true;
+    return false;
 }
 
 var isCurrencyVisible = (index) => (index && theory.publicationUpgrade.level &&

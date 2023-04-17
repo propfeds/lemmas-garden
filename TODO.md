@@ -20,7 +20,8 @@
 
 - [ ] Almanac containing plants, L-system help, etc.
 - [x] Buy All upgrade unlocks maxLevel config
-- [ ] Autobuy upgrade unlocks harvest stage config
+- Autobuy upgrade unlocks harvest stage config
+  - [ ] No! Doesn't fit gardening theme!
 - [ ] Colour schemes?
 - [ ] Timer function to measure growth
 
