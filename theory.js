@@ -2750,7 +2750,7 @@ const PLANT_DATA =
             'A(r, t): r>=flowerThreshold = [++A(r-0.15, 0)][--I(0)]',
             'A(r, t): t<2 = A(r+0.06, t+1)',
             'A(r, t) = F(0.24, 0.72)T[-L(0.06, maxLeafSize)]/(180)[-L(0.06, maxLeafSize)]/(90)A(r, -2)',
-            'I(t): t<3 = F(0.24, 0.72)T[-L(0.03, maxLeafSize/3)]/(137.508)I(t+1)',
+            'I(t): t<3 = F(0.24, 0.84)T[-L(0.03, maxLeafSize/3)]/(137.508)I(t+1)',
             'I(t) = F(0.36, 1.2)K(0)',
             'K(p): p<maxFlowerSize = K(p+0.25)',
             'L(r, lim): r<lim = L(r+0.03, lim)',
