@@ -2571,6 +2571,11 @@ class ColonyManager
             c.growth += maxdg;
             c.energy -= maxdg;
         }
+        else
+        {
+            c.energy += c.growth;
+            c.growth = BigNumber.ZERO;
+        }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
 
@@ -2684,6 +2689,11 @@ class ColonyManager
             c.growth += maxdg;
             c.energy -= maxdg;
         }
+        else
+        {
+            c.energy += c.growth;
+            c.growth = BigNumber.ZERO;
+        }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
 
@@ -2762,7 +2772,7 @@ const PLANT_DATA =
         ], 15, 0, 'AI', '', -0.24, {
             'flowerThreshold': '0.9',
             'maxFlowerSize': '3',
-            'maxLeafSize': '0.48'
+            'maxLeafSize': '0.6'
         }),
         maxStage: 38,
         cost: new FirstFreeCost(new ExponentialCost(0.5, Math.log2(3))),
