@@ -2927,7 +2927,7 @@ let quaternaryEntries =
 ];
 let taxQuaternaryEntry =
 [
-    new QuaternaryEntry('T_p', null)
+    new QuaternaryEntry('T_{\\text{p}}', null)
 ];
 
 let createFramedButton = (params, margin, callback, image) =>
@@ -3059,9 +3059,9 @@ const pruneLabel = ui.createLatexLabel
 
 const settingsLabel = ui.createLatexLabel
 ({
-    row: 1, column: 0,
+    row: 0, column: 1,
     verticalTextAlignment: TextAlignment.START,
-    margin: new Thickness(2, 0),
+    margin: new Thickness(0, 9),
     text: getLoc('labelSettings'),
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
@@ -3418,7 +3418,7 @@ var getEquationOverlay = () =>
                 margin: new Thickness(4),
                 horizontalOptions: LayoutOptions.START,
                 verticalOptions: LayoutOptions.START,
-                rowDefinitions:
+                columnDefinitions:
                 [
                     'auto', 'auto'
                 ],
