@@ -102,7 +102,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'Version: 0.0.2, Axiom',
+        versionName: 'Version: 0.0.3, Axiom (WIP)',
 
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish',
@@ -132,7 +132,8 @@ const locStrings =
         menuVariables: 'Defined Variables',
         labelVars: 'Variables: {0}',
 
-        plotTitle: `\\text{{Plot }}{{{0}}}`,
+        plotTitle: `\\mathcal{{P}}{{\\mskip -1mu l}}{{o\\mskip -2mu}}
+        {{\\mskip -3mu t}}\\enspace #{{{0}}}`,
         unlockPlot: `\\text{{plot }}{{{0}}}`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
@@ -2810,9 +2811,9 @@ const PLANT_DATA =
         [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.24, 1.32)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
+            'A(r, t) = F(0.24, 1.44)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
             'I(t): t<4 = I(t+1)',
-            'I(t) = F(0.06, 0.42)[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]',
+            'I(t) = F(0, 0.36)[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]',
             'F < K(t): t>=signalThreshold && t<=signalThreshold = S(0)[+$K(0)][-$K(0)]K(t)',
             'K(t): t-2 = K(t+1)',
             'K(t) = K(t+1)K(0)',
@@ -2828,8 +2829,8 @@ const PLANT_DATA =
             '~> K(t) = /(90)F(sqrt(t/4)){[k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//]}',
             '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
-            '~> L(p, lim, s): s<1 = {\\(90)T(p*1.2)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
-            '~> L(p, lim, s): s>=1 = {\\(90)T(lim*2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
+            '~> L(p, lim, s): s<1 = {\\(90)T(p*0.8)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
+            '~> L(p, lim, s): s>=1 = {\\(90)T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
         ], 30, 0, 'BASIL', '+-&^/\\T', 0.06, {
             'flowerThreshold': '1.38',
             'maxLeafSize': '0.66',
@@ -2853,9 +2854,9 @@ const PLANT_DATA =
         camera: (stage) =>
         {
             return {
-                scale: 6,
+                scale: 8,
                 x: 0,
-                y: Math.min(Math.max(3.75, stage / 4), 8),
+                y: Math.min(Math.max(5, stage / 4), 9),
                 Z: 0,
                 upright: true
             };
@@ -4306,7 +4307,8 @@ let createWorldMenu = () =>
                 ({
                     text: getLoc('versionName'),
                     horizontalOptions: LayoutOptions.CENTER,
-                    verticalTextAlignment: TextAlignment.CENTER
+                    verticalTextAlignment: TextAlignment.CENTER,
+                    fontSize: 12
                 }),
                 ui.createBox
                 ({
