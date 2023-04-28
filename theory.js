@@ -68,6 +68,7 @@ let actuallyPlanting = true;
 let graphMode2D = 1;
 let graphMode3D = true;
 let colonyMode = 1;
+let fancyPlotTitle = false;
 let colonyViewConfig = {};
 let notebook = {};
 
@@ -134,8 +135,9 @@ const locStrings =
         menuVariables: 'Defined Variables',
         labelVars: 'Variables: {0}',
 
-        plotTitle: `\\mathcal{{P}}{{\\mskip -1mu l}}{{o\\mskip -2mu}}
-        {{\\mskip -3mu t}}\\enspace {{{0}}}`,
+        plotTitle: `\\text{{Plot }}{{{0}}}`,
+        plotTitleFancy: `\\mathcal{{P}}{{\\mskip -1mu l}}{{o\\mskip -2mu}}
+        {{\\mskip -3mu t}}\\enspace #{{{0}}}`,
         unlockPlot: `\\text{{plot }}{{{0}}}`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
@@ -178,6 +180,11 @@ const locStrings =
             'Colony view: Off',
             'Colony view: Single',
             'Colony view: List'
+        ],
+        plotTitleModes:
+        [
+            'Plot title: Serif',
+            'Plot title: Cursive'
         ],
 
         plants:
@@ -3472,7 +3479,8 @@ var getEquationOverlay = () =>
 
 var getPrimaryEquation = () =>
 {
-    return Localization.format(getLoc('plotTitle'), plotIdx + 1);
+    return Localization.format(getLoc(fancyPlotTitle ? 'plotTitleFancy' :
+    'plotTitle'), plotIdx + 1);
 }
 
 var getSecondaryEquation = () =>
@@ -4282,6 +4290,30 @@ let createWorldMenu = () =>
             CMSlider.value = colonyMode;
         }
     });
+    let PTLabel = ui.createLatexLabel
+    ({
+        text: getLoc('plotTitleModes')[Number(fancyPlotTitle)],
+        row: 3, column: 0,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let PTSwitch = ui.createSwitch
+    ({
+        isToggled: fancyPlotTitle,
+        row: 3, column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        onTouched: (e) =>
+        {
+            if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            e.type == TouchType.LONGPRESS_RELEASED)
+            {
+                Sound.playClick();
+                fancyPlotTitle = !fancyPlotTitle;
+                PTSwitch.isToggled = fancyPlotTitle;
+                PTLabel.text = getLoc('plotTitleModes')[Number(fancyPlotTitle)];
+                theory.invalidatePrimaryEquation();
+            }
+        }
+    });
 
     let menu = ui.createPopup
     ({
@@ -4298,6 +4330,7 @@ let createWorldMenu = () =>
                     [
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
+                        getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth)
                     ],
                     children:
@@ -4307,7 +4340,9 @@ let createWorldMenu = () =>
                         GM2Label,
                         GM2Slider,
                         CMLabel,
-                        CMSlider
+                        CMSlider,
+                        PTLabel,
+                        PTSwitch
                     ]
                 }),
                 ui.createLatexLabel
@@ -4461,6 +4496,7 @@ var getInternalState = () => JSON.stringify
     graphMode2D: graphMode2D,
     graphMode3D: graphMode3D,
     colonyMode: colonyMode,
+    fancyPlotTitle: fancyPlotTitle,
     colonyViewConfig: colonyViewConfig,
     notebook: notebook
 }, bigStringify);
@@ -4511,9 +4547,11 @@ var setInternalState = (stateStr) =>
         graphMode3D = state.graphMode3D;
     if('colonyMode' in state)
         colonyMode = state.colonyMode;
+    if('fancyPlotTitle' in state)
+        fancyPlotTitle = state.fancyPlotTitle;
+
     if('colonyViewConfig' in state)
         colonyViewConfig = state.colonyViewConfig;
-
     if('notebook' in state)
         notebook = state.notebook;
 
