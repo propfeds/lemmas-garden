@@ -24,7 +24,7 @@
   - [ ] Only unlocks in a future update (students!)
 - [x] Make the colony menu give commentary, while the stats are always displayed on screen
   - [x] If stage lower than first leaf, give the usual intro (move that inside the stages object)
-- [ ] Rewrite descriptions for basil to reflect new balance changes
+- [x] Rewrite descriptions for basil to reflect new balance changes
 - [x] Remove seed field from L-s menu
 
 - [ ] Colour schemes?

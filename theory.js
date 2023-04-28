@@ -237,38 +237,33 @@ internode\\\\I : shortened stem (not internode)\\\\K: flower\\\\L: leaf\\\\—
                 {
                     index:
                     [
-                        0, 4, 8, 9, 12, 13, 14, 17, 21,
-                        23,
-                        30,
-                        31,
-                        40,
-                        41,
-                        42
+                        0, 4, 8, 9, 12, 13, 14, 17, 20,
+                        21,
+                        22,
+                        32, 33,
+                        54
                     ],
                     0: `Hailed as the 'king/queen of herbs' all throughout the
 world, basil is used as a spice in a vast number of recipes. Even dogs enjoy
 basil from time to time.`,
-                    4: 'The first pair of leaves pops up.\\\\A stem, as well.',
+                    4: 'The first pair of leaves pops up. A stem, as well.',
                     8: 'The second pair of leaves appears.',
-                    9: 'Little leaves start to grow over\\\\the first node.',
+                    9: 'Little leaves start to grow over the first node.',
                     12: 'The third pair of leaves appears.',
-                    13: 'Little leaves now grow over\\\\the second node.',
+                    13: 'Little leaves now grow over the second node.',
                     14: 'This rhythm will repeat for a while.',
-                    17: `I'll show you what to do when it\\\\flowers, soon.`,
-                    21: `The first flower appears. If you're\\\\to harvest
-later, nip it\\\\in the bud.`,
-                    23: `Once the flower tower reaches a\\\\certain size, the
-leaves will lose\\\\their flavours.`,
-                    30: `Now, if the flowers were still there,\\\\imagine a
-signal sent by them.`,
-                    31: `This signal would travel from top\\\\to bottom, all the
-way to basil base.`,
-                    40: `Basil base catches the signal.\\\\'Basil Base,
-Inflorescence calling.\\\\Go into seed.'`,
-                    41: `Basil base sends a return signal.\\\\This time, to the
-leaves.`,
-                    42: `Leaf Squadron, Basil Base calling.\\\\Prepare to
-self-destruct.`
+                    17: `I'll show you what to do when it flowers, soon.`,
+                    20: `It's about to flower. You can nip the stem now if you
+don't feel confident.`,
+                    21: `The first flower appears. If you're to harvest later,
+nip it in the bud. Otherwise, the plant will go into seed and its leaves will
+lose flavour.`,
+                    22: `If the flower's still there, imagine it's sending a
+signal from top to bottom, all the way to basil base.`,
+                    32: `Basil base catches the signal.`,
+                    33: `Basil base sends a return signal, reminding the leaves
+to go absolutely bitter.`,
+                    54: `A basil plant has sacrificed itself for science.`
                 }
             },
             9001:
@@ -1555,7 +1550,7 @@ class LSystem
                 result += sequence[i];
                 if(params && params[i])
                     result += `(${params[i].join(', ')})`;
-                result += '\n';
+                // result += '\n';
             }
         }
         return {
@@ -2803,26 +2798,26 @@ const PLANT_DATA =
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
             'A(r, t) = F(0.24, 1.44)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
+            'I(t) > S(type): type<=0 = S(type)I(t)',
             'I(t): t<4 = I(t+1)',
             'I(t) = F(0, 0.36)[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]',
-            'K(t): t<=signalThreshold = S(0)[+K(1)][-K(1)]K(t+1)',
+            'K(t): t<=signalThreshold = S(0)/(90)[+K(1)][-K(1)]K(t+1)',
             'K(t): t-2 = K(t+1)',
             'K(t) = K(t+1)K(1)',
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
             'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
             'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
-            'I(t) > S(type): type<=0 = S(type)I(t)',
             'F(l, lim) > S(type): type<=0 = S(type)F(l, lim)',
             'S(type) < F(l, lim): type>=1 = F(l, lim)S(type)',
             'S(type) =',
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)',
             '~> *= Model specification',
-            '~> K(t) = /(90)F(sqrt(t/4)){[k(sqrt(max(1.2, t/8)))//k(sqrt(max(1.2, t/8)))//k(sqrt(max(1.2, t/8)))//k(sqrt(max(1.2, t/8)))//k(sqrt(max(1.2, t/8)))//k(sqrt(max(1.2, t/8)))//]}',
+            '~> K(t) = /(90)F(min(1.25, sqrt(t/4)))T(-0.2){[k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//]}',
             '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
             '~> L(p, lim, s): s<1 = {\\(90)T(p*0.8)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
-            '~> L(p, lim, s): s>=1 = {\\(90)T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
+            '~> L(p, lim, s): s>=1 = {\\(90)T(lim)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
         ], 30, 0, 'BASIL', '+-&^/\\T', 0.06, {
             'flowerThreshold': '1.38',
             'maxLeafSize': '0.66',
