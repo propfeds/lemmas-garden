@@ -193,6 +193,7 @@ between tau not feeling bloated and pub multipliers not too small)
 - **Root veggies** that make you guess how big they are?
   - Doesn't work since you can see the income at all times
 - **Thyme** that warps time? PvZ ripoff
+- **Gunflower** that shoots rabbits?
 - **Rhizomes?**
 - **Flower gender** mechanic?
 
@@ -225,13 +226,16 @@ I. It's a good opportunity to channel emotions.
 
 ### 1. Achievements:
 
-- **Immortal**: Celebrate your farm's 50th anniversary.
+- **Immortal**: Celebrate the 50th anniversary.
 - **Rabbits on Your Lawn**: Let hopleek spread to a plot with a PvZ plant.
 
 ### 2. Chapters:
 
 - **No. Scrap all stuff below.** Have Lemma pass away after about half way.
 All plants afterwards will display 'No commentary'.
+  - After this, unlock Students
+    - Unlocks more excursions
+    - Unlocks auto-plant/harvest (NO AUTO-PRUNE)
 
 - **Introduction**: Yesterday, a small plot of land was registered to Lemma
 Rancher. Today, Lemma's garden does wonderfully. Tomorrow, Madeline would be

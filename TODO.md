@@ -21,7 +21,12 @@
 - [ ] Almanac containing plants, L-system help, etc.
 - [x] Buy All upgrade unlocks maxLevel config
 - Autobuy upgrade unlocks harvest stage config
-  - [ ] No! Doesn't fit gardening theme!
+  - [ ] Only unlocks in a future update (students!)
+- [x] Make the colony menu give commentary, while the stats are always displayed on screen
+  - [x] If stage lower than first leaf, give the usual intro (move that inside the stages object)
+- [ ] Rewrite descriptions for basil to reflect new balance changes
+- [x] Remove seed field from L-s menu
+
 - [ ] Colour schemes?
 - [ ] Timer function to measure growth
 

@@ -43,13 +43,15 @@ var getDescription = (language) =>
     let descs =
     {
         en:
-`Last night, Lemma swept away the rubbles of her old garden.`,
+`Last night, Lemma swept away the rubbles of her old garden.
+
+You are her first student in a long while.`,
     };
 
     return descs[language] || descs.en;
 }
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
-var version = 0.02;
+var version = 0.03;
 
 const maxPlots = 6;
 
@@ -133,7 +135,7 @@ const locStrings =
         labelVars: 'Variables: {0}',
 
         plotTitle: `\\mathcal{{P}}{{\\mskip -1mu l}}{{o\\mskip -2mu}}
-        {{\\mskip -3mu t}}\\enspace #{{{0}}}`,
+        {{\\mskip -3mu t}}\\enspace {{{0}}}`,
         unlockPlot: `\\text{{plot }}{{{0}}}`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
@@ -174,9 +176,8 @@ const locStrings =
         colonyModes:
         [
             'Colony view: Off',
-            'Colony view: Commentary',
-            'Colony view: Statistics',
-            'Colony view: List',
+            'Colony view: Single',
+            'Colony view: List'
         ],
 
         plants:
@@ -185,10 +186,6 @@ const locStrings =
             {
                 name: 'Calendula',
                 info: 'A classic flower to start the month.',
-                details: `Commonly called pot marigold (not to be confused with
-marigolds of the genus Tagetes), calendulas are fast growing flowers known for
-numerous medicinal and culinary uses. In fact, the 'pot' in its name refers to
-it being an ingredient in soups, stews, broths and teas.`,
                 LsDetails: `Symbols:\\\\A: apex (stem shoot)\\\\F: internode
 \\\\I : flower stem (not internode)\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest
 returns profit as the sum of all K.\\\\—\\\\The Model specification section can
@@ -197,37 +194,31 @@ be ignored.`,
                 {
                     index:
                     [
-                        0, 2, 3, 5, 8, 10,
-                        11,
+                        0,
+                        3, 8,
                         13, 17,
                         19,
-                        20,
-                        21, 22,
-                        23, 25, 26, 28, 29, 33, 37, 38
+                        21, 24, 25, 26, 28, 29, 33, 37, 38
                     ],
-                    0: 'A seedling in its warm slumber.',
-                    2: 'An old sentiment in reminiscence.',
+                    0: `Commonly called pot marigold (not to be confused with
+marigolds of the genus Tagetes), calendulas are fast growing flowers known for
+numerous medicinal and culinary uses. In fact, the 'pot' in its name refers to
+its role as an ingredient in soups, stews, broths and teas.`,
                     3: 'Hey. A little stem has just risen.',
-                    5: 'The little stem continues to grow.',
-                    8: 'The second pair of leaves appears.',
-                    10: `For this cultivar, each pair of leaves\\\\is rotated
-to 90° against the previous.`,
-                    11: `Other cultivars may generate leaves\\\\by spinning
-around themselves.`,
+                    8: `The second pair of leaves appears. For this cultivar, 
+each pair of leaves is rotated to 90° against the previous. Other cultivars may
+generate leaves in a spiral around the stem.`,
                     13: 'The third pair of leaves appears.',
-                    17: `The stem has split in two.\\\\It will start to flower
+                    17: `The stem has split in two. It will start to flower
 soon.`,
-                    19: `When it's about to flower, the stem\\\\will start to
-spiral around itself,\\\\spawning small leaves.`,
-                    20: `The spinning angle is 137.5°,\\\\also known as the
-golden angle.`,
+                    19: `On the flower stem, little leaves will start to
+spawn in spiral around it. The spinning angle is approximately 137.508°,
+known as the golden angle.`,
                     21: 'Look! Our first flower bud.',
-                    22: `Our first bud will start to open soon.\\\\Meanwhile,
-the other stem split again.`,
-                    23: 'Wait for it...',
+                    24: 'Wait for it...',
                     25: 'A second flower bud appears!',
                     26: 'The third and final flower appears.',
-                    28: 'My wife loved to eat these raw.',
+                    28: 'My wife loved to eat these flowers raw.',
                     29: `Try it!\\\\No, don't. We'll sell them.`,
                     33: 'The first flower matures.',
                     37: 'The second flower matures.',
@@ -238,13 +229,10 @@ the other stem split again.`,
             {
                 name: 'Basil',
                 info: 'A fast growing herb, regularly used for spicing.',
-                details: `Hailed as the 'king/queen of herbs' all throughout the
-world, basil is used as a spice in a vast number of recipes. Even dogs can enjoy
-basil.`,
                 LsDetails: `Symbols:\\\\A: apex (stem shoot)\\\\B: base\\\\F:
 internode\\\\I : shortened stem (not internode)\\\\K: flower\\\\L: leaf\\\\—
-\\\\Harvest returns profit as the sum of all L.\\\\Prune cuts off all K.\\\\—
-\\\\The Model specification section can be ignored.`,
+\\\\Harvest returns profit as the sum of all L.\\\\Prune cuts off all A and K.
+\\\\—\\\\The Model specification section can be ignored.`,
                 stages:
                 {
                     index:
@@ -257,7 +245,9 @@ internode\\\\I : shortened stem (not internode)\\\\K: flower\\\\L: leaf\\\\—
                         41,
                         42
                     ],
-                    0: 'A seedling in its sweet slumber.',
+                    0: `Hailed as the 'king/queen of herbs' all throughout the
+world, basil is used as a spice in a vast number of recipes. Even dogs enjoy
+basil from time to time.`,
                     4: 'The first pair of leaves pops up.\\\\A stem, as well.',
                     8: 'The second pair of leaves appears.',
                     9: 'Little leaves start to grow over\\\\the first node.',
@@ -285,7 +275,6 @@ self-destruct.`
             {
                 name: 'Arrow weed (test)',
                 info: 'Testing my arrow weeds',
-                details: `Arrow weed is the friend of all mathematicians.`,
                 LsDetails: `The symbol A represents a rising shoot (apex), ` +
 `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
 `F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
@@ -296,13 +285,14 @@ self-destruct.`
                     0: 'The first shoot rises.\\\\Already harvestable.',
                     1: 'The shoot splits in three.\\\\The stem lengthens.',
                     2: 'The shoots continue to divide.',
-                    4: 'What do you expect? It\'s a fractal.'
+                    4: `What do you expect? It\'s a fractal. Arrow weed is the
+friend of all mathematicians.`
                 }
             }
         },
-        plantStats: `{0}\\\\—\\\\Max stage: {1}\\\\Growth rate: {2} (at ` +
-`night)\\\\Growth cost: {3} * {4} (length)`,
-        stageNotFound: 'No commentary.',
+        plantStats: `({0}) {1}\\\\—\\\\Max stage: {2}\\\\Growth rate: {3} ` +
+`(at night)\\\\Growth cost: {4} * {5} (length)`,
+        noCommentary: 'No commentary.',
 
         resetRenderer: 'You are about to reset the graph.'
     }
@@ -1565,6 +1555,7 @@ class LSystem
                 result += sequence[i];
                 if(params && params[i])
                     result += `(${params[i].join(', ')})`;
+                result += '\n';
             }
         }
         return {
@@ -2722,7 +2713,7 @@ class ColonyManager
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(100)));
 const plantUnlocks = [1, 2, 9001];
-const plantUnlockCosts = new CompositeCost(1, new ConstantCost(21000),
+const plantUnlockCosts = new CompositeCost(1, new ConstantCost(12000),
 new ConstantCost(1e9));
 const permaCosts =
 [
@@ -2747,7 +2738,7 @@ const PLANT_DATA =
     {
         system: new LSystem('-(3)A(0.12, 0)',
         [
-            'A(r, t): t>=2 && r>=flowerThreshold = F(0.6, 1.44)K(0)',
+            'A(r, t): t>=2 && r>=flowerThreshold = F(0.6, 1.8)K(0)',
             'A(r, t): r>=flowerThreshold = [++A(r-0.15, 0)][--I(0)]',
             'A(r, t): t<2 = A(r+0.06, t+1)',
             'A(r, t) = F(0.24, 0.72)T[-L(0.06, maxLeafSize)]/(180)[-L(0.06, maxLeafSize)]/(90)A(r, -2)',
@@ -2759,10 +2750,10 @@ const PLANT_DATA =
             '~> *= Model specification',
             '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/4)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)]}',
             '~> K(p): p<1.5 = {[w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)]F(0.25)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.23, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-9)k(p*0.23, p*18-15)][o(p*0.22, p*17.5)]}',
-            '~> K(p) = {[w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))]F(0.25)[k(1.5/4, p*18)k(1.5/4, p*18)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.23, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-9)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.24, p*18-15)][o(1.5/4, p*22.5)o(1.5*0.22, p*17.5)o(1.5*0.18, p*10)]}',
+            '~> K(p) = {[w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))]F(1/3)[k(1.5/4, p*18)k(1.5/4, p*18)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.23, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-9)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.24, p*18-15)][o(1.5/4, p*22.5)o(1.5*0.22, p*17.5)o(1.5*0.18, p*10)]}',
             '~> w(p, a): p<0.2 = [--(a)F(0.2).+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)[+++(a)F(0.2).].]',
             '~> w(p, a): p<0.25 = [--(a)F(p).++F(p).^F(p).]/[--(a)F(p)++F(p).^F(p).]/[--(a)F(p)++F(p).^F(p).]/[--(a)F(p)[++F(p).].]',
-            '~> w(p, a) = [--(a)F(p).++F(p).^+-(a)F(p).]/[--(a)F(p)++F(p).^+-(a)F(p).]/[--(a)F(p)++F(p).^+-(a)F(p).]/[--(a)F(p)[++F(p).].]',
+            '~> w(p, a) = [--(a)F(p).++F(p).^-F(p).]/[--(a)F(p)++F(p).^-F(p).]/[--(a)F(p)++F(p).^-F(p).]/[--(a)F(p)[++F(p).].]',
             '~> k(p, a): p<0.25 = [---(a)F(p/2).+^F(p*2).+&F(p).][---(a)F(p/2)[+&F(p*2)[+^F(p).].].]/(137.508)',
             '~> k(p, a): p<0.35 = [---(a)F(p/2).+^F(p*2).&F(p).][---(a)F(p/2)[+&F(p*2)[^F(p).].].]/(137.508)',
             '~> k(p, a) = [---(a)F(p/2).+^F(p*2).-&F(p).][---(a)F(p/2)[+&F(p*2)[-^F(p).].].]/(137.508)',
@@ -2770,7 +2761,7 @@ const PLANT_DATA =
             '~> L(p, lim): p<=maxLeafSize/4 = {T(p*0.8)[&F(p).F(p).&-F(p).^^-F(p).^F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].].[^F(p).F(p).^-F(p).&&-F(p).&F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].]}',
             '~> L(p, lim): p<=maxLeafSize/3 = {T(p*2)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
             '~> L(p, lim) = {T(p*1.6)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
-        ], 15, 0, 'AI', '', -0.24, {
+        ], 15, 0, 'AI', '', -0.3, {
             'flowerThreshold': '0.9',
             'maxFlowerSize': '3',
             'maxLeafSize': '0.6'
@@ -2814,19 +2805,20 @@ const PLANT_DATA =
             'A(r, t) = F(0.24, 1.44)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
             'I(t): t<4 = I(t+1)',
             'I(t) = F(0, 0.36)[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]',
-            'F < K(t): t>=signalThreshold && t<=signalThreshold = S(0)[+$K(0)][-$K(0)]K(t)',
+            'K(t): t<=signalThreshold = S(0)[+K(1)][-K(1)]K(t+1)',
             'K(t): t-2 = K(t+1)',
-            'K(t) = K(t+1)K(0)',
+            'K(t) = K(t+1)K(1)',
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
             'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
             'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
+            'I(t) > S(type): type<=0 = S(type)I(t)',
             'F(l, lim) > S(type): type<=0 = S(type)F(l, lim)',
             'S(type) < F(l, lim): type>=1 = F(l, lim)S(type)',
             'S(type) =',
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)',
             '~> *= Model specification',
-            '~> K(t) = /(90)F(sqrt(t/4)){[k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//k(sqrt(t/8))//]}',
+            '~> K(t) = /(90)F(sqrt(t/4)){[k(sqrt(max(1.2, t/8)))//k(sqrt(max(1.2, t/8)))//k(sqrt(max(1.2, t/8)))//k(sqrt(max(1.2, t/8)))//k(sqrt(max(1.2, t/8)))//k(sqrt(max(1.2, t/8)))//]}',
             '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
             '~> L(p, lim, s): s<1 = {\\(90)T(p*0.8)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
@@ -2834,9 +2826,9 @@ const PLANT_DATA =
         ], 30, 0, 'BASIL', '+-&^/\\T', 0.06, {
             'flowerThreshold': '1.38',
             'maxLeafSize': '0.66',
-            'signalThreshold': '8'
+            'signalThreshold': '0'
         }),
-        cost: new ExponentialCost(4, 1),
+        cost: new ExponentialCost(1, 1),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.THREE,
         actions:
@@ -2847,7 +2839,7 @@ const PLANT_DATA =
                 killColony: true
             },
             {   // Always a prune
-                system: new LSystem('', ['K=']),
+                system: new LSystem('', ['K=', 'A=']),
                 killColony: false
             }
         ],
@@ -3337,7 +3329,7 @@ var init = () =>
     // To do: challenge plot (-1)
     // Next: plant unlocks and milestones
 
-    // theory.primaryEquationHeight = 48;
+    theory.primaryEquationHeight = 30;
     theory.primaryEquationScale = 0.96;
     theory.secondaryEquationHeight = 102;
 }
@@ -3497,7 +3489,7 @@ var getSecondaryEquation = () =>
     if(!c)
     {
         let taxInfo = `\\text{${getLoc('pubTax')}}\\colon\\enspace
-        ${taxRate}\\times\\max\\text{p}\\\\\\\\`;
+        T_{\\text{p}}=${taxRate}\\times\\max\\text{p}\\\\\\\\`;
         let tauInfo = `${theory.latexSymbol}=\\max\\text{p}`;
         return `\\begin{array}{c}${theory.publicationUpgrade.level &&
         theory.canPublish ? taxInfo : ''}${tauInfo}\\end{array}`;
@@ -3506,16 +3498,6 @@ var getSecondaryEquation = () =>
     switch(colonyMode)
     {
         case 1:
-            let stages = getLoc('plants')[c.id].stages;
-            let commentary = stages[c.stage] ||
-            stages[binarySearch(stages.index, c.stage)];
-            return `\\text{${Localization.format(getLoc('colonyProg'),
-            c.population, getLoc('plants')[c.id].name, c.stage, c.growth *
-            BigNumber.HUNDRED / (PLANT_DATA[c.id].growthCost *
-            BigNumber.from(c.sequence.length)))}}\\\\\\text{${commentary}}\\\\
-            (${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
-            \\\\`;
-        case 2:
             return `\\text{${Localization.format(getLoc('colony'), c.population,
             getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
             g=${c.growth}/${PLANT_DATA[c.id].growthCost *
@@ -3523,7 +3505,7 @@ var getSecondaryEquation = () =>
             P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}
             \\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
             \\\\`;
-        case 3:
+        case 2:
             let result = '';
             for(let i = 0; i < colonyIdx[plotIdx]; ++i)
             {
@@ -3751,6 +3733,7 @@ let createSystemMenu = (id) =>
         column: 1,
         horizontalTextAlignment: TextAlignment.END
     });
+    /*
     let tmpSeed = values.seed || '0';
     let seedLabel = ui.createGrid
     ({
@@ -3775,6 +3758,7 @@ let createSystemMenu = (id) =>
         column: 1,
         horizontalTextAlignment: TextAlignment.END
     });
+    */
 
     let menu = ui.createPopup
     ({
@@ -3865,8 +3849,10 @@ let createSystemMenu = (id) =>
                                         TextAlignment.CENTER
                                     }),
                                     tropismEntry,
+                                    /*
                                     seedLabel,
                                     seedEntry
+                                    */
                                 ]
                             })
                         ]
@@ -3906,6 +3892,7 @@ let createColonyViewMenu = (colony) =>
     {
         start: 0
     };
+
     let filterEntry = ui.createEntry
     ({
         column: 1,
@@ -3953,11 +3940,29 @@ let createColonyViewMenu = (colony) =>
         }
         return reconstructionTask.result;
     }
-    let pageTitle = ui.createLatexLabel
+
+    let tmpTitle = Localization.format(getLoc('colony'), colony.population,
+    getLoc('plants')[colony.id].name, colony.stage);
+    let tmpStage = colony.stage;
+    let cmtStage;
+    let updateCommentary = () =>
+    {
+        let stages = getLoc('plants')[colony.id].stages;
+        if(!stages || !stages.index || colony.stage < stages.index[0])
+            return getLoc('noCommentary');
+
+        if(stages[colony.stage])
+            cmtStage = colony.stage;
+        else
+            cmtStage = binarySearch(stages.index, colony.stage);
+        return stages[cmtStage];
+    }
+    let tmpCmt = updateCommentary();
+    let plantStats = ui.createLatexLabel
     ({
-        text: Localization.format(getLoc('plantStats'),
-        getLoc('plants')[colony.id].details, PLANT_DATA[colony.id].maxStage ||
-        '∞', PLANT_DATA[colony.id].growthRate, PLANT_DATA[colony.id].growthCost,
+        text: Localization.format(getLoc('plantStats'), cmtStage, tmpCmt,
+        PLANT_DATA[colony.id].maxStage || '∞',
+        PLANT_DATA[colony.id].growthRate, PLANT_DATA[colony.id].growthCost,
         colony.sequence.length),
         margin: new Thickness(0, 6),
         horizontalTextAlignment: TextAlignment.START,
@@ -3970,6 +3975,7 @@ let createColonyViewMenu = (colony) =>
         text: () => updateReconstruction(),
         lineBreakMode: LineBreakMode.CHARACTER_WRAP
     });
+
     let viewButton = ui.createButton
     ({
         text: getLoc('btnView'),
@@ -3991,9 +3997,6 @@ let createColonyViewMenu = (colony) =>
             menu.hide();
         }
     });
-    let tmpTitle = Localization.format(getLoc('colony'), colony.population,
-    getLoc('plants')[colony.id].name, colony.stage);
-    let tmpStage = colony.stage;
 
     let menu = ui.createPopup
     ({
@@ -4001,9 +4004,18 @@ let createColonyViewMenu = (colony) =>
         {
             if(tmpStage != colony.stage)
             {
+                /*
+                Menu title and commentary are updated dynamically without
+                the player having to close and re-open.
+                */
                 tmpTitle = Localization.format(getLoc('colony'),
                 colony.population, getLoc('plants')[colony.id].name,
                 colony.stage);
+                tmpCmt = updateCommentary();
+                plantStats.text = Localization.format(getLoc('plantStats'),
+                cmtStage, tmpCmt, PLANT_DATA[colony.id].maxStage || '∞',
+                PLANT_DATA[colony.id].growthRate,
+                PLANT_DATA[colony.id].growthCost, colony.sequence.length);
                 tmpStage = colony.stage;
                 reconstructionTask =
                 {
@@ -4017,7 +4029,7 @@ let createColonyViewMenu = (colony) =>
         ({
             children:
             [
-                pageTitle,
+                plantStats,
                 ui.createFrame
                 ({
                     padding: new Thickness(8, 6),
@@ -4262,7 +4274,7 @@ let createWorldMenu = () =>
     ({
         row: 2, column: 1,
         minimum: 0,
-        maximum: 3,
+        maximum: 2,
         value: colonyMode,
         onValueChanged: () =>
         {
