@@ -137,10 +137,13 @@ const locStrings =
 
         plotTitle: `\\text{{Plot }}{{{0}}}`,
         plotTitleFancy: `\\mathcal{{P}}{{\\mskip -1mu l}}{{o\\mskip -2mu}}
-        {{\\mskip -3mu t}}\\enspace #{{{0}}}`,
+{{\\mskip -3mu t}}\\enspace {{#\\mskip -3mu}}{{\\mskip -1mu}}{{{0}}}`,
         unlockPlot: `\\text{{plot }}{{{0}}}`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
+        challengeTitle: `\\text{{Excursion }}{{{0}}}`,
+        challengeTitleFancy: `\\mathcal{{E}}{{\\mskip -1mu}}xcur
+{{\\mskip -2mu s}}ion \\enspace {{#\\mskip -3mu}}{{\\mskip -1mu}}{{{0}}}`,
 
         permaNote: 'Notebook',
         permaNoteInfo: 'Manage populations and harvests',
@@ -155,9 +158,9 @@ const locStrings =
         dateTime: 'Year {0} day {1}\\\\{2}:{3}',
         dateTimeTax: 'Y{0}/{1}, {2}:{3}\\\\Tax: {4}p',
         dateTimeL: `\\text{{Year }}{0}\\text{{ day }}{1},\\enspace{2}
-        \\colon{3}`,
-        dateTimeTaxL: `\\text{{Y}}{0}\\text{{ d}}{1},\\enspace{2}
-        \\colon{3}\\, - \\,\\text{{Tax\\colon}}\\enspace{4}\\text{{p}}`,
+\\colon{3}`,
+        dateTimeTaxL: `\\text{{Y}}{0}\\text{{ d}}{1},\\enspace{2}\\colon{3}\\,
+- \\,\\text{{Tax\\colon}}\\enspace{4}\\text{{p}}`,
 
         switchPlant: 'Switch plant (plot {0})',
         switchPlantInfo: 'Cycles through the list of plants',
@@ -2756,9 +2759,8 @@ const PLANT_DATA =
             '~> w(p, a): p<0.2 = [--(a)F(0.2).+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)[+++(a)F(0.2).].]',
             '~> w(p, a): p<0.25 = [--(a)F(p).++F(p).^F(p).]/[--(a)F(p)++F(p).^F(p).]/[--(a)F(p)++F(p).^F(p).]/[--(a)F(p)[++F(p).].]',
             '~> w(p, a) = [--(a)F(p).++F(p).^-F(p).]/[--(a)F(p)++F(p).^-F(p).]/[--(a)F(p)++F(p).^-F(p).]/[--(a)F(p)[++F(p).].]',
-            '~> k(p, a): p<0.25 = [---(a)F(p/2).+^F(p*2).+&F(p).][---(a)F(p/2)[+&F(p*2)[+^F(p).].].]/(137.508)',
-            '~> k(p, a): p<0.35 = [---(a)F(p/2).+^F(p*2).&F(p).][---(a)F(p/2)[+&F(p*2)[^F(p).].].]/(137.508)',
-            '~> k(p, a) = [---(a)F(p/2).+^F(p*2).-&F(p).][---(a)F(p/2)[+&F(p*2)[-^F(p).].].]/(137.508)',
+            '~> k(p, a): p<0.3 = [---(a)F(p/2).+^F(p*2).+&F(p).][---(a)F(p/2)[+&F(p*2)[+^F(p).].].]/(137.508)',
+            '~> k(p, a) = [---(a)F(p/2).+^F(p*2).&F(p).][---(a)F(p/2)[+&F(p*2)[^F(p).].].]/(137.508)',
             '~> o(p, a) = [-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]',
             '~> L(p, lim): p<=maxLeafSize/4 = {T(p*0.8)[&F(p).F(p).&-F(p).^^-F(p).^F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].].[^F(p).F(p).^-F(p).&&-F(p).&F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].]}',
             '~> L(p, lim): p<=maxLeafSize/3 = {T(p*2)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',

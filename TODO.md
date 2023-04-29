@@ -17,6 +17,7 @@
 - [ ] Newspapers
 
 - [ ] Almanac containing plants, L-system help, etc.
+  - [ ] Move notebook inside
 - [x] Buy All upgrade unlocks maxLevel config
 - [ ] Autobuy upgrade unlocks harvest stage config
   - Only unlocks in a future update (students!)
