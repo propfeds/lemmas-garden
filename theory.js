@@ -295,8 +295,8 @@ friend of all mathematicians.`
                 }
             }
         },
-        plantStats: `({0}) {1}\\\\—\\\\Max stage: {2}\\\\Growth rate: {3} ` +
-`(at night)\\\\Growth cost: {4} * {5} (length)`,
+        plantStats: `({0}) {1}\\\\—\\\\Max stage: {2}\\\\Growth rate: {3}/s ` +
+`(at night)\\\\Growth cost: {4} * {5} chars (length)`,
         noCommentary: 'No commentary.',
 
         resetRenderer: 'You are about to reset the graph.'
@@ -2743,10 +2743,10 @@ const PLANT_DATA =
     {
         system: new LSystem('-(3)A(0.12, 0)',
         [
-            'A(r, t): t>=2 && r>=flowerThreshold = F(0.6, 1.8)K(0)',
-            'A(r, t): r>=flowerThreshold = [++A(r-0.15, 0)][--I(0)]',
+            'A(r, t): t>=2 && r>=flowerThreshold = F(0.9, 2.1)K(0)',
+            'A(r, t): r>=flowerThreshold = [+A(r-0.15, 0)][-I(0)]',
             'A(r, t): t<2 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.24, 0.72)T[-L(0.06, maxLeafSize)]/(180)[-L(0.06, maxLeafSize)]/(90)A(r, -2)',
+            'A(r, t) = F(0.24, 0.72)T[-L(0.06, maxLeafSize-r/4)]/(180)[-L(0.06, maxLeafSize-r/4)]/(90)A(r, -2)',
             'I(t): t<3 = F(0.24, 0.84)T[-L(0.03, maxLeafSize/3)]/(137.508)I(t+1)',
             'I(t) = F(0.48, 1.44)K(0)',
             'K(p): p<maxFlowerSize = K(p+0.25)',
@@ -2763,12 +2763,12 @@ const PLANT_DATA =
             '~> k(p, a) = [---(a)F(p/2).+^F(p*2).&F(p).][---(a)F(p/2)[+&F(p*2)[^F(p).].].]/(137.508)',
             '~> o(p, a) = [-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]',
             '~> L(p, lim): p<=maxLeafSize/4 = {T(p*0.8)[&F(p).F(p).&-F(p).^^-F(p).^F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].].[^F(p).F(p).^-F(p).&&-F(p).&F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].]}',
-            '~> L(p, lim): p<=maxLeafSize/3 = {T(p*2)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
-            '~> L(p, lim) = {T(p*1.6)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
-        ], 15, 0, 'AI', '', -0.3, {
+            '~> L(p, lim): p<=maxLeafSize/3 = {T(p*1.4)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
+            '~> L(p, lim) = {T(p*2)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
+        ], 15, 0, 'AI', '', -0.2, {
             'flowerThreshold': '0.9',
             'maxFlowerSize': '3',
-            'maxLeafSize': '0.6'
+            'maxLeafSize': '0.66'
         }),
         maxStage: 38,
         cost: new FirstFreeCost(new ExponentialCost(0.5, Math.log2(3))),
@@ -2832,6 +2832,7 @@ const PLANT_DATA =
             'maxLeafSize': '0.66',
             'signalThreshold': '0'
         }),
+        maxStage: 54,
         cost: new ExponentialCost(1, 1),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.THREE,
