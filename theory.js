@@ -105,7 +105,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'Version: 0.0.3, Axiom (WIP)',
+        versionName: 'Version: 0.0.3, Axiom',
 
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish',
