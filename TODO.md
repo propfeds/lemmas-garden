@@ -14,18 +14,25 @@
 - [ ] Spreadable plants
 - [ ] Cap colony count to 5 per plot, unless?
 
-- [ ] Buff basil
-
 - [ ] Newspapers
 
 - [ ] Almanac containing plants, L-system help, etc.
+  - [ ] Move notebook inside
 - [x] Buy All upgrade unlocks maxLevel config
 - [ ] Autobuy upgrade unlocks harvest stage config
+  - Only unlocks in a future update (students!)
+
 - [ ] Colour schemes?
 - [ ] Timer function to measure growth
 
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
+
+- [x] Buff basil
+- [x] Make the colony menu give commentary, while the stats are always displayed on screen
+  - [x] If stage lower than first leaf, give the usual intro (move that inside the stages object)
+- [x] Rewrite descriptions for basil to reflect new balance changes
+- [x] Remove seed field from L-s menu
 
 ## v0: Completed
 
