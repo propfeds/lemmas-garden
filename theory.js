@@ -278,8 +278,8 @@ to go absolutely bitter.`,
             },
             9001:
             {
-                name: 'Arrow weed (test)',
-                info: 'Testing my arrow weeds',
+                name: '(Test) Arrow weed',
+                info: 'Not balanced for regular play.',
                 LsDetails: `The symbol A represents a rising shoot (apex), ` +
 `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
 `F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
@@ -3165,8 +3165,8 @@ var init = () =>
             currency, PLANT_DATA[plantUnlocks[j]].cost);
             plants[i][plantUnlocks[j]].description = Localization.format(
             getLoc('plotPlant'), i + 1, getLoc('plants')[plantUnlocks[j]].name);
-            plants[i][plantUnlocks[j]].info = getLoc('plants')[
-            plantUnlocks[j]].info;
+            plants[i][plantUnlocks[j]].info = getLoc('plants')[plantUnlocks[j]].
+            info;
             plants[i][plantUnlocks[j]].bought = (amount) =>
             {
                 if(actuallyPlanting)
@@ -3259,8 +3259,8 @@ var init = () =>
             if(plantPerma.level == plantPerma.maxLevel)
                 return Localization.getUpgradeUnlockInfo(getLoc('unlockPlant'));
             if(amount == 1)
-                return Localization.getUpgradeUnlockInfo(`\\text{${
-                getLoc('plants')[plantUnlocks[plantPerma.level + 1]].name}}`);
+                return getLoc('plants')[plantUnlocks[
+                plantPerma.level + amount]].info;
             return Localization.getUpgradeUnlockInfo(`\\text{${
             getLoc('plants')[plantUnlocks[plantPerma.level + 1]].name}~${
             getLoc('plants')[plantUnlocks[plantPerma.level + amount]].name}}`);
