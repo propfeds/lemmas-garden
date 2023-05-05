@@ -125,7 +125,8 @@ between tau not feeling bloated and pub multipliers not too small)
 - **Plot 0** is a wild forest
   - Spawns all sorts of plants that can spread into plots 1~6
   - Cannot be viewed
-- **Excursions (challenge plots)** (negative): not harvestable
+- **Challenge plots** (negative): not harvestable
+  - Name: Excursions? Lessons? ... Lemmas?
   - Beating them will unlock new plant types
   - Ideas: 5x+1 Cotton Conjecture, ~~Botched~~ Bloated Linden (lol)
 
@@ -192,6 +193,9 @@ between tau not feeling bloated and pub multipliers not too small)
   - Doesn't work since you can see the income at all times
 - **Thyme** that warps time? PvZ ripoff
 - **Gunflower** that shoots rabbits?
+- **Knotweed** that can entangle, strangle other plants?
+  - Possible challenge - rescue a plant from the knots (TOPOLOGY???)
+  - Pun? Not-weed
 - **Rhizomes?**
 - **Flower gender** mechanic?
 
@@ -232,7 +236,7 @@ I. It's a good opportunity to channel emotions.
 - **No. Scrap all stuff below.** Have Lemma pass away after about half way.
 All plants afterwards will display 'No commentary'.
   - After this, unlock Students
-    - Unlocks more excursions
+    - Unlocks more challenges
     - Unlocks auto-plant/harvest (NO AUTO-PRUNE)
 
 - **Introduction**: Yesterday, a small plot of land was registered to Lemma

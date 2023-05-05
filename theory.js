@@ -136,14 +136,14 @@ const locStrings =
         labelVars: 'Variables: {0}',
 
         plotTitle: `\\text{{Plot }}{{{0}}}`,
-        plotTitleFancy: `\\mathcal{{P}}{{\\mskip -1mu l}}{{o\\mskip -2mu}}
-{{\\mskip -3mu t}}\\enspace {{#\\mskip -3mu}}{{\\mskip -1mu}}{{{0}}}`,
+        plotTitleFancy: `\\mathcal{{P}}{{\\mkern -1mu}}lo{{\\mkern 1mu}}t
+\\enspace #{{\\mkern 2mu}}{{{0}}}`,
         unlockPlot: `\\text{{plot }}{{{0}}}`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
-        challengeTitle: `\\text{{Excursion }}{{{0}}}`,
-        challengeTitleFancy: `\\mathcal{{E}}{{\\mskip -1mu}}xcur
-{{\\mskip -2mu s}}ion \\enspace {{#\\mskip -3mu}}{{\\mskip -1mu}}{{{0}}}`,
+        challengeTitle: `\\text{{Lesson }}{{{0}}}`,
+        challengeTitleFancy: `\\mathcal{{L}}e{{\\mkern -1mu}}s{{\\mkern -1mu}}so
+{{\\mkern 1mu}}n \\enspace #{{\\mkern 2mu}}{{{0}}}`,
 
         permaNote: 'Notebook',
         permaNoteInfo: 'Manage populations and harvests',
