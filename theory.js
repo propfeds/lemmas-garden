@@ -155,7 +155,7 @@ const locStrings =
 
         colony: '{0} of {1}, stage {2}',
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
-        dateTime: 'Year {0} day {1}\\\\{2}:{3}',
+        dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}',
         dateTimeTax: 'Y{0}/{1}, {2}:{3}\\\\Tax: {4}p',
         dateTimeL: `\\text{{Year }}{0}\\text{{ day }}{1},\\enspace{2}
 \\colon{3}`,
@@ -3544,12 +3544,15 @@ var getSecondaryEquation = () =>
 let getTimeString = () =>
 {
     let years = Math.floor(days / 365);
+    let dayofYear = days - years * 365;
+    let weeks = Math.floor(dayofYear / 7);
     let timeofDay = time % 144;
     let hour = Math.floor(timeofDay / 6);
     let min = Math.round((timeofDay % 6) * 10);
 
-    return Localization.format(getLoc('dateTime'), years + 1, (days % 365) + 1,
-    hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'));
+    return Localization.format(getLoc('dateTime'), years + 1, weeks + 1,
+    dayofYear - weeks * 7 + 1, hour.toString().padStart(2, '0'),
+    min.toString().padStart(2, '0'));
 }
 
 var getQuaternaryEntries = () =>
