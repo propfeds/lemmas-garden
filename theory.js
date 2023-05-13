@@ -2357,6 +2357,12 @@ class ColonyManager
                 return;
             }
         }
+        // Max 5 colonies per plot
+        if(this.colonies[plot].length >= 5)
+        {
+            plants[plot][id].refund(population);
+            return;
+        }
         let c =
         {
             id: id,
@@ -2568,11 +2574,6 @@ class ColonyManager
             c.growth += maxdg;
             c.energy -= maxdg;
         }
-        else
-        {
-            c.energy += c.growth;
-            c.growth = BigNumber.ZERO;
-        }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
 
@@ -2672,6 +2673,9 @@ class ColonyManager
 
         c.growth -= PLANT_DATA[c.id].growthCost *
         BigNumber.from(c.sequence.length);
+        c.diReserve += c.growth / c.synthRate;
+        c.growth = BigNumber.ZERO;
+
         c.sequence = this.deriveTask.derivation;
         c.params = this.deriveTask.parameters;
         c.synthRate = this.calcTask.synthRate;
@@ -2685,11 +2689,6 @@ class ColonyManager
             let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
             c.growth += maxdg;
             c.energy -= maxdg;
-        }
-        else
-        {
-            c.energy += c.growth;
-            c.growth = BigNumber.ZERO;
         }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
