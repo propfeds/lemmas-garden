@@ -105,7 +105,7 @@ const locStrings =
 {
     en:
     {
-        versionName: 'Version: 0.0.3, Axiom',
+        versionName: 'Version: 0.1, Rabbits on Your Lawn!\\\\Work in Progress',
 
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish',
@@ -2727,10 +2727,10 @@ const permaCosts =
 ];
 
 const taxRate = BigNumber.from(.12);
-const tauRate = BigNumber.ONE;
-// e30 = 100 tau, e45 = end, but tau rate 1 = better design
+const tauRate = 2;
+// e50 = 100 tau, e75 = end?
 
-const pubExp = BigNumber.from(.15);
+const pubExp = BigNumber.from(.15 / tauRate);
 var getPublicationMultiplier = (tau) => tau.max(BigNumber.ONE).pow(pubExp *
 tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
 var getPublicationMultiplierFormula = (symbol) =>
@@ -2770,7 +2770,7 @@ const PLANT_DATA =
             'maxLeafSize': '0.66'
         }),
         maxStage: 38,
-        cost: new FirstFreeCost(new ExponentialCost(0.5, Math.log2(3))),
+        cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
         growthRate: BigNumber.THREE,
         growthCost: BigNumber.THREE,
         actions:
@@ -2832,7 +2832,7 @@ const PLANT_DATA =
             'signalThreshold': '0'
         }),
         maxStage: 54,
-        cost: new ExponentialCost(1, 1),
+        cost: new ExponentialCost(2, 1),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.THREE,
         actions:
@@ -3495,7 +3495,7 @@ var getSecondaryEquation = () =>
     {
         let taxInfo = `\\text{${getLoc('pubTax')}}\\colon\\enspace
         T_{\\text{p}}=${taxRate}\\times\\max\\text{p}\\\\\\\\`;
-        let tauInfo = `${theory.latexSymbol}=\\max\\text{p}`;
+        let tauInfo = `${theory.latexSymbol}=\\max\\text{p}^${tauRate}`;
         return `\\begin{array}{c}${theory.publicationUpgrade.level &&
         theory.canPublish ? taxInfo : ''}${tauInfo}\\end{array}`;
     }
@@ -4399,7 +4399,7 @@ var getTau = () => currency.value.max(BigNumber.ZERO).pow(tauRate);
 
 var getCurrencyFromTau = (tau) =>
 [
-    tau.pow(1/tauRate),
+    tau.pow(BigNumber.ONE / tauRate),
     currency.symbol
 ];
 
