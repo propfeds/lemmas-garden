@@ -2727,14 +2727,14 @@ const permaCosts =
 ];
 
 const taxRate = BigNumber.from(.12);
-const tauRate = 2;
+const tauRate = BigNumber.TWO;
 // e50 = 100 tau, e75 = end?
 
-const pubExp = BigNumber.from(.15 / tauRate);
+const pubExp = BigNumber.from(.15) / tauRate;
 var getPublicationMultiplier = (tau) => tau.max(BigNumber.ONE).pow(pubExp *
 tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
 var getPublicationMultiplierFormula = (symbol) =>
-`{${symbol}}^{${pubExp}\\ln({\\ln{${symbol}})}}`;
+`{${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
 
 const PLANT_DATA =
 {
@@ -3495,7 +3495,8 @@ var getSecondaryEquation = () =>
     {
         let taxInfo = `\\text{${getLoc('pubTax')}}\\colon\\enspace
         T_{\\text{p}}=${taxRate}\\times\\max\\text{p}\\\\\\\\`;
-        let tauInfo = `${theory.latexSymbol}=\\max\\text{p}^${tauRate}`;
+        let tauInfo = `${theory.latexSymbol}=\\max\\text{p}^
+        ${tauRate.toString(0)}`;
         return `\\begin{array}{c}${theory.publicationUpgrade.level &&
         theory.canPublish ? taxInfo : ''}${tauInfo}\\end{array}`;
     }
