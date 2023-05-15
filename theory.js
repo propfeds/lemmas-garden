@@ -2731,10 +2731,10 @@ class ColonyManager
 const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(100)));
 const plantUnlocks = [1, 2, 9001];
 const plantUnlockCosts = new CompositeCost(1, new ConstantCost(12000),
-new ConstantCost(1e9));
+new ConstantCost(1e45));
 const permaCosts =
 [
-    BigNumber.from(36),
+    BigNumber.from(27),
     BigNumber.from(4800),
     BigNumber.from(1e45)
 ];
