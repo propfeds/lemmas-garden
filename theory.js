@@ -2741,13 +2741,12 @@ const permaCosts =
 
 const taxRate = BigNumber.from(.12);
 const tauRate = BigNumber.TWO;
-// e50 = 100 tau, e75 = end?
-
+const pubCoef = BigNumber.from(0.5);
 const pubExp = BigNumber.from(.15) / tauRate;
-var getPublicationMultiplier = (tau) => tau.max(BigNumber.ONE).pow(pubExp *
-tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
-var getPublicationMultiplierFormula = (symbol) =>
-`{${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
+var getPublicationMultiplier = (tau) => pubCoef * tau.max(BigNumber.ONE).pow(
+pubExp * tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
+var getPublicationMultiplierFormula = (symbol) => `\\frac{1}{2}\\times
+{${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
 
 const PLANT_DATA =
 {
@@ -2781,11 +2780,11 @@ const PLANT_DATA =
         ], 15, 0, 'AI', '', -0.2, {
             'flowerThreshold': '0.9',
             'maxFlowerSize': '3',
-            'maxLeafSize': '0.66'
+            'maxLeafSize': '0.72'
         }),
         maxStage: 38,
         cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
-        growthRate: BigNumber.THREE,
+        growthRate: BigNumber.FOUR,
         growthCost: BigNumber.THREE,
         actions:
         [
