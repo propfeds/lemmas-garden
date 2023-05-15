@@ -2756,7 +2756,7 @@ const PLANT_DATA =
         system: new LSystem('-(3)A(0.12, 0)',
         [
             'A(r, t): t>=2 && r>=flowerThreshold = F(0.9, 2.1)K(0)',
-            'A(r, t): r>=flowerThreshold = [+A(r-0.15, 0)][-I(0)]',
+            'A(r, t): r>=flowerThreshold = [&A(r-0.15, 0)][^I(0)]',
             'A(r, t): t<2 = A(r+0.06, t+1)',
             'A(r, t) = F(0.24, 0.72)T[-L(0.06, maxLeafSize-r/4)]/(180)[-L(0.06, maxLeafSize-r/4)]/(90)A(r, -2)',
             'I(t): t<3 = F(0.24, 0.84)T[-L(0.03, maxLeafSize/3)]/(137.508)I(t+1)',
