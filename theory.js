@@ -65,7 +65,7 @@ let colonyIdx = new Array(maxPlots).fill(0);
 let plantIdx = new Array(maxPlots).fill(0);
 let finishedTutorial = false;
 let actuallyPlanting = true;
-let graphMode2D = 1;
+let graphMode2D = 0;
 let graphMode3D = true;
 let colonyMode = 1;
 let fancyPlotTitle = false;
@@ -105,7 +105,8 @@ const locStrings =
 {
     en:
     {
-        versionName: 'Version: 0.1, Rabbits on Your Lawn!\\\\Work in Progress',
+        versionName: `Version: 0.1, Rabbits on Your Lawn!\\\\
+Work in Progress`,
 
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish',
@@ -672,8 +673,12 @@ class Quaternion
      */
     get headingVector()
     {
-        let r = this.neg.mul(xUpQuat).mul(this);
-        return new Vector3(r.i, r.j, r.k);
+        if(!this.head)
+        {
+            let r = this.neg.mul(xUpQuat).mul(this);
+            this.head = new Vector3(r.i, r.j, r.k);
+        }
+        return this.head;
     }
     /**
      * Returns an up vector from the quaternion.
@@ -681,8 +686,12 @@ class Quaternion
      */
     get upVector()
     {
-        let r = this.neg.mul(yUpQuat).mul(this);
-        return new Vector3(r.i, r.j, r.k);
+        if(!this.up)
+        {
+            let r = this.neg.mul(yUpQuat).mul(this);
+            this.up = new Vector3(r.i, r.j, r.k);
+        }
+        return this.up;
     }
     /**
      * Returns a side vector (left or right?) from the quaternion.
@@ -690,8 +699,12 @@ class Quaternion
      */
     get sideVector()
     {
-        let r = this.neg.mul(zUpQuat).mul(this);
-        return new Vector3(r.i, r.j, r.k);
+        if(!this.side)
+        {
+            let r = this.neg.mul(zUpQuat).mul(this);
+            this.side = new Vector3(r.i, r.j, r.k);
+        }
+        return this.side;
     }
     /**
      * (Deprecated) Rotate from a heading vector to another. Inaccurate!
@@ -3381,8 +3394,6 @@ var tick = (elapsedTime, multiplier) =>
     growthIntegral = newGI;
 
     manager.growAll(BigNumber.from(di), BigNumber.from(dg));
-    if(graphMode3D)
-        renderer.draw();
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
 }
@@ -4355,6 +4366,7 @@ let createWorldMenu = () =>
                 ({
                     text: getLoc('versionName'),
                     horizontalOptions: LayoutOptions.CENTER,
+                    horizontalTextAlignment: TextAlignment.CENTER,
                     verticalTextAlignment: TextAlignment.CENTER,
                     fontSize: 12
                 }),
@@ -4608,7 +4620,12 @@ var get2DGraphValue = () =>
     }
 };
 
-var get3DGraphPoint = () => renderer.cursor;
+var get3DGraphPoint = () =>
+{
+    if(graphMode3D)
+        renderer.draw();
+    return renderer.cursor;
+}
 
 var get3DGraphTranslation = () => renderer.camera;
 
