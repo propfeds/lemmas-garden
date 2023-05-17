@@ -24,7 +24,7 @@
 
 - [ ] Colour schemes?
 - [ ] Timer function to measure growth
-  - [ ] Device time is suffice?
+  - Device time measured by user is suffice?
 
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
@@ -33,6 +33,7 @@
 
 - [ ] Progression (untested)
   - [x] Double tau growth
+  - [x] Divide pub mult by 2
   - [x] Don't divide ln by 2
   - [x] Double initial price of calendula and basil
 

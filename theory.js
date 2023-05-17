@@ -209,7 +209,8 @@ be ignored.`,
                         3, 8,
                         13, 17,
                         19,
-                        21, 24, 25, 26, 28, 29, 33, 37, 38
+                        21, 24, 25, 26, 28, 29,
+                        33, 37, 38
                     ],
                     0: `Commonly called pot marigold (not to be confused with
 marigolds of the genus Tagetes), calendulas are fast growing flowers known for
@@ -230,7 +231,8 @@ known as the golden angle.`,
                     25: 'A second flower bud appears!',
                     26: 'The third and final flower appears.',
                     28: 'My wife loved to eat these flowers raw.',
-                    29: `Try it!\\\\No, don't. We'll sell them.`,
+                    29: `Try it!\\\\No, don't, we'll sell them.\\\\Three penny
+calendula! Three penny calendula!`,
                     33: 'The first flower matures.',
                     37: 'The second flower matures.',
                     38: 'All flowers have reached maturity.',
@@ -2687,6 +2689,7 @@ class ColonyManager
         c.growth -= PLANT_DATA[c.id].growthCost *
         BigNumber.from(c.sequence.length);
         c.diReserve += c.growth / c.synthRate;
+        c.dgReserve += c.growth / PLANT_DATA[c.id].growthRate;
         c.growth = BigNumber.ZERO;
 
         c.sequence = this.deriveTask.derivation;
