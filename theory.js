@@ -69,6 +69,7 @@ let graphMode2D = 0;
 let graphMode3D = true;
 let colonyMode = 1;
 let fancyPlotTitle = false;
+let actionPanelOnTop = false;
 let colonyViewConfig = {};
 let notebook = {};
 
@@ -157,11 +158,7 @@ Work in Progress`,
         colony: '{0} of {1}, stage {2}',
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
         dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}',
-        dateTimeTax: 'Y{0}/{1}, {2}:{3}\\\\Tax: {4}p',
-        dateTimeL: `\\text{{Year }}{0}\\text{{ day }}{1},\\enspace{2}
-\\colon{3}`,
-        dateTimeTaxL: `\\text{{Y}}{0}\\text{{ d}}{1},\\enspace{2}\\colon{3}\\,
-- \\,\\text{{Tax\\colon}}\\enspace{4}\\text{{p}}`,
+        dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\',
 
         switchPlant: 'Switch plant (plot {0})',
         switchPlantInfo: 'Cycles through the list of plants',
@@ -184,6 +181,11 @@ Work in Progress`,
             'Colony view: Off',
             'Colony view: Single',
             'Colony view: List'
+        ],
+        actionPanelLocations:
+        [
+            'Action panel: Bottom',
+            'Action panel: Top'
         ],
         plotTitleModes:
         [
@@ -3405,7 +3407,7 @@ var getEquationOverlay = () =>
 {
     let result = ui.createGrid
     ({
-        rowDefinitions: ['1*', '1*'],
+        // rowDefinitions: ['1*', '1*'],
         // columnDefinitions: ['68*', '32*'],
         inputTransparent: true,
         cascadeInputTransparent: false,
@@ -3427,7 +3429,8 @@ var getEquationOverlay = () =>
             ({
                 row: 0, column: 0,
                 horizontalTextAlignment: TextAlignment.CENTER,
-                verticalTextAlignment: TextAlignment.START,
+                verticalTextAlignment: () => actionPanelOnTop ?
+                TextAlignment.END : TextAlignment.START,
                 margin: new Thickness(10, 4),
                 text: getTimeString,
                 fontSize: 10,
@@ -3438,7 +3441,8 @@ var getEquationOverlay = () =>
                 row: 0, column: 0,
                 margin: new Thickness(4),
                 horizontalOptions: LayoutOptions.START,
-                verticalOptions: LayoutOptions.START,
+                verticalOptions: () => actionPanelOnTop ? LayoutOptions.END :
+                LayoutOptions.START,
                 columnDefinitions:
                 [
                     'auto', 'auto'
@@ -3453,8 +3457,10 @@ var getEquationOverlay = () =>
             }),
             ui.createGrid
             ({
-                row: 1, column: 0,
+                row: 0, column: 0,
                 columnDefinitions: ['68*', '32*'],
+                verticalOptions: () => actionPanelOnTop ?
+                LayoutOptions.START : LayoutOptions.END,
                 inputTransparent: true,
                 cascadeInputTransparent: false,
                 children:
@@ -3465,7 +3471,7 @@ var getEquationOverlay = () =>
                         row: 0, column: 0,
                         margin: new Thickness(4),
                         horizontalOptions: LayoutOptions.START,
-                        verticalOptions: LayoutOptions.END,
+                        // verticalOptions: LayoutOptions.END,
                         columnDefinitions:
                         [
                             'auto', 'auto',
@@ -3564,9 +3570,9 @@ let getTimeString = () =>
     let hour = Math.floor(timeofDay / 6);
     let min = Math.round((timeofDay % 6) * 10);
 
-    return Localization.format(getLoc('dateTime'), years + 1, weeks + 1,
-    dayofYear - weeks * 7 + 1, hour.toString().padStart(2, '0'),
-    min.toString().padStart(2, '0'));
+    return Localization.format(getLoc(actionPanelOnTop ? 'dateTimeBottom' :
+    'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1,
+    hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'));
 }
 
 var getQuaternaryEntries = () =>
@@ -4245,13 +4251,13 @@ let createWorldMenu = () =>
     let GM3Label = ui.createLatexLabel
     ({
         text: getLoc('graphMode3D'),
-        row: 0, column: 0,
+        row: 4, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM3Switch = ui.createSwitch
     ({
         isToggled: graphMode3D,
-        row: 0, column: 1,
+        row: 4, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e) =>
         {
@@ -4267,12 +4273,12 @@ let createWorldMenu = () =>
     let GM2Label = ui.createLatexLabel
     ({
         text: getLoc('graphModes2D')[graphMode2D],
-        row: 1, column: 0,
+        row: 3, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM2Slider = ui.createSlider
     ({
-        row: 1, column: 1,
+        row: 3, column: 1,
         minimum: 0,
         maximum: 2,
         value: graphMode2D,
@@ -4310,16 +4316,41 @@ let createWorldMenu = () =>
             CMSlider.value = colonyMode;
         }
     });
+    let APLabel = ui.createLatexLabel
+    ({
+        text: getLoc('actionPanelLocations')[Number(actionPanelOnTop)],
+        row: 1, column: 0,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let APSwitch = ui.createSwitch
+    ({
+        isToggled: actionPanelOnTop,
+        row: 1, column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        onTouched: (e) =>
+        {
+            if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            e.type == TouchType.LONGPRESS_RELEASED)
+            {
+                Sound.playClick();
+                actionPanelOnTop = !actionPanelOnTop;
+                APSwitch.isToggled = actionPanelOnTop;
+                APLabel.text = getLoc('actionPanelLocations')[
+                Number(actionPanelOnTop)];
+                theory.invalidatePrimaryEquation();
+            }
+        }
+    });
     let PTLabel = ui.createLatexLabel
     ({
         text: getLoc('plotTitleModes')[Number(fancyPlotTitle)],
-        row: 3, column: 0,
+        row: 0, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let PTSwitch = ui.createSwitch
     ({
         isToggled: fancyPlotTitle,
-        row: 3, column: 1,
+        row: 0, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e) =>
         {
@@ -4351,6 +4382,7 @@ let createWorldMenu = () =>
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
+                        getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth)
                     ],
                     children:
@@ -4361,6 +4393,8 @@ let createWorldMenu = () =>
                         GM2Slider,
                         CMLabel,
                         CMSlider,
+                        APLabel,
+                        APSwitch,
                         PTLabel,
                         PTSwitch
                     ]
@@ -4518,6 +4552,7 @@ var getInternalState = () => JSON.stringify
     graphMode3D: graphMode3D,
     colonyMode: colonyMode,
     fancyPlotTitle: fancyPlotTitle,
+    actionPanelOnTop: actionPanelOnTop,
     colonyViewConfig: colonyViewConfig,
     notebook: notebook
 }, bigStringify);
@@ -4570,6 +4605,8 @@ var setInternalState = (stateStr) =>
         colonyMode = state.colonyMode;
     if('fancyPlotTitle' in state)
         fancyPlotTitle = state.fancyPlotTitle;
+    if('actionPanelOnTop' in state)
+        actionPanelOnTop = state.actionPanelOnTop;
 
     if('colonyViewConfig' in state)
         colonyViewConfig = state.colonyViewConfig;
