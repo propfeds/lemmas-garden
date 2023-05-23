@@ -2789,8 +2789,8 @@ const PLANT_DATA =
         }),
         maxStage: 38,
         cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
-        growthRate: BigNumber.FOUR,
-        growthCost: BigNumber.THREE,
+        growthRate: BigNumber.THREE,
+        growthCost: BigNumber.from(2.5),
         actions:
         [
             {   // Always a harvest
