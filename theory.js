@@ -58,6 +58,7 @@ const maxPlots = 6;
 let haxEnabled = false;
 let time = 0;
 let days = 0;
+let years = 0;
 let insolationIntegral = 0;
 let growthIntegral = 0;
 let plotIdx = 0;
@@ -65,10 +66,11 @@ let colonyIdx = new Array(maxPlots).fill(0);
 let plantIdx = new Array(maxPlots).fill(0);
 let finishedTutorial = false;
 let actuallyPlanting = true;
-let graphMode2D = 1;
+let graphMode2D = 0;
 let graphMode3D = true;
 let colonyMode = 1;
 let fancyPlotTitle = false;
+let actionPanelOnTop = false;
 let colonyViewConfig = {};
 let notebook = {};
 
@@ -105,7 +107,8 @@ const locStrings =
 {
     en:
     {
-        versionName: 'Version: 0.0.3, Axiom',
+        versionName: `Version: 0.1, Rabbits on Your Lawn!\\\\
+Work in Progress`,
 
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish',
@@ -144,6 +147,7 @@ const locStrings =
         challengeTitle: `\\text{{Lesson }}{{{0}}}`,
         challengeTitleFancy: `\\mathcal{{L}}e{{\\mkern -1mu}}s{{\\mkern -1mu}}so
 {{\\mkern 1mu}}n \\enspace #{{\\mkern 2mu}}{{{0}}}`,
+        lockedPlot: `\\text{Untilled soil.}`,
 
         permaNote: 'Notebook',
         permaNoteInfo: 'Manage populations and harvests',
@@ -155,12 +159,8 @@ const locStrings =
 
         colony: '{0} of {1}, stage {2}',
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
-        dateTime: 'Year {0} day {1}\\\\{2}:{3}',
-        dateTimeTax: 'Y{0}/{1}, {2}:{3}\\\\Tax: {4}p',
-        dateTimeL: `\\text{{Year }}{0}\\text{{ day }}{1},\\enspace{2}
-\\colon{3}`,
-        dateTimeTaxL: `\\text{{Y}}{0}\\text{{ d}}{1},\\enspace{2}\\colon{3}\\,
-- \\,\\text{{Tax\\colon}}\\enspace{4}\\text{{p}}`,
+        dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}',
+        dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\',
 
         switchPlant: 'Switch plant (plot {0})',
         switchPlantInfo: 'Cycles through the list of plants',
@@ -183,6 +183,11 @@ const locStrings =
             'Colony view: Off',
             'Colony view: Single',
             'Colony view: List'
+        ],
+        actionPanelLocations:
+        [
+            'Action panel: Bottom',
+            'Action panel: Top'
         ],
         plotTitleModes:
         [
@@ -208,7 +213,8 @@ be ignored.`,
                         3, 8,
                         13, 17,
                         19,
-                        21, 24, 25, 26, 28, 29, 33, 37, 38
+                        21, 24, 25, 26, 28, 29,
+                        33, 37, 38
                     ],
                     0: `Commonly called pot marigold (not to be confused with
 marigolds of the genus Tagetes), calendulas are fast growing flowers known for
@@ -229,7 +235,8 @@ known as the golden angle.`,
                     25: 'A second flower bud appears!',
                     26: 'The third and final flower appears.',
                     28: 'My wife loved to eat these flowers raw.',
-                    29: `Try it!\\\\No, don't. We'll sell them.`,
+                    29: `Try it!\\\\No, don't, we'll sell them.\\\\Three penny
+calendula! Three penny calendula!`,
                     33: 'The first flower matures.',
                     37: 'The second flower matures.',
                     38: 'All flowers have reached maturity.',
@@ -394,7 +401,7 @@ let binarySearch = (arr, target) =>
         else
             r = m - 1;
     }
-    return arr[l];
+    return l;
 }
 
 /**
@@ -672,8 +679,12 @@ class Quaternion
      */
     get headingVector()
     {
-        let r = this.neg.mul(xUpQuat).mul(this);
-        return new Vector3(r.i, r.j, r.k);
+        if(!this.head)
+        {
+            let r = this.neg.mul(xUpQuat).mul(this);
+            this.head = new Vector3(r.i, r.j, r.k);
+        }
+        return this.head;
     }
     /**
      * Returns an up vector from the quaternion.
@@ -681,8 +692,12 @@ class Quaternion
      */
     get upVector()
     {
-        let r = this.neg.mul(yUpQuat).mul(this);
-        return new Vector3(r.i, r.j, r.k);
+        if(!this.up)
+        {
+            let r = this.neg.mul(yUpQuat).mul(this);
+            this.up = new Vector3(r.i, r.j, r.k);
+        }
+        return this.up;
     }
     /**
      * Returns a side vector (left or right?) from the quaternion.
@@ -690,8 +705,12 @@ class Quaternion
      */
     get sideVector()
     {
-        let r = this.neg.mul(zUpQuat).mul(this);
-        return new Vector3(r.i, r.j, r.k);
+        if(!this.side)
+        {
+            let r = this.neg.mul(zUpQuat).mul(this);
+            this.side = new Vector3(r.i, r.j, r.k);
+        }
+        return this.side;
     }
     /**
      * (Deprecated) Rotate from a heading vector to another. Inaccurate!
@@ -2674,6 +2693,7 @@ class ColonyManager
         c.growth -= PLANT_DATA[c.id].growthCost *
         BigNumber.from(c.sequence.length);
         c.diReserve += c.growth / c.synthRate;
+        c.dgReserve += c.growth / PLANT_DATA[c.id].growthRate;
         c.growth = BigNumber.ZERO;
 
         c.sequence = this.deriveTask.derivation;
@@ -2713,28 +2733,36 @@ class ColonyManager
     }
 }
 
+const yearStartLookup = [0];
+
+for(let i = 1; i <= 400; ++i)
+{
+    let leap = !(i%4) && (!!(i%100) || !(i%400));
+    let offset = leap ? 366 : 365;
+    yearStartLookup[i] = yearStartLookup[i-1] + offset;
+}
+
 // Balance parameters
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(100)));
 const plantUnlocks = [1, 2, 9001];
-const plantUnlockCosts = new CompositeCost(1, new ConstantCost(12000),
-new ConstantCost(1e9));
+const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2200),
+new ConstantCost(1e45));
 const permaCosts =
 [
-    BigNumber.from(36),
+    BigNumber.from(27),
     BigNumber.from(4800),
     BigNumber.from(1e45)
 ];
 
-const taxRate = BigNumber.from(.12);
-const tauRate = BigNumber.ONE;
-// e30 = 100 tau, e45 = end, but tau rate 1 = better design
-
-const pubExp = BigNumber.from(.15);
-var getPublicationMultiplier = (tau) => tau.max(BigNumber.ONE).pow(pubExp *
-tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
-var getPublicationMultiplierFormula = (symbol) =>
-`{${symbol}}^{${pubExp}\\ln({\\ln{${symbol}})}}`;
+const taxRate = BigNumber.from(-.12);
+const tauRate = BigNumber.TWO;
+const pubCoef = BigNumber.from(2/3);
+const pubExp = BigNumber.from(.15) / tauRate;
+var getPublicationMultiplier = (tau) => pubCoef * tau.max(BigNumber.ONE).pow(
+pubExp * tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
+var getPublicationMultiplierFormula = (symbol) => `\\frac{2}{3}\\times
+{${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
 
 const PLANT_DATA =
 {
@@ -2743,19 +2771,20 @@ const PLANT_DATA =
         system: new LSystem('-(3)A(0.12, 0)',
         [
             'A(r, t): t>=2 && r>=flowerThreshold = F(0.9, 2.1)K(0)',
-            'A(r, t): r>=flowerThreshold = [+A(r-0.15, 0)][-I(0)]',
+            'A(r, t): r>=flowerThreshold = [&A(r-0.15, 0)][^I(0)]',
             'A(r, t): t<2 = A(r+0.06, t+1)',
             'A(r, t) = F(0.24, 0.72)T[-L(0.06, maxLeafSize-r/4)]/(180)[-L(0.06, maxLeafSize-r/4)]/(90)A(r, -2)',
-            'I(t): t<3 = F(0.24, 0.84)T[-L(0.03, maxLeafSize/3)]/(137.508)I(t+1)',
-            'I(t) = F(0.48, 1.44)K(0)',
+            'I(t): t<3 = F(0.36, 0.84)T[-L(0.06, maxLeafSize/3)]/(137.508)I(t+1)',
+            'I(t) = F(0.6, 1.44)K(0)',
             'K(p): p<maxFlowerSize = K(p+0.25)',
-            'L(r, lim): r<lim = L(r+0.03, lim)',
+            'L(r, lim): r<lim = L(r+0.02, lim)',
             'F(l, lim): l<lim = F(l+0.12, lim)',
             '~> *= Model specification',
-            '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/4)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)]}',
-            '~> K(p): p<1.5 = {[w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)]F(0.25)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.23, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-9)k(p*0.23, p*18-15)][o(p*0.22, p*17.5)]}',
-            '~> K(p) = {[w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))w(0.25, max(p*18, 42))]F(1/3)[k(1.5/4, p*18)k(1.5/4, p*18)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.23, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-9)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.24, p*18-15)][o(1.5/4, p*22.5)o(1.5*0.22, p*17.5)o(1.5*0.18, p*10)]}',
-            '~> w(p, a): p<0.2 = [--(a)F(0.2).+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)[+++(a)F(0.2).].]',
+            '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/10+0.1)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)]}',
+            '~> K(p): p<1.5 = {[w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)]F(p/10+0.1)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.23, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-9)k(p*0.23, p*18-15)][o(p*0.22, p*17.5)]}',
+            '~> K(p) = {[w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)]F(p/10+0.1)[k(1.5/4, p*18)k(1.5/4, p*18)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.23, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-9)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.24, p*18-15)][o(1.5/4, p*22.5)o(1.5*0.22, p*17.5)o(1.5*0.18, p*10)]}',
+            '~> w(p, a): p<0.1 = [--(a)F(0.2).+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)[+++(a)F(0.2).].]',
+            '~> w(p, a): p<0.2 = [--(a)F(0.2).+++F(0.2).^+F(0.2).]/[--(a)F(0.2)+++F(0.2).^+F(0.2).]/[--(a)F(0.2)+++F(0.2).^+F(0.2).]/[--(a)F(0.2)[+++F(0.2).].]',
             '~> w(p, a): p<0.25 = [--(a)F(p).++F(p).^F(p).]/[--(a)F(p)++F(p).^F(p).]/[--(a)F(p)++F(p).^F(p).]/[--(a)F(p)[++F(p).].]',
             '~> w(p, a) = [--(a)F(p).++F(p).^-F(p).]/[--(a)F(p)++F(p).^-F(p).]/[--(a)F(p)++F(p).^-F(p).]/[--(a)F(p)[++F(p).].]',
             '~> k(p, a): p<0.3 = [---(a)F(p/2).+^F(p*2).+&F(p).][---(a)F(p/2)[+&F(p*2)[+^F(p).].].]/(137.508)',
@@ -2767,12 +2796,12 @@ const PLANT_DATA =
         ], 15, 0, 'AI', '', -0.2, {
             'flowerThreshold': '0.9',
             'maxFlowerSize': '3',
-            'maxLeafSize': '0.66'
+            'maxLeafSize': '0.72'
         }),
         maxStage: 38,
-        cost: new FirstFreeCost(new ExponentialCost(0.5, Math.log2(3))),
+        cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
         growthRate: BigNumber.THREE,
-        growthCost: BigNumber.THREE,
+        growthCost: BigNumber.from(2.5),
         actions:
         [
             {   // Always a harvest
@@ -3323,6 +3352,8 @@ var init = () =>
             {
                 warpZero.level = 0;
                 time = 0;
+                days = 0;
+                years = 0;
                 insolationIntegral = 0;
                 growthIntegral = 0;
             }
@@ -3370,6 +3401,8 @@ var tick = (elapsedTime, multiplier) =>
     // Help me check my integral maths
     let cycles = time / 144;
     days = Math.floor(cycles);
+    while(days >= yearStartLookup[years + 1])
+        ++years;
     let phase = Math.max(0, Math.min(cycles - days - 0.25, 0.5));
     let newII = days * 144 / Math.PI - 72 *
     (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
@@ -3381,8 +3414,6 @@ var tick = (elapsedTime, multiplier) =>
     growthIntegral = newGI;
 
     manager.growAll(BigNumber.from(di), BigNumber.from(dg));
-    if(graphMode3D)
-        renderer.draw();
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
 }
@@ -3391,7 +3422,7 @@ var getEquationOverlay = () =>
 {
     let result = ui.createGrid
     ({
-        rowDefinitions: ['1*', '1*'],
+        // rowDefinitions: ['1*', '1*'],
         // columnDefinitions: ['68*', '32*'],
         inputTransparent: true,
         cascadeInputTransparent: false,
@@ -3413,7 +3444,8 @@ var getEquationOverlay = () =>
             ({
                 row: 0, column: 0,
                 horizontalTextAlignment: TextAlignment.CENTER,
-                verticalTextAlignment: TextAlignment.START,
+                verticalTextAlignment: () => actionPanelOnTop ?
+                TextAlignment.END : TextAlignment.START,
                 margin: new Thickness(10, 4),
                 text: getTimeString,
                 fontSize: 10,
@@ -3424,7 +3456,8 @@ var getEquationOverlay = () =>
                 row: 0, column: 0,
                 margin: new Thickness(4),
                 horizontalOptions: LayoutOptions.START,
-                verticalOptions: LayoutOptions.START,
+                verticalOptions: () => actionPanelOnTop ? LayoutOptions.END :
+                LayoutOptions.START,
                 columnDefinitions:
                 [
                     'auto', 'auto'
@@ -3439,8 +3472,10 @@ var getEquationOverlay = () =>
             }),
             ui.createGrid
             ({
-                row: 1, column: 0,
+                row: 0, column: 0,
                 columnDefinitions: ['68*', '32*'],
+                verticalOptions: () => actionPanelOnTop ?
+                LayoutOptions.START : LayoutOptions.END,
                 inputTransparent: true,
                 cascadeInputTransparent: false,
                 children:
@@ -3451,7 +3486,7 @@ var getEquationOverlay = () =>
                         row: 0, column: 0,
                         margin: new Thickness(4),
                         horizontalOptions: LayoutOptions.START,
-                        verticalOptions: LayoutOptions.END,
+                        // verticalOptions: LayoutOptions.END,
                         columnDefinitions:
                         [
                             'auto', 'auto',
@@ -3488,14 +3523,15 @@ var getPrimaryEquation = () =>
 var getSecondaryEquation = () =>
 {
     if(!plotPerma.level)
-        return '';
+        return getLoc('lockedPlot');
 
     let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
     if(!c)
     {
-        let taxInfo = `\\text{${getLoc('pubTax')}}\\colon\\enspace
+        let taxInfo = `\\text{${getLoc('pubTax')}}\\colon\\\\
         T_{\\text{p}}=${taxRate}\\times\\max\\text{p}\\\\\\\\`;
-        let tauInfo = `${theory.latexSymbol}=\\max\\text{p}`;
+        let tauInfo = `${theory.latexSymbol}=\\max\\text{p}^
+        ${tauRate.toString(0)}`;
         return `\\begin{array}{c}${theory.publicationUpgrade.level &&
         theory.canPublish ? taxInfo : ''}${tauInfo}\\end{array}`;
     }
@@ -3542,12 +3578,14 @@ var getSecondaryEquation = () =>
 
 let getTimeString = () =>
 {
-    let years = Math.floor(days / 365);
+    let dayofYear = days - yearStartLookup[years];
+    let weeks = Math.floor(dayofYear / 7);
     let timeofDay = time % 144;
     let hour = Math.floor(timeofDay / 6);
     let min = Math.round((timeofDay % 6) * 10);
 
-    return Localization.format(getLoc('dateTime'), years + 1, (days % 365) + 1,
+    return Localization.format(getLoc(actionPanelOnTop ? 'dateTimeBottom' :
+    'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1,
     hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'));
 }
 
@@ -3569,7 +3607,7 @@ var getQuaternaryEntries = () =>
     }
     if(theory.publicationUpgrade.level && theory.canPublish)
     {
-        taxCurrency.value = -getCurrencyFromTau(theory.tau)[0] * taxRate;
+        taxCurrency.value = getCurrencyFromTau(theory.tau)[0] * taxRate;
         taxQuaternaryEntry[0].value = taxCurrency.value;
         return quaternaryEntries.concat(taxQuaternaryEntry);
     }
@@ -3959,7 +3997,7 @@ let createColonyViewMenu = (colony) =>
         if(stages[colony.stage])
             cmtStage = colony.stage;
         else
-            cmtStage = binarySearch(stages.index, colony.stage);
+            cmtStage = stages.index[binarySearch(stages.index, colony.stage)];
         return stages[cmtStage];
     }
     let tmpCmt = updateCommentary();
@@ -4227,13 +4265,13 @@ let createWorldMenu = () =>
     let GM3Label = ui.createLatexLabel
     ({
         text: getLoc('graphMode3D'),
-        row: 0, column: 0,
+        row: 4, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM3Switch = ui.createSwitch
     ({
         isToggled: graphMode3D,
-        row: 0, column: 1,
+        row: 4, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e) =>
         {
@@ -4249,12 +4287,12 @@ let createWorldMenu = () =>
     let GM2Label = ui.createLatexLabel
     ({
         text: getLoc('graphModes2D')[graphMode2D],
-        row: 1, column: 0,
+        row: 3, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM2Slider = ui.createSlider
     ({
-        row: 1, column: 1,
+        row: 3, column: 1,
         minimum: 0,
         maximum: 2,
         value: graphMode2D,
@@ -4292,16 +4330,41 @@ let createWorldMenu = () =>
             CMSlider.value = colonyMode;
         }
     });
+    let APLabel = ui.createLatexLabel
+    ({
+        text: getLoc('actionPanelLocations')[Number(actionPanelOnTop)],
+        row: 1, column: 0,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let APSwitch = ui.createSwitch
+    ({
+        isToggled: actionPanelOnTop,
+        row: 1, column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        onTouched: (e) =>
+        {
+            if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            e.type == TouchType.LONGPRESS_RELEASED)
+            {
+                Sound.playClick();
+                actionPanelOnTop = !actionPanelOnTop;
+                APSwitch.isToggled = actionPanelOnTop;
+                APLabel.text = getLoc('actionPanelLocations')[
+                Number(actionPanelOnTop)];
+                theory.invalidatePrimaryEquation();
+            }
+        }
+    });
     let PTLabel = ui.createLatexLabel
     ({
         text: getLoc('plotTitleModes')[Number(fancyPlotTitle)],
-        row: 3, column: 0,
+        row: 0, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let PTSwitch = ui.createSwitch
     ({
         isToggled: fancyPlotTitle,
-        row: 3, column: 1,
+        row: 0, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e) =>
         {
@@ -4333,6 +4396,7 @@ let createWorldMenu = () =>
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
+                        getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth)
                     ],
                     children:
@@ -4343,6 +4407,8 @@ let createWorldMenu = () =>
                         GM2Slider,
                         CMLabel,
                         CMSlider,
+                        APLabel,
+                        APSwitch,
                         PTLabel,
                         PTSwitch
                     ]
@@ -4351,6 +4417,7 @@ let createWorldMenu = () =>
                 ({
                     text: getLoc('versionName'),
                     horizontalOptions: LayoutOptions.CENTER,
+                    horizontalTextAlignment: TextAlignment.CENTER,
                     verticalTextAlignment: TextAlignment.CENTER,
                     fontSize: 12
                 }),
@@ -4399,7 +4466,7 @@ var getTau = () => currency.value.max(BigNumber.ZERO).pow(tauRate);
 
 var getCurrencyFromTau = (tau) =>
 [
-    tau.pow(1/tauRate),
+    tau.pow(BigNumber.ONE / tauRate),
     currency.symbol
 ];
 
@@ -4499,6 +4566,7 @@ var getInternalState = () => JSON.stringify
     graphMode3D: graphMode3D,
     colonyMode: colonyMode,
     fancyPlotTitle: fancyPlotTitle,
+    actionPanelOnTop: actionPanelOnTop,
     colonyViewConfig: colonyViewConfig,
     notebook: notebook
 }, bigStringify);
@@ -4524,6 +4592,7 @@ var setInternalState = (stateStr) =>
         time = state.time;
         let cycles = time / 144;
         days = Math.floor(cycles);
+        years = binarySearch(yearStartLookup, days);
         let phase = Math.max(0, Math.min(cycles - days - 0.25, 0.5));
         insolationIntegral = days * 144 / Math.PI - 72 *
         (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
@@ -4551,6 +4620,8 @@ var setInternalState = (stateStr) =>
         colonyMode = state.colonyMode;
     if('fancyPlotTitle' in state)
         fancyPlotTitle = state.fancyPlotTitle;
+    if('actionPanelOnTop' in state)
+        actionPanelOnTop = state.actionPanelOnTop;
 
     if('colonyViewConfig' in state)
         colonyViewConfig = state.colonyViewConfig;
@@ -4604,7 +4675,12 @@ var get2DGraphValue = () =>
     }
 };
 
-var get3DGraphPoint = () => renderer.cursor;
+var get3DGraphPoint = () =>
+{
+    if(graphMode3D)
+        renderer.draw();
+    return renderer.cursor;
+}
 
 var get3DGraphTranslation = () => renderer.camera;
 

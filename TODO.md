@@ -24,15 +24,18 @@
 
 - [ ] Colour schemes?
 - [ ] Timer function to measure growth
-  - [ ] Device time is suffice?
+  - Device time measured by user is suffice?
 
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
 
-- Progression
-  - [ ] Double tau growth
-  - [ ] Don't divide ln by 2
-  - [ ] Double initial price of calendula and basil
+- [ ] Add a Pruned commentary track
+
+- [ ] Progression (untested)
+  - [x] Double tau growth
+  - [x] Divide pub mult by 2
+  - [x] Don't divide ln by 2
+  - [x] Double initial price of calendula and basil
 
 - [x] Buff basil
 - [x] Make the colony menu give commentary, while the stats are always displayed on screen

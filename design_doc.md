@@ -211,7 +211,7 @@ between tau not feeling bloated and pub multipliers not too small)
   - Fire toggle: first starts burning one by one slowly, then burns faster
     - If it completely burns everything, it will spread to the next plot
 
-- Mutations: let players mutate a plant for one level or forever?
+- **The Lindenmaker (Mutations):** let players mutate a plant for one level
   - Adopts the new plant's ruleset
   - Example colony: 24 of Hopleek (35) x Dog rose
   - Cutting leaves or harvesting fruits will have the same notation:
