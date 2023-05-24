@@ -58,6 +58,7 @@ const maxPlots = 6;
 let haxEnabled = false;
 let time = 0;
 let days = 0;
+let years = 0;
 let insolationIntegral = 0;
 let growthIntegral = 0;
 let plotIdx = 0;
@@ -146,6 +147,7 @@ Work in Progress`,
         challengeTitle: `\\text{{Lesson }}{{{0}}}`,
         challengeTitleFancy: `\\mathcal{{L}}e{{\\mkern -1mu}}s{{\\mkern -1mu}}so
 {{\\mkern 1mu}}n \\enspace #{{\\mkern 2mu}}{{{0}}}`,
+        lockedPlot: `\\text{Untilled soil.}`,
 
         permaNote: 'Notebook',
         permaNoteInfo: 'Manage populations and harvests',
@@ -399,7 +401,7 @@ let binarySearch = (arr, target) =>
         else
             r = m - 1;
     }
-    return arr[l];
+    return l;
 }
 
 /**
@@ -2731,6 +2733,15 @@ class ColonyManager
     }
 }
 
+const yearStartLookup = [0];
+
+for(let i = 1; i <= 400; ++i)
+{
+    let leap = !(i%4) && (!!(i%100) || !(i%400));
+    let offset = leap ? 366 : 365;
+    yearStartLookup[i] = yearStartLookup[i-1] + offset;
+}
+
 // Balance parameters
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(100)));
@@ -2744,13 +2755,13 @@ const permaCosts =
     BigNumber.from(1e45)
 ];
 
-const taxRate = BigNumber.from(.12);
+const taxRate = BigNumber.from(-.12);
 const tauRate = BigNumber.TWO;
-const pubCoef = BigNumber.from(0.5);
+const pubCoef = BigNumber.from(2/3);
 const pubExp = BigNumber.from(.15) / tauRate;
 var getPublicationMultiplier = (tau) => pubCoef * tau.max(BigNumber.ONE).pow(
 pubExp * tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
-var getPublicationMultiplierFormula = (symbol) => `\\frac{1}{2}\\times
+var getPublicationMultiplierFormula = (symbol) => `\\frac{2}{3}\\times
 {${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
 
 const PLANT_DATA =
@@ -2850,7 +2861,7 @@ const PLANT_DATA =
             'signalThreshold': '0'
         }),
         maxStage: 54,
-        cost: new ExponentialCost(2, 1),
+        cost: new ExponentialCost(1, 1),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.THREE,
         actions:
@@ -3341,6 +3352,8 @@ var init = () =>
             {
                 warpZero.level = 0;
                 time = 0;
+                days = 0;
+                years = 0;
                 insolationIntegral = 0;
                 growthIntegral = 0;
             }
@@ -3388,6 +3401,8 @@ var tick = (elapsedTime, multiplier) =>
     // Help me check my integral maths
     let cycles = time / 144;
     days = Math.floor(cycles);
+    while(days >= yearStartLookup[years + 1])
+        ++years;
     let phase = Math.max(0, Math.min(cycles - days - 0.25, 0.5));
     let newII = days * 144 / Math.PI - 72 *
     (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
@@ -3508,12 +3523,12 @@ var getPrimaryEquation = () =>
 var getSecondaryEquation = () =>
 {
     if(!plotPerma.level)
-        return '';
+        return getLoc('lockedPlot');
 
     let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
     if(!c)
     {
-        let taxInfo = `\\text{${getLoc('pubTax')}}\\colon\\enspace
+        let taxInfo = `\\text{${getLoc('pubTax')}}\\colon\\\\
         T_{\\text{p}}=${taxRate}\\times\\max\\text{p}\\\\\\\\`;
         let tauInfo = `${theory.latexSymbol}=\\max\\text{p}^
         ${tauRate.toString(0)}`;
@@ -3563,8 +3578,7 @@ var getSecondaryEquation = () =>
 
 let getTimeString = () =>
 {
-    let years = Math.floor(days / 365);
-    let dayofYear = days - years * 365;
+    let dayofYear = days - yearStartLookup[years];
     let weeks = Math.floor(dayofYear / 7);
     let timeofDay = time % 144;
     let hour = Math.floor(timeofDay / 6);
@@ -3593,7 +3607,7 @@ var getQuaternaryEntries = () =>
     }
     if(theory.publicationUpgrade.level && theory.canPublish)
     {
-        taxCurrency.value = -getCurrencyFromTau(theory.tau)[0] * taxRate;
+        taxCurrency.value = getCurrencyFromTau(theory.tau)[0] * taxRate;
         taxQuaternaryEntry[0].value = taxCurrency.value;
         return quaternaryEntries.concat(taxQuaternaryEntry);
     }
@@ -3983,7 +3997,7 @@ let createColonyViewMenu = (colony) =>
         if(stages[colony.stage])
             cmtStage = colony.stage;
         else
-            cmtStage = binarySearch(stages.index, colony.stage);
+            cmtStage = stages.index[binarySearch(stages.index, colony.stage)];
         return stages[cmtStage];
     }
     let tmpCmt = updateCommentary();
@@ -4578,6 +4592,7 @@ var setInternalState = (stateStr) =>
         time = state.time;
         let cycles = time / 144;
         days = Math.floor(cycles);
+        years = binarySearch(yearStartLookup, days);
         let phase = Math.max(0, Math.min(cycles - days - 0.25, 0.5));
         insolationIntegral = days * 144 / Math.PI - 72 *
         (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
