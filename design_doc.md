@@ -125,7 +125,8 @@ between tau not feeling bloated and pub multipliers not too small)
 - **Plot 0** is a wild forest
   - Spawns all sorts of plants that can spread into plots 1~6
   - Cannot be viewed
-- **Excursions (challenge plots)** (negative): not harvestable
+- **Challenge plots** (negative): not harvestable
+  - Name: Excursions? Lessons? ... Lemmas?
   - Beating them will unlock new plant types
   - Ideas: 5x+1 Cotton Conjecture, ~~Botched~~ Bloated Linden (lol)
 
@@ -147,6 +148,8 @@ between tau not feeling bloated and pub multipliers not too small)
 
 ### 2. Mid-game
 
+- **Bush**:
+  - Look at ur window, you have a tinny bush of english lavender
 - **Sunflowers** & sunflower batteries!
   - This cultivar of sunflowers is dysfunctional. They cannot turn their heads to face the sun, even when they're young. Regardless, Lemma often brushes over their heads as if they were her children.
   - Its ability to head towards the sun will get weaker as it gets older,
@@ -192,6 +195,9 @@ between tau not feeling bloated and pub multipliers not too small)
   - Doesn't work since you can see the income at all times
 - **Thyme** that warps time? PvZ ripoff
 - **Gunflower** that shoots rabbits?
+- **Knotweed** that can entangle, strangle other plants?
+  - Possible challenge - rescue a plant from the knots (TOPOLOGY???)
+  - Pun? Not-weed
 - **Rhizomes?**
 - **Flower gender** mechanic?
 
@@ -207,7 +213,7 @@ between tau not feeling bloated and pub multipliers not too small)
   - Fire toggle: first starts burning one by one slowly, then burns faster
     - If it completely burns everything, it will spread to the next plot
 
-- Mutations: let players mutate a plant for one level or forever?
+- **The Lindenmaker (Mutations):** let players mutate a plant for one level
   - Adopts the new plant's ruleset
   - Example colony: 24 of Hopleek (35) x Dog rose
   - Cutting leaves or harvesting fruits will have the same notation:
@@ -232,16 +238,20 @@ I. It's a good opportunity to channel emotions.
 - **No. Scrap all stuff below.** Have Lemma pass away after about half way.
 All plants afterwards will display 'No commentary'.
   - After this, unlock Students
-    - Unlocks more excursions
+    - Unlocks more challenges
     - Unlocks auto-plant/harvest (NO AUTO-PRUNE)
 
 - **Introduction**: Yesterday, a small plot of land was registered to Lemma
 Rancher. Today, Lemma's garden does wonderfully. Tomorrow, Madeline would be
 proud.
-- **First publish**: 'Let's see we got... this much from last harvest.
+- **First publish**: 'We've... this much from last harvest.
 Minus the sales tax, maintenance, dog food, *plant* food... I wonder why it'd 
 always miraculously add up to {0}% each time? Lemma, can [you] prove this?'
 We called it the weather's toll. Just to stop worrying about it too much.
+- **Basil unlock**: Sorry for letting you wait this long.
+I have a friend called Corollary who'd supply me with new seeds for my students.
+She wasn't here until today, so apologies that you may've got a little bit sick
+of that calendula.
 - **Clickable headlines** (singular upgrade) after certain points:
   - Hopleek spawning (anticipation on Y4)
   - Published adverts

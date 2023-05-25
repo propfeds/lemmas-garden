@@ -16,17 +16,30 @@
 
 - [ ] Newspapers
 
-- [ ] Almanac containing plants, L-system help, etc.
-  - [ ] Move notebook inside
 - [x] Buy All upgrade unlocks maxLevel config
 - [ ] Autobuy upgrade unlocks harvest stage config
   - Only unlocks in a future update (students!)
 
 - [ ] Colour schemes?
 - [ ] Timer function to measure growth
+  - Device time measured by user is suffice?
 
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
+
+- [ ] Add a Pruned commentary track
+- [ ] Almanac containing plants, L-system help, etc.
+  - [ ] Move notebook inside
+  - [ ] Move the teaching from commentary to almanac
+
+- Let's think about it. A plant that takes 80 minutes to grow, and you have to
+do nothing. Do you feel like it could be more interesting?
+
+- [ ] Progression (untested)
+  - [x] Double tau growth
+  - [x] Divide pub mult by 2
+  - [x] Don't divide ln by 2
+  - [x] Double initial price of calendula and basil
 
 - [x] Buff basil
 - [x] Make the colony menu give commentary, while the stats are always displayed on screen
