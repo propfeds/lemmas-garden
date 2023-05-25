@@ -148,6 +148,8 @@ between tau not feeling bloated and pub multipliers not too small)
 
 ### 2. Mid-game
 
+- **Bush**:
+  - Look at ur window, you have a tinny bush of english lavender
 - **Sunflowers** & sunflower batteries!
   - This cultivar of sunflowers is dysfunctional. They cannot turn their heads to face the sun, even when they're young. Regardless, Lemma often brushes over their heads as if they were her children.
   - Its ability to head towards the sun will get weaker as it gets older,
@@ -242,10 +244,14 @@ All plants afterwards will display 'No commentary'.
 - **Introduction**: Yesterday, a small plot of land was registered to Lemma
 Rancher. Today, Lemma's garden does wonderfully. Tomorrow, Madeline would be
 proud.
-- **First publish**: 'Let's see we got... this much from last harvest.
+- **First publish**: 'We've... this much from last harvest.
 Minus the sales tax, maintenance, dog food, *plant* food... I wonder why it'd 
 always miraculously add up to {0}% each time? Lemma, can [you] prove this?'
 We called it the weather's toll. Just to stop worrying about it too much.
+- **Basil unlock**: Sorry for letting you wait this long.
+I have a friend called Corollary who'd supply me with new seeds for my students.
+She wasn't here until today, so apologies that you may've got a little bit sick
+of that calendula.
 - **Clickable headlines** (singular upgrade) after certain points:
   - Hopleek spawning (anticipation on Y4)
   - Published adverts

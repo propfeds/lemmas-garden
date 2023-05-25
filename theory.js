@@ -52,7 +52,7 @@ You are her first student in a long while.`,
     return descs[language] || descs.en;
 }
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
-var version = 0.03;
+var version = 0.04;
 
 const maxPlots = 6;
 
@@ -110,8 +110,8 @@ const locStrings =
 {
     en:
     {
-        versionName: `Version: 0.1, Rabbits on Your Lawn!\\\\
-Work in Progress`,
+        versionName: `Version: 0.0.4, Axiom`,
+        versionNameShort: 'v0.1, Work in Progress',
 
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish',
@@ -306,8 +306,8 @@ friend of all mathematicians.`
                 }
             }
         },
-        plantStats: `({0}) {1}\\\\—\\\\Max stage: {2}\\\\Max growth rate: ` +
-`{3}/s (night)\\\\Growth cost: {4} * {5} chars`,
+        plantStats: `({0}) {1}\\\\—\\\\Maximum stage: {2}\\\\Synthesis rate: ` +
+`{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} * {6} chars`,
         noCommentary: 'No commentary.',
 
         resetRenderer: 'You are about to reset the graph.'
@@ -3443,9 +3443,12 @@ var getEquationOverlay = () =>
             // ui.createLatexLabel
             // ({
             //     row: 0, column: 0,
-            //     verticalTextAlignment: TextAlignment.START,
-            //     margin: new Thickness(8, 4),
-            //     text: getLoc('versionName'),
+            //     rotation: -24,
+            //     horizontalOptions: LayoutOptions.CENTER,
+            //     verticalOptions: LayoutOptions.END,
+            //     // verticalTextAlignment: TextAlignment.CENTER,
+            //     margin: new Thickness(8, 32),
+            //     text: getLoc('versionNameShort'),
             //     fontSize: 9,
             //     textColor: Color.TEXT_MEDIUM
             // }),
@@ -4020,7 +4023,7 @@ let createColonyViewMenu = (colony) =>
     let plantStats = ui.createLatexLabel
     ({
         text: Localization.format(getLoc('plantStats'), cmtStage, tmpCmt,
-        PLANT_DATA[colony.id].maxStage || '∞',
+        PLANT_DATA[colony.id].maxStage || '∞', colony.synthRate,
         PLANT_DATA[colony.id].growthRate, PLANT_DATA[colony.id].growthCost,
         colony.sequence.length),
         margin: new Thickness(0, 6),
@@ -4073,7 +4076,7 @@ let createColonyViewMenu = (colony) =>
                 tmpCmt = updateCommentary();
                 plantStats.text = Localization.format(getLoc('plantStats'),
                 cmtStage, tmpCmt, PLANT_DATA[colony.id].maxStage || '∞',
-                PLANT_DATA[colony.id].growthRate,
+                PLANT_DATA[colony.id].growthRate, colony.synthRate,
                 PLANT_DATA[colony.id].growthCost, colony.sequence.length);
                 tmpStage = colony.stage;
                 reconstructionTask =
@@ -4578,11 +4581,14 @@ var getInternalState = () => JSON.stringify
     plantIdx: plantIdx,
     finishedTutorial: finishedTutorial,
     manager: manager.object,
-    graphMode2D: graphMode2D,
-    graphMode3D: graphMode3D,
-    colonyMode: colonyMode,
-    fancyPlotTitle: fancyPlotTitle,
-    actionPanelOnTop: actionPanelOnTop,
+    settings:
+    {
+        graphMode2D: graphMode2D,
+        graphMode3D: graphMode3D,
+        colonyMode: colonyMode,
+        fancyPlotTitle: fancyPlotTitle,
+        actionPanelOnTop: actionPanelOnTop
+    },
     colonyViewConfig: colonyViewConfig,
     notebook: notebook
 }, bigStringify);
@@ -4593,6 +4599,7 @@ var setInternalState = (stateStr) =>
         return;
 
     let state = JSON.parse(stateStr, unBigStringify);
+    let v = state.version;
 
     if('haxEnabled' in state)
     {
@@ -4627,17 +4634,28 @@ var setInternalState = (stateStr) =>
 
     if('manager' in state)
         manager = new ColonyManager(state.manager);
-    
-    if('graphMode2D' in state)
-        graphMode2D = state.graphMode2D;
-    if('graphMode3D' in state)
-        graphMode3D = state.graphMode3D;
-    if('colonyMode' in state)
-        colonyMode = state.colonyMode;
-    if('fancyPlotTitle' in state)
-        fancyPlotTitle = state.fancyPlotTitle;
-    if('actionPanelOnTop' in state)
-        actionPanelOnTop = state.actionPanelOnTop;
+
+    if(v < 0.04)
+    {
+        if('graphMode2D' in state)
+            graphMode2D = state.graphMode2D;
+        if('graphMode3D' in state)
+            graphMode3D = state.graphMode3D;
+        if('colonyMode' in state)
+            colonyMode = state.colonyMode;
+        if('fancyPlotTitle' in state)
+            fancyPlotTitle = state.fancyPlotTitle;
+        if('actionPanelOnTop' in state)
+            actionPanelOnTop = state.actionPanelOnTop;
+    }
+    else if('settings' in state)
+    {
+        graphMode2D = state.settings.graphMode2D;
+        graphMode3D = state.settings.graphMode3D;
+        colonyMode = state.settings.colonyMode;
+        fancyPlotTitle = state.settings.fancyPlotTitle;
+        actionPanelOnTop = state.settings.actionPanelOnTop;
+    }
 
     if('colonyViewConfig' in state)
         colonyViewConfig = state.colonyViewConfig;
