@@ -171,7 +171,7 @@ Growth: {5}/{6} (+{7}/s)\\\\Profit: {8}p\\\\({9}/{10})`,
         switchPlant: 'Switch plant (plot {0})',
         switchPlantInfo: 'Cycles through the list of plants',
         plotPlant: 'Plot {0}: {1}',
-        viewColony: 'View colony',
+        viewColony: 'Examine colony',
         viewColonyInfo: 'Displays details about the colony',
         switchColony: 'Switch colony',
         switchColonyInfo: 'Cycles through the list of colonies',
@@ -235,7 +235,7 @@ soon.`,
                     19: `On the flower stem, little leaves will start to
 spawn in spiral around it. The spinning angle is approximately 137.508°,
 known as the golden angle.`,
-                    21: 'Look! Our first flower bud.',
+                    21: 'Our first flower bud has risen.',
                     24: 'Wait for it...',
                     25: 'A second flower bud appears!',
                     26: 'The third and final flower appears.',
@@ -306,8 +306,8 @@ friend of all mathematicians.`
                 }
             }
         },
-        plantStats: `({0}) {1}\\\\—\\\\Max stage: {2}\\\\Growth rate: {3}/s ` +
-`(at night)\\\\Growth cost: {4} * {5} chars (length)`,
+        plantStats: `({0}) {1}\\\\—\\\\Max stage: {2}\\\\Max growth rate: ` +
+`{3}/s (night)\\\\Growth cost: {4} * {5} chars`,
         noCommentary: 'No commentary.',
 
         resetRenderer: 'You are about to reset the graph.'
@@ -3148,24 +3148,6 @@ var init = () =>
         };
         switchPlant.isAvailable = false;
     }
-    /* View colony
-    Essential in learning the game.
-    */
-    {
-        viewColony = theory.createSingularUpgrade(1, currency, new FreeCost);
-        viewColony.description = getLoc('viewColony');
-        viewColony.info = getLoc('viewColonyInfo');
-        viewColony.bought = (_) =>
-        {
-            viewColony.level = 0;
-            let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-            if(!c)
-                return;
-            let seqMenu = createColonyViewMenu(c);
-            seqMenu.show();
-        };
-        viewColony.isAvailable = false;
-    }
     /* Switch colony
     Modulow
     */
@@ -3185,6 +3167,24 @@ var init = () =>
             renderer.colony = c;
         };
         switchColony.isAvailable = false;
+    }
+    /* View colony
+    Essential in learning the game.
+    */
+    {
+        viewColony = theory.createSingularUpgrade(1, currency, new FreeCost);
+        viewColony.description = getLoc('viewColony');
+        viewColony.info = getLoc('viewColonyInfo');
+        viewColony.bought = (_) =>
+        {
+            viewColony.level = 0;
+            let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+            if(!c)
+                return;
+            let seqMenu = createColonyViewMenu(c);
+            seqMenu.show();
+        };
+        viewColony.isAvailable = false;
     }
 
     /* Plants & switch plants
@@ -3382,7 +3382,7 @@ var updateAvailability = () =>
     else
     {
         switchPlant.isAvailable = !manager.colonies[plotIdx].length;
-        viewColony.isAvailable = manager.colonies[plotIdx].length == 1;
+        viewColony.isAvailable = manager.colonies[plotIdx].length >= 1;
         switchColony.isAvailable = manager.colonies[plotIdx].length > 1;
     }
     for(let i = 0; i < plotPerma.level; ++i)
