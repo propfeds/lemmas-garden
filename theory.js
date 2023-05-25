@@ -162,7 +162,7 @@ Work in Progress`,
 
         colony: `{0} of {1}, stage {2}`,
         colonyStats: `{0} of {1}, stage {2}\\\\Energy: {3} (+{4}/s)\\\\
-Growth: {5}/{6} (+{7}/s)\\\\Profit: {8}p\\\\({9}/{10})`,
+Growth: {5}/{6} (+{7}/s)\\\\Profit: {8}p`,
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
         dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}\\\\{5}',
         dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\{5}',
@@ -173,7 +173,7 @@ Growth: {5}/{6} (+{7}/s)\\\\Profit: {8}p\\\\({9}/{10})`,
         plotPlant: 'Plot {0}: {1}',
         viewColony: 'Examine colony',
         viewColonyInfo: 'Displays details about the colony',
-        switchColony: 'Switch colony',
+        switchColony: 'Switch colony ({0}/{1})',
         switchColonyInfo: 'Cycles through the list of colonies',
 
         menuSettings: 'Theory Settings',
@@ -3118,7 +3118,7 @@ var switchPlant, viewColony, switchColony;
 
 var plants = Array.from({length: maxPlots}, (_) => {return {};});
 
-var notebookPerma, settingsPerma, plotPerma, plantPerma;
+var notebookPerma, plotPerma, plantPerma;
 
 var freePenny, warpTick, warpOne, warpZero;
 
@@ -3148,26 +3148,6 @@ var init = () =>
         };
         switchPlant.isAvailable = false;
     }
-    /* Switch colony
-    Modulow
-    */
-    {
-        switchColony = theory.createSingularUpgrade(2, currency, new FreeCost);
-        switchColony.description = getLoc('switchColony');
-        switchColony.info = getLoc('switchColonyInfo');
-        switchColony.bought = (_) =>
-        {
-            switchColony.level = 0;
-            if(manager.colonies[plotIdx].length < 2)
-                return;
-
-            colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) %
-            manager.colonies[plotIdx].length;
-            let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-            renderer.colony = c;
-        };
-        switchColony.isAvailable = false;
-    }
     /* View colony
     Essential in learning the game.
     */
@@ -3185,6 +3165,28 @@ var init = () =>
             seqMenu.show();
         };
         viewColony.isAvailable = false;
+    }
+    /* Switch colony
+    Modulow
+    */
+    {
+        switchColony = theory.createSingularUpgrade(2, currency, new FreeCost);
+        switchColony.getDescription = () => Localization.format(
+        getLoc('switchColony'), colonyIdx[plotIdx] + 1,
+        manager.colonies[plotIdx].length);
+        switchColony.info = getLoc('switchColonyInfo');
+        switchColony.bought = (_) =>
+        {
+            switchColony.level = 0;
+            if(manager.colonies[plotIdx].length < 2)
+                return;
+
+            colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) %
+            manager.colonies[plotIdx].length;
+            let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+            renderer.colony = c;
+        };
+        switchColony.isAvailable = false;
     }
 
     /* Plants & switch plants
@@ -3370,7 +3372,7 @@ var init = () =>
 
     theory.primaryEquationHeight = 30;
     theory.primaryEquationScale = 0.96;
-    theory.secondaryEquationHeight = 102;
+    theory.secondaryEquationHeight = 105;
 }
 
 var updateAvailability = () =>
@@ -3550,8 +3552,8 @@ var getSecondaryEquation = () =>
             c.population, getLoc('plants')[c.id].name, c.stage, c.energy,
             c.synthRate * BigNumber.from(insolationCoord), c.growth,
             PLANT_DATA[c.id].growthCost * BigNumber.from(c.sequence.length),
-            PLANT_DATA[c.id].growthRate * BigNumber.from(growthCoord), c.profit,
-            colonyIdx[plotIdx] + 1, manager.colonies[plotIdx].length)}}`;
+            PLANT_DATA[c.id].growthRate * BigNumber.from(growthCoord), c.profit)
+            }}`;
             return `\\text{${Localization.format(getLoc('colony'), c.population,
             getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
             g=${c.growth}/${PLANT_DATA[c.id].growthCost *
