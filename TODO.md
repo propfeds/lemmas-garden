@@ -16,8 +16,6 @@
 
 - [ ] Newspapers
 
-- [ ] Almanac containing plants, L-system help, etc.
-  - [ ] Move notebook inside
 - [x] Buy All upgrade unlocks maxLevel config
 - [ ] Autobuy upgrade unlocks harvest stage config
   - Only unlocks in a future update (students!)
@@ -30,6 +28,12 @@
   - Internal state unfriendly
 
 - [ ] Add a Pruned commentary track
+- [ ] Almanac containing plants, L-system help, etc.
+  - [ ] Move notebook inside
+  - [ ] Move the teaching from commentary to almanac
+
+- Let's think about it. A plant that takes 80 minutes to grow, and you have to
+do nothing. Do you feel like it could be more interesting?
 
 - [ ] Progression (untested)
   - [x] Double tau growth

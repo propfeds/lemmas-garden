@@ -27,6 +27,7 @@ import { BigNumber } from '../api/BigNumber';
 import { Upgrade } from '../api/Upgrades';
 import { Button } from '../api/ui/Button';
 import { Frame } from '../api/ui/Frame';
+import { log } from 'winjs';
 
 var id = 'lemmas_garden';
 var getName = (language) =>
@@ -59,6 +60,8 @@ let haxEnabled = false;
 let time = 0;
 let days = 0;
 let years = 0;
+let insolationCoord = 0;
+let growthCoord = 0;
 let insolationIntegral = 0;
 let growthIntegral = 0;
 let plotIdx = 0;
@@ -157,10 +160,13 @@ Work in Progress`,
         labelMaxLevel: 'Max. level',
         labelHarvestStage: 'Harvest stage',
 
-        colony: '{0} of {1}, stage {2}',
+        colony: `{0} of {1}, stage {2}`,
+        colonyStats: `{0} of {1}, stage {2}\\\\Energy: {3} (+{4}/s)\\\\
+Growth: {5}/{6} (+{7}/s)\\\\Profit: {8}p\\\\({9}/{10})`,
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
-        dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}',
-        dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\',
+        dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}\\\\{5}',
+        dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\{5}',
+        hacks: 'Hax enabled',
 
         switchPlant: 'Switch plant (plot {0})',
         switchPlantInfo: 'Cycles through the list of plants',
@@ -186,8 +192,8 @@ Work in Progress`,
         ],
         actionPanelLocations:
         [
-            'Action panel: Bottom',
-            'Action panel: Top'
+            'Time display: Top',
+            'Time display: Bottom'
         ],
         plotTitleModes:
         [
@@ -213,14 +219,13 @@ be ignored.`,
                         3, 8,
                         13, 17,
                         19,
-                        21, 24, 25, 26, 28, 29,
-                        33, 37, 38
+                        21, 24, 25, 26, 28, 29, 33, 37, 38
                     ],
                     0: `Commonly called pot marigold (not to be confused with
 marigolds of the genus Tagetes), calendulas are fast growing flowers known for
 numerous medicinal and culinary uses. In fact, the 'pot' in its name refers to
 its role as an ingredient in soups, stews, broths and teas.`,
-                    3: 'Hey. A little stem has just risen.',
+                    3: 'A little stem has just risen.',
                     8: `The second pair of leaves appears. For this cultivar, 
 each pair of leaves is rotated to 90° against the previous. Other cultivars may
 generate leaves in a spiral around the stem.`,
@@ -235,8 +240,7 @@ known as the golden angle.`,
                     25: 'A second flower bud appears!',
                     26: 'The third and final flower appears.',
                     28: 'My wife loved to eat these flowers raw.',
-                    29: `Try it!\\\\No, don't, we'll sell them.\\\\Three penny
-calendula! Three penny calendula!`,
+                    29: `Try it!\\\\No, don't, we'll sell them.`,
                     33: 'The first flower matures.',
                     37: 'The second flower matures.',
                     38: 'All flowers have reached maturity.',
@@ -3412,8 +3416,11 @@ var tick = (elapsedTime, multiplier) =>
     let newGI = time / 2 + 36 * Math.sin(time * Math.PI / 72) / Math.PI;
     let dg = newGI - growthIntegral;
     growthIntegral = newGI;
-
     manager.growAll(BigNumber.from(di), BigNumber.from(dg));
+
+    let timeCos = Math.cos(time * Math.PI / 72);
+    insolationCoord = Math.max(0, -timeCos);
+    growthCoord = (timeCos + 1) / 2;
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
 }
@@ -3539,6 +3546,12 @@ var getSecondaryEquation = () =>
     switch(colonyMode)
     {
         case 1:
+            return `\\text{${Localization.format(getLoc('colonyStats'),
+            c.population, getLoc('plants')[c.id].name, c.stage, c.energy,
+            c.synthRate * BigNumber.from(insolationCoord), c.growth,
+            PLANT_DATA[c.id].growthCost * BigNumber.from(c.sequence.length),
+            PLANT_DATA[c.id].growthRate * BigNumber.from(growthCoord), c.profit,
+            colonyIdx[plotIdx] + 1, manager.colonies[plotIdx].length)}}`;
             return `\\text{${Localization.format(getLoc('colony'), c.population,
             getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
             g=${c.growth}/${PLANT_DATA[c.id].growthCost *
@@ -3586,7 +3599,8 @@ let getTimeString = () =>
 
     return Localization.format(getLoc(actionPanelOnTop ? 'dateTimeBottom' :
     'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1,
-    hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'));
+    hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'),
+    haxEnabled ? getLoc('hacks') : '');
 }
 
 var getQuaternaryEntries = () =>
@@ -4580,7 +4594,7 @@ var setInternalState = (stateStr) =>
 
     if('haxEnabled' in state)
     {
-        haxEnabled = state.haxEnabled;
+        haxEnabled = true;
         freePenny.isAvailable = haxEnabled;
         warpTick.isAvailable = haxEnabled;
         warpOne.isAvailable = haxEnabled;
@@ -4669,9 +4683,9 @@ var get2DGraphValue = () =>
         case 0:
             return 0;
         case 1:     // Insolation
-            return Math.max(0, -Math.cos(time * Math.PI / 72));
+            return insolationCoord;
         case 2:     // Growth
-            return (Math.cos(time * Math.PI / 72) + 1) / 2;
+            return growthCoord;
     }
 };
 
