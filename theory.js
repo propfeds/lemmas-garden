@@ -162,11 +162,11 @@ Work in Progress`,
 
         colony: `{0} of {1}, stage {2}`,
         colonyStats: `{0} of {1}, stage {2}\\\\Energy: {3} (+{4}/s)\\\\
-Growth: {5}/{6} (+{7}/s)\\\\Profit: {8}p`,
+Growth: {5}/{6} (+{7}/s)\\\\Profit: {8}p\\\\`,
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
         dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}\\\\{5}',
         dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\{5}',
-        hacks: 'Hax enabled',
+        hacks: 'Hax',
 
         switchPlant: 'Switch plant (plot {0})',
         switchPlantInfo: 'Cycles through the list of plants',
@@ -4596,7 +4596,7 @@ var setInternalState = (stateStr) =>
 
     if('haxEnabled' in state)
     {
-        haxEnabled = true;
+        haxEnabled = state.haxEnabled;
         freePenny.isAvailable = haxEnabled;
         warpTick.isAvailable = haxEnabled;
         warpOne.isAvailable = haxEnabled;
