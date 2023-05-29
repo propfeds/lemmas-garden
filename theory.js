@@ -2749,8 +2749,9 @@ for(let i = 1; i <= 400; ++i)
 // Balance parameters
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(100)));
-const plantUnlocks = [1, 2, 9001];
-const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2200),
+const plantUnlocks = [1, 2];
+const plantUnlockCosts = new CompositeCost(1,
+new ConstantCost(2200),
 new ConstantCost(1e45));
 const permaCosts =
 [
@@ -3120,7 +3121,7 @@ var plants = Array.from({length: maxPlots}, (_) => {return {};});
 
 var notebookPerma, plotPerma, plantPerma;
 
-var freePenny, warpTick, warpOne, warpZero;
+var freePenny, warpTick, warpOne, warpYear, warpZero;
 
 var currency, taxCurrency;
 
@@ -3344,6 +3345,17 @@ var init = () =>
         warpOne.bought = (_) => tick(144, 1);
         warpOne.isAvailable = haxEnabled;
     }
+    /* Warp year
+    For testing purposes
+    */
+    {
+        warpYear = theory.createPermanentUpgrade(9005, currency,
+        new FreeCost);
+        warpYear.description = 'Warp one year';
+        warpYear.info = 'Warps forward by 365 days';
+        warpYear.bought = (_) => tick(144 * 365, 1);
+        warpYear.isAvailable = haxEnabled;
+    }
     /* Warp zero
     For testing purposes
     */
@@ -3368,7 +3380,7 @@ var init = () =>
     }
 
     // To do: challenge plot (-1)
-    // Next: plant unlocks and milestones
+    // Next: milestones
 
     theory.primaryEquationHeight = 30;
     theory.primaryEquationScale = 0.96;

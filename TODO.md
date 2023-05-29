@@ -9,7 +9,11 @@
 - [ ] Simple solitary flower
   - Tulip?
   - Buttercup
-- [ ] Leap years and hopleeks
+- Leap years and hopleeks
+  - [x] Leap years calculation
+  - [ ] 400-year cycle wrapping
+  - [ ] Hopleek
+  - [ ] Hopleek schedule
 - [ ] Sunflower
 - [ ] Spreadable plants
 - [ ] Cap colony count to 5 per plot, unless?

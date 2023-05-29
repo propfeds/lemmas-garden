@@ -198,7 +198,13 @@ between tau not feeling bloated and pub multipliers not too small)
 - **Knotweed** that can entangle, strangle other plants?
   - Possible challenge - rescue a plant from the knots (TOPOLOGY???)
   - Pun? Not-weed
+- **Venus fly trap**
+- **Bamboo**
+- **Active sprouts? (Micro greens)**
+  - You can eat sunflower sprouts, aaa
+- **Poison ivy**
 - **Rhizomes?**
+- **Fungi** - foraging?
 - **Flower gender** mechanic?
 
 ## Permas & Milestones
