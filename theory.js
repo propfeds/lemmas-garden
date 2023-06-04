@@ -162,11 +162,20 @@ const locStrings =
 
         colony: `{0} of {1}, stage {2}`,
         colonyStats: `{0} of {1}, stage {2}\\\\Energy: {3} (+{4}/s)\\\\
-Growth: {5}/{6} (+{7}/s)\\\\Profit: {8}p\\\\`,
+Growth: {5}/{6} (+{7}/s)\\\\Profit: {8}p\\\\{9}`,
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
         dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}\\\\{5}',
         dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\{5}',
         hacks: 'Hax',
+        status:
+        {
+            evolve: 'Growing...',
+            actions:
+            [
+                'Harvesting...',
+                'Pruning...'
+            ]
+        },
 
         switchPlant: 'Switch plant (plot {0})',
         switchPlantInfo: 'Cycles through the list of plants',
@@ -3563,12 +3572,18 @@ var getSecondaryEquation = () =>
     switch(colonyMode)
     {
         case 1:
+            let status = (manager.gangsta && manager.gangsta[0] == plotIdx &&
+            manager.gangsta[1] == colonyIdx[plotIdx]) ?
+            getLoc('status')['evolve'] : (manager.actionGangsta &&
+            manager.actionGangsta[0] == plotIdx &&
+            manager.actionGangsta[1] == colonyIdx[plotIdx]) ?
+            getLoc('status')['actions'][manager.actionGangsta[2]] : '';
             return `\\text{${Localization.format(getLoc('colonyStats'),
             c.population, getLoc('plants')[c.id].name, c.stage, c.energy,
             c.synthRate * BigNumber.from(insolationCoord), c.growth,
             PLANT_DATA[c.id].growthCost * BigNumber.from(c.sequence.length),
-            PLANT_DATA[c.id].growthRate * BigNumber.from(growthCoord), c.profit)
-            }}`;
+            PLANT_DATA[c.id].growthRate * BigNumber.from(growthCoord), c.profit,
+            status)}}`;
             return `\\text{${Localization.format(getLoc('colony'), c.population,
             getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
             g=${c.growth}/${PLANT_DATA[c.id].growthCost *
