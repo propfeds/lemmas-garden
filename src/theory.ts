@@ -1,33 +1,25 @@
-import { BigNumber } from '../api/BigNumber';
-import { CompositeCost, ConstantCost, ExponentialCost, FirstFreeCost, FreeCost } from '../api/Costs';
-import { Localization } from '../api/Localization';
-import { QuaternaryEntry, theory } from '../api/Theory';
-import { ImageSource } from '../api/ui/properties/ImageSource';
-import { LayoutOptions } from '../api/ui/properties/LayoutOptions';
-import { TextAlignment } from '../api/ui/properties/TextAlignment';
-import { Thickness } from '../api/ui/properties/Thickness';
-import { Vector3 } from '../api/Vector3';
-import { FreeCost } from '../api/Costs';
-import { theory } from '../api/Theory';
-import { Utils } from '../api/Utils';
-import { Vector3 } from '../api/Vector3';
-import { ui } from '../api/ui/UI';
-import { Color } from '../api/ui/properties/Color';
-import { FontFamily } from '../api/ui/properties/FontFamily';
-import { Keyboard } from '../api/ui/properties/Keyboard';
-import { LayoutOptions } from '../api/ui/properties/LayoutOptions';
-import { TextAlignment } from '../api/ui/properties/TextAlignment';
-import { Thickness } from '../api/ui/properties/Thickness';
-import { TouchType } from '../api/ui/properties/TouchType';
-import { Localization } from '../api/Localization';
-import { MathExpression } from '../api/MathExpression';
-import { ClearButtonVisibility } from '../api/ui/properties/ClearButtonVisibility';
-import { LineBreakMode } from '../api/ui/properties/LineBreakMode';
-import { BigNumber } from '../api/BigNumber';
-import { Upgrade } from '../api/Upgrades';
-import { Button } from '../api/ui/Button';
-import { Frame } from '../api/ui/Frame';
-import { log } from 'winjs';
+import { BigNumber } from '../../api/BigNumber';
+import { CompositeCost, ConstantCost, ExponentialCost, FirstFreeCost, FreeCost } from '../../api/Costs';
+import { Localization } from '../../api/Localization';
+import { QuaternaryEntry, theory } from '../../api/Theory';
+import { ImageSource } from '../../api/ui/properties/ImageSource';
+import { LayoutOptions } from '../../api/ui/properties/LayoutOptions';
+import { TextAlignment } from '../../api/ui/properties/TextAlignment';
+import { Thickness } from '../../api/ui/properties/Thickness';
+import { Vector3 } from '../../api/Vector3';
+import { Utils } from '../../api/Utils';
+import { ui } from '../../api/ui/UI';
+import { Color } from '../../api/ui/properties/Color';
+import { FontFamily } from '../../api/ui/properties/FontFamily';
+import { Keyboard } from '../../api/ui/properties/Keyboard';
+import { TouchType } from '../../api/ui/properties/TouchType';
+import { MathExpression } from '../../api/MathExpression';
+import { ClearButtonVisibility } from '../../api/ui/properties/ClearButtonVisibility';
+import { LineBreakMode } from '../../api/ui/properties/LineBreakMode';
+import { Upgrade } from '../../api/Upgrades';
+import { Button } from '../../api/ui/Button';
+import { Frame } from '../../api/ui/Frame';
+import { Theme } from '../../api/Settings';
 
 var id = 'lemmas_garden';
 var getName = (language) =>
@@ -433,12 +425,28 @@ let getCoordString = (x) => x.toFixed(x >= -0.01 ?
     (x < -9.99 ? (x < -99.9 ? 0 : 1) : 2)
 );
 
+interface QueueInput
+{
+    oldestIndex?: number;
+    newestIndex?: number;
+    storage?:
+    {
+        [key: number]: any
+    };
+}
+
 /**
  * What else do you expect?
  */
 class Queue
 {
-    constructor(object = {})
+    oldestIndex: number;
+    newestIndex: number;
+    storage:
+    {
+        [key: number]: any
+    };
+    constructor(object: QueueInput = {})
     {
         this.oldestIndex = object.oldestIndex || 0;
         this.newestIndex = object.newestIndex || 0;
@@ -497,6 +505,10 @@ class Xorshift
      * @constructor
      * @param {number} seed must be initialized to non-zero.
      */
+    x: number;
+    y: number;
+    z: number;
+    w: number;
     constructor(seed = 0)
     {
         this.x = seed;
@@ -578,6 +590,13 @@ class Quaternion
      * @param {number} j (default: 0) the imaginary j component.
      * @param {number} k (default: 0) the imaginary k component.
      */
+    r: number;
+    i: number;
+    j: number;
+    k: number;
+    head: Vector3;
+    up: Vector3;
+    side: Vector3;
     constructor(r = 1, i = 0, j = 0, k = 0)
     {
         /**
@@ -785,11 +804,13 @@ class Quaternion
             return this;
 
         let curHead = this.headingVector;
-        let newHead = curHead - new Vector3(0, weight, 0);
+        let weightVector = new Vector3(0, weight, 0);
+        let newHead = <Vector3><unknown>(<any>curHead - <any>weightVector);
         let n = newHead.length;
         if(n == 0)
             return this;
-        newHead /= n;
+        // newHead /= n;
+        newHead = <Vector3><unknown>(<any>newHead / <any>n);
         let result = this.rotateFrom(curHead, newHead);
         return result;
     }
@@ -816,7 +837,8 @@ class Quaternion
         let n = rotAxis.length;
         if(n == 0)
             return this;
-        rotAxis /= n;
+        // rotAxis /= n;
+        rotAxis = <Vector3><unknown>(<any>rotAxis / <any>n);
         let a = weight * n / 2;
         let s = Math.sin(a);
         let c = Math.cos(a);
@@ -842,7 +864,8 @@ class Quaternion
         let n = side.length;
         if(n == 0)
             return this;
-        side /= n;
+        // side /= n;
+        side = <Vector3><unknown>(<any>side / <any>n);
         // U = HxL
         let newUp = new Vector3(
             curHead.y * side.z - curHead.z * side.y,
