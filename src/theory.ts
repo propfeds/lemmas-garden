@@ -7,7 +7,7 @@ import { LayoutOptions } from '../../api/ui/properties/LayoutOptions';
 import { TextAlignment } from '../../api/ui/properties/TextAlignment';
 import { Thickness } from '../../api/ui/properties/Thickness';
 import { Vector3 } from '../../api/Vector3';
-import { Utils } from '../../api/Utils';
+import { Utils, log } from '../../api/Utils';
 import { ui } from '../../api/ui/UI';
 import { Color } from '../../api/ui/properties/Color';
 import { FontFamily } from '../../api/ui/properties/FontFamily';
@@ -24,7 +24,7 @@ import { Theme } from '../../api/Settings';
 var id = 'lemmas_garden';
 var getName = (language) =>
 {
-    let names =
+    const names =
     {
         en: 'Lemma\'s Garden',
     };
@@ -33,7 +33,7 @@ var getName = (language) =>
 }
 var getDescription = (language) =>
 {
-    let descs =
+    const descs =
     {
         en:
 `Last night, Lemma swept away the rubbles of her old garden.
@@ -890,6 +890,37 @@ class Quaternion
     }
 }
 
+interface LSystemInput
+{
+    axiom: string,
+    rules: string[],
+    turnAngle: number | string,
+    seed: number,
+    ignoreList: string,
+    ctxIgnoreList: string,
+    tropism: number | string,
+    variables: {[key: string]: string}
+}
+
+interface LSystemRule
+{
+    left?: string,
+    right?: string,
+    params?: {[key: string]: [string, number]},
+    paramMap?: (v: string, l: null | BigNumber[], m: null | BigNumber[],
+    r: null | BigNumber[]) => null | BigNumber,
+    condition?: MathExpression,
+    derivations?: string | string[],
+    parameters?: MathExpression | MathExpression[],
+    chances?: MathExpression | MathExpression[]
+}
+
+interface Task
+{
+    start?: number,
+    [key: string]: any
+}
+
 /**
  * Represents a parametric L-system.
  */
@@ -907,6 +938,18 @@ class LSystem
      * @param {string} tropism the tropism factor.
      * @param {object} variables globally defined variables for the system.
      */
+    userInput: LSystemInput;
+    variables: Map<string, BigNumber>;
+    axiom: string;
+    axiomParams: Array<null | BigNumber[]>;
+    rules: Map<string, LSystemRule[]>;
+    models: Map<string, LSystemRule[]>;
+    ignoreList: Set<string>;
+    ctxIgnoreList: Set<string>;
+    RNG: Xorshift;
+    halfAngle: number;
+    rotations: Map<string, Quaternion>;
+    tropism: number;
     constructor(axiom = '', rules = [], turnAngle = 0, seed = 0,
     ignoreList = '', ctxIgnoreList = '', tropism = 0, variables = {})
     {
@@ -965,7 +1008,7 @@ class LSystem
             if(!contextMatch[6])
                 continue;
 
-            let tmpRule = {};
+            let tmpRule: LSystemRule = {};
             let ruleParams = {};
             if(contextMatch[8])
             {
@@ -1110,9 +1153,8 @@ class LSystem
 
         this.RNG = new Xorshift(seed);
         this.halfAngle = MathExpression.parse(turnAngle.toString()).evaluate(
-        (v) => this.variables.get(v)).
-        toNumber() * Math.PI / 360;
-        
+        (v) => this.variables.get(v)).toNumber() * Math.PI / 360;
+
         this.rotations = new Map();
         let s = Math.sin(this.halfAngle);
         let c = Math.cos(this.halfAngle);
@@ -1124,8 +1166,7 @@ class LSystem
         this.rotations.set('/', new Quaternion(-c, -s, 0, 0));
 
         this.tropism = MathExpression.parse(tropism.toString()).evaluate(
-        (v) => this.variables.get(v)).
-        toNumber();
+        (v) => this.variables.get(v)).toNumber();
     }
 
     /**
@@ -1227,7 +1268,7 @@ class LSystem
      * @param {string} sequence the sequence.
      * @returns {object}
      */
-    getAncestree(sequence, task = {})
+    getAncestree(sequence, task: Task = {})
     {
         // Scanning behaviour should be very similar to renderer drawing.
         let tmpStack = task.stack || [];
@@ -1300,7 +1341,7 @@ class LSystem
      * @param {string} sequence the input string.
      * @returns {{start: number, result: string}}
      */
-    derive(sequence, seqParams, ancestors, children, task = {})
+    derive(sequence, seqParams, ancestors, children, task: Task = {})
     {
         let result = task.derivation || '';
         let resultParams = task.parameters || [];
@@ -1509,7 +1550,7 @@ class LSystem
 
                 if(typeof tmpRules[j].derivations === 'string')
                 {
-                    result = tmpRules[j].derivations;
+                    result = <string>tmpRules[j].derivations;
                     if(tmpRules[j].parameters)
                     {
                         for(let k = 0; k < tmpRules[j].parameters.length;
@@ -1605,7 +1646,7 @@ class LSystem
      * @param {{start: number, result: string}} task the current task.
      * @returns {{start: number, result: string}}
      */
-    reconstruct(sequence, params = null, filter = '', task = {})
+    reconstruct(sequence, params = null, filter = '', task: Task = {})
     {
         if(!params && !filter)
         {

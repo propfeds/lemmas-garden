@@ -1,0 +1,9 @@
+{
+    "compilerOptions":
+    {
+        "rootDir": "./src",
+        "outFile": "./theory.js",
+        "target": "ES6"
+    },
+    "exclude": ["../api/*"]
+}
