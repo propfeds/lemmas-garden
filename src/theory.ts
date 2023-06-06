@@ -21,12 +21,12 @@ import { Theme } from '../../api/Settings';
 import { Sound } from '../../api/Sound';
 import { game } from '../../api/Game';
 
-var id = 'lemmas_garden';
+var id = 'lemmas_garden_ts';
 var getName = (language) =>
 {
     const names =
     {
-        en: 'Lemma\'s Garden',
+        en: 'Typescript Garden',
     };
 
     return names[language] || names.en;
@@ -36,7 +36,7 @@ var getDescription = (language) =>
     const descs =
     {
         en:
-`Last night, Lemma swept away the rubbles of her old garden.
+`Last night, Lemma swept away the rubbles on her old garden.
 
 You are her first student in a long while.`,
     };
