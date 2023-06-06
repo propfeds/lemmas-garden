@@ -2703,7 +2703,7 @@ var init = () => {
     theory.createPublicationUpgrade(1, currency, permaCosts[0]);
     theory.createBuyAllUpgrade(2, currency, permaCosts[1]);
     theory.buyAllUpgrade.bought = (_) => updateAvailability();
-    theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
+    // theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
     /* Free penny
     For testing purposes
     */
