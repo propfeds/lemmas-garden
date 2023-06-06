@@ -36,7 +36,7 @@ You are her first student in a long while.`,
     return descs[language] || descs.en;
 };
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
-var version = 0.04;
+var version = 0.05;
 const maxPlots = 6;
 let haxEnabled = false;
 let time = 0;
@@ -83,8 +83,8 @@ const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const locStrings = {
     en: {
-        versionName: `Version: 0.0.4, Axiom`,
-        versionNameShort: 'v0.1, Work in Progress',
+        versionName: `Version: 0.0.5, Axiom`,
+        wip: 'v0.1, Work in Progress',
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish',
         btnView: 'View L-system',
@@ -2554,7 +2554,7 @@ const settingsFrame = createFramedButton({
 var switchPlant, viewColony, switchColony;
 var plants = Array.from({ length: maxPlots }, (_) => { return {}; });
 var notebookPerma, plotPerma, plantPerma;
-var freePenny, warpTick, warpOne, warpYear, warpZero;
+var freePenny, warpTick, warpDay, warpYear, warpZero;
 var currency, taxCurrency;
 var init = () => {
     currency = theory.createCurrency('p', 'p');
@@ -2728,11 +2728,11 @@ var init = () => {
     For testing purposes
     */
     {
-        warpOne = theory.createPermanentUpgrade(9003, currency, new FreeCost);
-        warpOne.description = 'Warp one day';
-        warpOne.info = 'Warps forward by 144 time units';
-        warpOne.bought = (_) => tick(144, 1);
-        warpOne.isAvailable = haxEnabled;
+        warpDay = theory.createPermanentUpgrade(9003, currency, new FreeCost);
+        warpDay.description = 'Warp one day';
+        warpDay.info = 'Warps forward by 144 time units';
+        warpDay.bought = (_) => tick(144, 1);
+        warpDay.isAvailable = haxEnabled;
     }
     /* Warp year
     For testing purposes
@@ -2831,7 +2831,7 @@ var getEquationOverlay = () => {
             //     verticalOptions: LayoutOptions.END,
             //     // verticalTextAlignment: TextAlignment.CENTER,
             //     margin: new Thickness(8, 32),
-            //     text: getLoc('versionNameShort'),
+            //     text: getLoc('wip'),
             //     fontSize: 9,
             //     textColor: Color.TEXT_MEDIUM
             // }),
@@ -3748,7 +3748,8 @@ var setInternalState = (stateStr) => {
         haxEnabled = state.haxEnabled;
         freePenny.isAvailable = haxEnabled;
         warpTick.isAvailable = haxEnabled;
-        warpOne.isAvailable = haxEnabled;
+        warpDay.isAvailable = haxEnabled;
+        warpYear.isAvailable = haxEnabled;
         warpZero.isAvailable = haxEnabled;
     }
     if ('time' in state) {
