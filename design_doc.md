@@ -4,7 +4,7 @@ Gardening theory (mod) for Exponential Idle.
 
 Playstyle: slow, semi active, timing required, reading of plant descriptions
 
-**Lemma because:**
+**Lemma because...**
 
 - Her name is Lemma
 - You can switch stages like a lemma
@@ -198,7 +198,13 @@ between tau not feeling bloated and pub multipliers not too small)
 - **Knotweed** that can entangle, strangle other plants?
   - Possible challenge - rescue a plant from the knots (TOPOLOGY???)
   - Pun? Not-weed
+- **Venus fly trap**
+- **Bamboo**
+- **Active sprouts? (Micro greens)**
+  - You can eat sunflower sprouts, aaa
+- **Poison ivy**
 - **Rhizomes?**
+- **Fungi** - foraging?
 - **Flower gender** mechanic?
 
 ## Permas & Milestones
@@ -213,7 +219,7 @@ between tau not feeling bloated and pub multipliers not too small)
   - Fire toggle: first starts burning one by one slowly, then burns faster
     - If it completely burns everything, it will spread to the next plot
 
-- **The Lindenmaker (Mutations):** let players mutate a plant for one level
+- **The Lindenmaker (Mutations)**: let players mutate a plant for one level
   - Adopts the new plant's ruleset
   - Example colony: 24 of Hopleek (35) x Dog rose
   - Cutting leaves or harvesting fruits will have the same notation:
@@ -248,6 +254,7 @@ proud.
 Minus the sales tax, maintenance, dog food, *plant* food... I wonder why it'd 
 always miraculously add up to {0}% each time? Lemma, can [you] prove this?'
 We called it the weather's toll. Just to stop worrying about it too much.
+- **Publisher**: is named Ellen to reference the double ln(ln(t)) in the formula
 - **Basil unlock**: Sorry for letting you wait this long.
 I have a friend called Corollary who'd supply me with new seeds for my students.
 She wasn't here until today, so apologies that you may've got a little bit sick

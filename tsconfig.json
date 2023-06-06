@@ -1,0 +1,9 @@
+{
+    "compilerOptions":
+    {
+        "rootDir": "./src",
+        "outDir": "./",
+        "target": "ES2017"
+    },
+    "exclude": ["../api"]
+}

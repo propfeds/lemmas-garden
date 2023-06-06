@@ -20,24 +20,34 @@ import { MathExpression } from '../../api/MathExpression';
 import { Theme } from '../../api/Settings';
 import { Sound } from '../../api/Sound';
 import { game } from '../../api/Game';
+
 var id = 'lemmas_garden';
-var getName = (language) => {
-    const names = {
+var getName = (language) =>
+{
+    const names =
+    {
         en: `Lemma's Garden`,
     };
+
     return names[language] || names.en;
-};
-var getDescription = (language) => {
-    const descs = {
-        en: `Last night, Lemma swept away the rubbles on her old garden.
+}
+var getDescription = (language) =>
+{
+    const descs =
+    {
+        en:
+`Last night, Lemma swept away the rubbles on her old garden.
 
 You are her first student in a long while.`,
     };
+
     return descs[language] || descs.en;
-};
+}
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
 var version = 0.05;
+
 const maxPlots = 6;
+
 let haxEnabled = false;
 let time = 0;
 let days = 0;
@@ -58,46 +68,59 @@ let fancyPlotTitle = false;
 let actionPanelOnTop = false;
 let colonyViewConfig = {};
 let notebook = {};
+
 let textColor = 'ffccff';
+
 let tmpCurrency;
 let tmpLevels;
+
 // Other constants
+
 const eq1Colour = new Map();
 eq1Colour.set(Theme.STANDARD, 'ffffff');
 eq1Colour.set(Theme.DARK, 'ffffff');
 eq1Colour.set(Theme.LIGHT, '000000');
+
 const eq2Colour = new Map();
 eq2Colour.set(Theme.STANDARD, 'c0c0c0');
 eq2Colour.set(Theme.DARK, 'b5b5b5');
 eq2Colour.set(Theme.LIGHT, '434343');
+
 const MAX_INT = 0x7fffffff;
 const TRIM_SP = /\s+/g;
 const LS_RULE = /([^:]+)(:(.+))?=(.*)/;
 // Context doesn't need to check for nested brackets!
-const LS_CONTEXT = /((.)(\(([^\)]+)\))?<)?((.)(\(([^\)]+)\))?)(>(.)(\(([^\)]+)\))?)?/;
+const LS_CONTEXT =
+/((.)(\(([^\)]+)\))?<)?((.)(\(([^\)]+)\))?)(>(.)(\(([^\)]+)\))?)?/;
 const BACKTRACK_LIST = new Set('+-&^\\/|[$T');
 // Leaves and apices
 const SYNTHABLE_SYMBOLS = new Set('LaA');
 const MAX_CHARS_PER_TICK = 200;
 const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
-const locStrings = {
-    en: {
+const locStrings =
+{
+    en:
+    {
         versionName: `Version: 0.0.5, Axiom`,
         wip: 'v0.1, Work in Progress',
+
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish',
+
         btnView: 'View L-system',
         btnVar: 'Variables',
         btnClose: 'Close',
         btnSave: 'Save',
         btnReset: 'Reset Graphs',
+
         labelActions: 'Actions: ',
         btnHarvest: 'Harvest',
         btnHarvestKill: 'Harvest\\\\(kill)',
         btnPrune: 'Prune',
         btnPruneKill: 'Prune\\\\(kill)',
         labelSettings: 'Settings',
+
         labelFilter: 'Filter: ',
         labelParams: 'Parameters: ',
         labelAxiom: 'Axiom: ',
@@ -109,6 +132,7 @@ const locStrings = {
         labelSeed: 'Random seed: ',
         menuVariables: 'Defined Variables',
         labelVars: 'Variables: {0}',
+
         plotTitle: `\\text{{Plot }}{{{0}}}`,
         plotTitleFancy: `\\mathcal{{P}}{{\\mkern -1mu}}lo{{\\mkern 1mu}}t
 \\enspace #{{\\mkern 2mu}}{{{0}}}`,
@@ -119,6 +143,7 @@ const locStrings = {
         challengeTitleFancy: `\\mathcal{{L}}e{{\\mkern -1mu}}s{{\\mkern -1mu}}so
 {{\\mkern 1mu}}n \\enspace #{{\\mkern 2mu}}{{{0}}}`,
         lockedPlot: `\\text{Untilled soil.}`,
+
         permaNote: 'Notebook',
         permaNoteInfo: 'Manage populations and harvests',
         permaSettings: 'Theory settings',
@@ -126,6 +151,7 @@ const locStrings = {
         labelPlants: 'Plants',
         labelMaxLevel: 'Max. level',
         labelHarvestStage: 'Harvest stage',
+
         colony: `{0} of {1}, stage {2}`,
         colonyStats: `{0} of {1}, stage {2}\\\\Energy: {3} (+{4}/s)\\\\
 Growth: {5}/{6} (+{7}/s)\\\\Profit: {8}p\\\\{9}`,
@@ -133,13 +159,16 @@ Growth: {5}/{6} (+{7}/s)\\\\Profit: {8}p\\\\{9}`,
         dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}\\\\{5}',
         dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\{5}',
         hacks: 'Hax',
-        status: {
+        status:
+        {
             evolve: 'Growing...',
-            actions: [
+            actions:
+            [
                 'Harvesting...',
                 'Pruning...'
             ]
         },
+
         switchPlant: 'Switch plant (plot {0})',
         switchPlantInfo: 'Cycles through the list of plants',
         plotPlant: 'Plot {0}: {1}',
@@ -147,36 +176,46 @@ Growth: {5}/{6} (+{7}/s)\\\\Profit: {8}p\\\\{9}`,
         viewColonyInfo: 'Displays details about the colony',
         switchColony: 'Switch colony ({0}/{1})',
         switchColonyInfo: 'Cycles through the list of colonies',
+
         menuSettings: 'Theory Settings',
         graphMode3D: '3D graph: ',
-        graphModes2D: [
+        graphModes2D:
+        [
             '2D graph: Off',
             '2D graph: Photo-synthesis',
             '2D graph: Growth'
         ],
-        colonyModes: [
+        colonyModes:
+        [
             'Colony view: Off',
             'Colony view: Single',
             'Colony view: List'
         ],
-        actionPanelLocations: [
+        actionPanelLocations:
+        [
             'Time display: Top',
             'Time display: Bottom'
         ],
-        plotTitleModes: [
+        plotTitleModes:
+        [
             'Plot title: Serif',
             'Plot title: Cursive'
         ],
-        plants: {
-            1: {
+
+        plants:
+        {
+            1:
+            {
                 name: 'Calendula',
                 info: 'A classic flower to start the month.',
                 LsDetails: `Symbols:\\\\A: apex (stem shoot)\\\\F: internode
 \\\\I : flower stem (not internode)\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest
 returns profit as the sum of all K.\\\\—\\\\The Model specification section can
 be ignored.`,
-                stages: {
-                    index: [
+                stages:
+                {
+                    index:
+                    [
                         0,
                         3, 8,
                         13, 17,
@@ -208,15 +247,18 @@ known as the golden angle.`,
                     38: 'All flowers have reached maturity.',
                 }
             },
-            2: {
+            2:
+            {
                 name: 'Basil',
                 info: 'A fast growing herb, regularly used for spicing.',
                 LsDetails: `Symbols:\\\\A: apex (stem shoot)\\\\B: base\\\\F:
 internode\\\\I : shortened stem (not internode)\\\\K: flower\\\\L: leaf\\\\—
 \\\\Harvest returns profit as the sum of all L.\\\\Prune cuts off all A and K.
 \\\\—\\\\The Model specification section can be ignored.`,
-                stages: {
-                    index: [
+                stages:
+                {
+                    index:
+                    [
                         0, 4, 8, 9, 12, 13, 14, 17, 20,
                         21,
                         22,
@@ -246,14 +288,16 @@ to go absolutely bitter.`,
                     54: `A basil plant has sacrificed itself for science.`
                 }
             },
-            9001: {
+            9001:
+            {
                 name: '(Test) Arrow weed',
                 info: 'Not balanced for regular play.',
                 LsDetails: `The symbol A represents a rising shoot (apex), ` +
-                    `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
-                    `F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
-                    `kills the colony.`,
-                stages: {
+`while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
+`F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
+`kills the colony.`,
+                stages:
+                {
                     index: [0, 1, 2, 4],
                     0: 'The first shoot rises.\\\\Already harvestable.',
                     1: 'The shoot splits in three.\\\\The stem lengthens.',
@@ -264,23 +308,29 @@ friend of all mathematicians.`
             }
         },
         plantStats: `({0}) {1}\\\\—\\\\Maximum stage: {2}\\\\Synthesis rate: ` +
-            `{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} * {6} chars`,
+`{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} * {6} chars`,
         noCommentary: 'No commentary.',
+
         resetRenderer: 'You are about to reset the graph.'
     }
 };
+
 /**
  * Returns a localised string.
  * @param {string} name the internal name of the string.
  * @returns {string} the string.
  */
-let getLoc = (name, lang = MENU_LANG) => {
-    if (lang in locStrings && name in locStrings[lang])
+let getLoc = (name, lang = MENU_LANG) =>
+{
+    if(lang in locStrings && name in locStrings[lang])
         return locStrings[lang][name];
-    if (name in locStrings.en)
+
+    if(name in locStrings.en)
         return locStrings.en[name];
+    
     return `String missing: ${lang}.${name}`;
-};
+}
+
 /* Image size reference
 Size 20:
 270x480
@@ -296,60 +346,75 @@ Size 36:
 Size 48:
 1080x1920
 */
-let getImageSize = (width) => {
-    if (width >= 1080)
+let getImageSize = (width) =>
+{
+    if(width >= 1080)
         return 48;
-    if (width >= 720)
+    if(width >= 720)
         return 36;
-    if (width >= 360)
+    if(width >= 360)
         return 24;
+
     return 20;
-};
-let getBtnSize = (width) => {
-    if (width >= 1080)
+}
+
+let getBtnSize = (width) =>
+{
+    if(width >= 1080)
         return 96;
-    if (width >= 720)
+    if(width >= 720)
         return 72;
-    if (width >= 360)
+    if(width >= 360)
         return 48;
+
     return 40;
-};
-let getMediumBtnSize = (width) => {
-    if (width >= 1080)
+}
+
+let getMediumBtnSize = (width) =>
+{
+    if(width >= 1080)
         return 88;
-    if (width >= 720)
+    if(width >= 720)
         return 66;
-    if (width >= 360)
+    if(width >= 360)
         return 44;
+
     return 36;
-};
-let getSmallBtnSize = (width) => {
-    if (width >= 1080)
+}
+
+let getSmallBtnSize = (width) =>
+{
+    if(width >= 1080)
         return 80;
-    if (width >= 720)
+    if(width >= 720)
         return 60;
-    if (width >= 360)
+    if(width >= 360)
         return 40;
+
     return 32;
-};
+}
+
 /**
  * Returns the index of the first smaller/equal element than target.
  * @param {number[]} arr the array being searched.
  * @param {number} target the value to search for.
  * @returns {number}
  */
-let binarySearch = (arr, target) => {
+let binarySearch = (arr, target) =>
+{
     let l = 0;
     let r = arr.length - 1;
-    while (l < r) {
+    while(l < r)
+    {
         let m = Math.ceil((l + r) / 2);
-        if (arr[m] <= target)
+        if(arr[m] <= target)
             l = m;
         else
             r = m - 1;
     }
     return l;
-};
+}
+
 /**
  * Returns a string of a fixed decimal number, with a fairly uniform width.
  * @param {number} x the number.
@@ -357,70 +422,119 @@ let binarySearch = (arr, target) => {
  */
 let getCoordString = (x) => x.toFixed(x >= -0.01 ?
     (x <= 9.999 ? 3 : (x <= 99.99 ? 2 : 1)) :
-    (x < -9.99 ? (x < -99.9 ? 0 : 1) : 2));
+    (x < -9.99 ? (x < -99.9 ? 0 : 1) : 2)
+);
+
 const yearStartLookup = [0];
-for (let i = 1; i <= 400; ++i) {
-    let leap = !(i % 4) && (!!(i % 100) || !(i % 400));
+
+for(let i = 1; i <= 400; ++i)
+{
+    let leap = !(i%4) && (!!(i%100) || !(i%400));
     let offset = leap ? 366 : 365;
-    yearStartLookup[i] = yearStartLookup[i - 1] + offset;
+    yearStartLookup[i] = yearStartLookup[i-1] + offset;
 }
+
+// Classes
+
+interface QueueInput
+{
+    oldestIndex?: number;
+    newestIndex?: number;
+    storage?:
+    {
+        [key: number]: any
+    };
+}
+
 /**
  * What else do you expect?
  */
-class Queue {
-    constructor(object = {}) {
+class Queue
+{
+    oldestIndex: number;
+    newestIndex: number;
+    storage:
+    {
+        [key: number]: any
+    };
+    constructor(object: QueueInput = {})
+    {
         this.oldestIndex = object.oldestIndex || 0;
         this.newestIndex = object.newestIndex || 0;
         this.storage = object.storage || {};
     }
-    get length() {
+
+    get length()
+    {
         let result = this.newestIndex - this.oldestIndex;
-        if (!result) {
+        if(!result)
+        {
             this.oldestIndex = 0;
             this.newestIndex = 0;
         }
         return result;
-    }
-    ;
-    get object() {
+    };
+
+    get object()
+    {
         return {
             oldestIndex: this.oldestIndex,
             newestIndex: this.newestIndex,
             storage: this.storage
         };
     }
-    enqueue(data) {
+
+    enqueue(data)
+    {
         this.storage[this.newestIndex] = data;
         this.newestIndex++;
-    }
-    ;
-    dequeue() {
-        var oldestIndex = this.oldestIndex, newestIndex = this.newestIndex, deletedData;
-        if (oldestIndex !== newestIndex) {
+    };
+
+    dequeue()
+    {
+        var oldestIndex = this.oldestIndex,
+            newestIndex = this.newestIndex,
+            deletedData;
+
+        if (oldestIndex !== newestIndex)
+        {
             deletedData = this.storage[oldestIndex];
             delete this.storage[oldestIndex];
             this.oldestIndex++;
+
             return deletedData;
         }
     }
 }
+
 /**
  * Represents an instance of the Xorshift RNG.
  */
-class Xorshift {
-    constructor(seed = 0) {
+class Xorshift
+{
+    /**
+     * @constructor
+     * @param {number} seed must be initialized to non-zero.
+     */
+    x: number;
+    y: number;
+    z: number;
+    w: number;
+    constructor(seed = 0)
+    {
         this.x = seed;
         this.y = 0;
         this.z = 0;
         this.w = 0;
-        for (let i = 0; i < 64; ++i)
+        for(let i = 0; i < 64; ++i)
             this.nextInt;
     }
     /**
      * Returns a random integer within [0, 2^31) probably.
      * @returns {number}
      */
-    get nextInt() {
+    get nextInt()
+    {
         let t = this.x ^ (this.x << 11);
         this.x = this.y;
         this.y = this.z;
@@ -432,20 +546,24 @@ class Xorshift {
      * Returns a random floating point number within [0, 1).
      * @returns {number}
      */
-    get nextFloat() {
+    get nextFloat()
+    {
         return (this.nextInt >>> 0) / ((1 << 30) * 2);
     }
     /**
      * Returns a full random double floating point number using 2 rolls.
      * @returns {number}
      */
-    get nextDouble() {
+    get nextDouble()
+    {
         let top, bottom, result;
-        do {
+        do
+        {
             top = this.nextInt >>> 10;
             bottom = this.nextFloat;
             result = (top + bottom) / (1 << 21);
-        } while (result === 0);
+        }
+        while(result === 0);
         return result;
     }
     /**
@@ -454,7 +572,8 @@ class Xorshift {
      * @param {number} end the range's upper bound, plus 1.
      * @returns {number}
      */
-    nextRange(start, end) {
+    nextRange(start, end)
+    {
         // [start, end)
         let size = end - start;
         return start + Math.floor(this.nextFloat * size);
@@ -464,15 +583,33 @@ class Xorshift {
      * @param {any[]} array the array.
      * @returns {any}
      */
-    choice(array) {
+    choice(array)
+    {
         return array[this.nextRange(0, array.length)];
     }
 }
+
 /**
  * Represents one hell of a quaternion.
  */
-class Quaternion {
-    constructor(r = 1, i = 0, j = 0, k = 0) {
+class Quaternion
+{
+    /**
+     * @constructor
+     * @param {number} r (default: 1) the real component.
+     * @param {number} i (default: 0) the imaginary i component.
+     * @param {number} j (default: 0) the imaginary j component.
+     * @param {number} k (default: 0) the imaginary k component.
+     */
+    r: number;
+    i: number;
+    j: number;
+    k: number;
+    head: Vector3;
+    up: Vector3;
+    side: Vector3;
+    constructor(r = 1, i = 0, j = 0, k = 0)
+    {
         /**
          * @type {number} the real component.
          */
@@ -490,14 +627,21 @@ class Quaternion {
          */
         this.k = k;
     }
+
     /**
      * Computes the sum of the current quaternion with another. Does not modify
      * the original quaternion.
      * @param {Quaternion} quat this other quaternion.
      * @returns {Quaternion}
      */
-    add(quat) {
-        return new Quaternion(this.r + quat.r, this.i + quat.i, this.j + quat.j, this.k + quat.k);
+    add(quat)
+    {
+        return new Quaternion(
+            this.r + quat.r,
+            this.i + quat.i,
+            this.j + quat.j,
+            this.k + quat.k
+        );
     }
     /**
      * Computes the product of the current quaternion with another. Does not
@@ -505,17 +649,19 @@ class Quaternion {
      * @param {Quaternion} quat this other quaternion.
      * @returns {Quaternion}
      */
-    mul(quat) {
+    mul(quat)
+    {
         let t0 = this.r * quat.r - this.i * quat.i -
-            this.j * quat.j - this.k * quat.k;
+        this.j * quat.j - this.k * quat.k;
         let t1 = this.r * quat.i + this.i * quat.r +
-            this.j * quat.k - this.k * quat.j;
+        this.j * quat.k - this.k * quat.j;
         let t2 = this.r * quat.j - this.i * quat.k +
-            this.j * quat.r + this.k * quat.i;
+        this.j * quat.r + this.k * quat.i;
         let t3 = this.r * quat.k + this.i * quat.j -
-            this.j * quat.i + this.k * quat.r;
+        this.j * quat.i + this.k * quat.r;
+
         let result = new Quaternion(t0, t1, t2, t3);
-        if (NORMALISE_QUATERNIONS)
+        if(NORMALISE_QUATERNIONS)
             return result.normalise;
         else
             return result;
@@ -525,14 +671,17 @@ class Quaternion {
      * @param {number} degrees degrees.
      * @param {string} symbol the corresponding symbol in L-system language.
      */
-    rotate(degrees = 0, symbol = '+') {
-        if (degrees == 0)
+    rotate(degrees = 0, symbol = '+')
+    {
+        if(degrees == 0)
             return this;
+
         let halfAngle = degrees * Math.PI / 360;
         let s = Math.sin(halfAngle);
         let c = Math.cos(halfAngle);
         let rotation;
-        switch (symbol) {
+        switch(symbol)
+        {
             case '+':
                 rotation = new Quaternion(-c, 0, 0, s);
                 break;
@@ -562,21 +711,24 @@ class Quaternion {
      * quaternions.
      * @returns {Quaternion}
      */
-    get neg() {
+    get neg()
+    {
         return new Quaternion(this.r, -this.i, -this.j, -this.k);
     }
     /**
      * Computes the norm of a quaternion.
      * @returns {number}
      */
-    get norm() {
+    get norm()
+    {
         return Math.sqrt(this.r ** 2 + this.i ** 2 + this.j ** 2 + this.k ** 2);
     }
     /**
      * Normalises a quaternion.
      * @returns {Quaternion}
      */
-    get normalise() {
+    get normalise()
+    {
         let n = this.norm;
         return new Quaternion(this.r / n, this.i / n, this.j / n, this.k / n);
     }
@@ -584,8 +736,10 @@ class Quaternion {
      * Returns a heading vector from the quaternion.
      * @returns {Vector3}
      */
-    get headingVector() {
-        if (!this.head) {
+    get headingVector()
+    {
+        if(!this.head)
+        {
             let r = this.neg.mul(xUpQuat).mul(this);
             this.head = new Vector3(r.i, r.j, r.k);
         }
@@ -595,8 +749,10 @@ class Quaternion {
      * Returns an up vector from the quaternion.
      * @returns {Vector3}
      */
-    get upVector() {
-        if (!this.up) {
+    get upVector()
+    {
+        if(!this.up)
+        {
             let r = this.neg.mul(yUpQuat).mul(this);
             this.up = new Vector3(r.i, r.j, r.k);
         }
@@ -606,8 +762,10 @@ class Quaternion {
      * Returns a side vector (left or right?) from the quaternion.
      * @returns {Vector3}
      */
-    get sideVector() {
-        if (!this.side) {
+    get sideVector()
+    {
+        if(!this.side)
+        {
             let r = this.neg.mul(zUpQuat).mul(this);
             this.side = new Vector3(r.i, r.j, r.k);
         }
@@ -619,20 +777,31 @@ class Quaternion {
      * @param {Vector3} dst the target heading.
      * @returns {Quaternion}
      */
-    rotateFrom(src, dst) {
+    rotateFrom(src, dst)
+    {
         let dp = src.x * dst.x + src.y * dst.y +
-            src.z * dst.z;
+        src.z * dst.z;
         let rotAxis;
-        if (dp < -1 + 1e-8) {
+        if(dp < -1 + 1e-8)
+        {
             /* Edge case
             If the two vectors are in opposite directions, just reverse.
             */
             return zUpQuat.mul(this);
         }
-        rotAxis = new Vector3(src.y * dst.z - src.z * dst.y, src.z * dst.x - src.x * dst.z, src.x * dst.y - src.y * dst.x);
+        rotAxis = new Vector3(
+            src.y * dst.z - src.z * dst.y,
+            src.z * dst.x - src.x * dst.z,
+            src.x * dst.y - src.y * dst.x,
+        );
         let s = Math.sqrt((1 + dp) * 2);
         // I forgore that our quaternions have to be all negative, dunnoe why
-        return this.mul(new Quaternion(-s / 2, rotAxis.x / s, rotAxis.y / s, rotAxis.z / s));
+        return this.mul(new Quaternion(
+            -s / 2,
+            rotAxis.x / s,
+            rotAxis.y / s,
+            rotAxis.z / s
+        ));
     }
     /**
      * https://stackoverflow.com/questions/71518531/how-do-i-convert-a-direction-vector-to-a-quaternion
@@ -640,17 +809,19 @@ class Quaternion {
      * @param {number} weight the vector's length (negative for upwards).
      * @returns {Quaternion}
      */
-    applyTropismVector(weight = 0) {
-        if (weight == 0)
+    applyTropismVector(weight = 0)
+    {
+        if(weight == 0)
             return this;
+
         let curHead = this.headingVector;
         let weightVector = new Vector3(0, weight, 0);
-        let newHead = (curHead - weightVector);
+        let newHead = <Vector3><unknown>(<any>curHead - <any>weightVector);
         let n = newHead.length;
-        if (n == 0)
+        if(n == 0)
             return this;
         // newHead /= n;
-        newHead = (newHead / n);
+        newHead = <Vector3><unknown>(<any>newHead / <any>n);
         let result = this.rotateFrom(curHead, newHead);
         return result;
     }
@@ -662,41 +833,60 @@ class Quaternion {
      * @param {number} z the tropism vector's z component.
      * @returns {Quaternion}
      */
-    applyTropism(weight = 0, x = 0, y = -1, z = 0) {
-        if (weight == 0)
+    applyTropism(weight = 0, x = 0, y = -1, z = 0)
+    {
+        if(weight == 0)
             return this;
+
         // a = e * |HxT| (n)
         let curHead = this.headingVector;
-        let rotAxis = new Vector3(curHead.y * z - curHead.z * y, curHead.z * x - curHead.x * z, curHead.x * y - curHead.y * x);
+        let rotAxis = new Vector3(
+            curHead.y * z - curHead.z * y,
+            curHead.z * x - curHead.x * z,
+            curHead.x * y - curHead.y * x,
+        );
         let n = rotAxis.length;
-        if (n == 0)
+        if(n == 0)
             return this;
         // rotAxis /= n;
-        rotAxis = (rotAxis / n);
+        rotAxis = <Vector3><unknown>(<any>rotAxis / <any>n);
         let a = weight * n / 2;
         let s = Math.sin(a);
         let c = Math.cos(a);
         // I don't know why it works the opposite way this time
-        return this.mul(new Quaternion(-c, rotAxis.x * s, rotAxis.y * s, rotAxis.z * s));
+        return this.mul(new Quaternion(
+            -c,
+            rotAxis.x * s,
+            rotAxis.y * s,
+            rotAxis.z * s
+        ));
     }
     /**
      * https://gamedev.stackexchange.com/questions/198977/how-to-solve-for-the-angle-of-a-axis-angle-rotation-that-gets-me-closest-to-a-sp/199027#199027
      * Rolls the quaternion so that its up vector aligns with the earth.
      * @returns {Quaternion}
      */
-    alignToVertical() {
+    alignToVertical()
+    {
         // L = V×H / |V×H|
         let curHead = this.headingVector;
         let curUp = this.upVector;
         let side = new Vector3(curHead.z, 0, -curHead.x);
         let n = side.length;
-        if (n == 0)
+        if(n == 0)
             return this;
         // side /= n;
-        side = (side / n);
+        side = <Vector3><unknown>(<any>side / <any>n);
         // U = HxL
-        let newUp = new Vector3(curHead.y * side.z - curHead.z * side.y, curHead.z * side.x - curHead.x * side.z, curHead.x * side.y - curHead.y * side.x);
-        let a = Math.atan2(curUp.x * side.x + curUp.y * side.y + curUp.z * side.z, curUp.x * newUp.x + curUp.y * newUp.y + newUp.z * newUp.z) / 2;
+        let newUp = new Vector3(
+            curHead.y * side.z - curHead.z * side.y,
+            curHead.z * side.x - curHead.x * side.z,
+            curHead.x * side.y - curHead.y * side.x,
+        );
+        let a = Math.atan2(
+            curUp.x * side.x + curUp.y * side.y + curUp.z * side.z,
+            curUp.x * newUp.x + curUp.y * newUp.y + newUp.z * newUp.z,
+        ) / 2;
         let s = Math.sin(a);
         let c = Math.cos(a);
         return new Quaternion(-c, s, 0, 0).mul(this);
@@ -705,78 +895,151 @@ class Quaternion {
      * Returns the quaternion's string representation.
      * @returns {string}
      */
-    toString() {
+    toString()
+    {
         return `${getCoordString(this.r)} + ${getCoordString(this.i)}i + ${getCoordString(this.j)}j + ${getCoordString(this.k)}k`;
     }
 }
+
+interface LSystemInput
+{
+    axiom: string;
+    rules: string[];
+    turnAngle: number | string;
+    seed: number;
+    ignoreList: string;
+    ctxIgnoreList: string;
+    tropism: number | string;
+    variables: {[key: string]: string}
+}
+
+interface LSystemRule
+{
+    left?: string;
+    right?: string;
+    params?: {[key: string]: [string, number]};
+    paramMap?: (v: string, l: null | BigNumber[], m: null | BigNumber[],
+    r: null | BigNumber[]) => null | BigNumber;
+    condition?: MathExpression;
+    derivations?: string | string[];
+    parameters?: MathExpression | MathExpression[];
+    chances?: MathExpression | MathExpression[]
+}
+
+interface Task
+{
+    start?: number;
+    [key: string]: any
+}
+
 /**
  * Represents a parametric L-system.
  */
-class LSystem {
-    constructor(axiom = '', rules = [], turnAngle = 0, seed = 0, ignoreList = '', ctxIgnoreList = '', tropism = 0, variables = {}) {
+class LSystem
+{
+    /**
+     * @constructor
+     * @param {string} axiom the starting sequence.
+     * @param {string[]} rules the production rules.
+     * @param {string} turnAngle the turning angle (in degrees).
+     * @param {number} seed the seed used for stochastic systems.
+     * @param {string} ignoreList a list of symbols to be ignored by the turtle.
+     * @param {string} ctxIgnoreList a list of symbols ignored when deriving
+     * context.
+     * @param {string} tropism the tropism factor.
+     * @param {object} variables globally defined variables for the system.
+     */
+    userInput: LSystemInput;
+    variables: Map<string, BigNumber>;
+    axiom: string;
+    axiomParams: Array<null | BigNumber[]>;
+    rules: Map<string, LSystemRule[]>;
+    models: Map<string, LSystemRule[]>;
+    ignoreList: Set<string>;
+    ctxIgnoreList: Set<string>;
+    RNG: Xorshift;
+    halfAngle: number;
+    rotations: Map<string, Quaternion>;
+    tropism: number;
+    constructor(axiom = '', rules = [], turnAngle = 0, seed = 0,
+    ignoreList = '', ctxIgnoreList = '', tropism = 0, variables = {})
+    {
         // User input
         this.userInput =
-            {
-                axiom: axiom,
-                rules: this.purgeEmpty(rules),
-                turnAngle: turnAngle,
-                seed: seed,
-                ignoreList: ignoreList,
-                ctxIgnoreList: ctxIgnoreList,
-                tropism: tropism,
-                variables: variables
-            };
+        {
+            axiom: axiom,
+            rules: this.purgeEmpty(rules),
+            turnAngle: turnAngle,
+            seed: seed,
+            ignoreList: ignoreList,
+            ctxIgnoreList: ctxIgnoreList,
+            tropism: tropism,
+            variables: variables
+        };
         // I want to transfer them to a map to deep copy them. LS menu uses
         // arrays so we're fine on that.
         this.variables = new Map();
-        for (let key in variables)
+        for(let key in variables)
             this.variables.set(key, MathExpression.parse(variables[key]).
-                evaluate());
+            evaluate());
+
         let axiomMatches = this.parseSequence(axiom.replace(TRIM_SP, ''));
         this.axiom = axiomMatches.result;
         this.axiomParams = axiomMatches.params;
+
         // Manually calculate axiom parameters
-        for (let i = 0; i < this.axiomParams.length; ++i) {
-            if (!this.axiomParams[i])
+        for(let i = 0; i < this.axiomParams.length; ++i)
+        {
+            if(!this.axiomParams[i])
                 continue;
+
             let params = this.parseParams(this.axiomParams[i]);
-            for (let j = 0; j < params.length; ++j)
-                params[j] = MathExpression.parse(params[j]).evaluate((v) => this.variables.get(v));
+            for(let j = 0; j < params.length; ++j)
+                params[j] = MathExpression.parse(params[j]).evaluate(
+                (v) => this.variables.get(v));
             this.axiomParams[i] = params;
             // Maybe leave them at BigNumber?
         }
+        
         let ruleMatches = [];
-        for (let i = 0; i < this.userInput.rules.length; ++i) {
+        for(let i = 0; i < this.userInput.rules.length; ++i)
+        {
             ruleMatches.push([...this.userInput.rules[i].replace(TRIM_SP, '').
-                    match(LS_RULE)]);
+            match(LS_RULE)]);
             // Indices 1, 3, 4 are context, condition, and all derivations
         }
         this.rules = new Map();
         this.models = new Map();
-        for (let i = 0; i < ruleMatches.length; ++i) {
+        for(let i = 0; i < ruleMatches.length; ++i)
+        {
             // [i][1]: context
             let contextMatch = [...ruleMatches[i][1].match(LS_CONTEXT)];
             // Indices 2, 4, 6, 8, 10, 12 are the symbols and parameters of
             // left, middle, and right respectively
-            if (!contextMatch[6])
+            if(!contextMatch[6])
                 continue;
-            let tmpRule = {};
+
+            let tmpRule: LSystemRule = {};
             let ruleParams = {};
-            if (contextMatch[8]) {
+            if(contextMatch[8])
+            {
                 let params = contextMatch[8].split(',');
-                for (let j = 0; j < params.length; ++j)
+                for(let j = 0; j < params.length; ++j)
                     ruleParams[params[j]] = ['m', j];
             }
             tmpRule.left = contextMatch[2];
-            if (tmpRule.left && contextMatch[4]) {
+            if(tmpRule.left && contextMatch[4])
+            {
                 let params = contextMatch[4].split(',');
-                for (let j = 0; j < params.length; ++j)
+                for(let j = 0; j < params.length; ++j)
                     ruleParams[params[j]] = ['l', j];
             }
             tmpRule.right = contextMatch[10];
-            if (tmpRule.right && contextMatch[12]) {
+            if(tmpRule.right && contextMatch[12])
+            {
                 let params = contextMatch[12].split(',');
-                for (let j = 0; j < params.length; ++j) {
+                for(let j = 0; j < params.length; ++j)
+                {
                     ruleParams[params[j]] = ['r', j];
                 }
             }
@@ -789,22 +1052,27 @@ class LSystem {
                 'd': ['r', 1]
             };
             */
-            tmpRule.paramMap = (v, l, m, r) => {
+            tmpRule.paramMap = (v, l, m, r) =>
+            {
                 let pos = tmpRule.params[v][0];
                 let result = null;
-                switch (pos) {
+                switch(pos)
+                {
                     case 'm':
-                        if (m) {
+                        if(m)
+                        {
                             result = m[tmpRule.params[v][1]];
                             break;
                         }
                     case 'l':
-                        if (l) {
+                        if(l)
+                        {
                             result = l[tmpRule.params[v][1]];
                             break;
                         }
                     case 'r':
-                        if (r) {
+                        if(r)
+                        {
                             result = r[tmpRule.params[v][1]];
                             break;
                         }
@@ -812,74 +1080,92 @@ class LSystem {
                 // log(`${v} = ${result}`);
                 return result;
                 // MathExpression eval: (v) => rule.paramMap(v, params[l], ...)
-            };
+            }
+
             // [i][3]: condition
-            if (ruleMatches[i][3])
+            if(ruleMatches[i][3])
                 tmpRule.condition = MathExpression.parse(ruleMatches[i][3]);
             else
                 tmpRule.condition = MathExpression.parse('1');
+
             // [i][4]: everything else
             // Doing just comma instead of semi-colon will ruin the parameters!
             let tmpRuleMatches = ruleMatches[i][4].split(';');
-            for (let j = 0; j < tmpRuleMatches.length; ++j) {
-                if (typeof tmpRuleMatches[j] === 'undefined')
+            for(let j = 0; j < tmpRuleMatches.length; ++j)
+            {
+                if(typeof tmpRuleMatches[j] === 'undefined')
                     continue;
+
                 tmpRuleMatches[j] = tmpRuleMatches[j].split(':');
                 let tmpDeriv = this.parseSequence(tmpRuleMatches[j][0]);
                 let derivParams = tmpDeriv.params;
-                for (let k = 0; k < derivParams.length; ++k) {
-                    if (!derivParams[k])
+                for(let k = 0; k < derivParams.length; ++k)
+                {
+                    if(!derivParams[k])
                         continue;
+
                     let params = this.parseParams(derivParams[k]);
-                    for (let l = 0; l < params.length; ++l)
+                    for(let l = 0; l < params.length; ++l)
                         params[l] = MathExpression.parse(params[l]);
+
                     derivParams[k] = params;
                 }
-                if (typeof tmpRule.derivations === 'string') {
+                if(typeof tmpRule.derivations === 'string')
+                {
                     tmpRule.derivations = [tmpRule.derivations,
-                        tmpDeriv.result];
+                    tmpDeriv.result];
                     tmpRule.parameters = [tmpRule.parameters, derivParams];
-                    if (tmpRuleMatches[j][1])
+                    if(tmpRuleMatches[j][1])
                         tmpRule.chances = [tmpRule.chances,
-                            MathExpression.parse(tmpRuleMatches[j][1])];
+                        MathExpression.parse(tmpRuleMatches[j][1])];
                     else
                         tmpRule.chances = [tmpRule.chances,
-                            MathExpression.parse('1')];
+                        MathExpression.parse('1')];
                 }
-                else if (!tmpRule.derivations) {
+                else if(!tmpRule.derivations)
+                {
                     tmpRule.derivations = tmpDeriv.result;
                     tmpRule.parameters = derivParams;
-                    if (tmpRuleMatches[j][1])
-                        tmpRule.chances = MathExpression.parse(tmpRuleMatches[j][1]);
+                    if(tmpRuleMatches[j][1])
+                        tmpRule.chances = MathExpression.parse(
+                        tmpRuleMatches[j][1]);
                     else
                         tmpRule.chances = MathExpression.parse('1');
                 }
-                else // Already an array
-                 {
+                else    // Already an array
+                {
                     tmpRule.derivations.push(tmpDeriv.result);
                     tmpRule.parameters.push(derivParams);
-                    if (tmpRuleMatches[j][1])
-                        tmpRule.chances.push(MathExpression.parse(tmpRuleMatches[j][1]));
+                    if(tmpRuleMatches[j][1])
+                        tmpRule.chances.push(MathExpression.parse(
+                        tmpRuleMatches[j][1]));
                     else
                         tmpRule.chances.push(MathExpression.parse('1'));
                 }
             }
+
             // Finally, push rule
-            if (contextMatch[6] == '~') {
-                if (!this.models.has(contextMatch[10]))
+            if(contextMatch[6] == '~')
+            {
+                if(!this.models.has(contextMatch[10]))
                     this.models.set(contextMatch[10], []);
                 this.models.get(contextMatch[10]).push(tmpRule);
             }
-            else {
-                if (!this.rules.has(contextMatch[6]))
+            else
+            {
+                if(!this.rules.has(contextMatch[6]))
                     this.rules.set(contextMatch[6], []);
                 this.rules.get(contextMatch[6]).push(tmpRule);
             }
         }
+
         this.ignoreList = new Set(ignoreList);
         this.ctxIgnoreList = new Set(ctxIgnoreList);
+
         this.RNG = new Xorshift(seed);
-        this.halfAngle = MathExpression.parse(turnAngle.toString()).evaluate((v) => this.variables.get(v)).toNumber() * Math.PI / 360;
+        this.halfAngle = MathExpression.parse(turnAngle.toString()).evaluate(
+        (v) => this.variables.get(v)).toNumber() * Math.PI / 360;
+
         this.rotations = new Map();
         let s = Math.sin(this.halfAngle);
         let c = Math.cos(this.halfAngle);
@@ -889,43 +1175,51 @@ class LSystem {
         this.rotations.set('^', new Quaternion(-c, 0, -s, 0));
         this.rotations.set('\\', new Quaternion(-c, s, 0, 0));
         this.rotations.set('/', new Quaternion(-c, -s, 0, 0));
-        this.tropism = MathExpression.parse(tropism.toString()).evaluate((v) => this.variables.get(v)).toNumber();
+
+        this.tropism = MathExpression.parse(tropism.toString()).evaluate(
+        (v) => this.variables.get(v)).toNumber();
     }
+
     /**
      * Parse a sequence to return one array of characters and one of parameters.
      * Is only used when initialising the L-system.
      * @param {string} sequence the sequence to be parsed.
      * @returns {object}
      */
-    parseSequence(sequence) {
+    parseSequence(sequence)
+    {
         let result = '';
         let resultParams = [];
         let bracketLvl = 0;
         let start = null;
-        for (let i = 0; i < sequence.length; ++i) {
-            switch (sequence[i]) {
+        for(let i = 0; i < sequence.length; ++i)
+        {
+            switch(sequence[i])
+            {
                 case ' ':
-                    log('Blank space detected.');
+                    log('Blank space detected.')
                     break;
                 case '(':
                     ++bracketLvl;
-                    if (bracketLvl == 1)
+                    if(bracketLvl == 1)
                         start = i + 1;
                     break;
                 case ')':
-                    if (!bracketLvl) {
+                    if(!bracketLvl)
+                    {
                         log('You\'ve clearly made a bracket error.');
                         break;
                     }
                     --bracketLvl;
-                    if (!bracketLvl)
+                    if(!bracketLvl)
                         resultParams.push(sequence.slice(start, i));
                     break;
                 default:
-                    if (bracketLvl)
+                    if(bracketLvl)
                         break;
+                    
                     result += sequence[i];
-                    if (sequence[i + 1] != '(')
+                    if(sequence[i + 1] != '(')
                         resultParams.push(null);
                     break;
             }
@@ -942,27 +1236,32 @@ class LSystem {
      * @param {string} string the string to be parsed.
      * @returns {string[]}
      */
-    parseParams(string) {
+    parseParams(string)
+    {
         let result = [];
         let bracketLvl = 0;
         let start = 0;
-        for (let i = 0; i < string.length; ++i) {
-            switch (string[i]) {
+        for(let i = 0; i < string.length; ++i)
+        {
+            switch(string[i])
+            {
                 case ' ':
-                    log('Blank space detected.');
+                    log('Blank space detected.')
                     break;
                 case '(':
                     ++bracketLvl;
                     break;
                 case ')':
-                    if (!bracketLvl) {
+                    if(!bracketLvl)
+                    {
                         log('You\'ve clearly made a bracket error.');
                         break;
                     }
                     --bracketLvl;
                     break;
                 case ',':
-                    if (!bracketLvl) {
+                    if(!bracketLvl)
+                    {
                         result.push(string.slice(start, i));
                         start = i + 1;
                     }
@@ -974,20 +1273,24 @@ class LSystem {
         result.push(string.slice(start, string.length));
         return result;
     }
+
     /**
      * Returns and ancestree and a child tree for a sequence.
      * @param {string} sequence the sequence.
      * @returns {object}
      */
-    getAncestree(sequence, task = {}) {
+    getAncestree(sequence, task: Task = {})
+    {
         // Scanning behaviour should be very similar to renderer drawing.
         let tmpStack = task.stack || [];
         let tmpIdxStack = task.idxStack || [];
         let tmpAncestors = task.ancestors || [];
         let tmpChildren = task.children || [];
         let i = task.start || 0;
-        for (; i < sequence.length; ++i) {
-            if (i - task.start > MAX_CHARS_PER_TICK) {
+        for(; i < sequence.length; ++i)
+        {
+            if(i - task.start > MAX_CHARS_PER_TICK)
+            {
                 return {
                     start: i,
                     stack: tmpStack,
@@ -996,33 +1299,39 @@ class LSystem {
                     children: tmpChildren
                 };
             }
-            switch (sequence[i]) {
+            switch(sequence[i])
+            {
                 case ' ':
-                    log('Blank space detected.');
+                    log('Blank space detected.')
                     break;
                 case '[':
                     tmpIdxStack.push(tmpStack.length);
                     break;
                 case ']':
-                    if (tmpStack.length == 0) {
+                    if(tmpStack.length == 0)
+                    {
                         log('You\'ve clearly made a bracket error.');
                         break;
                     }
-                    while (tmpStack.length > tmpIdxStack[tmpIdxStack.length - 1])
+                    while(tmpStack.length > tmpIdxStack[tmpIdxStack.length - 1])
                         tmpStack.pop();
+
                     tmpIdxStack.pop();
                     break;
                 default:
                     let ignored = this.ctxIgnoreList.has(sequence[i]);
-                    if (ignored)
+                    if(ignored)
                         break;
-                    if (tmpStack.length > 0) {
+                    
+                    if(tmpStack.length > 0)
+                    {
                         let ancIdx = tmpStack[tmpStack.length - 1];
                         tmpAncestors[i] = ancIdx;
-                        if (typeof tmpChildren[ancIdx] === 'undefined')
+                        if(typeof tmpChildren[ancIdx] === 'undefined')
                             tmpChildren[ancIdx] = [];
                         tmpChildren[ancIdx].push(i);
                     }
+
                     tmpStack.push(i);
                     break;
             }
@@ -1035,6 +1344,7 @@ class LSystem {
             children: tmpChildren
         };
     }
+
     /**
      * Derive a sequence from the input string. `next` denotes the starting
      * position to be derived next tick. `result` contains the work completed
@@ -1042,13 +1352,16 @@ class LSystem {
      * @param {string} sequence the input string.
      * @returns {{start: number, result: string}}
      */
-    derive(sequence, seqParams, ancestors, children, task = {}) {
+    derive(sequence, seqParams, ancestors, children, task: Task = {})
+    {
         let result = task.derivation || '';
         let resultParams = task.parameters || [];
         let i = task.start || 0;
         let charCount = 0;
-        for (; i < sequence.length; ++i) {
-            if (charCount > MAX_CHARS_PER_TICK) {
+        for(; i < sequence.length; ++i)
+        {
+            if(charCount > MAX_CHARS_PER_TICK)
+            {
                 return {
                     start: i,
                     charCount: charCount,
@@ -1056,10 +1369,13 @@ class LSystem {
                     parameters: resultParams
                 };
             }
-            if (sequence[i] == '%') {
+            if(sequence[i] == '%')
+            {
                 let branchLvl = 0;
-                for (; i < sequence.length; ++i) {
-                    switch (sequence[i]) {
+                for(; i < sequence.length; ++i)
+                {
+                    switch(sequence[i])
+                    {
                         case '[':
                             ++branchLvl;
                             break;
@@ -1067,10 +1383,11 @@ class LSystem {
                             --branchLvl;
                             break;
                     }
-                    if (branchLvl < 0)
+                    if(branchLvl < 0)
                         break;
                 }
-                if (sequence[i] == ']') {
+                if(sequence[i] == ']')
+                {
                     result += sequence[i];
                     ++charCount;
                     resultParams.push(null);
@@ -1078,48 +1395,68 @@ class LSystem {
                 else
                     continue;
             }
-            else if (sequence[i] == '~')
+            else if(sequence[i] == '~')
                 continue;
-            else if (this.rules.has(sequence[i])) {
+            else if(this.rules.has(sequence[i]))
+            {
                 let tmpRules = this.rules.get(sequence[i]);
                 let ruleChoice = -1;
-                for (let j = 0; j < tmpRules.length; ++j) {
+                for(let j = 0; j < tmpRules.length; ++j)
+                {
                     // Left and right first
-                    if (tmpRules[j].left && tmpRules[j].left !=
-                        sequence[ancestors[i]])
+                    if(tmpRules[j].left && tmpRules[j].left !=
+                    sequence[ancestors[i]])
                         continue;
+
                     let right = -1;
-                    if (tmpRules[j].right) {
-                        if (children[i]) {
-                            for (let k = 0; k < children[i].length; ++k) {
-                                if (tmpRules[j].right == sequence[children[i][k]]) {
+                    if(tmpRules[j].right)
+                    {
+                        if(children[i])
+                        {
+                            for(let k = 0; k < children[i].length; ++k)
+                            {
+                                if(tmpRules[j].right == sequence[children[i][
+                                k]])
+                                {
                                     right = children[i][k];
                                     break;
                                 }
                             }
                         }
-                        if (right == -1)
+                        if(right == -1)
                             continue;
                     }
+
                     let tmpParamMap = (v) => this.variables.get(v) ||
-                        tmpRules[j].paramMap(v, seqParams[ancestors[i]], seqParams[i], seqParams[right]);
+                    tmpRules[j].paramMap(v, seqParams[ancestors[i]],
+                    seqParams[i], seqParams[right]);
                     // Next up is the condition
-                    if (tmpRules[j].condition.evaluate(tmpParamMap) ==
-                        BigNumber.ZERO)
+                    if(tmpRules[j].condition.evaluate(tmpParamMap) ==
+                    BigNumber.ZERO)
                         continue;
-                    if (typeof tmpRules[j].derivations === 'string') {
+
+                    if(typeof tmpRules[j].derivations === 'string')
+                    {
                         result += tmpRules[j].derivations;
                         charCount += tmpRules[j].derivations.length;
-                        if (tmpRules[j].parameters) {
-                            for (let k = 0; k < tmpRules[j].parameters.length; ++k) {
+                        if(tmpRules[j].parameters)
+                        {
+                            for(let k = 0; k < tmpRules[j].parameters.length;
+                            ++k)
+                            {
                                 let derivPi = null;
-                                if (tmpRules[j].parameters[k]) {
-                                    for (let l = 0; l < tmpRules[j].parameters[k].length; ++l) {
-                                        if (tmpRules[j].parameters[k][l]) {
-                                            if (!derivPi)
+                                if(tmpRules[j].parameters[k])
+                                {
+                                    for(let l = 0; l < tmpRules[j].parameters[
+                                    k].length; ++l)
+                                    {
+                                        if(tmpRules[j].parameters[k][l])
+                                        {
+                                            if(!derivPi)
                                                 derivPi = [];
                                             derivPi.push(tmpRules[j].
-                                                parameters[k][l].evaluate(tmpParamMap));
+                                            parameters[k][l].evaluate(
+                                            tmpParamMap));
                                         }
                                     }
                                 }
@@ -1129,38 +1466,45 @@ class LSystem {
                         ruleChoice = j;
                         break;
                     }
-                    else // Stochastic time
-                     {
+                    else    // Stochastic time
+                    {
                         let roll = this.RNG.nextFloat;
                         let chanceSum = 0;
                         let choice = -1;
-                        for (let k = 0; k < tmpRules[j].derivations.length; ++k) {
+                        for(let k = 0; k < tmpRules[j].derivations.length; ++k)
+                        {
                             // Example
                             // roll: 0.50
                             // chance 1: 0.00 - 0.49
                             // sum after 1: 0.50
                             // chance 2: 0.50 - 0.99
                             // sum after 2: 1 (select!)
-                            chanceSum += tmpRules[j].chances[k].evaluate(tmpParamMap);
-                            if (chanceSum > roll) // select this
-                             {
+                            chanceSum += tmpRules[j].chances[k].evaluate(
+                            tmpParamMap);
+                            if(chanceSum > roll)    // select this
+                            {
                                 choice = k;
                                 result += tmpRules[j].derivations[k];
                                 charCount += tmpRules[j].derivations[k].length;
-                                if (tmpRules[j].parameters[k]) {
-                                    for (let l = 0; l < tmpRules[j].
-                                        parameters[k].length; ++l) {
+                                if(tmpRules[j].parameters[k])
+                                {
+                                    for(let l = 0; l < tmpRules[j].
+                                    parameters[k].length; ++l)
+                                    {
                                         let derivPi = null;
-                                        if (tmpRules[j].parameters[k][l]) {
-                                            for (let m = 0; m < tmpRules[j].
-                                                parameters[k][l].length; ++m) {
-                                                if (tmpRules[j].
-                                                    parameters[k][l][m]) {
-                                                    if (!derivPi)
+                                        if(tmpRules[j].parameters[k][l])
+                                        {
+                                            for(let m = 0; m < tmpRules[j].
+                                            parameters[k][l].length; ++m)
+                                            {
+                                                if(tmpRules[j].
+                                                parameters[k][l][m])
+                                                {
+                                                    if(!derivPi)
                                                         derivPi = [];
                                                     derivPi.push(tmpRules[j].
-                                                        parameters[k][l][m].
-                                                        evaluate(tmpParamMap));
+                                                    parameters[k][l][m].
+                                                    evaluate(tmpParamMap));
                                                 }
                                             }
                                         }
@@ -1171,19 +1515,21 @@ class LSystem {
                             }
                         }
                         // log(`roll = ${roll} choice = ${choice}`)
-                        if (choice == -1)
+                        if(choice == -1)
                             continue;
                         ruleChoice = j;
                         break;
                     }
                 }
-                if (ruleChoice == -1) {
+                if(ruleChoice == -1)
+                {
                     result += sequence[i];
                     ++charCount;
                     resultParams.push(...[seqParams[i]]);
                 }
             }
-            else {
+            else
+            {
                 result += sequence[i];
                 ++charCount;
                 resultParams.push(...[seqParams[i]]);
@@ -1196,30 +1542,43 @@ class LSystem {
             parameters: resultParams
         };
     }
-    deriveModel(symbol, params) {
+
+    deriveModel(symbol, params)
+    {
         let result = '';
         let resultParams = [];
-        if (this.models.has(symbol)) {
+        if(this.models.has(symbol))
+        {
             let tmpRules = this.models.get(symbol);
-            for (let j = 0; j < tmpRules.length; ++j) {
+            for(let j = 0; j < tmpRules.length; ++j)
+            {
                 let tmpParamMap = (v) => this.variables.get(v) ||
-                    tmpRules[j].paramMap(v, null, null, params);
+                tmpRules[j].paramMap(v, null, null, params);
                 // Next up is the condition
-                if (tmpRules[j].condition.evaluate(tmpParamMap) ==
-                    BigNumber.ZERO)
+                if(tmpRules[j].condition.evaluate(tmpParamMap) ==
+                BigNumber.ZERO)
                     continue;
-                if (typeof tmpRules[j].derivations === 'string') {
-                    result = tmpRules[j].derivations;
-                    if (tmpRules[j].parameters) {
-                        for (let k = 0; k < tmpRules[j].parameters.length; ++k) {
+
+                if(typeof tmpRules[j].derivations === 'string')
+                {
+                    result = <string>tmpRules[j].derivations;
+                    if(tmpRules[j].parameters)
+                    {
+                        for(let k = 0; k < tmpRules[j].parameters.length;
+                        ++k)
+                        {
                             let derivPi = null;
-                            if (tmpRules[j].parameters[k]) {
-                                for (let l = 0; l < tmpRules[j].parameters[k].
-                                    length; ++l) {
-                                    if (tmpRules[j].parameters[k][l]) {
-                                        if (!derivPi)
+                            if(tmpRules[j].parameters[k])
+                            {
+                                for(let l = 0; l < tmpRules[j].parameters[k].
+                                length; ++l)
+                                {
+                                    if(tmpRules[j].parameters[k][l])
+                                    {
+                                        if(!derivPi)
                                             derivPi = [];
-                                        derivPi.push(tmpRules[j].parameters[k][l].evaluate(tmpParamMap));
+                                        derivPi.push(tmpRules[j].parameters[k][
+                                        l].evaluate(tmpParamMap));
                                     }
                                 }
                             }
@@ -1228,39 +1587,46 @@ class LSystem {
                     }
                     break;
                 }
-                else // Stochastic time
-                 {
+                else    // Stochastic time
+                {
                     // Models can be drawn any time, thus, the RNG should be
                     // separate from actual rule processing.
                     let roll = globalRNG.nextFloat;
                     let chanceSum = 0;
                     let choice = -1;
-                    for (let k = 0; k < tmpRules[j].derivations.length; ++k) {
+                    for(let k = 0; k < tmpRules[j].derivations.length; ++k)
+                    {
                         // Example
                         // roll: 0.50
                         // chance 1: 0.00 - 0.49
                         // sum after 1: 0.50
                         // chance 2: 0.50 - 0.99
                         // sum after 2: 1 (select!)
-                        chanceSum += tmpRules[j].chances[k].evaluate(tmpParamMap);
-                        if (chanceSum > roll) // select this
-                         {
+                        chanceSum += tmpRules[j].chances[k].evaluate(
+                        tmpParamMap);
+                        if(chanceSum > roll)    // select this
+                        {
                             choice = k;
                             result = tmpRules[j].derivations[k];
-                            if (tmpRules[j].parameters[k]) {
-                                for (let l = 0; l < tmpRules[j].
-                                    parameters[k].length; ++l) {
+                            if(tmpRules[j].parameters[k])
+                            {
+                                for(let l = 0; l < tmpRules[j].
+                                parameters[k].length; ++l)
+                                {
                                     let derivPi = null;
-                                    if (tmpRules[j].parameters[k][l]) {
-                                        for (let m = 0; m < tmpRules[j].
-                                            parameters[k][l].length; ++m) {
-                                            if (tmpRules[j].
-                                                parameters[k][l][m]) {
-                                                if (!derivPi)
+                                    if(tmpRules[j].parameters[k][l])
+                                    {
+                                        for(let m = 0; m < tmpRules[j].
+                                        parameters[k][l].length; ++m)
+                                        {
+                                            if(tmpRules[j].
+                                            parameters[k][l][m])
+                                            {
+                                                if(!derivPi)
                                                     derivPi = [];
                                                 derivPi.push(tmpRules[j].
-                                                    parameters[k][l][m].
-                                                    evaluate(tmpParamMap));
+                                                parameters[k][l][m].
+                                                evaluate(tmpParamMap));
                                             }
                                         }
                                     }
@@ -1271,7 +1637,7 @@ class LSystem {
                         }
                     }
                     // log(`roll = ${roll} choice = ${choice}`)
-                    if (choice == -1)
+                    if(choice == -1)
                         continue;
                     break;
                 }
@@ -1282,6 +1648,7 @@ class LSystem {
             params: resultParams
         };
     }
+
     /**
      * Reconstructs the string representation of a sequence.
      * @param {string} sequence the sequence.
@@ -1290,8 +1657,10 @@ class LSystem {
      * @param {{start: number, result: string}} task the current task.
      * @returns {{start: number, result: string}}
      */
-    reconstruct(sequence, params = null, filter = '', task = {}) {
-        if (!params && !filter) {
+    reconstruct(sequence, params = null, filter = '', task: Task = {})
+    {
+        if(!params && !filter)
+        {
             return {
                 start: 0,
                 result: sequence
@@ -1300,16 +1669,19 @@ class LSystem {
         let filterSet = new Set(filter);
         let result = task.result || '';
         let i = task.start || 0;
-        for (; i < sequence.length; ++i) {
-            if ((i - task.start) * (task.start + 1) > MAX_CHARS_PER_TICK) {
+        for(; i < sequence.length; ++i)
+        {
+            if((i - task.start) * (task.start + 1) > MAX_CHARS_PER_TICK)
+            {
                 return {
                     start: i,
                     result: result
-                };
+                }
             }
-            if (!filter || filterSet.has(sequence[i])) {
+            if(!filter || filterSet.has(sequence[i]))
+            {
                 result += sequence[i];
-                if (params && params[i])
+                if(params && params[i])
                     result += `(${params[i].join(', ')})`;
                 // result += '\n';
             }
@@ -1324,12 +1696,15 @@ class LSystem {
      * @param {string[]} rules rules.
      * @returns {string[]}
      */
-    purgeEmpty(rules) {
+    purgeEmpty(rules)
+    {
         let result = [];
         let idx = 0;
-        for (let i = 0; i < rules.length; ++i) {
+        for(let i = 0; i < rules.length; ++i)
+        {
             // I hope this deep-copies
-            if (rules[i]) {
+            if(rules[i])
+            {
                 result[idx] = rules[i];
                 ++idx;
             }
@@ -1349,7 +1724,8 @@ class LSystem {
      *  variables: object
      * }}
      */
-    get object() {
+    get object()
+    {
         return {
             axiom: this.userInput.axiom,
             rules: this.purgeEmpty(this.userInput.rules),
@@ -1365,22 +1741,81 @@ class LSystem {
      * Returns the system's string representation.
      * @returns {string}
      */
-    toString() {
+    toString()
+    {
         return JSON.stringify(this.object, null, 4);
     }
 }
+
+interface RendererCamera
+{
+    scale?: number;
+    mode?: number;
+    followFactor?: number;
+    x?: number;
+    y?: number;
+    z?: number;
+    upright?: boolean
+}
+
+interface RendererStroke
+{
+    tickLength?: number;
+    initDelay?: number;
+    loadModels?: boolean;
+    quickDraw?: boolean;
+    quickBacktrack?: boolean;
+    backtrackTail?: boolean;
+    hesitateApex?: boolean;
+    hesitateFork?: boolean
+}
+
 /**
  * Mini-renderer!
  */
-class Renderer {
-    constructor(system, sequence, params, camera = {}, stroke = {}) {
+class Renderer
+{
+    figureScale: number;
+    cameraMode: number;
+    followFactor: number;
+    camCentre: Vector3;
+    upright: boolean;
+    lastCamera: Vector3;
+    lastCamVel: Vector3;
+    tickLength: number;
+    initDelay: number;
+    loadModels: boolean;
+    quickDraw: boolean;
+    quickBacktrack: boolean;
+    backtrackTail: boolean;
+    hesitateApex: boolean;
+    hesitateFork: boolean;
+    system: LSystem;
+    sequence: string;
+    params: Array<null | BigNumber[]>;
+    state: Vector3;
+    ori: Vector3;
+    stack: Array<[Vector3, Vector3]>;
+    idxStack: number[];
+    models: string[];
+    mdi: number[];
+    modelParams: Array<Array<null | BigNumber[]>>;
+    i: number;
+    elapsed: number;
+    cooldown: number;
+    polygonMode: number;
+    constructor(system, sequence, params, camera: RendererCamera = {},
+    stroke: RendererStroke = {})
+    {
         this.figureScale = camera.scale || 1;
         this.cameraMode = camera.mode || 0;
         this.followFactor = camera.followFactor || 0.15;
-        this.camCentre = new Vector3(camera.x || 0, camera.y || 0, camera.z || 0);
+        this.camCentre = new Vector3(camera.x || 0, camera.y || 0,
+        camera.z || 0);
         this.upright = camera.upright || false;
         this.lastCamera = new Vector3(0, 0, 0);
         this.lastCamVel = new Vector3(0, 0, 0);
+
         this.tickLength = stroke.tickLength || 1;
         this.initDelay = stroke.initDelay || 0;
         // Loop mode is always 0
@@ -1391,6 +1826,7 @@ class Renderer {
         this.backtrackTail = stroke.backtrackTail || true;
         this.hesitateApex = stroke.hesitateApex || true;
         this.hesitateFork = stroke.hesitateFork || true;
+
         this.system = system;
         this.sequence = sequence;
         this.params = params;
@@ -1406,11 +1842,13 @@ class Renderer {
         this.cooldown = 1;
         this.polygonMode = 0;
     }
+
     /**
      * Resets the renderer.
      * @param {boolean} clearGraph whether to clear the graph.
      */
-    reset(clearGraph = true) {
+    reset(clearGraph = true)
+    {
         this.state = new Vector3(0, 0, 0);
         this.ori = this.upright ? uprightQuat : new Quaternion();
         this.stack = [];
@@ -1422,7 +1860,8 @@ class Renderer {
         this.cooldown = 1;
         this.polygonMode = 0;
         this.elapsed = -this.initDelay;
-        if (clearGraph) {
+        if(clearGraph)
+        {
             theory.clearGraph();
         }
     }
@@ -1430,20 +1869,28 @@ class Renderer {
      * Configures the colony.
      * @param {object} colony hmm.
      */
-    set colony(colony) {
-        if (!colony) {
+    set colony(colony)
+    {
+        if(!colony)
+        {
             this.configure('', []);
             return;
         }
         this.system = PLANT_DATA[colony.id].system;
-        this.configure(colony.sequence, colony.params, PLANT_DATA[colony.id].camera(colony.stage), PLANT_DATA[colony.id].stroke(colony.stage));
+        this.configure(colony.sequence, colony.params,
+        PLANT_DATA[colony.id].camera(colony.stage),
+        PLANT_DATA[colony.id].stroke(colony.stage));
     }
-    configure(sequence, params, camera = {}, stroke = {}) {
+    configure(sequence, params, camera: RendererCamera = {},
+    stroke: RendererStroke = {})
+    {
         this.figureScale = camera.scale || 1;
         this.cameraMode = camera.mode || 0;
         this.followFactor = camera.followFactor || 0.15;
-        this.camCentre = new Vector3(camera.x || 0, camera.y || 0, camera.z || 0);
+        this.camCentre = new Vector3(camera.x || 0, camera.y || 0,
+        camera.z || 0);
         this.upright = camera.upright || false;
+
         this.tickLength = stroke.tickLength || 1;
         this.initDelay = stroke.initDelay || 0;
         // Loop mode is always 0
@@ -1454,80 +1901,124 @@ class Renderer {
         this.backtrackTail = stroke.backtrackTail || true;
         this.hesitateApex = stroke.hesitateApex || true;
         this.hesitateFork = stroke.hesitateFork || true;
+        
         this.sequence = sequence;
         this.params = params;
+
         this.reset(!graphMode2D);
     }
     /**
      * Moves the cursor forward.
      */
-    forward(distance = 1) {
+    forward(distance = 1)
+    {
         this.state += this.ori.headingVector * distance;
     }
     /**
      * Ticks the clock.
      */
-    tick() {
-        if (this.sequence.length)
+    tick()
+    {
+        if(this.sequence.length)
             ++this.elapsed;
     }
     /**
      * Computes the next cursor position internally.
      */
-    draw() {
+    draw()
+    {
         this.tick();
-        if (this.elapsed % this.tickLength) // Only update on multiples
+        if(this.elapsed % this.tickLength)  // Only update on multiples
             return;
+
         let j, t, moved;
-        let loopLimit = 2; // Shenanigans may arise with models? Try this
-        for (j = 0; j < loopLimit; ++j) {
-            if (this.cooldown > 0 && this.polygonMode <= 0) {
+        let loopLimit = 2;  // Shenanigans may arise with models? Try this
+        for(j = 0; j < loopLimit; ++j)
+        {
+            if(this.cooldown > 0 && this.polygonMode <= 0)
+            {
                 --this.cooldown;
                 return;
             }
-            if (this.models.length > 0) {
+
+            if(this.models.length > 0)
+            {
                 // Unreadable pile of shit
-                for (; this.mdi[this.mdi.length - 1] <
-                    this.models[this.models.length - 1].length; ++this.mdi[this.mdi.length - 1]) {
-                    switch (this.models[this.models.length - 1][this.mdi[this.mdi.length - 1]]) {
+                for(; this.mdi[this.mdi.length - 1] <
+                this.models[this.models.length - 1].length;
+                ++this.mdi[this.mdi.length - 1])
+                {
+                    switch(this.models[this.models.length - 1][
+                    this.mdi[this.mdi.length - 1]])
+                    {
                         case ' ':
-                            log('Blank space detected.');
+                            log('Blank space detected.')
                             break;
                         case '+':
-                            if (this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]])
-                                this.ori = this.ori.rotate(this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]][0].toNumber(), '+');
+                            if(this.modelParams[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]])
+                                this.ori = this.ori.rotate(this.modelParams[
+                                this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]][0].toNumber(),
+                                '+');
                             else
-                                this.ori = this.system.rotations.get('+').mul(this.ori);
+                                this.ori = this.system.rotations.get('+').mul(
+                                this.ori);
                             break;
                         case '-':
-                            if (this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]])
-                                this.ori = this.ori.rotate(this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]][0].toNumber(), '-');
+                            if(this.modelParams[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]])
+                                this.ori = this.ori.rotate(this.modelParams[
+                                this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]][0].toNumber(),
+                                '-');
                             else
-                                this.ori = this.system.rotations.get('-').mul(this.ori);
+                                this.ori = this.system.rotations.get('-').mul(
+                                this.ori);
                             break;
                         case '&':
-                            if (this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]])
-                                this.ori = this.ori.rotate(this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]][0].toNumber(), '&');
+                            if(this.modelParams[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]])
+                                this.ori = this.ori.rotate(this.modelParams[
+                                this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]][0].toNumber(),
+                                '&');
                             else
-                                this.ori = this.system.rotations.get('&').mul(this.ori);
+                                this.ori = this.system.rotations.get('&').mul(
+                                this.ori);
                             break;
                         case '^':
-                            if (this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]])
-                                this.ori = this.ori.rotate(this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]][0].toNumber(), '^');
+                            if(this.modelParams[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]])
+                                this.ori = this.ori.rotate(this.modelParams[
+                                this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]][0].toNumber(),
+                                '^');
                             else
-                                this.ori = this.system.rotations.get('^').mul(this.ori);
+                                this.ori = this.system.rotations.get('^').mul(
+                                this.ori);
                             break;
                         case '\\':
-                            if (this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]])
-                                this.ori = this.ori.rotate(this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]][0].toNumber(), '\\');
+                            if(this.modelParams[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]])
+                                this.ori = this.ori.rotate(this.modelParams[
+                                this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]][0].toNumber(),
+                                '\\');
                             else
-                                this.ori = this.system.rotations.get('\\').mul(this.ori);
+                                this.ori = this.system.rotations.get('\\').mul(
+                                this.ori);
                             break;
                         case '/':
-                            if (this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]])
-                                this.ori = this.ori.rotate(this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]][0].toNumber(), '/');
+                            if(this.modelParams[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]])
+                                this.ori = this.ori.rotate(this.modelParams[
+                                this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]][0].toNumber(),
+                                '/');
                             else
-                                this.ori = this.system.rotations.get('/').mul(this.ori);
+                                this.ori = this.system.rotations.get('/').mul(
+                                this.ori);
                             break;
                         case '|':
                             this.ori = zUpQuat.mul(this.ori);
@@ -1536,15 +2027,23 @@ class Renderer {
                             this.ori = this.ori.alignToVertical();
                             break;
                         case 'T':
-                            let args = this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]];
-                            if (args) {
-                                if (args.length >= 4)
-                                    this.ori = this.ori.applyTropism(args[0].toNumber(), args[1].toNumber(), args[2].toNumber(), args[3].toNumber());
+                            let args = this.modelParams[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]];
+                            if(args)
+                            {
+                                if(args.length >= 4)
+                                    this.ori = this.ori.applyTropism(
+                                    args[0].toNumber(),
+                                    args[1].toNumber(),
+                                    args[2].toNumber(),
+                                    args[3].toNumber());
                                 else
-                                    this.ori = this.ori.applyTropism(args[0].toNumber());
+                                    this.ori = this.ori.applyTropism(
+                                    args[0].toNumber());
                             }
                             else
-                                this.ori = this.ori.applyTropism(this.system.tropism);
+                                this.ori = this.ori.applyTropism(
+                                this.system.tropism);
                             break;
                         case '~':
                             break;
@@ -1553,94 +2052,134 @@ class Renderer {
                             this.stack.push([this.state, this.ori]);
                             break;
                         case ']':
-                            if (this.cooldown > 0 && this.polygonMode <= 0) {
+                            if(this.cooldown > 0 && this.polygonMode <= 0)
+                            {
                                 --this.cooldown;
                                 return;
                             }
-                            if (this.stack.length == 0) {
+
+                            if(this.stack.length == 0)
+                            {
                                 log('You\'ve clearly made a bracket error.');
                                 break;
                             }
+
                             moved = this.state !==
-                                this.stack[this.stack.length - 1][0];
+                            this.stack[this.stack.length - 1][0];
+
                             t = this.stack.pop();
                             this.state = t[0];
                             this.ori = t[1];
-                            if (this.stack.length ==
-                                this.idxStack[this.idxStack.length - 1]) {
+                            if(this.stack.length ==
+                            this.idxStack[this.idxStack.length - 1])
+                            {
                                 this.idxStack.pop();
-                                if (moved)
+                                if(moved)
                                     this.cooldown = 1;
-                                if (this.hesitateFork && this.polygonMode <= 0) {
+                                if(this.hesitateFork && this.polygonMode <= 0)
+                                {
                                     ++this.mdi[this.mdi.length - 1];
                                     return;
                                 }
-                                else {
+                                else
+                                {
                                     break;
                                 }
                             }
-                            if (this.polygonMode <= 0)
+                            if(this.polygonMode <= 0)
                                 return;
-                            else {
+                            else
+                            {
                                 --this.mdi[this.mdi.length - 1];
                                 break;
                             }
                         case '%':
                             // Nothing to do here
                             break;
-                        case '{':
+                        case '{':        
                             ++this.polygonMode;
                             break;
                         case '}':
                             --this.polygonMode;
                             break;
                         case '.':
-                            if (this.polygonMode <= 0)
+                            if(this.polygonMode <= 0)
                                 log('You cannot register a vertex outside of ' +
-                                    'polygon drawing.');
+                                'polygon drawing.');
                             else
                                 ++this.mdi[this.mdi.length - 1];
                             return;
                         default:
-                            if (this.cooldown > 0 && this.polygonMode <= 0) {
+                            if(this.cooldown > 0 && this.polygonMode <= 0)
+                            {
                                 --this.cooldown;
                                 return;
                             }
-                            if (this.loadModels && this.system.models.has(this.models[this.models.length - 1][this.mdi[this.mdi.length - 1]])) {
-                                let model = this.system.deriveModel(this.models[this.models.length - 1][this.mdi[this.mdi.length - 1]], this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]]);
+
+                            if(this.loadModels && this.system.models.has(
+                            this.models[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]]))
+                            {
+                                let model = this.system.deriveModel(this.models[
+                                this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]],
+                                this.modelParams[this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]]);
+
                                 this.models.push(model.result);
                                 this.modelParams.push(model.params);
                                 this.mdi.push(0);
                                 ++this.mdi[this.mdi.length - 2];
                                 return;
                             }
-                            let ignored = this.system.ignoreList.has(this.models[this.models.length - 1][this.mdi[this.mdi.length - 1]]);
-                            let breakAhead = BACKTRACK_LIST.has(this.models[this.models.length - 1][this.mdi[this.mdi.length - 1] + 1]);
-                            let btAhead = this.models[this.models.length - 1][this.mdi[this.mdi.length - 1] + 1] == ']' ||
-                                this.mdi[this.mdi.length - 1] ==
-                                    this.models[this.models.length - 1].length - 1;
-                            if (this.hesitateApex && btAhead)
+
+                            let ignored = this.system.ignoreList.has(
+                            this.models[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1]]);
+                            let breakAhead = BACKTRACK_LIST.has(
+                            this.models[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1] + 1]);
+                            let btAhead = this.models[this.models.length - 1][
+                            this.mdi[this.mdi.length - 1] + 1] == ']' ||
+                            this.mdi[this.mdi.length - 1] ==
+                            this.models[this.models.length - 1].length - 1;
+
+                            if(this.hesitateApex && btAhead)
                                 this.cooldown = 1;
-                            if (this.quickDraw && breakAhead)
+
+                            if(this.quickDraw && breakAhead)
                                 this.cooldown = 1;
+
                             moved = this.stack.length == 0 ||
-                                (this.stack.length > 0 && this.state !==
-                                    this.stack[this.stack.length - 1][0]);
-                            if (!this.quickBacktrack && moved && !ignored)
+                            (this.stack.length > 0 && this.state !==
+                            this.stack[this.stack.length - 1][0]);
+
+                            if(!this.quickBacktrack && moved && !ignored)
                                 this.stack.push([this.state, this.ori]);
-                            if (!ignored) {
-                                if (this.models[this.models.length - 1][this.mdi[this.mdi.length - 1]] == 'F' &&
-                                    this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]]) {
-                                    this.forward(this.modelParams[this.models.length - 1][this.mdi[this.mdi.length - 1]][0].toNumber());
+
+                            if(!ignored)
+                            {
+                                if(this.models[this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]] == 'F' &&
+                                this.modelParams[this.models.length - 1][
+                                this.mdi[this.mdi.length - 1]])
+                                {
+                                    this.forward(this.modelParams[
+                                    this.models.length - 1][
+                                    this.mdi[this.mdi.length - 1]][
+                                    0].toNumber());
                                 }
                                 else
                                     this.forward();
                             }
-                            if (this.quickBacktrack && breakAhead)
+
+                            if(this.quickBacktrack && breakAhead)
                                 this.stack.push([this.state, this.ori]);
-                            if (this.quickDraw && !btAhead)
+                            
+                            if(this.quickDraw && !btAhead)
                                 break;
-                            else if (this.polygonMode <= 0 && !ignored) {
+                            else if(this.polygonMode <= 0  && !ignored)
+                            {
                                 ++this.mdi[this.mdi.length - 1];
                                 return;
                             }
@@ -1655,48 +2194,62 @@ class Renderer {
                 // continue prevents the regular loop from running
                 continue;
             }
-            for (; this.i < this.sequence.length; ++this.i) {
+            for(; this.i < this.sequence.length; ++this.i)
+            {
                 // if(this.models.length > 0)
                 //     break;
-                switch (this.sequence[this.i]) {
+                switch(this.sequence[this.i])
+                {
                     case ' ':
-                        log('Blank space detected.');
+                        log('Blank space detected.')
                         break;
                     case '+':
-                        if (this.params[this.i])
-                            this.ori = this.ori.rotate(this.params[this.i][0].toNumber(), '+');
+                        if(this.params[this.i])
+                            this.ori = this.ori.rotate(this.params[
+                            this.i][0].toNumber(), '+');
                         else
-                            this.ori = this.system.rotations.get('+').mul(this.ori);
+                            this.ori = this.system.rotations.get('+').mul(
+                            this.ori);
                         break;
                     case '-':
-                        if (this.params[this.i])
-                            this.ori = this.ori.rotate(this.params[this.i][0].toNumber(), '-');
+                        if(this.params[this.i])
+                            this.ori = this.ori.rotate(this.params[
+                            this.i][0].toNumber(), '-');
                         else
-                            this.ori = this.system.rotations.get('-').mul(this.ori);
+                            this.ori = this.system.rotations.get('-').mul(
+                            this.ori);
                         break;
                     case '&':
-                        if (this.params[this.i])
-                            this.ori = this.ori.rotate(this.params[this.i][0].toNumber(), '&');
+                        if(this.params[this.i])
+                            this.ori = this.ori.rotate(this.params[
+                            this.i][0].toNumber(), '&');
                         else
-                            this.ori = this.system.rotations.get('&').mul(this.ori);
+                            this.ori = this.system.rotations.get('&').mul(
+                            this.ori);
                         break;
                     case '^':
-                        if (this.params[this.i])
-                            this.ori = this.ori.rotate(this.params[this.i][0].toNumber(), '^');
+                        if(this.params[this.i])
+                            this.ori = this.ori.rotate(this.params[
+                            this.i][0].toNumber(), '^');
                         else
-                            this.ori = this.system.rotations.get('^').mul(this.ori);
+                            this.ori = this.system.rotations.get('^').mul(
+                            this.ori);
                         break;
                     case '\\':
-                        if (this.params[this.i])
-                            this.ori = this.ori.rotate(this.params[this.i][0].toNumber(), '\\');
+                        if(this.params[this.i])
+                            this.ori = this.ori.rotate(this.params[
+                            this.i][0].toNumber(), '\\');
                         else
-                            this.ori = this.system.rotations.get('\\').mul(this.ori);
+                            this.ori = this.system.rotations.get('\\').mul(
+                            this.ori);
                         break;
                     case '/':
-                        if (this.params[this.i])
-                            this.ori = this.ori.rotate(this.params[this.i][0].toNumber(), '/');
+                        if(this.params[this.i])
+                            this.ori = this.ori.rotate(this.params[
+                            this.i][0].toNumber(), '/');
                         else
-                            this.ori = this.system.rotations.get('/').mul(this.ori);
+                            this.ori = this.system.rotations.get('/').mul(
+                            this.ori);
                         break;
                     case '|':
                         this.ori = zUpQuat.mul(this.ori);
@@ -1706,14 +2259,21 @@ class Renderer {
                         break;
                     case 'T':
                         let args = this.params[this.i];
-                        if (args) {
-                            if (args.length >= 4)
-                                this.ori = this.ori.applyTropism(args[0].toNumber(), args[1].toNumber(), args[2].toNumber(), args[3].toNumber());
+                        if(args)
+                        {
+                            if(args.length >= 4)
+                                this.ori = this.ori.applyTropism(
+                                args[0].toNumber(),
+                                args[1].toNumber(),
+                                args[2].toNumber(),
+                                args[3].toNumber());
                             else
-                                this.ori = this.ori.applyTropism(args[0].toNumber());
+                                this.ori = this.ori.applyTropism(
+                                args[0].toNumber());
                         }
                         else
-                            this.ori = this.ori.applyTropism(this.system.tropism);
+                            this.ori = this.ori.applyTropism(
+                            this.system.tropism);
                         break;
                     case '~':
                         break;
@@ -1722,93 +2282,121 @@ class Renderer {
                         this.stack.push([this.state, this.ori]);
                         break;
                     case ']':
-                        if (this.cooldown > 0 && this.polygonMode <= 0) {
+                        if(this.cooldown > 0 && this.polygonMode <= 0)
+                        {
                             --this.cooldown;
                             return;
                         }
-                        if (this.stack.length == 0) {
+
+                        if(this.stack.length == 0)
+                        {
                             log('You\'ve clearly made a bracket error.');
                             break;
                         }
+
                         moved = this.state !==
-                            this.stack[this.stack.length - 1][0];
+                        this.stack[this.stack.length - 1][0];
+
                         t = this.stack.pop();
                         this.state = t[0];
                         this.ori = t[1];
-                        if (this.stack.length ==
-                            this.idxStack[this.idxStack.length - 1]) {
+                        if(this.stack.length ==
+                        this.idxStack[this.idxStack.length - 1])
+                        {
                             this.idxStack.pop();
-                            if (moved)
+                            if(moved)
                                 this.cooldown = 1;
-                            if (this.hesitateFork && this.polygonMode <= 0) {
+                            if(this.hesitateFork && this.polygonMode <= 0)
+                            {
                                 ++this.i;
                                 return;
                             }
-                            else {
+                            else
+                            {
                                 break;
                             }
                         }
-                        if (this.polygonMode <= 0)
+                        if(this.polygonMode <= 0)
                             return;
-                        else {
+                        else
+                        {
                             --this.i;
                             break;
                         }
                     case '%':
                         // Nothing to do here, all handled by LSystem derivation
                         break;
-                    case '{':
+                    case '{':        
                         ++this.polygonMode;
                         break;
                     case '}':
                         --this.polygonMode;
                         break;
                     case '.':
-                        if (this.polygonMode <= 0)
+                        if(this.polygonMode <= 0)
                             log('You cannot register a vertex outside of ' +
-                                'polygon drawing.');
+                            'polygon drawing.');
                         else
                             ++this.i;
                         return;
                     default:
-                        if (this.cooldown > 0 && this.polygonMode <= 0) {
+                        if(this.cooldown > 0 && this.polygonMode <= 0)
+                        {
                             --this.cooldown;
                             return;
                         }
-                        if (this.loadModels && this.system.models.has(this.sequence[this.i])) {
-                            let model = this.system.deriveModel(this.sequence[this.i], this.params[this.i]);
+
+                        if(this.loadModels && this.system.models.has(
+                        this.sequence[this.i]))
+                        {
+                            let model = this.system.deriveModel(this.sequence[
+                            this.i], this.params[this.i]);
+    
                             this.models.push(model.result);
                             this.modelParams.push(model.params);
                             this.mdi.push(0);
                             ++this.i;
                             return;
                         }
-                        let ignored = this.system.ignoreList.has(this.sequence[this.i]);
-                        let breakAhead = BACKTRACK_LIST.has(this.sequence[this.i + 1]);
+                        let ignored = this.system.ignoreList.has(
+                        this.sequence[this.i]);
+                        let breakAhead = BACKTRACK_LIST.has(
+                        this.sequence[this.i + 1]);
                         let btAhead = this.sequence[this.i + 1] == ']' ||
-                            this.i == this.sequence.length - 1;
-                        if (this.hesitateApex && btAhead)
+                        this.i == this.sequence.length - 1;
+
+                        if(this.hesitateApex && btAhead)
                             this.cooldown = 1;
-                        if (this.quickDraw && breakAhead)
+
+                        if(this.quickDraw && breakAhead)
                             this.cooldown = 1;
+
                         moved = this.stack.length == 0 ||
-                            (this.stack.length > 0 && this.state !==
-                                this.stack[this.stack.length - 1][0]);
-                        if (!this.quickBacktrack && moved && !ignored)
+                        (this.stack.length > 0 && this.state !==
+                        this.stack[this.stack.length - 1][0]);
+
+                        if(!this.quickBacktrack && moved && !ignored)
                             this.stack.push([this.state, this.ori]);
-                        if (!ignored) {
-                            if (this.sequence[this.i] == 'F' &&
-                                this.params[this.i]) {
-                                this.forward(this.params[this.i][0].toNumber());
+
+                        if(!ignored)
+                        {
+                            if(this.sequence[this.i] == 'F' &&
+                            this.params[this.i])
+                            {
+                                this.forward(this.params[this.i][
+                                0].toNumber());
                             }
                             else
                                 this.forward();
                         }
-                        if (this.quickBacktrack && breakAhead)
+
+                        if(this.quickBacktrack && breakAhead)
                             this.stack.push([this.state, this.ori]);
-                        if (this.quickDraw && !btAhead)
+                        
+                        if(this.quickDraw && !btAhead)
                             break;
-                        else if (this.polygonMode <= 0 && !ignored) {
+                        else if(this.polygonMode <= 0 && !ignored)
+                        {
                             ++this.i;
                             return;
                         }
@@ -1817,9 +2405,10 @@ class Renderer {
                 }
             }
             // This is what the renderer will do at the end of a loop
-            if (!this.backtrackTail || this.stack.length == 0)
+            if(!this.backtrackTail || this.stack.length == 0)
                 return;
-            else {
+            else
+            {
                 let t = this.stack.pop();
                 this.state = t[0];
                 this.ori = t[1];
@@ -1833,7 +2422,8 @@ class Renderer {
      * @param {Vector3} coords the original coordinates.
      * @returns {Vector3}
      */
-    swizzle(coords) {
+    swizzle(coords)
+    {
         // The game uses left-handed Y-up, aka Y-down coordinates.
         return new Vector3(coords.x, -coords.y, coords.z);
     }
@@ -1841,16 +2431,19 @@ class Renderer {
      * Returns the camera centre's coordinates.
      * @returns {Vector3}
      */
-    get centre() {
-        if (this.cameraMode)
+    get centre()
+    {
+        if(this.cameraMode)
             return -this.cursor;
+
         return this.swizzle(-this.camCentre / this.figureScale);
     }
     /**
      * Returns the turtle's coordinates.
      * @returns {Vector3}
      */
-    get cursor() {
+    get cursor()
+    {
         let coords = this.state / this.figureScale;
         return this.swizzle(coords);
     }
@@ -1858,14 +2451,16 @@ class Renderer {
      * Returns the camera's coordinates.
      * @returns {Vector3}
      */
-    get camera() {
+    get camera()
+    {
         let newCamera;
-        switch (this.cameraMode) {
+        switch(this.cameraMode)
+        {
             case 1:
                 // I accidentally discovered Bézier curves unknowingly.
                 let dist = this.centre - this.lastCamera;
                 newCamera = this.lastCamera + dist * this.followFactor ** 2 +
-                    this.lastCamVel * (1 - this.followFactor) ** 2;
+                this.lastCamVel * (1 - this.followFactor) ** 2;
                 this.lastCamVel = newCamera - this.lastCamera;
                 this.lastCamera = newCamera;
                 return newCamera;
@@ -1874,41 +2469,87 @@ class Renderer {
         }
     }
 }
+
+interface ManagerInput
+{
+    colonies?: Array<Colony[]>;
+    gangsta?: [number, number];
+    ancestreeTask?: Task;
+    deriveTask?: Task;
+    calcTask?: Task;
+    actionQueue?: QueueInput;
+    actionGangsta?: [number, number, number];
+    actionAncestreeTask?: Task;
+    actionDeriveTask?: Task;
+    actionCalcTask?: Task;
+}
+
+interface Colony
+{
+    id: number;
+    population: number;
+    sequence: string;
+    params: Array<null | BigNumber[]>;
+    stage: number;
+
+    energy: BigNumber;
+    growth: BigNumber;
+    synthRate?: BigNumber;
+    profit?: BigNumber;
+    diReserve?: BigNumber;
+    dgReserve?: BigNumber;
+}
+
 /**
  * This is not ECS, I'm not good enough to understand ECS.
 */
-class ColonyManager {
-    constructor(object = {}) {
+class ColonyManager
+{
+    colonies: Array<Colony[]>;
+    gangsta: [number, number];
+    ancestreeTask: Task;
+    deriveTask: Task;
+    calcTask: Task;
+    actionQueue: Queue;
+    actionGangsta: [number, number, number];
+    actionAncestreeTask: Task;
+    actionDeriveTask: Task;
+    actionCalcTask: Task;
+    constructor(object: ManagerInput = {})
+    {
         // 6*inf
         this.colonies = object.colonies ||
-            Array.from({ length: maxPlots }, (_) => []);
+        Array.from({length: maxPlots}, (_) => []);
+
         // Everyone gangsta until a colony starts evolving
         this.gangsta = object.gangsta;
         this.ancestreeTask = object.ancestreeTask ||
-            {
-                start: 0
-            };
+        {
+            start: 0
+        };
         this.deriveTask = object.deriveTask ||
-            {
-                start: 0
-            };
+        {
+            start: 0
+        };
         this.calcTask = object.calcTask ||
-            {
-                start: 0
-            };
+        {
+            start: 0
+        };
         // Processed before regular gangsta
         this.actionQueue = new Queue(object.actionQueue);
         this.actionGangsta = object.actionGangsta;
         this.actionDeriveTask = object.actionDeriveTask ||
-            {
-                start: 0
-            };
+        {
+            start: 0
+        };
         this.actionCalcTask = object.actionCalcTask ||
-            {
-                start: 0
-            };
+        {
+            start: 0
+        };
     }
-    get object() {
+
+    get object()
+    {
         return {
             colonies: this.colonies,
             gangsta: this.gangsta,
@@ -1921,25 +2562,32 @@ class ColonyManager {
             actionCalcTask: this.actionCalcTask,
         };
     }
-    addColony(plot, id, population) {
-        for (let i = 0; i < this.colonies[plot].length; ++i) {
-            if (this.colonies[plot][i].id == id && !this.colonies[plot][i].stage) {
+
+    addColony(plot, id, population)
+    {
+        for(let i = 0; i < this.colonies[plot].length; ++i)
+        {
+            if(this.colonies[plot][i].id == id && !this.colonies[plot][i].stage)
+            {
                 this.colonies[plot][i].population += population;
                 theory.invalidateQuaternaryValues();
                 return;
             }
         }
         // Max 5 colonies per plot
-        if (this.colonies[plot].length >= 5) {
+        if(this.colonies[plot].length >= 5)
+        {
             plants[plot][id].refund(population);
             return;
         }
-        let c = {
+        let c: Colony =
+        {
             id: id,
             population: population,
             sequence: PLANT_DATA[id].system.axiom,
             params: PLANT_DATA[id].system.axiomParams,
             stage: 0,
+
             energy: BigNumber.ZERO,
             growth: BigNumber.ZERO
         };
@@ -1947,80 +2595,98 @@ class ColonyManager {
         c.synthRate = stats.synthRate;
         c.profit = stats.profit;
         this.colonies[plot].push(c);
-        if (plot == plotIdx && colonyIdx[plot] == this.colonies[plot].length - 1)
+        if(plot == plotIdx && colonyIdx[plot] == this.colonies[plot].length - 1)
             renderer.colony = c;
         theory.invalidateQuaternaryValues();
         updateAvailability();
     }
-    killColony(plot, index, id) {
+    killColony(plot, index, id?: number)
+    {
         let c = this.colonies[plot][index];
-        if (!c)
+        if(!c)
             return;
-        plants[plot][c.id].level -= Math.min(plants[plot][c.id].level, c.population);
-        if (index == this.colonies[plot].length - 1)
+
+        plants[plot][c.id].level -= Math.min(plants[plot][c.id].level,
+        c.population);
+        if(index == this.colonies[plot].length - 1)
             switchColony.buy(1);
-        if (this.gangsta && plot == this.gangsta[0]) {
-            if (this.gangsta[1] > index)
+        if(this.gangsta && plot == this.gangsta[0])
+        {
+            if(this.gangsta[1] > index)
                 --this.gangsta[1];
-            else if (this.gangsta[1] == index) {
+            else if(this.gangsta[1] == index)
+            {
                 this.ancestreeTask =
-                    {
-                        start: 0
-                    };
+                {
+                    start: 0
+                };
                 this.deriveTask =
-                    {
-                        start: 0
-                    };
+                {
+                    start: 0
+                };
                 this.calcTask =
-                    {
-                        start: 0
-                    };
+                {
+                    start: 0
+                };
                 this.gangsta = null;
             }
         }
         this.colonies[plot].splice(index, 1);
-        if (plot == plotIdx && !this.colonies[plot].length)
+        if(plot == plotIdx && !this.colonies[plot].length)
             renderer.colony = null;
         updateAvailability();
     }
-    growAll(di, dg) {
-        if (this.actionGangsta)
+    growAll(di, dg)
+    {
+        if(this.actionGangsta)
             this.continueAction();
-        else if (this.actionQueue.length) {
-            let action = this.actionQueue.dequeue();
+        else if(this.actionQueue.length)
+        {
+            let action: [number, number, number] = this.actionQueue.dequeue();
             this.performAction(...action);
         }
-        else if (this.gangsta)
+        else if(this.gangsta)
             this.evolve();
-        for (let i = 0; i < this.colonies.length; ++i) {
-            for (let j = 0; j < this.colonies[i].length; ++j) {
+
+        for(let i = 0; i < this.colonies.length; ++i)
+        {
+            for(let j = 0; j < this.colonies[i].length; ++j)
+            {
                 let c = this.colonies[i][j];
-                let notMature = c.stage < (PLANT_DATA[c.id].maxStage || MAX_INT);
-                if (notMature && c.growth >= PLANT_DATA[c.id].growthCost *
-                    BigNumber.from(c.sequence.length)) {
-                    if (!this.gangsta)
+                let notMature = c.stage < (PLANT_DATA[c.id].maxStage||MAX_INT);
+                if(notMature && c.growth >= PLANT_DATA[c.id].growthCost *
+                BigNumber.from(c.sequence.length))
+                {
+                    if(!this.gangsta)
                         this.gangsta = [i, j];
-                    if (!c.diReserve)
+
+                    if(!c.diReserve)
                         c.diReserve = BigNumber.ZERO;
                     c.diReserve += di;
-                    if (!c.dgReserve)
+
+                    if(!c.dgReserve)
                         c.dgReserve = BigNumber.ZERO;
                     c.dgReserve += dg;
                 }
-                else if (this.actionGangsta && this.actionGangsta[0] == i &&
-                    this.actionGangsta[1] == j) {
-                    if (!c.diReserve)
+                else if(this.actionGangsta && this.actionGangsta[0] == i &&
+                this.actionGangsta[1] == j)
+                {
+                    if(!c.diReserve)
                         c.diReserve = BigNumber.ZERO;
                     c.diReserve += di;
-                    if (!c.dgReserve)
+
+                    if(!c.dgReserve)
                         c.dgReserve = BigNumber.ZERO;
                     c.dgReserve += dg;
                 }
-                else {
+                else
+                {
                     c.energy += di * c.synthRate;
-                    if (notMature) {
+
+                    if(notMature)
+                    {
                         let maxdg = c.energy.min(dg *
-                            PLANT_DATA[c.id].growthRate);
+                        PLANT_DATA[c.id].growthRate);
                         c.growth += maxdg;
                         c.energy -= maxdg;
                     }
@@ -2028,7 +2694,8 @@ class ColonyManager {
             }
         }
     }
-    calculateStats(colony, task = {}, dTask = {}) {
+    calculateStats(colony, task: Task = {}, dTask: Task = {})
+    {
         // This is the only case where the colony needed
         let harvestable = PLANT_DATA[colony.id].actions[0].symbols;
         let synthRate = task.synthRate || BigNumber.ZERO;
@@ -2036,38 +2703,43 @@ class ColonyManager {
         let sequence = dTask.derivation || colony.sequence;
         let params = dTask.parameters || colony.params;
         let i = task.start || 0;
-        for (; i < sequence.length; ++i) {
-            if (i - task.start > MAX_CHARS_PER_TICK) {
+        for(; i < sequence.length; ++i)
+        {
+            if(i - task.start > MAX_CHARS_PER_TICK)
+            {
                 return {
                     start: i,
                     synthRate: synthRate,
                     profit: profit
-                };
+                }
             }
-            if (SYNTHABLE_SYMBOLS.has(sequence[i]) && params[i])
+            if(SYNTHABLE_SYMBOLS.has(sequence[i]) && params[i])
                 synthRate += params[i][0];
-            if (harvestable.has(sequence[i]) && params[i])
+            if(harvestable.has(sequence[i]) && params[i])
                 profit += params[i][0];
         }
         return {
             start: 0,
             synthRate: synthRate,
             profit: profit
-        };
+        }
     }
-    continueAction() {
+    continueAction()
+    {
         // Future idea: maybe instead of using an LS to prune/harvest, develop
         // efficient pruner/harvester, like a naked L-system rule???
         let c = this.colonies[this.actionGangsta[0]][this.actionGangsta[1]];
         let id = this.actionGangsta[2];
-        if (!c) {
+        if(!c)
+        {
             this.actionGangsta = null;
             return;
         }
-        if (PLANT_DATA[c.id].actions[id].killColony) {
-            if (id == 0)
+        if(PLANT_DATA[c.id].actions[id].killColony)
+        {
+            if(id == 0)
                 currency.value += c.profit * BigNumber.from(c.population) *
-                    theory.publicationMultiplier;
+                theory.publicationMultiplier;
             this.killColony(...this.actionGangsta);
             this.actionGangsta = null;
             theory.invalidateSecondaryEquation();
@@ -2076,183 +2748,240 @@ class ColonyManager {
         }
         // derive and calc stats (possibly ancestree if future actions require
         // checking adjacency)
-        if (!('derivation' in this.actionDeriveTask) ||
-            ('derivation' in this.actionDeriveTask && this.actionDeriveTask.start)) {
-            this.actionDeriveTask = PLANT_DATA[c.id].actions[id].system.derive(c.sequence, c.params, [], [], this.actionDeriveTask);
+        if(!('derivation' in this.actionDeriveTask) ||
+        ('derivation' in this.actionDeriveTask && this.actionDeriveTask.start))
+        {
+            this.actionDeriveTask = PLANT_DATA[c.id].actions[id].system.derive(
+            c.sequence, c.params, [], [], this.actionDeriveTask);
             return;
         }
-        if (!this.actionDeriveTask.derivation.length) {
-            if (id == 0)
+        if(!this.actionDeriveTask.derivation.length)
+        {
+            if(id == 0)
                 currency.value += c.profit * BigNumber.from(c.population) *
-                    theory.publicationMultiplier;
+                theory.publicationMultiplier;
             this.killColony(...this.actionGangsta);
             this.actionDeriveTask =
-                {
-                    start: 0
-                };
+            {
+                start: 0
+            };
             this.actionGangsta = null;
             theory.invalidateSecondaryEquation();
             theory.invalidateQuaternaryValues();
             return;
         }
-        if (!('synthRate' in this.actionCalcTask) ||
-            ('synthRate' in this.actionCalcTask && this.actionCalcTask.start)) {
-            this.actionCalcTask = this.calculateStats(c, this.actionCalcTask, this.actionDeriveTask);
+        if(!('synthRate' in this.actionCalcTask) ||
+        ('synthRate' in this.actionCalcTask && this.actionCalcTask.start))
+        {
+            this.actionCalcTask = this.calculateStats(c, this.actionCalcTask,
+            this.actionDeriveTask);
             return;
         }
-        if (id == 0)
+
+        if(id == 0)
             currency.value += c.profit * BigNumber.from(c.population) *
-                theory.publicationMultiplier;
+            theory.publicationMultiplier;
         c.synthRate = this.actionCalcTask.synthRate;
         c.profit = this.actionCalcTask.profit;
         c.sequence = this.actionDeriveTask.derivation;
         c.params = this.actionDeriveTask.parameters;
+
         c.energy += c.diReserve * c.synthRate;
-        let notMature = c.stage < (PLANT_DATA[c.id].maxStage || MAX_INT);
-        if (notMature) {
+        let notMature = c.stage < (PLANT_DATA[c.id].maxStage||MAX_INT);
+        if(notMature)
+        {
             let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
             c.growth += maxdg;
             c.energy -= maxdg;
         }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
+
         this.actionDeriveTask =
-            {
-                start: 0
-            };
+        {
+            start: 0
+        };
         this.actionCalcTask =
+        {
+            start: 0
+        };
+        // Roll back transaction!
+        if(this.gangsta && this.gangsta[0] == this.actionGangsta[0] &&
+        this.gangsta[1] == this.actionGangsta[1])
+        {
+            this.ancestreeTask =
             {
                 start: 0
             };
-        // Roll back transaction!
-        if (this.gangsta && this.gangsta[0] == this.actionGangsta[0] &&
-            this.gangsta[1] == this.actionGangsta[1]) {
-            this.ancestreeTask =
-                {
-                    start: 0
-                };
             this.deriveTask =
-                {
-                    start: 0
-                };
+            {
+                start: 0
+            };
             this.calcTask =
-                {
-                    start: 0
-                };
+            {
+                start: 0
+            };
         }
-        if (this.actionGangsta[0] == plotIdx &&
-            this.actionGangsta[1] == colonyIdx[plotIdx])
+        if(this.actionGangsta[0] == plotIdx &&
+        this.actionGangsta[1] == colonyIdx[plotIdx])
             renderer.colony = c;
         this.actionGangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
     }
-    performAction(plot, index, id) {
+    performAction(plot, index, id)
+    {
         let c = this.colonies[plot][index];
-        if (!c || !PLANT_DATA[c.id].actions[id])
+        if(!c || !PLANT_DATA[c.id].actions[id])
             return;
-        let action = [plot, index, id];
-        if (this.actionGangsta) {
+
+        let action: [number, number, number] = [plot, index, id];
+        if(this.actionGangsta)
+        {
             this.actionQueue.enqueue(action);
             return;
         }
         this.actionGangsta = action;
     }
-    evolve() {
+    evolve()
+    {
         let c = this.colonies[this.gangsta[0]][this.gangsta[1]];
-        if (!c) {
+        if(!c)
+        {
             this.gangsta = null;
             return;
         }
         // Ancestree, derive and calc stats
-        if (!('ancestors' in this.ancestreeTask) ||
-            ('ancestors' in this.ancestreeTask && this.ancestreeTask.start)) {
-            this.ancestreeTask = PLANT_DATA[c.id].system.getAncestree(c.sequence, this.ancestreeTask);
+        if(!('ancestors' in this.ancestreeTask) ||
+        ('ancestors' in this.ancestreeTask && this.ancestreeTask.start))
+        {
+            this.ancestreeTask = PLANT_DATA[c.id].system.getAncestree(
+            c.sequence, this.ancestreeTask);
             return;
         }
-        if (!('derivation' in this.deriveTask) ||
-            ('derivation' in this.deriveTask && this.deriveTask.start)) {
-            this.deriveTask = PLANT_DATA[c.id].system.derive(c.sequence, c.params, this.ancestreeTask.ancestors, this.ancestreeTask.children, this.deriveTask);
+        if(!('derivation' in this.deriveTask) ||
+        ('derivation' in this.deriveTask && this.deriveTask.start))
+        {
+            this.deriveTask = PLANT_DATA[c.id].system.derive(c.sequence,
+            c.params, this.ancestreeTask.ancestors, this.ancestreeTask.children,
+            this.deriveTask);
             return;
         }
-        if (!this.deriveTask.derivation.length) {
+        if(!this.deriveTask.derivation.length)
+        {
             this.killColony(...this.gangsta);
             this.ancestreeTask =
-                {
-                    start: 0
-                };
+            {
+                start: 0
+            };
             this.deriveTask =
-                {
-                    start: 0
-                };
+            {
+                start: 0
+            };
             this.gangsta = null;
             theory.invalidateSecondaryEquation();
             theory.invalidateQuaternaryValues();
             return;
         }
-        if (!('synthRate' in this.calcTask) ||
-            ('synthRate' in this.calcTask && this.calcTask.start)) {
-            this.calcTask = this.calculateStats(c, this.calcTask, this.deriveTask);
+        if(!('synthRate' in this.calcTask) ||
+        ('synthRate' in this.calcTask && this.calcTask.start))
+        {
+            this.calcTask = this.calculateStats(c, this.calcTask,
+            this.deriveTask);
             return;
         }
+
         c.growth -= PLANT_DATA[c.id].growthCost *
-            BigNumber.from(c.sequence.length);
+        BigNumber.from(c.sequence.length);
         c.diReserve += c.growth / c.synthRate;
         c.dgReserve += c.growth / PLANT_DATA[c.id].growthRate;
         c.growth = BigNumber.ZERO;
+
         c.sequence = this.deriveTask.derivation;
         c.params = this.deriveTask.parameters;
         c.synthRate = this.calcTask.synthRate;
         c.profit = this.calcTask.profit;
+
         c.energy += c.diReserve * c.synthRate;
         ++c.stage;
-        let notMature = c.stage < (PLANT_DATA[c.id].maxStage || MAX_INT);
-        if (notMature) {
+        let notMature = c.stage < (PLANT_DATA[c.id].maxStage||MAX_INT);
+        if(notMature)
+        {
             let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
             c.growth += maxdg;
             c.energy -= maxdg;
         }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
+
         this.ancestreeTask =
-            {
-                start: 0
-            };
+        {
+            start: 0
+        };
         this.deriveTask =
-            {
-                start: 0
-            };
+        {
+            start: 0
+        };
         this.calcTask =
-            {
-                start: 0
-            };
-        if (this.gangsta[0] == plotIdx && this.gangsta[1] == colonyIdx[plotIdx])
+        {
+            start: 0
+        };
+        if(this.gangsta[0] == plotIdx && this.gangsta[1] == colonyIdx[plotIdx])
             renderer.colony = c;
         this.gangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
     }
 }
+
+interface Action
+{
+    symbols?: Set<string>;
+    system?: LSystem;
+    killColony: boolean
+}
+
+interface Plant
+{
+    system: LSystem;
+    maxStage?: number;
+    cost: any;
+    growthRate: BigNumber;
+    growthCost: BigNumber;
+    actions: Action[];
+    camera: (stage: number) => RendererCamera;
+    stroke: (stage: number) => RendererStroke;
+}
+
 // Balance parameters
+
 const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(100)));
 const plantUnlocks = [1, 2];
-const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2200), new ConstantCost(1e45));
-const permaCosts = [
+const plantUnlockCosts = new CompositeCost(1,
+new ConstantCost(2200),
+new ConstantCost(1e45));
+const permaCosts =
+[
     BigNumber.from(27),
     BigNumber.from(4800),
     BigNumber.from(1e45)
 ];
+
 const taxRate = BigNumber.from(-.12);
 const tauRate = BigNumber.TWO;
-const pubCoef = BigNumber.from(2 / 3);
+const pubCoef = BigNumber.from(2/3);
 const pubExp = BigNumber.from(.15) / tauRate;
-var getPublicationMultiplier = (tau) => pubCoef * tau.max(BigNumber.ONE).pow(pubExp * tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
+var getPublicationMultiplier = (tau) => pubCoef * tau.max(BigNumber.ONE).pow(
+pubExp * tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
 var getPublicationMultiplierFormula = (symbol) => `\\frac{2}{3}\\times
 {${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
-const PLANT_DATA = {
-    1: // Calendula
+
+const PLANT_DATA: {[key: number]: Plant} =
+{
+    1:  // Calendula
     {
-        system: new LSystem('-(3)A(0.12, 0)', [
+        system: new LSystem('-(3)A(0.12, 0)',
+        [
             'A(r, t): t>=2 && r>=flowerThreshold = F(0.9, 2.1)K(0)',
             'A(r, t): r>=flowerThreshold = [&A(r-0.15, 0)][^I(0)]',
             'A(r, t): t<2 = A(r+0.06, t+1)',
@@ -2285,15 +3014,17 @@ const PLANT_DATA = {
         cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
         growthRate: BigNumber.THREE,
         growthCost: BigNumber.from(2.5),
-        actions: [
-            {
+        actions:
+        [
+            {   // Always a harvest
                 symbols: new Set('K'),
                 // system: new LSystem('', ['K=']),
                 killColony: true
             }
             // No prune
         ],
-        camera: (stage) => {
+        camera: (stage) =>
+        {
             return {
                 scale: 6,
                 x: 0,
@@ -2302,15 +3033,17 @@ const PLANT_DATA = {
                 upright: true
             };
         },
-        stroke: (stage) => {
+        stroke: (stage) =>
+        {
             return {
                 tickLength: 1,
             };
         }
     },
-    2: // Basil
+    2:  // Basil
     {
-        system: new LSystem('BA(0.18, 0)', [
+        system: new LSystem('BA(0.18, 0)',
+        [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
             'A(r, t) = F(0.24, 1.44)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
@@ -2343,18 +3076,20 @@ const PLANT_DATA = {
         cost: new ExponentialCost(1, 1),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.THREE,
-        actions: [
-            {
+        actions:
+        [
+            {   // Always a harvest
                 symbols: new Set('L'),
                 // system: new LSystem('', ['L=']),
                 killColony: true
             },
-            {
+            {   // Always a prune
                 system: new LSystem('', ['K=', 'A=']),
                 killColony: false
             }
         ],
-        camera: (stage) => {
+        camera: (stage) =>
+        {
             return {
                 scale: 8,
                 x: 0,
@@ -2363,13 +3098,14 @@ const PLANT_DATA = {
                 upright: true
             };
         },
-        stroke: (stage) => {
+        stroke: (stage) =>
+        {
             return {
                 tickLength: 1
             };
         }
     },
-    9001: // Arrow weed (test)
+    9001:   // Arrow weed (test)
     {
         system: new LSystem('A(1)', [
             'F(l)=F(l*2)',
@@ -2378,18 +3114,20 @@ const PLANT_DATA = {
         cost: new FirstFreeCost(new ExponentialCost(1, 1)),
         growthRate: BigNumber.TWO,
         growthCost: BigNumber.from(45),
-        actions: [
-            {
+        actions:
+        [
+            {   // Always a harvest
                 symbols: new Set('A'),
                 system: new LSystem('', ['A=']),
                 killColony: true
             },
-            {
+            {   // Always a prune
                 system: new LSystem('', ['F=']),
                 killColony: false
             }
         ],
-        camera: (stage) => {
+        camera: (stage) =>
+        {
             return {
                 scale: 2 ** stage,
                 // cameraMode: 0,
@@ -2400,7 +3138,8 @@ const PLANT_DATA = {
                 upright: false
             };
         },
-        stroke: (stage) => {
+        stroke: (stage) =>
+        {
             return {
                 tickLength: stage < 3 ? 2 : 1,
                 // initDelay: 0,
@@ -2413,16 +3152,20 @@ const PLANT_DATA = {
             };
         }
     }
-};
+}
+
 // const sidewayQuat = new Quaternion(1, 0, 0, 0);
-const uprightQuat = new Quaternion(-Math.sqrt(2) / 2, 0, 0, Math.sqrt(2) / 2);
+const uprightQuat = new Quaternion(-Math.sqrt(2)/2, 0, 0, Math.sqrt(2)/2);
 const xUpQuat = new Quaternion(0, 1, 0, 0);
 const yUpQuat = new Quaternion(0, 0, 1, 0);
 const zUpQuat = new Quaternion(0, 0, 0, 1);
+
 let manager = new ColonyManager();
 let renderer = new Renderer(new LSystem(), '', []);
 let globalRNG = new Xorshift(Date.now());
-let quaternaryEntries = [
+
+let quaternaryEntries =
+[
     new QuaternaryEntry('p_1', null),
     new QuaternaryEntry('p_2', null),
     new QuaternaryEntry('p_3', null),
@@ -2430,44 +3173,60 @@ let quaternaryEntries = [
     new QuaternaryEntry('p_5', null),
     new QuaternaryEntry('p_6', null),
 ];
-let taxQuaternaryEntry = [
+let taxQuaternaryEntry =
+[
     new QuaternaryEntry('T_{\\text{p}}', null)
 ];
-let createFramedButton = (params, margin, callback, image) => {
-    let frame = ui.createFrame({
+
+let createFramedButton = (params, margin, callback, image) =>
+{
+    let frame = ui.createFrame
+    ({
         cornerRadius: 1,
         margin: new Thickness(margin),
         padding: new Thickness(1),
         hasShadow: true,
         heightRequest: getImageSize(ui.screenWidth),
         widthRequest: getImageSize(ui.screenWidth),
-        content: ui.createImage({
+        content: ui.createImage
+        ({
             source: image,
             aspect: Aspect.ASPECT_FIT,
             useTint: false
         }),
         borderColor: Color.BORDER
     });
-    return ui.createStackLayout(Object.assign(Object.assign({}, params), { children: [
+    return ui.createStackLayout
+    ({
+        ...params,
+        children:
+        [
             frame
-        ], onTouched: (e) => {
-            if (e.type == TouchType.PRESSED) {
+        ],
+        onTouched: (e) =>
+        {
+            if(e.type == TouchType.PRESSED)
+            {
                 frame.borderColor = Color.TRANSPARENT;
                 // frame.hasShadow = false;
             }
-            else if (e.type == TouchType.SHORTPRESS_RELEASED ||
-                e.type == TouchType.LONGPRESS_RELEASED) {
+            else if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            e.type == TouchType.LONGPRESS_RELEASED)
+            {
                 Sound.playClick();
                 frame.borderColor = Color.BORDER;
                 // frame.hasShadow = true;
                 callback();
             }
-            else if (e.type == TouchType.CANCELLED) {
+            else if(e.type == TouchType.CANCELLED)
+            {
                 frame.borderColor = Color.BORDER;
                 // frame.hasShadow = true;
             }
-        } }));
-};
+        }
+    });
+}
+
 // const actionsLabel = ui.createLatexLabel
 // ({
 //     isVisible: () => manager.colonies[plotIdx][colonyIdx[plotIdx]] ?
@@ -2480,12 +3239,15 @@ let createFramedButton = (params, margin, callback, image) => {
 //     fontSize: 10,
 //     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
 // });
-const harvestFrame = createFramedButton({
+const harvestFrame = createFramedButton
+({
     row: 0, column: 0,
-}, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 0), game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/herbs-bundle-dark.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/herbs-bundle.png'));
-const harvestLabel = ui.createLatexLabel({
+}, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 0),
+game.settings.theme == Theme.LIGHT ?
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/herbs-bundle-dark.png') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/herbs-bundle.png'));
+const harvestLabel = ui.createLatexLabel
+({
     row: 0, column: 1,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
@@ -2494,21 +3256,26 @@ const harvestLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const pruneFrame = createFramedButton({
-    isVisible: () => {
+const pruneFrame = createFramedButton
+({
+    isVisible: () =>
+    {
         let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-        if (!c || !PLANT_DATA[c.id].actions[1])
+        if(!c || !PLANT_DATA[c.id].actions[1])
             return false;
         return true;
     },
     row: 0, column: 2,
-}, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 1), game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands-dark.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.png'));
-const pruneLabel = ui.createLatexLabel({
-    isVisible: () => {
+}, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 1),
+game.settings.theme == Theme.LIGHT ?
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands-dark.png') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.png'));
+const pruneLabel = ui.createLatexLabel
+({
+    isVisible: () =>
+    {
         let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-        if (!c || !PLANT_DATA[c.id].actions[1])
+        if(!c || !PLANT_DATA[c.id].actions[1])
             return false;
         return true;
     },
@@ -2537,7 +3304,9 @@ const pruneLabel = ui.createLatexLabel({
 //     fontSize: 10,
 //     textColor: Color.TEXT_MEDIUM
 // });
-const settingsLabel = ui.createLatexLabel({
+
+const settingsLabel = ui.createLatexLabel
+({
     row: 0, column: 1,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9),
@@ -2545,33 +3314,44 @@ const settingsLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const settingsFrame = createFramedButton({
+const settingsFrame = createFramedButton
+({
     column: 0,
     horizontalOptions: LayoutOptions.START
 }, 2, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog-dark.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog.png'));
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog-dark.png') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog.png'));
+
 var switchPlant, viewColony, switchColony;
-var plants = Array.from({ length: maxPlots }, (_) => { return {}; });
+
+var plants = Array.from({length: maxPlots}, (_) => {return {};});
+
 var notebookPerma, plotPerma, plantPerma;
+
 var freePenny, warpTick, warpDay, warpYear, warpZero;
+
 var currency, taxCurrency;
-var init = () => {
+
+var init = () =>
+{
     currency = theory.createCurrency('p', 'p');
     taxCurrency = theory.createCurrency(getLoc('currencyTax'));
+
     /* Switch plant
     Moduloose
     */
     {
         switchPlant = theory.createSingularUpgrade(0, currency, new FreeCost);
-        switchPlant.getDescription = () => Localization.format(getLoc('switchPlant'), plotIdx + 1);
+        switchPlant.getDescription = () => Localization.format(
+        getLoc('switchPlant'), plotIdx + 1);
         switchPlant.info = getLoc('switchPlantInfo');
-        switchPlant.bought = (_) => {
+        switchPlant.bought = (_) =>
+        {
             switchPlant.level = 0;
-            if (manager.colonies[plotIdx].length)
+            if(manager.colonies[plotIdx].length)
                 return;
             plantIdx[plotIdx] = (plantIdx[plotIdx] + 1) %
-                (plantPerma.level + 1);
+            (plantPerma.level + 1);
             updateAvailability();
         };
         switchPlant.isAvailable = false;
@@ -2583,10 +3363,11 @@ var init = () => {
         viewColony = theory.createSingularUpgrade(1, currency, new FreeCost);
         viewColony.description = getLoc('viewColony');
         viewColony.info = getLoc('viewColonyInfo');
-        viewColony.bought = (_) => {
+        viewColony.bought = (_) =>
+        {
             viewColony.level = 0;
             let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-            if (!c)
+            if(!c)
                 return;
             let seqMenu = createColonyViewMenu(c);
             seqMenu.show();
@@ -2598,46 +3379,59 @@ var init = () => {
     */
     {
         switchColony = theory.createSingularUpgrade(2, currency, new FreeCost);
-        switchColony.getDescription = () => Localization.format(getLoc('switchColony'), colonyIdx[plotIdx] + 1, manager.colonies[plotIdx].length);
+        switchColony.getDescription = () => Localization.format(
+        getLoc('switchColony'), colonyIdx[plotIdx] + 1,
+        manager.colonies[plotIdx].length);
         switchColony.info = getLoc('switchColonyInfo');
-        switchColony.bought = (_) => {
+        switchColony.bought = (_) =>
+        {
             switchColony.level = 0;
-            if (manager.colonies[plotIdx].length < 2)
+            if(manager.colonies[plotIdx].length < 2)
                 return;
+
             colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) %
-                manager.colonies[plotIdx].length;
+            manager.colonies[plotIdx].length;
             let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
             renderer.colony = c;
         };
         switchColony.isAvailable = false;
     }
+
     /* Plants & switch plants
     */
-    for (let i = 0; i < maxPlots; ++i) {
-        for (let j = 0; j < plantUnlocks.length; ++j) {
-            plants[i][plantUnlocks[j]] = theory.createUpgrade(i * 100 + j, currency, PLANT_DATA[plantUnlocks[j]].cost);
-            plants[i][plantUnlocks[j]].description = Localization.format(getLoc('plotPlant'), i + 1, getLoc('plants')[plantUnlocks[j]].name);
+    for(let i = 0; i < maxPlots; ++i)
+    {
+        for(let j = 0; j < plantUnlocks.length; ++j)
+        {
+            plants[i][plantUnlocks[j]] = theory.createUpgrade(i * 100 + j,
+            currency, PLANT_DATA[plantUnlocks[j]].cost);
+            plants[i][plantUnlocks[j]].description = Localization.format(
+            getLoc('plotPlant'), i + 1, getLoc('plants')[plantUnlocks[j]].name);
             plants[i][plantUnlocks[j]].info = getLoc('plants')[plantUnlocks[j]].
-                info;
-            plants[i][plantUnlocks[j]].bought = (amount) => {
-                if (actuallyPlanting)
+            info;
+            plants[i][plantUnlocks[j]].bought = (amount) =>
+            {
+                if(actuallyPlanting)
                     manager.addColony(i, plantUnlocks[j], amount);
             };
             plants[i][plantUnlocks[j]].isAvailable = false;
         }
     }
+
     /* Notebook
     Unlocks when acquiring Buy All.
     */
     {
-        notebookPerma = theory.createPermanentUpgrade(10, currency, new FreeCost);
+        notebookPerma = theory.createPermanentUpgrade(10, currency,
+        new FreeCost);
         notebookPerma.description = getLoc('permaNote');
         notebookPerma.info = getLoc('permaNoteInfo');
-        notebookPerma.bought = (_) => {
+        notebookPerma.bought = (_) =>
+        {
             notebookPerma.level = 0;
             let noteMenu = createNotebookMenu();
             noteMenu.show();
-        };
+        }
         notebookPerma.isAvailable = false;
     }
     /* Settings
@@ -2660,17 +3454,26 @@ var init = () => {
     */
     {
         plotPerma = theory.createPermanentUpgrade(0, currency, plotCosts);
-        plotPerma.getDescription = (amount) => {
-            if (amount == 1)
-                return Localization.getUpgradeUnlockDesc(Localization.format(getLoc('unlockPlot'), plotPerma.level + amount));
-            return Localization.getUpgradeUnlockDesc(Localization.format(getLoc('unlockPlots'), plotPerma.level + 1, plotPerma.level + amount));
-        };
-        plotPerma.getInfo = (amount) => {
-            if (amount == 1)
-                return Localization.getUpgradeUnlockInfo(Localization.format(getLoc('unlockPlot'), plotPerma.level + amount));
-            return Localization.getUpgradeUnlockInfo(Localization.format(getLoc('unlockPlots'), plotPerma.level + 1, plotPerma.level + amount));
-        };
-        plotPerma.bought = (_) => {
+        plotPerma.getDescription = (amount) =>
+        {
+            if(amount == 1)
+                return Localization.getUpgradeUnlockDesc(Localization.format(
+                getLoc('unlockPlot'), plotPerma.level + amount));
+            return Localization.getUpgradeUnlockDesc(Localization.format(
+            getLoc('unlockPlots'), plotPerma.level + 1,
+            plotPerma.level + amount));
+        }
+        plotPerma.getInfo = (amount) =>
+        {
+            if(amount == 1)
+                return Localization.getUpgradeUnlockInfo(Localization.format(
+                getLoc('unlockPlot'), plotPerma.level + amount));
+            return Localization.getUpgradeUnlockInfo(Localization.format(
+            getLoc('unlockPlots'), plotPerma.level + 1,
+            plotPerma.level + amount));
+        }
+        plotPerma.bought = (_) =>
+        {
             theory.invalidateQuaternaryValues();
             updateAvailability();
         };
@@ -2680,35 +3483,48 @@ var init = () => {
     What do I do if I have other plants to unlock with other means?.
     */
     {
-        plantPerma = theory.createPermanentUpgrade(4, currency, plantUnlockCosts);
-        plantPerma.getDescription = (amount) => {
-            if (plantPerma.level == plantPerma.maxLevel)
+        plantPerma = theory.createPermanentUpgrade(4, currency,
+        plantUnlockCosts);
+        plantPerma.getDescription = (amount) =>
+        {
+            if(plantPerma.level == plantPerma.maxLevel)
                 return Localization.getUpgradeUnlockDesc(getLoc('unlockPlant'));
-            if (amount == 1)
-                return Localization.getUpgradeUnlockDesc(`\\text{${getLoc('plants')[plantUnlocks[plantPerma.level + 1]].name}}`);
-            return Localization.getUpgradeUnlockDesc(`\\text{${getLoc('plants')[plantUnlocks[plantPerma.level + 1]].name}~${getLoc('plants')[plantUnlocks[plantPerma.level + amount]].name}}`);
-        };
-        plantPerma.getInfo = (amount) => {
-            if (plantPerma.level == plantPerma.maxLevel)
+            if(amount == 1)
+                return Localization.getUpgradeUnlockDesc(`\\text{${
+                getLoc('plants')[plantUnlocks[plantPerma.level + 1]].name}}`);
+            return Localization.getUpgradeUnlockDesc(`\\text{${
+            getLoc('plants')[plantUnlocks[plantPerma.level + 1]].name}~${
+            getLoc('plants')[plantUnlocks[plantPerma.level + amount]].name}}`);
+        }
+        plantPerma.getInfo = (amount) =>
+        {
+            if(plantPerma.level == plantPerma.maxLevel)
                 return Localization.getUpgradeUnlockInfo(getLoc('unlockPlant'));
-            if (amount == 1)
-                return getLoc('plants')[plantUnlocks[plantPerma.level + amount]].info;
-            return Localization.getUpgradeUnlockInfo(`\\text{${getLoc('plants')[plantUnlocks[plantPerma.level + 1]].name}~${getLoc('plants')[plantUnlocks[plantPerma.level + amount]].name}}`);
-        };
-        plantPerma.bought = (_) => {
+            if(amount == 1)
+                return getLoc('plants')[plantUnlocks[
+                plantPerma.level + amount]].info;
+            return Localization.getUpgradeUnlockInfo(`\\text{${
+            getLoc('plants')[plantUnlocks[plantPerma.level + 1]].name}~${
+            getLoc('plants')[plantUnlocks[plantPerma.level + amount]].name}}`);
+        }
+        plantPerma.bought = (_) =>
+        {
             updateAvailability();
         };
         plantPerma.maxLevel = plantUnlocks.length - 1;
     }
+
     theory.createPublicationUpgrade(1, currency, permaCosts[0]);
     theory.createBuyAllUpgrade(2, currency, permaCosts[1]);
     theory.buyAllUpgrade.bought = (_) => updateAvailability();
     // theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
+
     /* Free penny
     For testing purposes
     */
     {
-        freePenny = theory.createPermanentUpgrade(9001, currency, new FreeCost);
+        freePenny = theory.createPermanentUpgrade(9001, currency,
+        new FreeCost);
         freePenny.description = 'Get 1 penny for free';
         freePenny.info = 'Yields 1 penny';
         freePenny.bought = (_) => currency.value += BigNumber.ONE;
@@ -2718,7 +3534,8 @@ var init = () => {
     For testing purposes
     */
     {
-        warpTick = theory.createPermanentUpgrade(9004, currency, new FreeCost);
+        warpTick = theory.createPermanentUpgrade(9004, currency,
+        new FreeCost);
         warpTick.description = 'Warp 1.5 minutes';
         warpTick.info = 'Warps forward by 0.15 time units';
         warpTick.bought = (_) => tick(0.15, 1);
@@ -2728,7 +3545,8 @@ var init = () => {
     For testing purposes
     */
     {
-        warpDay = theory.createPermanentUpgrade(9003, currency, new FreeCost);
+        warpDay = theory.createPermanentUpgrade(9003, currency,
+        new FreeCost);
         warpDay.description = 'Warp one day';
         warpDay.info = 'Warps forward by 144 time units';
         warpDay.bought = (_) => tick(144, 1);
@@ -2738,7 +3556,8 @@ var init = () => {
     For testing purposes
     */
     {
-        warpYear = theory.createPermanentUpgrade(9005, currency, new FreeCost);
+        warpYear = theory.createPermanentUpgrade(9005, currency,
+        new FreeCost);
         warpYear.description = 'Warp one year';
         warpYear.info = 'Warps forward by 365 days';
         warpYear.bought = (_) => tick(144 * 365, 1);
@@ -2748,11 +3567,14 @@ var init = () => {
     For testing purposes
     */
     {
-        warpZero = theory.createPermanentUpgrade(9002, currency, new FreeCost);
+        warpZero = theory.createPermanentUpgrade(9002, currency,
+        new FreeCost);
         warpZero.description = 'Warp to day 1 (press 5 times to confirm)';
         warpZero.info = 'Warps backward';
-        warpZero.bought = (_) => {
-            if (warpZero.level > 4) {
+        warpZero.bought = (_) =>
+        {
+            if(warpZero.level > 4)
+            {
                 warpZero.level = 0;
                 time = 0;
                 days = 0;
@@ -2763,30 +3585,39 @@ var init = () => {
         };
         warpZero.isAvailable = haxEnabled;
     }
+
     // To do: challenge plot (-1)
     // Next: milestones
+
     theory.primaryEquationHeight = 30;
     theory.primaryEquationScale = 0.96;
     theory.secondaryEquationHeight = 105;
-};
-var updateAvailability = () => {
-    if (!finishedTutorial) {
+}
+
+var updateAvailability = () =>
+{
+    if(!finishedTutorial)
+    {
         finishedTutorial = plotPerma.level > 0;
     }
-    else {
+    else
+    {
         switchPlant.isAvailable = !manager.colonies[plotIdx].length;
         viewColony.isAvailable = manager.colonies[plotIdx].length >= 1;
         switchColony.isAvailable = manager.colonies[plotIdx].length > 1;
     }
-    for (let i = 0; i < plotPerma.level; ++i) {
-        for (let j = 0; j < plantUnlocks.length; ++j)
+    for(let i = 0; i < plotPerma.level; ++i)
+    {
+        for(let j = 0; j < plantUnlocks.length; ++j)
             plants[i][plantUnlocks[j]].isAvailable =
-                plants[i][plantUnlocks[j]].level > 0 ||
-                    (j == plantIdx[i] && j <= plantPerma.level);
+            plants[i][plantUnlocks[j]].level > 0 ||
+            (j == plantIdx[i] && j <= plantPerma.level);
     }
     notebookPerma.isAvailable = theory.isBuyAllAvailable;
-};
-var tick = (elapsedTime, multiplier) => {
+}
+
+var tick = (elapsedTime, multiplier) =>
+{
     // Without the multiplier, one year is 14.6 hours
     let dt = elapsedTime * multiplier;
     time += dt;
@@ -2795,11 +3626,11 @@ var tick = (elapsedTime, multiplier) => {
     // Help me check my integral maths
     let cycles = time / 144;
     days = Math.floor(cycles);
-    while (days >= yearStartLookup[years + 1])
+    while(days >= yearStartLookup[years + 1])
         ++years;
     let phase = Math.max(0, Math.min(cycles - days - 0.25, 0.5));
     let newII = days * 144 / Math.PI - 72 *
-        (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
+    (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
     let di = newII - insolationIntegral;
     insolationIntegral = newII;
     // universal growth factor = cos(x*pi/72)/2 + 1/2
@@ -2807,19 +3638,24 @@ var tick = (elapsedTime, multiplier) => {
     let dg = newGI - growthIntegral;
     growthIntegral = newGI;
     manager.growAll(BigNumber.from(di), BigNumber.from(dg));
+
     let timeCos = Math.cos(time * Math.PI / 72);
     insolationCoord = Math.max(0, -timeCos);
     growthCoord = (timeCos + 1) / 2;
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
-};
-var getEquationOverlay = () => {
-    let result = ui.createGrid({
+}
+
+var getEquationOverlay = () =>
+{
+    let result = ui.createGrid
+    ({
         // rowDefinitions: ['1*', '1*'],
         // columnDefinitions: ['68*', '32*'],
         inputTransparent: true,
         cascadeInputTransparent: false,
-        children: [
+        children:
+        [
             // For reference
             // ui.createFrame({row: 0, column: 2}),
             // ui.createFrame({row: 1, column: 2}),
@@ -2835,54 +3671,63 @@ var getEquationOverlay = () => {
             //     fontSize: 9,
             //     textColor: Color.TEXT_MEDIUM
             // }),
-            ui.createLatexLabel({
+            ui.createLatexLabel
+            ({
                 row: 0, column: 0,
                 horizontalTextAlignment: TextAlignment.CENTER,
                 verticalTextAlignment: () => actionPanelOnTop ?
-                    TextAlignment.END : TextAlignment.START,
+                TextAlignment.END : TextAlignment.START,
                 margin: new Thickness(10, 4),
                 text: getTimeString,
                 fontSize: 10,
                 textColor: Color.TEXT_MEDIUM
             }),
-            ui.createGrid({
+            ui.createGrid
+            ({
                 row: 0, column: 0,
                 margin: new Thickness(4),
                 horizontalOptions: LayoutOptions.START,
                 verticalOptions: () => actionPanelOnTop ? LayoutOptions.END :
-                    LayoutOptions.START,
-                columnDefinitions: [
+                LayoutOptions.START,
+                columnDefinitions:
+                [
                     'auto', 'auto'
                 ],
                 inputTransparent: true,
                 cascadeInputTransparent: false,
-                children: [
+                children:
+                [
                     settingsFrame,
                     settingsLabel
                 ]
             }),
-            ui.createGrid({
+            ui.createGrid
+            ({
                 row: 0, column: 0,
                 columnDefinitions: ['68*', '32*'],
                 verticalOptions: () => actionPanelOnTop ?
-                    LayoutOptions.START : LayoutOptions.END,
+                LayoutOptions.START : LayoutOptions.END,
                 inputTransparent: true,
                 cascadeInputTransparent: false,
-                children: [
-                    ui.createGrid({
+                children:
+                [
+                    ui.createGrid
+                    ({
                         isVisible: () => manager.colonies[plotIdx].length > 0,
                         row: 0, column: 0,
                         margin: new Thickness(4),
                         horizontalOptions: LayoutOptions.START,
                         // verticalOptions: LayoutOptions.END,
-                        columnDefinitions: [
+                        columnDefinitions:
+                        [
                             'auto', 'auto',
                             'auto', 'auto',
                             'auto', 'auto'
                         ],
                         inputTransparent: true,
                         cascadeInputTransparent: false,
-                        children: [
+                        children:
+                        [
                             harvestFrame,
                             harvestLabel,
                             pruneFrame,
@@ -2894,145 +3739,196 @@ var getEquationOverlay = () => {
                     // actionsLabel,
                 ]
             })
+            
         ]
     });
     return result;
-};
-var getPrimaryEquation = () => {
+}
+
+var getPrimaryEquation = () =>
+{
     return Localization.format(getLoc(fancyPlotTitle ? 'plotTitleFancy' :
-        'plotTitle'), plotIdx + 1);
-};
-var getSecondaryEquation = () => {
-    if (!plotPerma.level)
+    'plotTitle'), plotIdx + 1);
+}
+
+var getSecondaryEquation = () =>
+{
+    if(!plotPerma.level)
         return getLoc('lockedPlot');
+
     let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    if (!c) {
+    if(!c)
+    {
         let taxInfo = `\\text{${getLoc('pubTax')}}\\colon\\\\
         T_{\\text{p}}=${taxRate}\\times\\max\\text{p}\\\\\\\\`;
         let tauInfo = `${theory.latexSymbol}=\\max\\text{p}^
         ${tauRate.toString(0)}`;
         return `\\begin{array}{c}${theory.publicationUpgrade.level &&
-            theory.canPublish ? taxInfo : ''}${tauInfo}\\end{array}`;
+        theory.canPublish ? taxInfo : ''}${tauInfo}\\end{array}`;
     }
-    switch (colonyMode) {
+
+    switch(colonyMode)
+    {
         case 1:
             let status = (manager.gangsta && manager.gangsta[0] == plotIdx &&
-                manager.gangsta[1] == colonyIdx[plotIdx]) ?
-                getLoc('status')['evolve'] : (manager.actionGangsta &&
-                manager.actionGangsta[0] == plotIdx &&
-                manager.actionGangsta[1] == colonyIdx[plotIdx]) ?
-                getLoc('status')['actions'][manager.actionGangsta[2]] : '';
-            return `\\text{${Localization.format(getLoc('colonyStats'), c.population, getLoc('plants')[c.id].name, c.stage, c.energy, c.synthRate * BigNumber.from(insolationCoord), c.growth, PLANT_DATA[c.id].growthCost * BigNumber.from(c.sequence.length), PLANT_DATA[c.id].growthRate * BigNumber.from(growthCoord), c.profit, status)}}`;
-            return `\\text{${Localization.format(getLoc('colony'), c.population, getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
+            manager.gangsta[1] == colonyIdx[plotIdx]) ?
+            getLoc('status')['evolve'] : (manager.actionGangsta &&
+            manager.actionGangsta[0] == plotIdx &&
+            manager.actionGangsta[1] == colonyIdx[plotIdx]) ?
+            getLoc('status')['actions'][manager.actionGangsta[2]] : '';
+            return `\\text{${Localization.format(getLoc('colonyStats'),
+            c.population, getLoc('plants')[c.id].name, c.stage, c.energy,
+            c.synthRate * BigNumber.from(insolationCoord), c.growth,
+            PLANT_DATA[c.id].growthCost * BigNumber.from(c.sequence.length),
+            PLANT_DATA[c.id].growthRate * BigNumber.from(growthCoord), c.profit,
+            status)}}`;
+            return `\\text{${Localization.format(getLoc('colony'), c.population,
+            getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
             g=${c.growth}/${PLANT_DATA[c.id].growthCost *
-                BigNumber.from(c.sequence.length)}\\\\
+            BigNumber.from(c.sequence.length)}\\\\
             P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}
             \\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
             \\\\`;
         case 2:
             let result = '';
-            for (let i = 0; i < colonyIdx[plotIdx]; ++i) {
+            for(let i = 0; i < colonyIdx[plotIdx]; ++i)
+            {
                 let d = manager.colonies[plotIdx][i];
-                result += `\\text{${Localization.format(getLoc('colonyProg'), d.population, getLoc('plants')[d.id].name, d.stage, d.growth *
-                    BigNumber.HUNDRED / (PLANT_DATA[d.id].growthCost *
-                    BigNumber.from(d.sequence.length)))}}\\\\`;
+                result += `\\text{${Localization.format(getLoc('colonyProg'),
+                d.population, getLoc('plants')[d.id].name, d.stage, d.growth *
+                BigNumber.HUNDRED / (PLANT_DATA[d.id].growthCost *
+                BigNumber.from(d.sequence.length)))}}\\\\`;
             }
-            result += `\\underline{\\text{${Localization.format(getLoc('colonyProg'), c.population, getLoc('plants')[c.id].name, c.stage, c.growth * BigNumber.HUNDRED /
-                (PLANT_DATA[c.id].growthCost *
-                    BigNumber.from(c.sequence.length)))}}}\\\\`;
-            for (let i = colonyIdx[plotIdx] + 1; i < manager.colonies[plotIdx].length; ++i) {
+            result += `\\underline{\\text{${Localization.format(
+            getLoc('colonyProg'), c.population, getLoc('plants')[c.id].name,
+            c.stage, c.growth * BigNumber.HUNDRED /
+            (PLANT_DATA[c.id].growthCost *
+            BigNumber.from(c.sequence.length)))}}}\\\\`;
+            for(let i = colonyIdx[plotIdx] + 1;
+            i < manager.colonies[plotIdx].length; ++i)
+            {
                 let d = manager.colonies[plotIdx][i];
-                result += `\\text{${Localization.format(getLoc('colonyProg'), d.population, getLoc('plants')[d.id].name, d.stage, d.growth *
-                    BigNumber.HUNDRED / (PLANT_DATA[d.id].growthCost *
-                    BigNumber.from(d.sequence.length)))}}\\\\`;
+                result += `\\text{${Localization.format(getLoc('colonyProg'),
+                d.population, getLoc('plants')[d.id].name, d.stage, d.growth *
+                BigNumber.HUNDRED / (PLANT_DATA[d.id].growthCost *
+                BigNumber.from(d.sequence.length)))}}\\\\`;
             }
             return result;
         default:
             return '';
     }
-};
-let getTimeString = () => {
+}
+
+let getTimeString = () =>
+{
     let dayofYear = days - yearStartLookup[years];
     let weeks = Math.floor(dayofYear / 7);
     let timeofDay = time % 144;
     let hour = Math.floor(timeofDay / 6);
     let min = Math.round((timeofDay % 6) * 10);
+
     return Localization.format(getLoc(actionPanelOnTop ? 'dateTimeBottom' :
-        'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1, hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'), haxEnabled ? getLoc('hacks') : '');
-};
-var getQuaternaryEntries = () => {
-    if (!plotPerma.level)
+    'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1,
+    hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'),
+    haxEnabled ? getLoc('hacks') : '');
+}
+
+var getQuaternaryEntries = () =>
+{
+    if(!plotPerma.level)
         return quaternaryEntries.slice(0, 1);
-    for (let i = 0; i < plotPerma.level; ++i) {
+
+    for(let i = 0; i < plotPerma.level; ++i)
+    {
         let sum = BigNumber.ZERO;
-        for (let j = 0; j < manager.colonies[i].length; ++j) {
+        for(let j = 0; j < manager.colonies[i].length; ++j)
+        {
             let c = manager.colonies[i][j];
             sum += c.profit * BigNumber.from(c.population) *
-                theory.publicationMultiplier;
+            theory.publicationMultiplier;
         }
         quaternaryEntries[i].value = sum;
     }
-    if (theory.publicationUpgrade.level && theory.canPublish) {
+    if(theory.publicationUpgrade.level && theory.canPublish)
+    {
         taxCurrency.value = getCurrencyFromTau(theory.tau)[0] * taxRate;
         taxQuaternaryEntry[0].value = taxCurrency.value;
         return quaternaryEntries.concat(taxQuaternaryEntry);
     }
-    return quaternaryEntries; //.slice(0, plotPerma.level);
-};
-let createVariableMenu = (variables) => {
+    return quaternaryEntries;   //.slice(0, plotPerma.level);
+}
+
+let createVariableMenu = (variables) =>
+{
     // Q: Does Object.entries mean that its contents are references, and 
     // therefore overwritable from afar?
     let varEntries = [];
-    for (let i = 0; i < variables.length; ++i) {
-        varEntries.push(ui.createEntry({
+    for(let i = 0; i < variables.length; ++i)
+    {
+        varEntries.push(ui.createEntry
+        ({
             row: i,
             column: 0,
             text: variables[i][0]
         }));
-        varEntries.push(ui.createLatexLabel({
+        varEntries.push(ui.createLatexLabel
+        ({
             text: '=',
             row: i,
             column: 1,
             horizontalTextAlignment: TextAlignment.CENTER,
             verticalTextAlignment: TextAlignment.CENTER
         }));
-        varEntries.push(ui.createEntry({
+        varEntries.push(ui.createEntry
+        ({
             row: i,
             column: 2,
             text: variables[i][1],
             horizontalTextAlignment: TextAlignment.END
         }));
     }
-    let varsLabel = ui.createLatexLabel({
+    let varsLabel = ui.createLatexLabel
+    ({
         text: Localization.format(getLoc('labelVars'), variables.length),
         verticalTextAlignment: TextAlignment.CENTER,
         // margin: new Thickness(0, 12)
         heightRequest: getSmallBtnSize(ui.screenWidth)
     });
-    let varStack = ui.createGrid({
+    let varStack = ui.createGrid
+    ({
         columnDefinitions: ['50*', '20*', '30*'],
         children: varEntries
     });
-    let menu = ui.createPopup({
+
+    let menu = ui.createPopup
+    ({
         title: getLoc('menuVariables'),
-        content: ui.createStackLayout({
-            children: [
-                ui.createGrid({
+        content: ui.createStackLayout
+        ({
+            children:
+            [
+                ui.createGrid
+                ({
                     columnDefinitions: ['70*', '30*'],
-                    children: [
+                    children:
+                    [
                         varsLabel
                     ]
                 }),
-                ui.createScrollView({
+                ui.createScrollView
+                ({
                     content: varStack
                 }),
-                ui.createBox({
+                ui.createBox
+                ({
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
                 }),
-                ui.createButton({
+                ui.createButton
+                ({
                     text: getLoc('btnClose'),
-                    onClicked: () => {
+                    onClicked: () =>
+                    {
                         Sound.playClick();
                         menu.hide();
                     }
@@ -3041,69 +3937,84 @@ let createVariableMenu = (variables) => {
         })
     });
     return menu;
-};
-let createSystemMenu = (id) => {
+}
+
+let createSystemMenu = (id) =>
+{
     let values = PLANT_DATA[id].system.object;
+
     let tmpAxiom = values.axiom;
-    let axiomEntry = ui.createEntry({
+    let axiomEntry = ui.createEntry
+    ({
         text: tmpAxiom,
         row: 0,
         column: 1
     });
     let tmpVars = Object.entries(values.variables);
-    let varButton = ui.createButton({
+    let varButton = ui.createButton
+    ({
         text: getLoc('btnVar'),
         row: 0,
         column: 2,
         heightRequest: getSmallBtnSize(ui.screenWidth),
-        onClicked: () => {
+        onClicked: () =>
+        {
             Sound.playClick();
             let varMenu = createVariableMenu(tmpVars);
             varMenu.show();
         }
     });
     let tmpRules = [];
-    for (let i = 0; i < values.rules.length; ++i)
+    for(let i = 0; i < values.rules.length; ++i)
         tmpRules[i] = values.rules[i];
     let ruleEntries = [];
-    for (let i = 0; i < tmpRules.length; ++i) {
-        ruleEntries.push(ui.createEntry({
+    for(let i = 0; i < tmpRules.length; ++i)
+    {
+        ruleEntries.push(ui.createEntry
+        ({
             row: i,
             text: tmpRules[i]
         }));
     }
-    let rulesLabel = ui.createLatexLabel({
+    let rulesLabel = ui.createLatexLabel
+    ({
         text: Localization.format(getLoc('labelRules'), ruleEntries.length),
         verticalTextAlignment: TextAlignment.CENTER,
         // margin: new Thickness(0, 12),
         heightRequest: getSmallBtnSize(ui.screenWidth)
     });
-    let ruleStack = ui.createGrid({
+    let ruleStack = ui.createGrid
+    ({
         children: ruleEntries
     });
+
     let tmpIgnore = values.ignoreList || '';
-    let ignoreEntry = ui.createEntry({
+    let ignoreEntry = ui.createEntry
+    ({
         text: tmpIgnore,
         row: 0,
         column: 1,
         horizontalTextAlignment: TextAlignment.END
     });
     let tmpCI = values.ctxIgnoreList || '';
-    let CIEntry = ui.createEntry({
+    let CIEntry = ui.createEntry
+    ({
         text: tmpCI,
         row: 1,
         column: 1,
         horizontalTextAlignment: TextAlignment.END
     });
     let tmpAngle = values.turnAngle || '0';
-    let angleEntry = ui.createEntry({
+    let angleEntry = ui.createEntry
+    ({
         text: tmpAngle.toString(),
         row: 2,
         column: 1,
         horizontalTextAlignment: TextAlignment.END
     });
     let tmpTropism = values.tropism || '0';
-    let tropismEntry = ui.createEntry({
+    let tropismEntry = ui.createEntry
+    ({
         text: tmpTropism.toString(),
         row: 3,
         column: 1,
@@ -3135,70 +4046,94 @@ let createSystemMenu = (id) => {
         horizontalTextAlignment: TextAlignment.END
     });
     */
-    let menu = ui.createPopup({
+
+    let menu = ui.createPopup
+    ({
         title: getLoc('plants')[id].name,
         isPeekable: true,
-        content: ui.createStackLayout({
-            children: [
-                ui.createScrollView({
+        content: ui.createStackLayout
+        ({
+            children:
+            [
+                ui.createScrollView
+                ({
                     // heightRequest: ui.screenHeight * 0.32,
-                    content: ui.createStackLayout({
-                        children: [
-                            ui.createLatexLabel({
+                    content: ui.createStackLayout
+                    ({
+                        children:
+                        [
+                            ui.createLatexLabel
+                            ({
                                 text: getLoc('plants')[id].LsDetails,
                                 margin: new Thickness(0, 6),
                                 horizontalTextAlignment: TextAlignment.START,
                                 verticalTextAlignment: TextAlignment.CENTER
                             }),
-                            ui.createGrid({
+                            ui.createGrid
+                            ({
                                 columnDefinitions: ['20*', '50*', '30*'],
-                                children: [
-                                    ui.createLatexLabel({
+                                children:
+                                [
+                                    ui.createLatexLabel
+                                    ({
                                         text: getLoc('labelAxiom'),
                                         row: 0,
                                         column: 0,
-                                        verticalTextAlignment: TextAlignment.CENTER
+                                        verticalTextAlignment:
+                                        TextAlignment.CENTER
                                     }),
                                     axiomEntry,
                                     varButton
                                 ]
                             }),
-                            ui.createGrid({
+                            ui.createGrid
+                            ({
                                 columnDefinitions: ['70*', '30*'],
-                                children: [
+                                children:
+                                [
                                     rulesLabel
                                 ]
                             }),
                             ruleStack,
-                            ui.createGrid({
+                            ui.createGrid
+                            ({
                                 columnDefinitions: ['70*', '30*'],
-                                children: [
-                                    ui.createLatexLabel({
+                                children:
+                                [
+                                    ui.createLatexLabel
+                                    ({
                                         text: getLoc('labelIgnored'),
                                         row: 0,
                                         column: 0,
-                                        verticalTextAlignment: TextAlignment.CENTER
+                                        verticalTextAlignment:
+                                        TextAlignment.CENTER
                                     }),
                                     ignoreEntry,
-                                    ui.createLatexLabel({
+                                    ui.createLatexLabel
+                                    ({
                                         text: getLoc('labelCtxIgnored'),
                                         row: 1,
                                         column: 0,
-                                        verticalTextAlignment: TextAlignment.CENTER
+                                        verticalTextAlignment:
+                                        TextAlignment.CENTER
                                     }),
                                     CIEntry,
-                                    ui.createLatexLabel({
+                                    ui.createLatexLabel
+                                    ({
                                         text: getLoc('labelAngle'),
                                         row: 2,
                                         column: 0,
-                                        verticalTextAlignment: TextAlignment.CENTER
+                                        verticalTextAlignment:
+                                        TextAlignment.CENTER
                                     }),
                                     angleEntry,
-                                    ui.createLatexLabel({
+                                    ui.createLatexLabel
+                                    ({
                                         text: getLoc('labelTropism'),
                                         row: 3,
                                         column: 0,
-                                        verticalTextAlignment: TextAlignment.CENTER
+                                        verticalTextAlignment:
+                                        TextAlignment.CENTER
                                     }),
                                     tropismEntry,
                                     /*
@@ -3210,13 +4145,16 @@ let createSystemMenu = (id) => {
                         ]
                     })
                 }),
-                ui.createBox({
+                ui.createBox
+                ({
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
                 }),
-                ui.createButton({
+                ui.createButton
+                ({
                     text: getLoc('btnClose'),
-                    onClicked: () => {
+                    onClicked: () =>
+                    {
                         Sound.playClick();
                         menu.hide();
                     }
@@ -3225,147 +4163,195 @@ let createSystemMenu = (id) => {
         })
     });
     return menu;
-};
-let createColonyViewMenu = (colony) => {
-    if (!colonyViewConfig[colony.id]) {
+}
+
+let createColonyViewMenu = (colony) =>
+{
+    if(!colonyViewConfig[colony.id])
+    {
         colonyViewConfig[colony.id] =
-            {
-                filter: '',
-                params: true
-            };
+        {
+            filter: '',
+            params: true
+        };
     }
-    let reconstructionTask = {
+    let reconstructionTask: Task =
+    {
         start: 0
     };
-    let filterEntry = ui.createEntry({
+
+    let filterEntry = ui.createEntry
+    ({
         column: 1,
         text: colonyViewConfig[colony.id].filter,
         clearButtonVisibility: ClearButtonVisibility.WHILE_EDITING,
-        onTextChanged: (ot, nt) => {
+        onTextChanged: (ot, nt) =>
+        {
             colonyViewConfig[colony.id].filter = nt;
             reconstructionTask =
-                {
-                    start: 0
-                };
+            {
+                start: 0
+            };
         }
     });
-    let paramSwitch = ui.createSwitch({
+    let paramSwitch = ui.createSwitch
+    ({
         column: 3,
         isToggled: colonyViewConfig[colony.id].params,
         horizontalOptions: LayoutOptions.CENTER,
-        onTouched: (e) => {
-            if (e.type == TouchType.SHORTPRESS_RELEASED ||
-                e.type == TouchType.LONGPRESS_RELEASED) {
+        onTouched: (e) =>
+        {
+            if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            e.type == TouchType.LONGPRESS_RELEASED)
+            {
                 Sound.playClick();
                 colonyViewConfig[colony.id].params =
-                    !colonyViewConfig[colony.id].params;
+                !colonyViewConfig[colony.id].params;
                 paramSwitch.isToggled = colonyViewConfig[colony.id].params;
                 reconstructionTask =
-                    {
-                        start: 0
-                    };
+                {
+                    start: 0
+                };
             }
         }
     });
-    let updateReconstruction = () => {
-        if (!('result' in reconstructionTask) ||
-            ('result' in reconstructionTask && reconstructionTask.start)) {
-            reconstructionTask = PLANT_DATA[colony.id].system.reconstruct(colony.sequence, colonyViewConfig[colony.id].params ?
-                colony.params : null, colonyViewConfig[colony.id].filter, reconstructionTask);
+    let updateReconstruction = () =>
+    {
+        if(!('result' in reconstructionTask) ||
+        ('result' in reconstructionTask && reconstructionTask.start))
+        {
+            reconstructionTask = PLANT_DATA[colony.id].system.reconstruct(
+            colony.sequence, colonyViewConfig[colony.id].params ?
+            colony.params : null, colonyViewConfig[colony.id].filter,
+            reconstructionTask);
         }
         return reconstructionTask.result;
-    };
-    let tmpTitle = Localization.format(getLoc('colony'), colony.population, getLoc('plants')[colony.id].name, colony.stage);
+    }
+
+    let tmpTitle = Localization.format(getLoc('colony'), colony.population,
+    getLoc('plants')[colony.id].name, colony.stage);
     let tmpStage = colony.stage;
     let cmtStage;
-    let updateCommentary = () => {
+    let updateCommentary = () =>
+    {
         let stages = getLoc('plants')[colony.id].stages;
-        if (!stages || !stages.index || colony.stage < stages.index[0])
+        if(!stages || !stages.index || colony.stage < stages.index[0])
             return getLoc('noCommentary');
-        if (stages[colony.stage])
+
+        if(stages[colony.stage])
             cmtStage = colony.stage;
         else
             cmtStage = stages.index[binarySearch(stages.index, colony.stage)];
         return stages[cmtStage];
-    };
+    }
     let tmpCmt = updateCommentary();
-    let plantStats = ui.createLatexLabel({
-        text: Localization.format(getLoc('plantStats'), cmtStage, tmpCmt, PLANT_DATA[colony.id].maxStage || '∞', colony.synthRate, PLANT_DATA[colony.id].growthRate, PLANT_DATA[colony.id].growthCost, colony.sequence.length),
+    let plantStats = ui.createLatexLabel
+    ({
+        text: Localization.format(getLoc('plantStats'), cmtStage, tmpCmt,
+        PLANT_DATA[colony.id].maxStage || '∞', colony.synthRate,
+        PLANT_DATA[colony.id].growthRate, PLANT_DATA[colony.id].growthCost,
+        colony.sequence.length),
         margin: new Thickness(0, 6),
         horizontalTextAlignment: TextAlignment.START,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let pageContents = ui.createLabel({
+    let pageContents = ui.createLabel
+    ({
         fontFamily: FontFamily.CMU_REGULAR,
         fontSize: 16,
         text: () => updateReconstruction(),
         lineBreakMode: LineBreakMode.CHARACTER_WRAP
     });
-    let viewButton = ui.createButton({
+
+    let viewButton = ui.createButton
+    ({
         text: getLoc('btnView'),
         row: 0, column: 0,
-        onClicked: () => {
+        onClicked: () =>
+        {
             Sound.playClick();
             let statsMenu = createSystemMenu(colony.id);
             statsMenu.show();
         }
     });
-    let closeButton = ui.createButton({
+    let closeButton = ui.createButton
+    ({
         text: getLoc('btnClose'),
         row: 0, column: 1,
-        onClicked: () => {
+        onClicked: () =>
+        {
             Sound.playClick();
             menu.hide();
         }
     });
-    let menu = ui.createPopup({
-        title: () => {
-            if (tmpStage != colony.stage) {
+
+    let menu = ui.createPopup
+    ({
+        title: () =>
+        {
+            if(tmpStage != colony.stage)
+            {
                 /*
                 Menu title and commentary are updated dynamically without
                 the player having to close and re-open.
                 */
-                tmpTitle = Localization.format(getLoc('colony'), colony.population, getLoc('plants')[colony.id].name, colony.stage);
+                tmpTitle = Localization.format(getLoc('colony'),
+                colony.population, getLoc('plants')[colony.id].name,
+                colony.stage);
                 tmpCmt = updateCommentary();
-                plantStats.text = Localization.format(getLoc('plantStats'), cmtStage, tmpCmt, PLANT_DATA[colony.id].maxStage || '∞', PLANT_DATA[colony.id].growthRate, colony.synthRate, PLANT_DATA[colony.id].growthCost, colony.sequence.length);
+                plantStats.text = Localization.format(getLoc('plantStats'),
+                cmtStage, tmpCmt, PLANT_DATA[colony.id].maxStage || '∞',
+                PLANT_DATA[colony.id].growthRate, colony.synthRate,
+                PLANT_DATA[colony.id].growthCost, colony.sequence.length);
                 tmpStage = colony.stage;
                 reconstructionTask =
-                    {
-                        start: 0
-                    };
+                {
+                    start: 0
+                };
             }
             return tmpTitle;
         },
         isPeekable: true,
-        content: ui.createStackLayout({
-            children: [
+        content: ui.createStackLayout
+        ({
+            children:
+            [
                 plantStats,
-                ui.createFrame({
+                ui.createFrame
+                ({
                     padding: new Thickness(8, 6),
                     heightRequest: ui.screenHeight * 0.16,
-                    content: ui.createScrollView({
-                        content: ui.createStackLayout({
-                            children: [
+                    content: ui.createScrollView
+                    ({
+                        content: ui.createStackLayout
+                        ({
+                            children:
+                            [
                                 pageContents
                             ]
                         })
                     })
                 }),
-                ui.createBox({
+                ui.createBox
+                ({
                     heightRequest: 0,
                     margin: new Thickness(0)
                 }),
-                ui.createGrid({
+                ui.createGrid
+                ({
                     minimumHeightRequest: getSmallBtnSize(ui.screenWidth),
                     columnDefinitions: ['20*', '30*', '35*', '15*'],
-                    children: [
-                        ui.createLatexLabel({
+                    children:
+                    [
+                        ui.createLatexLabel
+                        ({
                             text: getLoc('labelFilter'),
                             column: 0,
                             verticalTextAlignment: TextAlignment.CENTER
                         }),
                         filterEntry,
-                        ui.createLatexLabel({
+                        ui.createLatexLabel
+                        ({
                             text: getLoc('labelParams'),
                             column: 2,
                             horizontalOptions: LayoutOptions.END,
@@ -3374,14 +4360,17 @@ let createColonyViewMenu = (colony) => {
                         paramSwitch
                     ]
                 }),
-                ui.createBox({
+                ui.createBox
+                ({
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
                 }),
-                ui.createGrid({
+                ui.createGrid
+                ({
                     minimumHeightRequest: getBtnSize(ui.screenWidth),
                     columnDefinitions: ['50*', '50*'],
-                    children: [
+                    children:
+                    [
                         viewButton,
                         closeButton
                     ]
@@ -3390,77 +4379,97 @@ let createColonyViewMenu = (colony) => {
         })
     });
     return menu;
-};
-let createNotebookMenu = () => {
+}
+
+let createNotebookMenu = () =>
+{
     let plantLabels = [];
     let maxLevelEntries = [];
     // let harvestEntries = [];
-    for (let i = 0; i <= plantPerma.level; ++i) {
-        if (!notebook[plantUnlocks[i]]) {
+    for(let i = 0; i <= plantPerma.level; ++i)
+    {
+        if(!notebook[plantUnlocks[i]])
+        {
             notebook[plantUnlocks[i]] =
-                {
-                    maxLevel: MAX_INT,
-                    harvestStage: MAX_INT
-                };
+            {
+                maxLevel: MAX_INT,
+                harvestStage: MAX_INT
+            };
         }
-        plantLabels.push(ui.createLatexLabel({
+        plantLabels.push(ui.createLatexLabel
+        ({
             text: getLoc('plants')[plantUnlocks[i]].name,
             row: i, column: 0,
             verticalTextAlignment: TextAlignment.CENTER
         }));
-        maxLevelEntries.push(ui.createEntry({
+        maxLevelEntries.push(ui.createEntry
+        ({
             row: i, column: 1,
             text: notebook[plantUnlocks[i]].maxLevel == MAX_INT ? '' :
-                notebook[plantUnlocks[i]].maxLevel.toString(),
+            notebook[plantUnlocks[i]].maxLevel.toString(),
             keyboard: Keyboard.NUMERIC,
             horizontalTextAlignment: TextAlignment.END,
-            onTextChanged: (ot, nt) => {
+            onTextChanged: (ot, nt) =>
+            {
                 let tmpML = Number(nt) || MAX_INT;
-                for (let j = 0; j < maxPlots; ++j) {
+                for(let j = 0; j < maxPlots; ++j)
+                {
                     let count = 0;
-                    for (let k = 0; k < manager.colonies[j].length; ++k) {
+                    for(let k = 0; k < manager.colonies[j].length; ++k)
+                    {
                         let c = manager.colonies[j][k];
-                        if (c.id == plantUnlocks[i]) {
+                        if(c.id == plantUnlocks[i])
+                        {
                             count += c.population;
                             tmpML = Math.max(tmpML, count);
                         }
                     }
                 }
                 notebook[plantUnlocks[i]].maxLevel = tmpML;
-                for (let j = 0; j < maxPlots; ++j)
+                for(let j = 0; j < maxPlots; ++j)
                     plants[j][plantUnlocks[i]].maxLevel = tmpML;
             }
         }));
         // TODO: Create harvest entry
     }
-    let noteGrid = ui.createGrid({
+    let noteGrid = ui.createGrid
+    ({
         columnDefinitions: theory.isAutoBuyerAvailable ? ['40*', '30*', '30*'] :
-            ['70*', '30*'],
+        ['70*', '30*'],
         children: [...plantLabels, ...maxLevelEntries]
     });
-    let menu = ui.createPopup({
+
+    let menu = ui.createPopup
+    ({
         title: getLoc('permaNote'),
-        content: ui.createStackLayout({
-            children: [
-                ui.createGrid({
+        content: ui.createStackLayout
+        ({
+            children:
+            [
+                ui.createGrid
+                ({
                     heightRequest: theory.isAutoBuyerAvailable ?
-                        getSmallBtnSize(ui.screenWidth) :
-                        getImageSize(ui.screenWidth),
+                    getSmallBtnSize(ui.screenWidth) :
+                    getImageSize(ui.screenWidth),
                     columnDefinitions: theory.isAutoBuyerAvailable ?
-                        ['40*', '30*', '30*'] : ['70*', '30*'],
-                    children: [
-                        ui.createLatexLabel({
+                    ['40*', '30*', '30*'] : ['70*', '30*'],
+                    children:
+                    [
+                        ui.createLatexLabel
+                        ({
                             text: getLoc('labelPlants'),
                             row: 0, column: 0,
                             verticalTextAlignment: TextAlignment.CENTER
                         }),
-                        ui.createLatexLabel({
+                        ui.createLatexLabel
+                        ({
                             text: getLoc('labelMaxLevel'),
                             row: 0, column: 1,
                             horizontalOptions: LayoutOptions.END,
                             verticalTextAlignment: TextAlignment.CENTER
                         }),
-                        ui.createLatexLabel({
+                        ui.createLatexLabel
+                        ({
                             isVisible: theory.isAutoBuyerAvailable,
                             text: getLoc('labelHarvestStage'),
                             row: 0, column: 2,
@@ -3469,18 +4478,22 @@ let createNotebookMenu = () => {
                         })
                     ]
                 }),
-                ui.createBox({
+                ui.createBox
+                ({
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
                 }),
                 noteGrid,
-                ui.createBox({
+                ui.createBox
+                ({
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
                 }),
-                ui.createButton({
+                ui.createButton
+                ({
                     text: getLoc('btnClose'),
-                    onClicked: () => {
+                    onClicked: () =>
+                    {
                         Sound.playClick();
                         menu.hide();
                     }
@@ -3489,96 +4502,119 @@ let createNotebookMenu = () => {
         })
     });
     return menu;
-};
-let createWorldMenu = () => {
-    let GM3Label = ui.createLatexLabel({
+}
+
+let createWorldMenu = () =>
+{
+    let GM3Label = ui.createLatexLabel
+    ({
         text: getLoc('graphMode3D'),
         row: 4, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let GM3Switch = ui.createSwitch({
+    let GM3Switch = ui.createSwitch
+    ({
         isToggled: graphMode3D,
         row: 4, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
-        onTouched: (e) => {
-            if (e.type == TouchType.SHORTPRESS_RELEASED ||
-                e.type == TouchType.LONGPRESS_RELEASED) {
+        onTouched: (e) =>
+        {
+            if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            e.type == TouchType.LONGPRESS_RELEASED)
+            {
                 Sound.playClick();
                 graphMode3D = !graphMode3D;
                 GM3Switch.isToggled = graphMode3D;
             }
         }
     });
-    let GM2Label = ui.createLatexLabel({
+    let GM2Label = ui.createLatexLabel
+    ({
         text: getLoc('graphModes2D')[graphMode2D],
         row: 3, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let GM2Slider = ui.createSlider({
+    let GM2Slider = ui.createSlider
+    ({
         row: 3, column: 1,
         minimum: 0,
         maximum: 2,
         value: graphMode2D,
-        onValueChanged: () => {
+        onValueChanged: () =>
+        {
             graphMode2D = Math.round(GM2Slider.value);
             GM2Label.text = getLoc('graphModes2D')[graphMode2D];
         },
-        onDragCompleted: () => {
+        onDragCompleted: () =>
+        {
             Sound.playClick();
             GM2Slider.value = graphMode2D;
         }
     });
-    let CMLabel = ui.createLatexLabel({
+    let CMLabel = ui.createLatexLabel
+    ({
         text: getLoc('colonyModes')[colonyMode],
         row: 2, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let CMSlider = ui.createSlider({
+    let CMSlider = ui.createSlider
+    ({
         row: 2, column: 1,
         minimum: 0,
         maximum: 2,
         value: colonyMode,
-        onValueChanged: () => {
+        onValueChanged: () =>
+        {
             colonyMode = Math.round(CMSlider.value);
             CMLabel.text = getLoc('colonyModes')[colonyMode];
         },
-        onDragCompleted: () => {
+        onDragCompleted: () =>
+        {
             Sound.playClick();
             CMSlider.value = colonyMode;
         }
     });
-    let APLabel = ui.createLatexLabel({
+    let APLabel = ui.createLatexLabel
+    ({
         text: getLoc('actionPanelLocations')[Number(actionPanelOnTop)],
         row: 1, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let APSwitch = ui.createSwitch({
+    let APSwitch = ui.createSwitch
+    ({
         isToggled: actionPanelOnTop,
         row: 1, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
-        onTouched: (e) => {
-            if (e.type == TouchType.SHORTPRESS_RELEASED ||
-                e.type == TouchType.LONGPRESS_RELEASED) {
+        onTouched: (e) =>
+        {
+            if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            e.type == TouchType.LONGPRESS_RELEASED)
+            {
                 Sound.playClick();
                 actionPanelOnTop = !actionPanelOnTop;
                 APSwitch.isToggled = actionPanelOnTop;
-                APLabel.text = getLoc('actionPanelLocations')[Number(actionPanelOnTop)];
+                APLabel.text = getLoc('actionPanelLocations')[
+                Number(actionPanelOnTop)];
                 theory.invalidatePrimaryEquation();
             }
         }
     });
-    let PTLabel = ui.createLatexLabel({
+    let PTLabel = ui.createLatexLabel
+    ({
         text: getLoc('plotTitleModes')[Number(fancyPlotTitle)],
         row: 0, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let PTSwitch = ui.createSwitch({
+    let PTSwitch = ui.createSwitch
+    ({
         isToggled: fancyPlotTitle,
         row: 0, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
-        onTouched: (e) => {
-            if (e.type == TouchType.SHORTPRESS_RELEASED ||
-                e.type == TouchType.LONGPRESS_RELEASED) {
+        onTouched: (e) =>
+        {
+            if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            e.type == TouchType.LONGPRESS_RELEASED)
+            {
                 Sound.playClick();
                 fancyPlotTitle = !fancyPlotTitle;
                 PTSwitch.isToggled = fancyPlotTitle;
@@ -3587,21 +4623,28 @@ let createWorldMenu = () => {
             }
         }
     });
-    let menu = ui.createPopup({
+
+    let menu = ui.createPopup
+    ({
         isPeekable: true,
         title: getLoc('menuSettings'),
-        content: ui.createStackLayout({
-            children: [
-                ui.createGrid({
+        content: ui.createStackLayout
+        ({
+            children:
+            [
+                ui.createGrid
+                ({
                     columnDefinitions: ['70*', '30*'],
-                    rowDefinitions: [
+                    rowDefinitions:
+                    [
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth)
                     ],
-                    children: [
+                    children:
+                    [
                         GM3Label,
                         GM3Switch,
                         GM2Label,
@@ -3614,33 +4657,41 @@ let createWorldMenu = () => {
                         PTSwitch
                     ]
                 }),
-                ui.createLatexLabel({
+                ui.createLatexLabel
+                ({
                     text: getLoc('versionName'),
                     horizontalOptions: LayoutOptions.CENTER,
                     horizontalTextAlignment: TextAlignment.CENTER,
                     verticalTextAlignment: TextAlignment.CENTER,
                     fontSize: 12
                 }),
-                ui.createBox({
+                ui.createBox
+                ({
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
                 }),
-                ui.createGrid({
+                ui.createGrid
+                ({
                     minimumHeightRequest: getBtnSize(ui.screenWidth),
                     columnDefinitions: ['50*', '50*'],
-                    children: [
-                        ui.createButton({
+                    children:
+                    [
+                        ui.createButton
+                        ({
                             column: 0,
                             text: getLoc('btnClose'),
-                            onClicked: () => {
+                            onClicked: () =>
+                            {
                                 Sound.playClick();
                                 menu.hide();
                             }
                         }),
-                        ui.createButton({
+                        ui.createButton
+                        ({
                             column: 1,
                             text: getLoc('btnReset'),
-                            onClicked: () => {
+                            onClicked: () =>
+                            {
                                 Sound.playClick();
                                 renderer.reset();
                             }
@@ -3651,76 +4702,102 @@ let createWorldMenu = () => {
         })
     });
     return menu;
-};
+}
+
 var isCurrencyVisible = (index) => !index;
+
 var getTau = () => currency.value.max(BigNumber.ZERO).pow(tauRate);
-var getCurrencyFromTau = (tau) => [
+
+var getCurrencyFromTau = (tau) =>
+[
     tau.pow(BigNumber.ONE / tauRate),
     currency.symbol
 ];
-var prePublish = () => {
+
+var prePublish = () =>
+{
     tmpCurrency = currency.value + taxCurrency.value;
-    tmpLevels = Array.from({ length: maxPlots }, (_) => []);
-};
+    tmpLevels = Array.from({length: maxPlots}, (_) => []);
+}
+
 // You can be in debt for this lol
-var postPublish = () => {
+var postPublish = () =>
+{
     currency.value = tmpCurrency;
+
     actuallyPlanting = false;
-    tmpLevels = Array.from({ length: maxPlots }, (_) => { return {}; });
-    for (let i = 0; i < maxPlots; ++i) {
-        for (let j = 0; j < manager.colonies[i].length; ++j) {
+    tmpLevels = Array.from({length: maxPlots}, (_) => {return {};});
+    for(let i = 0; i < maxPlots; ++i)
+    {
+        for(let j = 0; j < manager.colonies[i].length; ++j)
+        {
             let c = manager.colonies[i][j];
-            if (!tmpLevels[i][c.id])
+            if(!tmpLevels[i][c.id])
                 tmpLevels[i][c.id] = 0;
             tmpLevels[i][c.id] += c.population;
         }
-        for (let j = 0; j < plantUnlocks.length; ++j)
+        for(let j = 0; j < plantUnlocks.length; ++j)
             plants[i][plantUnlocks[j]].level = tmpLevels[i][plantUnlocks[j]];
     }
     actuallyPlanting = true;
+
     theory.invalidateQuaternaryValues();
-};
+}
+
 var canResetStage = () => false;
+
 var getResetStageMessage = () => getLoc('resetRenderer');
+
 var resetStage = () => renderer.reset();
+
 var canGoToPreviousStage = () => plotPerma.level > 0 && plotIdx > 0;
-var goToPreviousStage = () => {
+
+var goToPreviousStage = () =>
+{
     --plotIdx;
     let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    if (c)
+    if(c)
         renderer.colony = c;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     updateAvailability();
 };
 var canGoToNextStage = () => plotIdx < plotPerma.level - 1;
-var goToNextStage = () => {
+var goToNextStage = () =>
+{
     ++plotIdx;
     let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    if (c)
+    if(c)
         renderer.colony = c;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     updateAvailability();
 };
+
 // Copied from the ol Oiler's Formula
-var bigStringify = (_, val) => {
-    try {
-        if (val instanceof BigNumber)
+var bigStringify = (_, val) =>
+{
+    try
+    {
+        if(val instanceof BigNumber)
             return 'BigNumber' + val.toBase64String();
     }
-    catch (_a) { }
-    ;
+    catch {};
     return val;
-};
-var unBigStringify = (_, val) => {
-    if (val && typeof val === 'string') {
-        if (val.startsWith('BigNumber'))
+}
+
+var unBigStringify = (_, val) =>
+{
+    if (val && typeof val === 'string')
+    {
+        if(val.startsWith('BigNumber'))
             return BigNumber.fromBase64String(val.substring(9));
     }
     return val;
-};
-var getInternalState = () => JSON.stringify({
+}
+
+var getInternalState = () => JSON.stringify
+({
     version: version,
     haxEnabled: haxEnabled,
     time: time,
@@ -3729,7 +4806,8 @@ var getInternalState = () => JSON.stringify({
     plantIdx: plantIdx,
     finishedTutorial: finishedTutorial,
     manager: manager.object,
-    settings: {
+    settings:
+    {
         graphMode2D: graphMode2D,
         graphMode3D: graphMode3D,
         colonyMode: colonyMode,
@@ -3739,12 +4817,17 @@ var getInternalState = () => JSON.stringify({
     colonyViewConfig: colonyViewConfig,
     notebook: notebook
 }, bigStringify);
-var setInternalState = (stateStr) => {
-    if (!stateStr)
+
+var setInternalState = (stateStr) =>
+{
+    if(!stateStr)
         return;
+
     let state = JSON.parse(stateStr, unBigStringify);
     let v = state.version;
-    if ('haxEnabled' in state) {
+
+    if('haxEnabled' in state)
+    {
         haxEnabled = state.haxEnabled;
         freePenny.isAvailable = haxEnabled;
         warpTick.isAvailable = haxEnabled;
@@ -3752,90 +4835,113 @@ var setInternalState = (stateStr) => {
         warpYear.isAvailable = haxEnabled;
         warpZero.isAvailable = haxEnabled;
     }
-    if ('time' in state) {
+
+    if('time' in state)
+    {
         time = state.time;
         let cycles = time / 144;
         days = Math.floor(cycles);
         years = binarySearch(yearStartLookup, days);
         let phase = Math.max(0, Math.min(cycles - days - 0.25, 0.5));
         insolationIntegral = days * 144 / Math.PI - 72 *
-            (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
+        (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
         growthIntegral = time / 2 + 36 * Math.sin(time * Math.PI / 72) /
-            Math.PI;
+        Math.PI;
     }
-    if ('plotIdx' in state)
+
+    if('plotIdx' in state)
         plotIdx = state.plotIdx;
-    if ('colonyIdx' in state)
+    if('colonyIdx' in state)
         colonyIdx = state.colonyIdx;
-    if ('plantIdx' in state)
+    if('plantIdx' in state)
         plantIdx = state.plantIdx;
-    if ('finishedTutorial' in state)
+    if('finishedTutorial' in state)
         finishedTutorial = state.finishedTutorial;
-    if ('manager' in state)
+
+    if('manager' in state)
         manager = new ColonyManager(state.manager);
-    if (v < 0.04) {
-        if ('graphMode2D' in state)
+
+    if(v < 0.04)
+    {
+        if('graphMode2D' in state)
             graphMode2D = state.graphMode2D;
-        if ('graphMode3D' in state)
+        if('graphMode3D' in state)
             graphMode3D = state.graphMode3D;
-        if ('colonyMode' in state)
+        if('colonyMode' in state)
             colonyMode = state.colonyMode;
-        if ('fancyPlotTitle' in state)
+        if('fancyPlotTitle' in state)
             fancyPlotTitle = state.fancyPlotTitle;
-        if ('actionPanelOnTop' in state)
+        if('actionPanelOnTop' in state)
             actionPanelOnTop = state.actionPanelOnTop;
     }
-    else if ('settings' in state) {
+    else if('settings' in state)
+    {
         graphMode2D = state.settings.graphMode2D;
         graphMode3D = state.settings.graphMode3D;
         colonyMode = state.settings.colonyMode;
         fancyPlotTitle = state.settings.fancyPlotTitle;
         actionPanelOnTop = state.settings.actionPanelOnTop;
     }
-    if ('colonyViewConfig' in state)
+
+    if('colonyViewConfig' in state)
         colonyViewConfig = state.colonyViewConfig;
-    if ('notebook' in state)
+    if('notebook' in state)
         notebook = state.notebook;
+
     actuallyPlanting = false;
-    tmpLevels = Array.from({ length: maxPlots }, (_) => { return {}; });
-    for (let i = 0; i < maxPlots; ++i) {
-        for (let j = 0; j < manager.colonies[i].length; ++j) {
+    tmpLevels = Array.from({length: maxPlots}, (_) => {return {};});
+    for(let i = 0; i < maxPlots; ++i)
+    {
+        for(let j = 0; j < manager.colonies[i].length; ++j)
+        {
             let c = manager.colonies[i][j];
-            if (!tmpLevels[i][c.id])
+            if(!tmpLevels[i][c.id])
                 tmpLevels[i][c.id] = 0;
             tmpLevels[i][c.id] += c.population;
         }
-        for (let j = 0; j < plantUnlocks.length; ++j) {
+        for(let j = 0; j < plantUnlocks.length; ++j)
+        {
             plants[i][plantUnlocks[j]].level = tmpLevels[i][plantUnlocks[j]];
-            if (theory.isBuyAllAvailable && notebook[plantUnlocks[j]]) {
-                plants[i][plantUnlocks[j]].maxLevel = Math.max(notebook[plantUnlocks[j]].maxLevel, plants[i][plantUnlocks[j]].level);
+            if(theory.isBuyAllAvailable && notebook[plantUnlocks[j]])
+            {
+                plants[i][plantUnlocks[j]].maxLevel = Math.max(
+                notebook[plantUnlocks[j]].maxLevel,
+                plants[i][plantUnlocks[j]].level);
             }
         }
     }
     actuallyPlanting = true;
+
     let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    if (c)
+    if(c)
         renderer.colony = c;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
     theory.invalidateQuaternaryValues();
     updateAvailability();
-};
-var get2DGraphValue = () => {
-    switch (graphMode2D) {
+}
+
+var get2DGraphValue = () =>
+{
+    switch(graphMode2D)
+    {
         case 0:
             return 0;
-        case 1: // Insolation
+        case 1:     // Insolation
             return insolationCoord;
-        case 2: // Growth
+        case 2:     // Growth
             return growthCoord;
     }
 };
-var get3DGraphPoint = () => {
-    if (graphMode3D)
+
+var get3DGraphPoint = () =>
+{
+    if(graphMode3D)
         renderer.draw();
     return renderer.cursor;
-};
+}
+
 var get3DGraphTranslation = () => renderer.camera;
+
 init();
