@@ -20,10 +20,10 @@ import { MathExpression } from '../../api/MathExpression';
 import { Theme } from '../../api/Settings';
 import { Sound } from '../../api/Sound';
 import { game } from '../../api/Game';
-var id = 'lemmas_garden_ts';
+var id = 'lemmas_garden';
 var getName = (language) => {
     const names = {
-        en: 'Typescript Garden',
+        en: `Lemma's Garden`,
     };
     return names[language] || names.en;
 };
@@ -2288,7 +2288,7 @@ const PLANT_DATA = {
         actions: [
             {
                 symbols: new Set('K'),
-                system: new LSystem('', ['K=']),
+                // system: new LSystem('', ['K=']),
                 killColony: true
             }
             // No prune

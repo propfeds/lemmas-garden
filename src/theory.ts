@@ -21,12 +21,12 @@ import { Theme } from '../../api/Settings';
 import { Sound } from '../../api/Sound';
 import { game } from '../../api/Game';
 
-var id = 'lemmas_garden_ts';
+var id = 'lemmas_garden';
 var getName = (language) =>
 {
     const names =
     {
-        en: 'Typescript Garden',
+        en: `Lemma's Garden`,
     };
 
     return names[language] || names.en;
@@ -2934,6 +2934,25 @@ class ColonyManager
     }
 }
 
+interface Action
+{
+    symbols?: Set<string>;
+    system?: LSystem;
+    killColony: boolean
+}
+
+interface Plant
+{
+    system: LSystem;
+    maxStage?: number;
+    cost: any;
+    growthRate: BigNumber;
+    growthCost: BigNumber;
+    actions: Action[];
+    camera: (stage: number) => RendererCamera;
+    stroke: (stage: number) => RendererStroke;
+}
+
 // Balance parameters
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(100)));
@@ -2957,7 +2976,7 @@ pubExp * tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
 var getPublicationMultiplierFormula = (symbol) => `\\frac{2}{3}\\times
 {${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
 
-const PLANT_DATA =
+const PLANT_DATA: {[key: number]: Plant} =
 {
     1:  // Calendula
     {
@@ -2999,7 +3018,7 @@ const PLANT_DATA =
         [
             {   // Always a harvest
                 symbols: new Set('K'),
-                system: new LSystem('', ['K=']),
+                // system: new LSystem('', ['K=']),
                 killColony: true
             }
             // No prune
