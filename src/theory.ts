@@ -7,19 +7,19 @@ import { LayoutOptions } from '../../api/ui/properties/LayoutOptions';
 import { TextAlignment } from '../../api/ui/properties/TextAlignment';
 import { Thickness } from '../../api/ui/properties/Thickness';
 import { Vector3 } from '../../api/Vector3';
-import { Utils, log } from '../../api/Utils';
+import { log } from '../../api/Utils';
 import { ui } from '../../api/ui/UI';
+import { Aspect } from '../../api/ui/properties/Aspect';
+import { ClearButtonVisibility } from '../../api/ui/properties/ClearButtonVisibility';
 import { Color } from '../../api/ui/properties/Color';
 import { FontFamily } from '../../api/ui/properties/FontFamily';
 import { Keyboard } from '../../api/ui/properties/Keyboard';
+import { LineBreakMode } from '../../api/ui/properties/LineBreakMode';
 import { TouchType } from '../../api/ui/properties/TouchType';
 import { MathExpression } from '../../api/MathExpression';
-import { ClearButtonVisibility } from '../../api/ui/properties/ClearButtonVisibility';
-import { LineBreakMode } from '../../api/ui/properties/LineBreakMode';
-import { Upgrade } from '../../api/Upgrades';
-import { Button } from '../../api/ui/Button';
-import { Frame } from '../../api/ui/Frame';
 import { Theme } from '../../api/Settings';
+import { Sound } from '../../api/Sound';
+import { game } from '../../api/Game';
 
 var id = 'lemmas_garden';
 var getName = (language) =>
@@ -424,6 +424,17 @@ let getCoordString = (x) => x.toFixed(x >= -0.01 ?
     (x <= 9.999 ? 3 : (x <= 99.99 ? 2 : 1)) :
     (x < -9.99 ? (x < -99.9 ? 0 : 1) : 2)
 );
+
+const yearStartLookup = [0];
+
+for(let i = 1; i <= 400; ++i)
+{
+    let leap = !(i%4) && (!!(i%100) || !(i%400));
+    let offset = leap ? 366 : 365;
+    yearStartLookup[i] = yearStartLookup[i-1] + offset;
+}
+
+// Classes
 
 interface QueueInput
 {
@@ -892,32 +903,32 @@ class Quaternion
 
 interface LSystemInput
 {
-    axiom: string,
-    rules: string[],
-    turnAngle: number | string,
-    seed: number,
-    ignoreList: string,
-    ctxIgnoreList: string,
-    tropism: number | string,
+    axiom: string;
+    rules: string[];
+    turnAngle: number | string;
+    seed: number;
+    ignoreList: string;
+    ctxIgnoreList: string;
+    tropism: number | string;
     variables: {[key: string]: string}
 }
 
 interface LSystemRule
 {
-    left?: string,
-    right?: string,
-    params?: {[key: string]: [string, number]},
+    left?: string;
+    right?: string;
+    params?: {[key: string]: [string, number]};
     paramMap?: (v: string, l: null | BigNumber[], m: null | BigNumber[],
-    r: null | BigNumber[]) => null | BigNumber,
-    condition?: MathExpression,
-    derivations?: string | string[],
-    parameters?: MathExpression | MathExpression[],
+    r: null | BigNumber[]) => null | BigNumber;
+    condition?: MathExpression;
+    derivations?: string | string[];
+    parameters?: MathExpression | MathExpression[];
     chances?: MathExpression | MathExpression[]
 }
 
 interface Task
 {
-    start?: number,
+    start?: number;
     [key: string]: any
 }
 
@@ -1736,12 +1747,65 @@ class LSystem
     }
 }
 
+interface RendererCamera
+{
+    scale?: number;
+    mode?: number;
+    followFactor?: number;
+    x?: number;
+    y?: number;
+    z?: number;
+    upright?: boolean
+}
+
+interface RendererStroke
+{
+    tickLength?: number;
+    initDelay?: number;
+    loadModels?: boolean;
+    quickDraw?: boolean;
+    quickBacktrack?: boolean;
+    backtrackTail?: boolean;
+    hesitateApex?: boolean;
+    hesitateFork?: boolean
+}
+
 /**
  * Mini-renderer!
  */
 class Renderer
 {
-    constructor(system, sequence, params, camera = {}, stroke = {})
+    figureScale: number;
+    cameraMode: number;
+    followFactor: number;
+    camCentre: Vector3;
+    upright: boolean;
+    lastCamera: Vector3;
+    lastCamVel: Vector3;
+    tickLength: number;
+    initDelay: number;
+    loadModels: boolean;
+    quickDraw: boolean;
+    quickBacktrack: boolean;
+    backtrackTail: boolean;
+    hesitateApex: boolean;
+    hesitateFork: boolean;
+    system: LSystem;
+    sequence: string;
+    params: Array<null | BigNumber[]>;
+    state: Vector3;
+    ori: Vector3;
+    stack: Array<[Vector3, Vector3]>;
+    idxStack: number[];
+    models: string[];
+    mdi: number[];
+    modelParams: Array<Array<null | BigNumber[]>>;
+    i: number;
+    elapsed: number;
+    cooldown: number;
+    polygonMode: number;
+    constructor(system, sequence, params, camera: RendererCamera = {},
+    stroke: RendererStroke = {})
     {
         this.figureScale = camera.scale || 1;
         this.cameraMode = camera.mode || 0;
@@ -1817,7 +1881,8 @@ class Renderer
         PLANT_DATA[colony.id].camera(colony.stage),
         PLANT_DATA[colony.id].stroke(colony.stage));
     }
-    configure(sequence, params, camera = {}, stroke = {})
+    configure(sequence, params, camera: RendererCamera = {},
+    stroke: RendererStroke = {})
     {
         this.figureScale = camera.scale || 1;
         this.cameraMode = camera.mode || 0;
@@ -2405,12 +2470,52 @@ class Renderer
     }
 }
 
+interface ManagerInput
+{
+    colonies?: Array<Colony[]>;
+    gangsta?: [number, number];
+    ancestreeTask?: Task;
+    deriveTask?: Task;
+    calcTask?: Task;
+    actionQueue?: QueueInput;
+    actionGangsta?: [number, number, number];
+    actionAncestreeTask?: Task;
+    actionDeriveTask?: Task;
+    actionCalcTask?: Task;
+}
+
+interface Colony
+{
+    id: number;
+    population: number;
+    sequence: string;
+    params: Array<null | BigNumber[]>;
+    stage: number;
+
+    energy: BigNumber;
+    growth: BigNumber;
+    synthRate?: BigNumber;
+    profit?: BigNumber;
+    diReserve?: BigNumber;
+    dgReserve?: BigNumber;
+}
+
 /**
  * This is not ECS, I'm not good enough to understand ECS.
 */
 class ColonyManager
 {
-    constructor(object = {})
+    colonies: Array<Colony[]>;
+    gangsta: [number, number];
+    ancestreeTask: Task;
+    deriveTask: Task;
+    calcTask: Task;
+    actionQueue: Queue;
+    actionGangsta: [number, number, number];
+    actionAncestreeTask: Task;
+    actionDeriveTask: Task;
+    actionCalcTask: Task;
+    constructor(object: ManagerInput = {})
     {
         // 6*inf
         this.colonies = object.colonies ||
@@ -2475,7 +2580,7 @@ class ColonyManager
             plants[plot][id].refund(population);
             return;
         }
-        let c =
+        let c: Colony =
         {
             id: id,
             population: population,
@@ -2495,7 +2600,7 @@ class ColonyManager
         theory.invalidateQuaternaryValues();
         updateAvailability();
     }
-    killColony(plot, index)
+    killColony(plot, index, id?: number)
     {
         let c = this.colonies[plot][index];
         if(!c)
@@ -2536,7 +2641,10 @@ class ColonyManager
         if(this.actionGangsta)
             this.continueAction();
         else if(this.actionQueue.length)
-            this.performAction(...this.actionQueue.dequeue());
+        {
+            let action: [number, number, number] = this.actionQueue.dequeue();
+            this.performAction(...action);
+        }
         else if(this.gangsta)
             this.evolve();
 
@@ -2586,7 +2694,7 @@ class ColonyManager
             }
         }
     }
-    calculateStats(colony, task = {}, dTask = {})
+    calculateStats(colony, task: Task = {}, dTask: Task = {})
     {
         // This is the only case where the colony needed
         let harvestable = PLANT_DATA[colony.id].actions[0].symbols;
@@ -2727,7 +2835,7 @@ class ColonyManager
         if(!c || !PLANT_DATA[c.id].actions[id])
             return;
 
-        let action = [plot, index, id];
+        let action: [number, number, number] = [plot, index, id];
         if(this.actionGangsta)
         {
             this.actionQueue.enqueue(action);
@@ -2824,15 +2932,6 @@ class ColonyManager
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
     }
-}
-
-const yearStartLookup = [0];
-
-for(let i = 1; i <= 400; ++i)
-{
-    let leap = !(i%4) && (!!(i%100) || !(i%400));
-    let offset = leap ? 366 : 365;
-    yearStartLookup[i] = yearStartLookup[i-1] + offset;
 }
 
 // Balance parameters
@@ -4057,7 +4156,7 @@ let createColonyViewMenu = (colony) =>
             params: true
         };
     }
-    let reconstructionTask =
+    let reconstructionTask: Task =
     {
         start: 0
     };
