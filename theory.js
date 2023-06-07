@@ -38,6 +38,7 @@ You are her first student in a long while.`,
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
 var version = 0.05;
 const maxPlots = 6;
+const maxColoniesPerPlot = 5;
 let haxEnabled = false;
 let time = 0;
 let days = 0;
@@ -58,18 +59,9 @@ let fancyPlotTitle = false;
 let actionPanelOnTop = false;
 let colonyViewConfig = {};
 let notebook = {};
-let textColor = 'ffccff';
 let tmpCurrency;
 let tmpLevels;
 // Other constants
-const eq1Colour = new Map();
-eq1Colour.set(Theme.STANDARD, 'ffffff');
-eq1Colour.set(Theme.DARK, 'ffffff');
-eq1Colour.set(Theme.LIGHT, '000000');
-const eq2Colour = new Map();
-eq2Colour.set(Theme.STANDARD, 'c0c0c0');
-eq2Colour.set(Theme.DARK, 'b5b5b5');
-eq2Colour.set(Theme.LIGHT, '434343');
 const MAX_INT = 0x7fffffff;
 const TRIM_SP = /\s+/g;
 const LS_RULE = /([^:]+)(:(.+))?=(.*)/;
@@ -358,6 +350,10 @@ let binarySearch = (arr, target) => {
 let getCoordString = (x) => x.toFixed(x >= -0.01 ?
     (x <= 9.999 ? 3 : (x <= 99.99 ? 2 : 1)) :
     (x < -9.99 ? (x < -99.9 ? 0 : 1) : 2));
+/**
+ * Restricts a number into the specified range.
+ */
+let saturate = (x, min, max) => x > max ? max : x < min ? min : x;
 const yearStartLookup = [0];
 for (let i = 1; i <= 400; ++i) {
     let leap = !(i % 4) && (!!(i % 100) || !(i % 400));
@@ -1929,8 +1925,8 @@ class ColonyManager {
                 return;
             }
         }
-        // Max 5 colonies per plot
-        if (this.colonies[plot].length >= 5) {
+        // Max 5, unless invading
+        if (this.colonies[plot].length >= maxColoniesPerPlot) {
             plants[plot][id].refund(population);
             return;
         }
@@ -2297,7 +2293,7 @@ const PLANT_DATA = {
             return {
                 scale: 6,
                 x: 0,
-                y: Math.min(Math.max(3.75, stage / 4), 5),
+                y: saturate(stage / 4, 3.75, 5),
                 Z: 0,
                 upright: true
             };
@@ -2358,7 +2354,7 @@ const PLANT_DATA = {
             return {
                 scale: 8,
                 x: 0,
-                y: Math.min(Math.max(5, stage / 4), 9),
+                y: saturate(stage / 4, 5, 9),
                 Z: 0,
                 upright: true
             };
@@ -2797,7 +2793,7 @@ var tick = (elapsedTime, multiplier) => {
     days = Math.floor(cycles);
     while (days >= yearStartLookup[years + 1])
         ++years;
-    let phase = Math.max(0, Math.min(cycles - days - 0.25, 0.5));
+    let phase = saturate(cycles - days - 0.25, 0, 0.5);
     let newII = days * 144 / Math.PI - 72 *
         (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
     let di = newII - insolationIntegral;
@@ -3757,7 +3753,7 @@ var setInternalState = (stateStr) => {
         let cycles = time / 144;
         days = Math.floor(cycles);
         years = binarySearch(yearStartLookup, days);
-        let phase = Math.max(0, Math.min(cycles - days - 0.25, 0.5));
+        let phase = saturate(cycles - days - 0.25, 0, 0.5);
         insolationIntegral = days * 144 / Math.PI - 72 *
             (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
         growthIntegral = time / 2 + 36 * Math.sin(time * Math.PI / 72) /

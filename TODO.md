@@ -11,12 +11,13 @@
   - Buttercup
 - Leap years and hopleeks
   - [x] Leap years calculation
-  - [ ] 400-year cycle wrapping
+    - [ ] 400-year cycle wrapping
   - [ ] Hopleek
-  - [ ] Hopleek schedule
+    - [ ] Biting is on evolution queue instead of action?
+    - [ ] Hopleek schedule
 - [ ] Sunflower
 - [ ] Spreadable plants
-- [ ] Cap colony count to 5 per plot, unless?
+- [x] Cap colony count to 5 per plot, unless?
 
 - [ ] Newspapers
 
