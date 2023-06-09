@@ -247,18 +247,13 @@ All plants afterwards will display 'No commentary'.
     - Unlocks more challenges
     - Unlocks auto-plant/harvest (NO AUTO-PRUNE)
 
-- **Introduction**: Yesterday, a small plot of land was registered to Lemma
-Rancher. Today, Lemma's garden does wonderfully. Tomorrow, Madeline would be
-proud.
+- **Intro dialogue**: Hint at grief.
 - **First publish**: 'We've... this much from last harvest.
 Minus the sales tax, maintenance, dog food, *plant* food... I wonder why it'd 
 always miraculously add up to {0}% each time? Lemma, can [you] prove this?'
 We called it the weather's toll. Just to stop worrying about it too much.
 - **Publisher**: is named Ellen to reference the double ln(ln(t)) in the formula
-- **Basil unlock**: Sorry for letting you wait this long.
-I have a friend called Corollary who'd supply me with new seeds for my students.
-She wasn't here until today, so apologies that you may've got a little bit sick
-of that calendula.
+- **Basil unlock**: Knows that the player is sick of calendula.
 - **Clickable headlines** (singular upgrade) after certain points:
   - Hopleek spawning (anticipation on Y4)
   - Published adverts

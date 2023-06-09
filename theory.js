@@ -37,31 +37,6 @@ You are her first student in a long while.`,
 };
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
 var version = 0.05;
-const maxPlots = 6;
-const maxColoniesPerPlot = 5;
-let haxEnabled = false;
-let time = 0;
-let days = 0;
-let years = 0;
-let insolationCoord = 0;
-let growthCoord = 0;
-let insolationIntegral = 0;
-let growthIntegral = 0;
-let plotIdx = 0;
-let colonyIdx = new Array(maxPlots).fill(0);
-let plantIdx = new Array(maxPlots).fill(0);
-let finishedTutorial = false;
-let actuallyPlanting = true;
-let graphMode2D = 0;
-let graphMode3D = true;
-let colonyMode = 1;
-let fancyPlotTitle = false;
-let actionPanelOnTop = false;
-let colonyViewConfig = {};
-let notebook = {};
-let tmpCurrency;
-let tmpLevels;
-// Other constants
 const MAX_INT = 0x7fffffff;
 const TRIM_SP = /\s+/g;
 const LS_RULE = /([^:]+)(:(.+))?=(.*)/;
@@ -73,7 +48,7 @@ const SYNTHABLE_SYMBOLS = new Set('LaA');
 const MAX_CHARS_PER_TICK = 200;
 const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
-const locStrings = {
+const LOC_STRINGS = {
     en: {
         versionName: `Version: 0.0.5, Axiom`,
         wip: 'v0.1, Work in Progress',
@@ -267,10 +242,10 @@ friend of all mathematicians.`
  * @returns {string} the string.
  */
 let getLoc = (name, lang = MENU_LANG) => {
-    if (lang in locStrings && name in locStrings[lang])
-        return locStrings[lang][name];
-    if (name in locStrings.en)
-        return locStrings.en[name];
+    if (lang in LOC_STRINGS && name in LOC_STRINGS[lang])
+        return LOC_STRINGS[lang][name];
+    if (name in LOC_STRINGS.en)
+        return LOC_STRINGS.en[name];
     return `String missing: ${lang}.${name}`;
 };
 /* Image size reference
@@ -1874,10 +1849,11 @@ class Renderer {
  * This is not ECS, I'm not good enough to understand ECS.
 */
 class ColonyManager {
-    constructor(object = {}) {
-        // 6*inf
+    constructor(object = {}, length, width) {
+        this.length = length;
+        this.width = width;
         this.colonies = object.colonies ||
-            Array.from({ length: maxPlots }, (_) => []);
+            Array.from({ length: this.length }, (_) => []);
         // Everyone gangsta until a colony starts evolving
         this.gangsta = object.gangsta;
         this.ancestreeTask = object.ancestreeTask ||
@@ -1926,7 +1902,7 @@ class ColonyManager {
             }
         }
         // Max 5, unless invading
-        if (this.colonies[plot].length >= maxColoniesPerPlot) {
+        if (this.colonies[plot].length >= this.width) {
             plants[plot][id].refund(population);
             return;
         }
@@ -2230,6 +2206,8 @@ class ColonyManager {
     }
 }
 // Balance parameters
+const nofPlots = 6;
+const maxColoniesPerPlot = 5;
 const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(100)));
 const plantUnlocks = [1, 2];
 const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2200), new ConstantCost(1e45));
@@ -2410,12 +2388,34 @@ const PLANT_DATA = {
         }
     }
 };
+let haxEnabled = false;
+let time = 0;
+let days = 0;
+let years = 0;
+let insolationCoord = 0;
+let growthCoord = 0;
+let insolationIntegral = 0;
+let growthIntegral = 0;
+let plotIdx = 0;
+let colonyIdx = new Array(nofPlots).fill(0);
+let plantIdx = new Array(nofPlots).fill(0);
+let finishedTutorial = false;
+let actuallyPlanting = true;
+let graphMode2D = 0;
+let graphMode3D = true;
+let colonyMode = 1;
+let fancyPlotTitle = false;
+let actionPanelOnTop = false;
+let colonyViewConfig = {};
+let notebook = {};
+let tmpCurrency;
+let tmpLevels;
 // const sidewayQuat = new Quaternion(1, 0, 0, 0);
 const uprightQuat = new Quaternion(-Math.sqrt(2) / 2, 0, 0, Math.sqrt(2) / 2);
 const xUpQuat = new Quaternion(0, 1, 0, 0);
 const yUpQuat = new Quaternion(0, 0, 1, 0);
 const zUpQuat = new Quaternion(0, 0, 0, 1);
-let manager = new ColonyManager();
+let manager = new ColonyManager({}, nofPlots, maxColoniesPerPlot);
 let renderer = new Renderer(new LSystem(), '', []);
 let globalRNG = new Xorshift(Date.now());
 let quaternaryEntries = [
@@ -2548,7 +2548,7 @@ const settingsFrame = createFramedButton({
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog-dark.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog.png'));
 var switchPlant, viewColony, switchColony;
-var plants = Array.from({ length: maxPlots }, (_) => { return {}; });
+var plants = Array.from({ length: nofPlots }, (_) => { return {}; });
 var notebookPerma, plotPerma, plantPerma;
 var freePenny, warpTick, warpDay, warpYear, warpZero;
 var currency, taxCurrency;
@@ -2609,7 +2609,7 @@ var init = () => {
     }
     /* Plants & switch plants
     */
-    for (let i = 0; i < maxPlots; ++i) {
+    for (let i = 0; i < nofPlots; ++i) {
         for (let j = 0; j < plantUnlocks.length; ++j) {
             plants[i][plantUnlocks[j]] = theory.createUpgrade(i * 100 + j, currency, PLANT_DATA[plantUnlocks[j]].cost);
             plants[i][plantUnlocks[j]].description = Localization.format(getLoc('plotPlant'), i + 1, getLoc('plants')[plantUnlocks[j]].name);
@@ -2670,7 +2670,7 @@ var init = () => {
             theory.invalidateQuaternaryValues();
             updateAvailability();
         };
-        plotPerma.maxLevel = maxPlots;
+        plotPerma.maxLevel = nofPlots;
     }
     /* Plant unlock
     What do I do if I have other plants to unlock with other means?.
@@ -3412,7 +3412,7 @@ let createNotebookMenu = () => {
             horizontalTextAlignment: TextAlignment.END,
             onTextChanged: (ot, nt) => {
                 let tmpML = Number(nt) || MAX_INT;
-                for (let j = 0; j < maxPlots; ++j) {
+                for (let j = 0; j < nofPlots; ++j) {
                     let count = 0;
                     for (let k = 0; k < manager.colonies[j].length; ++k) {
                         let c = manager.colonies[j][k];
@@ -3423,7 +3423,7 @@ let createNotebookMenu = () => {
                     }
                 }
                 notebook[plantUnlocks[i]].maxLevel = tmpML;
-                for (let j = 0; j < maxPlots; ++j)
+                for (let j = 0; j < nofPlots; ++j)
                     plants[j][plantUnlocks[i]].maxLevel = tmpML;
             }
         }));
@@ -3656,14 +3656,14 @@ var getCurrencyFromTau = (tau) => [
 ];
 var prePublish = () => {
     tmpCurrency = currency.value + taxCurrency.value;
-    tmpLevels = Array.from({ length: maxPlots }, (_) => []);
+    tmpLevels = Array.from({ length: nofPlots }, (_) => []);
 };
 // You can be in debt for this lol
 var postPublish = () => {
     currency.value = tmpCurrency;
     actuallyPlanting = false;
-    tmpLevels = Array.from({ length: maxPlots }, (_) => { return {}; });
-    for (let i = 0; i < maxPlots; ++i) {
+    tmpLevels = Array.from({ length: nofPlots }, (_) => { return {}; });
+    for (let i = 0; i < nofPlots; ++i) {
         for (let j = 0; j < manager.colonies[i].length; ++j) {
             let c = manager.colonies[i][j];
             if (!tmpLevels[i][c.id])
@@ -3700,7 +3700,7 @@ var goToNextStage = () => {
     updateAvailability();
 };
 // Copied from the ol Oiler's Formula
-var bigStringify = (_, val) => {
+let bigStringify = (_, val) => {
     try {
         if (val instanceof BigNumber)
             return 'BigNumber' + val.toBase64String();
@@ -3709,7 +3709,7 @@ var bigStringify = (_, val) => {
     ;
     return val;
 };
-var unBigStringify = (_, val) => {
+let unBigStringify = (_, val) => {
     if (val && typeof val === 'string') {
         if (val.startsWith('BigNumber'))
             return BigNumber.fromBase64String(val.substring(9));
@@ -3768,7 +3768,7 @@ var setInternalState = (stateStr) => {
     if ('finishedTutorial' in state)
         finishedTutorial = state.finishedTutorial;
     if ('manager' in state)
-        manager = new ColonyManager(state.manager);
+        manager = new ColonyManager(state.manager, nofPlots, maxColoniesPerPlot);
     if (v < 0.04) {
         if ('graphMode2D' in state)
             graphMode2D = state.graphMode2D;
@@ -3793,8 +3793,8 @@ var setInternalState = (stateStr) => {
     if ('notebook' in state)
         notebook = state.notebook;
     actuallyPlanting = false;
-    tmpLevels = Array.from({ length: maxPlots }, (_) => { return {}; });
-    for (let i = 0; i < maxPlots; ++i) {
+    tmpLevels = Array.from({ length: nofPlots }, (_) => { return {}; });
+    for (let i = 0; i < nofPlots; ++i) {
         for (let j = 0; j < manager.colonies[i].length; ++j) {
             let c = manager.colonies[i][j];
             if (!tmpLevels[i][c.id])

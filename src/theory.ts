@@ -46,47 +46,6 @@ You are her first student in a long while.`,
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
 var version = 0.05;
 
-const maxPlots = 6;
-const maxColoniesPerPlot = 5;
-
-let haxEnabled = false;
-let time = 0;
-let days = 0;
-let years = 0;
-let insolationCoord = 0;
-let growthCoord = 0;
-let insolationIntegral = 0;
-let growthIntegral = 0;
-let plotIdx = 0;
-let colonyIdx = new Array(maxPlots).fill(0);
-let plantIdx = new Array(maxPlots).fill(0);
-let finishedTutorial = false;
-let actuallyPlanting = true;
-let graphMode2D = 0;
-let graphMode3D = true;
-let colonyMode = 1;
-let fancyPlotTitle = false;
-let actionPanelOnTop = false;
-
-interface ColonyViewEntry
-{
-    filter: string;
-    params: boolean
-}
-let colonyViewConfig: {[key: number]: ColonyViewEntry} = {};
-
-interface NotebookEntry
-{
-    maxLevel: number;
-    harvestStage: number
-}
-let notebook: {[key: number]: NotebookEntry} = {};
-
-let tmpCurrency: BigNumber;
-let tmpLevels: {[key: number]: number}[];
-
-// Other constants
-
 const MAX_INT = 0x7fffffff;
 const TRIM_SP = /\s+/g;
 const LS_RULE = /([^:]+)(:(.+))?=(.*)/;
@@ -99,7 +58,7 @@ const SYNTHABLE_SYMBOLS = new Set('LaA');
 const MAX_CHARS_PER_TICK = 200;
 const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
-const locStrings =
+const LOC_STRINGS =
 {
     en:
     {
@@ -312,22 +271,50 @@ friend of all mathematicians.`
 `{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} * {6} chars`,
         noCommentary: 'No commentary.',
 
-        resetRenderer: 'You are about to reset the graph.'
+        chapters:
+        {
+            intro:
+            {
+                title: `Lemma's Garden`,
+                text:
+`You're not one of my students, are you?
+Surprised anybody would visit this late, let alone
+urge me to let them plant here.
+Well then, welcome to class.
+
+Hum. Can't even bear to look at this ground...
+
+Go till it. We'll start in the morning.`
+            },
+            basil:
+            {
+                title: `Corollary`,
+                text:
+`Sorry for letting you wait this long.
+I have a friend who... supplies me with seeds.
+For my old students, not you.
+It's a bit exorbitant, but consistent.
+
+...She didn't return until today. Apologies.
+Wee bit sick of that calendula?`
+            }
+        }
     }
 };
+
 
 /**
  * Returns a localised string.
  * @param {string} name the internal name of the string.
- * @returns {string} the string.
+ * @returns {any} the string or folder.
  */
-let getLoc = (name, lang = MENU_LANG) =>
+let getLoc = (name: string, lang: string = MENU_LANG): any =>
 {
-    if(lang in locStrings && name in locStrings[lang])
-        return locStrings[lang][name];
+    if(lang in LOC_STRINGS && name in LOC_STRINGS[lang])
+        return LOC_STRINGS[lang][name];
 
-    if(name in locStrings.en)
-        return locStrings.en[name];
+    if(name in LOC_STRINGS.en)
+        return LOC_STRINGS.en[name];
     
     return `String missing: ${lang}.${name}`;
 }
@@ -2512,6 +2499,8 @@ interface Colony
 */
 class ColonyManager
 {
+    length: number;
+    width: number;
     colonies: Array<Colony[]>;
     gangsta: [number, number];
     ancestreeTask: Task;
@@ -2522,11 +2511,13 @@ class ColonyManager
     actionAncestreeTask: Task;
     actionDeriveTask: Task;
     actionCalcTask: Task;
-    constructor(object: ManagerInput = {})
+    constructor(object: ManagerInput = {}, length: number, width: number)
     {
-        // 6*inf
+        this.length = length;
+        this.width = width;
+
         this.colonies = object.colonies ||
-        Array.from({length: maxPlots}, (_) => []);
+        Array.from({length: this.length}, (_) => []);
 
         // Everyone gangsta until a colony starts evolving
         this.gangsta = object.gangsta;
@@ -2582,7 +2573,7 @@ class ColonyManager
             }
         }
         // Max 5, unless invading
-        if(this.colonies[plot].length >= maxColoniesPerPlot)
+        if(this.colonies[plot].length >= this.width)
         {
             plants[plot][id].refund(population);
             return;
@@ -2960,8 +2951,22 @@ interface Plant
     stroke: (stage: number) => RendererStroke;
 }
 
+interface ColonyViewEntry
+{
+    filter: string;
+    params: boolean
+}
+
+interface NotebookEntry
+{
+    maxLevel: number;
+    harvestStage: number
+}
+
 // Balance parameters
 
+const nofPlots = 6;
+const maxColoniesPerPlot = 5;
 const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(100)));
 const plantUnlocks = [1, 2];
 const plantUnlockCosts = new CompositeCost(1,
@@ -3161,13 +3166,36 @@ const PLANT_DATA: {[key: number]: Plant} =
     }
 }
 
+let haxEnabled = false;
+let time = 0;
+let days = 0;
+let years = 0;
+let insolationCoord = 0;
+let growthCoord = 0;
+let insolationIntegral = 0;
+let growthIntegral = 0;
+let plotIdx = 0;
+let colonyIdx = new Array(nofPlots).fill(0);
+let plantIdx = new Array(nofPlots).fill(0);
+let finishedTutorial = false;
+let actuallyPlanting = true;
+let graphMode2D = 0;
+let graphMode3D = true;
+let colonyMode = 1;
+let fancyPlotTitle = false;
+let actionPanelOnTop = false;
+let colonyViewConfig: {[key: number]: ColonyViewEntry} = {};
+let notebook: {[key: number]: NotebookEntry} = {};
+let tmpCurrency: BigNumber;
+let tmpLevels: {[key: number]: number}[];
+
 // const sidewayQuat = new Quaternion(1, 0, 0, 0);
 const uprightQuat = new Quaternion(-Math.sqrt(2)/2, 0, 0, Math.sqrt(2)/2);
 const xUpQuat = new Quaternion(0, 1, 0, 0);
 const yUpQuat = new Quaternion(0, 0, 1, 0);
 const zUpQuat = new Quaternion(0, 0, 0, 1);
 
-let manager = new ColonyManager();
+let manager = new ColonyManager({}, nofPlots, maxColoniesPerPlot);
 let renderer = new Renderer(new LSystem(), '', []);
 let globalRNG = new Xorshift(Date.now());
 
@@ -3331,7 +3359,7 @@ ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/tr
 
 var switchPlant, viewColony, switchColony;
 
-var plants = Array.from({length: maxPlots}, (_) => {return {};});
+var plants = Array.from({length: nofPlots}, (_) => {return {};});
 
 var notebookPerma, plotPerma, plantPerma;
 
@@ -3406,7 +3434,7 @@ var init = () =>
 
     /* Plants & switch plants
     */
-    for(let i = 0; i < maxPlots; ++i)
+    for(let i = 0; i < nofPlots; ++i)
     {
         for(let j = 0; j < plantUnlocks.length; ++j)
         {
@@ -3484,7 +3512,7 @@ var init = () =>
             theory.invalidateQuaternaryValues();
             updateAvailability();
         };
-        plotPerma.maxLevel = maxPlots;
+        plotPerma.maxLevel = nofPlots;
     }
     /* Plant unlock
     What do I do if I have other plants to unlock with other means?.
@@ -3595,6 +3623,11 @@ var init = () =>
 
     // To do: challenge plot (-1)
     // Next: milestones
+
+    theory.createStoryChapter(0, getLoc('chapters').intro.title,
+    getLoc('chapters').intro.text, () => true);
+    theory.createStoryChapter(1, getLoc('chapters').intro.basil,
+    getLoc('chapters').intro.basil, () => plantPerma.level > 0);
 
     theory.primaryEquationHeight = 30;
     theory.primaryEquationScale = 0.96;
@@ -3779,10 +3812,10 @@ var getSecondaryEquation = () =>
         case 1:
             let status = (manager.gangsta && manager.gangsta[0] == plotIdx &&
             manager.gangsta[1] == colonyIdx[plotIdx]) ?
-            getLoc('status')['evolve'] : (manager.actionGangsta &&
+            getLoc('status').evolve : (manager.actionGangsta &&
             manager.actionGangsta[0] == plotIdx &&
             manager.actionGangsta[1] == colonyIdx[plotIdx]) ?
-            getLoc('status')['actions'][manager.actionGangsta[2]] : '';
+            getLoc('status').actions[manager.actionGangsta[2]] : '';
             return `\\text{${Localization.format(getLoc('colonyStats'),
             c.population, getLoc('plants')[c.id].name, c.stage, c.energy,
             c.synthRate * BigNumber.from(insolationCoord), c.growth,
@@ -4419,7 +4452,7 @@ let createNotebookMenu = () =>
             onTextChanged: (ot, nt) =>
             {
                 let tmpML = Number(nt) || MAX_INT;
-                for(let j = 0; j < maxPlots; ++j)
+                for(let j = 0; j < nofPlots; ++j)
                 {
                     let count = 0;
                     for(let k = 0; k < manager.colonies[j].length; ++k)
@@ -4433,7 +4466,7 @@ let createNotebookMenu = () =>
                     }
                 }
                 notebook[plantUnlocks[i]].maxLevel = tmpML;
-                for(let j = 0; j < maxPlots; ++j)
+                for(let j = 0; j < nofPlots; ++j)
                     plants[j][plantUnlocks[i]].maxLevel = tmpML;
             }
         }));
@@ -4724,7 +4757,7 @@ var getCurrencyFromTau = (tau) =>
 var prePublish = () =>
 {
     tmpCurrency = currency.value + taxCurrency.value;
-    tmpLevels = Array.from({length: maxPlots}, (_) => []);
+    tmpLevels = Array.from({length: nofPlots}, (_) => []);
 }
 
 // You can be in debt for this lol
@@ -4733,8 +4766,8 @@ var postPublish = () =>
     currency.value = tmpCurrency;
 
     actuallyPlanting = false;
-    tmpLevels = Array.from({length: maxPlots}, (_) => {return {};});
-    for(let i = 0; i < maxPlots; ++i)
+    tmpLevels = Array.from({length: nofPlots}, (_) => {return {};});
+    for(let i = 0; i < nofPlots; ++i)
     {
         for(let j = 0; j < manager.colonies[i].length; ++j)
         {
@@ -4782,7 +4815,7 @@ var goToNextStage = () =>
 };
 
 // Copied from the ol Oiler's Formula
-var bigStringify = (_, val) =>
+let bigStringify = (_, val) =>
 {
     try
     {
@@ -4793,7 +4826,7 @@ var bigStringify = (_, val) =>
     return val;
 }
 
-var unBigStringify = (_, val) =>
+let unBigStringify = (_, val) =>
 {
     if (val && typeof val === 'string')
     {
@@ -4866,7 +4899,8 @@ var setInternalState = (stateStr) =>
         finishedTutorial = state.finishedTutorial;
 
     if('manager' in state)
-        manager = new ColonyManager(state.manager);
+        manager = new ColonyManager(state.manager, nofPlots,
+        maxColoniesPerPlot);
 
     if(v < 0.04)
     {
@@ -4896,8 +4930,8 @@ var setInternalState = (stateStr) =>
         notebook = state.notebook;
 
     actuallyPlanting = false;
-    tmpLevels = Array.from({length: maxPlots}, (_) => {return {};});
-    for(let i = 0; i < maxPlots; ++i)
+    tmpLevels = Array.from({length: nofPlots}, (_) => {return {};});
+    for(let i = 0; i < nofPlots; ++i)
     {
         for(let j = 0; j < manager.colonies[i].length; ++j)
         {
