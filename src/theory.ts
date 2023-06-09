@@ -275,15 +275,14 @@ friend of all mathematicians.`
         {
             intro:
             {
-                title: `Lemma's Garden`,
+                title: `Lemma's garden`,
                 text:
 `You're not one of my students, are you?
 Surprised anybody would visit this late, let alone
-urge me to let them plant here.
+urge me to let them plant in my ground.
 Well then, welcome to class.
 
-Hum. Can't even bear to look at this ground...
-
+Hum. Can't even bear to look at this soil...
 Go till it. We'll start in the morning.`
             },
             basil:
@@ -301,7 +300,6 @@ Wee bit sick of that calendula?`
         }
     }
 };
-
 
 /**
  * Returns a localised string.
@@ -3626,8 +3624,8 @@ var init = () =>
 
     theory.createStoryChapter(0, getLoc('chapters').intro.title,
     getLoc('chapters').intro.text, () => true);
-    theory.createStoryChapter(1, getLoc('chapters').intro.basil,
-    getLoc('chapters').intro.basil, () => plantPerma.level > 0);
+    theory.createStoryChapter(1, getLoc('chapters').basil.title,
+    getLoc('chapters').basil.text, () => plantPerma.level > 0);
 
     theory.primaryEquationHeight = 30;
     theory.primaryEquationScale = 0.96;

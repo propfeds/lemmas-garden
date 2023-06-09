@@ -233,13 +233,34 @@ friend of all mathematicians.`
         plantStats: `({0}) {1}\\\\—\\\\Maximum stage: {2}\\\\Synthesis rate: ` +
             `{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} * {6} chars`,
         noCommentary: 'No commentary.',
-        resetRenderer: 'You are about to reset the graph.'
+        chapters: {
+            intro: {
+                title: `Lemma's garden`,
+                text: `You're not one of my students, are you?
+Surprised anybody would visit this late, let alone
+urge me to let them plant in my ground.
+Well then, welcome to class.
+
+Hum. Can't even bear to look at this soil...
+Go till it. We'll start in the morning.`
+            },
+            basil: {
+                title: `Corollary`,
+                text: `Sorry for letting you wait this long.
+I have a friend who... supplies me with seeds.
+For my old students, not you.
+It's a bit exorbitant, but consistent.
+
+...She didn't return until today. Apologies.
+Wee bit sick of that calendula?`
+            }
+        }
     }
 };
 /**
  * Returns a localised string.
  * @param {string} name the internal name of the string.
- * @returns {string} the string.
+ * @returns {any} the string or folder.
  */
 let getLoc = (name, lang = MENU_LANG) => {
     if (lang in LOC_STRINGS && name in LOC_STRINGS[lang])
@@ -2761,6 +2782,8 @@ var init = () => {
     }
     // To do: challenge plot (-1)
     // Next: milestones
+    theory.createStoryChapter(0, getLoc('chapters').intro.title, getLoc('chapters').intro.text, () => true);
+    theory.createStoryChapter(1, getLoc('chapters').basil.title, getLoc('chapters').basil.text, () => plantPerma.level > 0);
     theory.primaryEquationHeight = 30;
     theory.primaryEquationScale = 0.96;
     theory.secondaryEquationHeight = 105;
@@ -2914,10 +2937,10 @@ var getSecondaryEquation = () => {
         case 1:
             let status = (manager.gangsta && manager.gangsta[0] == plotIdx &&
                 manager.gangsta[1] == colonyIdx[plotIdx]) ?
-                getLoc('status')['evolve'] : (manager.actionGangsta &&
+                getLoc('status').evolve : (manager.actionGangsta &&
                 manager.actionGangsta[0] == plotIdx &&
                 manager.actionGangsta[1] == colonyIdx[plotIdx]) ?
-                getLoc('status')['actions'][manager.actionGangsta[2]] : '';
+                getLoc('status').actions[manager.actionGangsta[2]] : '';
             return `\\text{${Localization.format(getLoc('colonyStats'), c.population, getLoc('plants')[c.id].name, c.stage, c.energy, c.synthRate * BigNumber.from(insolationCoord), c.growth, PLANT_DATA[c.id].growthCost * BigNumber.from(c.sequence.length), PLANT_DATA[c.id].growthRate * BigNumber.from(growthCoord), c.profit, status)}}`;
             return `\\text{${Localization.format(getLoc('colony'), c.population, getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
             g=${c.growth}/${PLANT_DATA[c.id].growthCost *
