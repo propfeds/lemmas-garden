@@ -22,10 +22,11 @@ import { Sound } from '../../api/Sound';
 import { game } from '../../api/Game';
 var id = 'lemmas_garden';
 var getName = (language) => {
+    var _a;
     const names = {
         en: `Lemma's Garden`,
     };
-    return names[language] || names.en;
+    return (_a = names[language]) !== null && _a !== void 0 ? _a : names.en;
 };
 var getDescription = (language) => {
     const descs = {
@@ -2806,7 +2807,8 @@ var updateAvailability = () => {
     notebookPerma.isAvailable = theory.isBuyAllAvailable;
 };
 var tick = (elapsedTime, multiplier) => {
-    // Without the multiplier, one year is 14.6 hours
+    // Without the multiplier, one year is 14.6 hours (14:36)
+    // With the multiplier, one year is 9.7(3) hours (9:44)
     let dt = elapsedTime * multiplier;
     time += dt;
     // https://www.desmos.com/calculator/pfku4nopgy
@@ -2826,9 +2828,11 @@ var tick = (elapsedTime, multiplier) => {
     let dg = newGI - growthIntegral;
     growthIntegral = newGI;
     manager.growAll(BigNumber.from(di), BigNumber.from(dg));
-    let timeCos = Math.cos(time * Math.PI / 72);
-    insolationCoord = Math.max(0, -timeCos);
-    growthCoord = (timeCos + 1) / 2;
+    if (!game.isCalculatingOfflineProgress) {
+        let timeCos = Math.cos(time * Math.PI / 72);
+        insolationCoord = Math.max(0, -timeCos);
+        growthCoord = (timeCos + 1) / 2;
+    }
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
 };

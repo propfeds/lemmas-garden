@@ -22,16 +22,16 @@ import { Sound } from '../../api/Sound';
 import { game } from '../../api/Game';
 
 var id = 'lemmas_garden';
-var getName = (language: string) =>
+var getName = (language: string): string =>
 {
     const names =
     {
         en: `Lemma's Garden`,
     };
 
-    return names[language] || names.en;
+    return names[language] ?? names.en;
 }
-var getDescription = (language: string) =>
+var getDescription = (language: string): string =>
 {
     const descs =
     {
@@ -41,7 +41,7 @@ var getDescription = (language: string) =>
 You are her first student in a long while.`,
     };
 
-    return descs[language] || descs.en;
+    return descs[language] ?? descs.en;
 }
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
 var version = 0.05;
@@ -313,7 +313,7 @@ let getLoc = (name: string, lang: string = MENU_LANG): any =>
 
     if(name in LOC_STRINGS.en)
         return LOC_STRINGS.en[name];
-    
+
     return `String missing: ${lang}.${name}`;
 }
 
@@ -332,7 +332,7 @@ Size 36:
 Size 48:
 1080x1920
 */
-let getImageSize = (width) =>
+let getImageSize = (width: number): number =>
 {
     if(width >= 1080)
         return 48;
@@ -344,7 +344,7 @@ let getImageSize = (width) =>
     return 20;
 }
 
-let getBtnSize = (width) =>
+let getBtnSize = (width: number): number =>
 {
     if(width >= 1080)
         return 96;
@@ -356,7 +356,7 @@ let getBtnSize = (width) =>
     return 40;
 }
 
-let getMediumBtnSize = (width) =>
+let getMediumBtnSize = (width: number): number =>
 {
     if(width >= 1080)
         return 88;
@@ -368,7 +368,7 @@ let getMediumBtnSize = (width) =>
     return 36;
 }
 
-let getSmallBtnSize = (width) =>
+let getSmallBtnSize = (width: number): number =>
 {
     if(width >= 1080)
         return 80;
@@ -386,7 +386,7 @@ let getSmallBtnSize = (width) =>
  * @param {number} target the value to search for.
  * @returns {number}
  */
-let binarySearch = (arr, target) =>
+let binarySearch = (arr: number[], target: number): number =>
 {
     let l = 0;
     let r = arr.length - 1;
@@ -406,7 +406,7 @@ let binarySearch = (arr, target) =>
  * @param {number} x the number.
  * @returns {string}
  */
-let getCoordString = (x) => x.toFixed(x >= -0.01 ?
+let getCoordString = (x: number): string => x.toFixed(x >= -0.01 ?
     (x <= 9.999 ? 3 : (x <= 99.99 ? 2 : 1)) :
     (x < -9.99 ? (x < -99.9 ? 0 : 1) : 2)
 );
@@ -1786,8 +1786,8 @@ class Renderer
     sequence: string;
     params: Array<null | BigNumber[]>;
     state: Vector3;
-    ori: Vector3;
-    stack: Array<[Vector3, Vector3]>;
+    ori: Quaternion;
+    stack: Array<[Vector3, Quaternion]>;
     idxStack: number[];
     models: string[];
     mdi: number[];
@@ -3654,9 +3654,10 @@ var updateAvailability = () =>
     notebookPerma.isAvailable = theory.isBuyAllAvailable;
 }
 
-var tick = (elapsedTime, multiplier) =>
+var tick = (elapsedTime: number, multiplier: number) =>
 {
-    // Without the multiplier, one year is 14.6 hours
+    // Without the multiplier, one year is 14.6 hours (14:36)
+    // With the multiplier, one year is 9.7(3) hours (9:44)
     let dt = elapsedTime * multiplier;
     time += dt;
     // https://www.desmos.com/calculator/pfku4nopgy
@@ -3677,9 +3678,12 @@ var tick = (elapsedTime, multiplier) =>
     growthIntegral = newGI;
     manager.growAll(BigNumber.from(di), BigNumber.from(dg));
 
-    let timeCos = Math.cos(time * Math.PI / 72);
-    insolationCoord = Math.max(0, -timeCos);
-    growthCoord = (timeCos + 1) / 2;
+    if(!game.isCalculatingOfflineProgress)
+    {
+        let timeCos = Math.cos(time * Math.PI / 72);
+        insolationCoord = Math.max(0, -timeCos);
+        growthCoord = (timeCos + 1) / 2;
+    }
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
 }
