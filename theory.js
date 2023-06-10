@@ -29,12 +29,13 @@ var getName = (language) => {
     return (_a = names[language]) !== null && _a !== void 0 ? _a : names.en;
 };
 var getDescription = (language) => {
+    var _a;
     const descs = {
         en: `Last night, Lemma swept away the rubbles on her old garden.
 
 You are her first student in a long while.`,
     };
-    return descs[language] || descs.en;
+    return (_a = descs[language]) !== null && _a !== void 0 ? _a : descs.en;
 };
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
 var version = 0.05;
@@ -362,9 +363,10 @@ for (let i = 1; i <= 400; ++i) {
  */
 class Queue {
     constructor(object = {}) {
-        this.oldestIndex = object.oldestIndex || 0;
-        this.newestIndex = object.newestIndex || 0;
-        this.storage = object.storage || {};
+        var _a, _b, _c;
+        this.oldestIndex = (_a = object.oldestIndex) !== null && _a !== void 0 ? _a : 0;
+        this.newestIndex = (_b = object.newestIndex) !== null && _b !== void 0 ? _b : 0;
+        this.storage = (_c = object.storage) !== null && _c !== void 0 ? _c : {};
     }
     get length() {
         let result = this.newestIndex - this.oldestIndex;
@@ -973,12 +975,13 @@ class LSystem {
      * @returns {object}
      */
     getAncestree(sequence, task = {}) {
+        var _a, _b, _c, _d, _e;
         // Scanning behaviour should be very similar to renderer drawing.
-        let tmpStack = task.stack || [];
-        let tmpIdxStack = task.idxStack || [];
-        let tmpAncestors = task.ancestors || [];
-        let tmpChildren = task.children || [];
-        let i = task.start || 0;
+        let tmpStack = (_a = task.stack) !== null && _a !== void 0 ? _a : [];
+        let tmpIdxStack = (_b = task.idxStack) !== null && _b !== void 0 ? _b : [];
+        let tmpAncestors = (_c = task.ancestors) !== null && _c !== void 0 ? _c : [];
+        let tmpChildren = (_d = task.children) !== null && _d !== void 0 ? _d : [];
+        let i = (_e = task.start) !== null && _e !== void 0 ? _e : 0;
         for (; i < sequence.length; ++i) {
             if (i - task.start > MAX_CHARS_PER_TICK) {
                 return {
@@ -1036,15 +1039,15 @@ class LSystem {
      * @returns {{start: number, result: string}}
      */
     derive(sequence, seqParams, ancestors, children, task = {}) {
-        let result = task.derivation || '';
-        let resultParams = task.parameters || [];
-        let i = task.start || 0;
+        var _a, _b, _c;
+        let result = (_a = task.derivation) !== null && _a !== void 0 ? _a : '';
+        let resultParams = (_b = task.parameters) !== null && _b !== void 0 ? _b : [];
+        let i = (_c = task.start) !== null && _c !== void 0 ? _c : 0;
         let charCount = 0;
         for (; i < sequence.length; ++i) {
             if (charCount > MAX_CHARS_PER_TICK) {
                 return {
                     start: i,
-                    charCount: charCount,
                     derivation: result,
                     parameters: resultParams
                 };
@@ -1094,8 +1097,10 @@ class LSystem {
                         if (right == -1)
                             continue;
                     }
-                    let tmpParamMap = (v) => this.variables.get(v) ||
-                        tmpRules[j].paramMap(v, seqParams[ancestors[i]], seqParams[i], seqParams[right]);
+                    let tmpParamMap = (v) => {
+                        var _a;
+                        return (_a = this.variables.get(v)) !== null && _a !== void 0 ? _a : tmpRules[j].paramMap(v, seqParams[ancestors[i]], seqParams[i], seqParams[right]);
+                    };
                     // Next up is the condition
                     if (tmpRules[j].condition.evaluate(tmpParamMap) ==
                         BigNumber.ZERO)
@@ -1184,7 +1189,6 @@ class LSystem {
         }
         return {
             start: 0,
-            charCount: charCount,
             derivation: result,
             parameters: resultParams
         };
@@ -1195,8 +1199,10 @@ class LSystem {
         if (this.models.has(symbol)) {
             let tmpRules = this.models.get(symbol);
             for (let j = 0; j < tmpRules.length; ++j) {
-                let tmpParamMap = (v) => this.variables.get(v) ||
-                    tmpRules[j].paramMap(v, null, null, params);
+                let tmpParamMap = (v) => {
+                    var _a;
+                    return (_a = this.variables.get(v)) !== null && _a !== void 0 ? _a : tmpRules[j].paramMap(v, null, null, params);
+                };
                 // Next up is the condition
                 if (tmpRules[j].condition.evaluate(tmpParamMap) ==
                     BigNumber.ZERO)
@@ -1284,6 +1290,7 @@ class LSystem {
      * @returns {{start: number, result: string}}
      */
     reconstruct(sequence, params = null, filter = '', task = {}) {
+        var _a, _b;
         if (!params && !filter) {
             return {
                 start: 0,
@@ -1291,8 +1298,8 @@ class LSystem {
             };
         }
         let filterSet = new Set(filter);
-        let result = task.result || '';
-        let i = task.start || 0;
+        let result = (_a = task.result) !== null && _a !== void 0 ? _a : '';
+        let i = (_b = task.start) !== null && _b !== void 0 ? _b : 0;
         for (; i < sequence.length; ++i) {
             if ((i - task.start) * (task.start + 1) > MAX_CHARS_PER_TICK) {
                 return {
@@ -1367,23 +1374,24 @@ class LSystem {
  */
 class Renderer {
     constructor(system, sequence, params, camera = {}, stroke = {}) {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
         this.figureScale = camera.scale || 1;
-        this.cameraMode = camera.mode || 0;
-        this.followFactor = camera.followFactor || 0.15;
-        this.camCentre = new Vector3(camera.x || 0, camera.y || 0, camera.z || 0);
-        this.upright = camera.upright || false;
+        this.cameraMode = (_a = camera.mode) !== null && _a !== void 0 ? _a : 0;
+        this.followFactor = (_b = camera.followFactor) !== null && _b !== void 0 ? _b : 0.15;
+        this.camCentre = new Vector3((_c = camera.x) !== null && _c !== void 0 ? _c : 0, (_d = camera.y) !== null && _d !== void 0 ? _d : 0, (_e = camera.z) !== null && _e !== void 0 ? _e : 0);
+        this.upright = (_f = camera.upright) !== null && _f !== void 0 ? _f : false;
         this.lastCamera = new Vector3(0, 0, 0);
         this.lastCamVel = new Vector3(0, 0, 0);
-        this.tickLength = stroke.tickLength || 1;
-        this.initDelay = stroke.initDelay || 0;
+        this.tickLength = (_g = stroke.tickLength) !== null && _g !== void 0 ? _g : 1;
+        this.initDelay = (_h = stroke.initDelay) !== null && _h !== void 0 ? _h : 0;
         // Loop mode is always 0
         // Whether to reset graph on hitting reset button is a game setting
-        this.loadModels = stroke.loadModels || true;
-        this.quickDraw = stroke.quickDraw || false;
-        this.quickBacktrack = stroke.quickBacktrack || false;
-        this.backtrackTail = stroke.backtrackTail || true;
-        this.hesitateApex = stroke.hesitateApex || true;
-        this.hesitateFork = stroke.hesitateFork || true;
+        this.loadModels = (_j = stroke.loadModels) !== null && _j !== void 0 ? _j : true;
+        this.quickDraw = (_k = stroke.quickDraw) !== null && _k !== void 0 ? _k : false;
+        this.quickBacktrack = (_l = stroke.quickBacktrack) !== null && _l !== void 0 ? _l : false;
+        this.backtrackTail = (_m = stroke.backtrackTail) !== null && _m !== void 0 ? _m : true;
+        this.hesitateApex = (_o = stroke.hesitateApex) !== null && _o !== void 0 ? _o : true;
+        this.hesitateFork = (_p = stroke.hesitateFork) !== null && _p !== void 0 ? _p : true;
         this.system = system;
         this.sequence = sequence;
         this.params = params;
@@ -1432,21 +1440,22 @@ class Renderer {
         this.configure(colony.sequence, colony.params, PLANT_DATA[colony.id].camera(colony.stage), PLANT_DATA[colony.id].stroke(colony.stage));
     }
     configure(sequence, params, camera = {}, stroke = {}) {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
         this.figureScale = camera.scale || 1;
-        this.cameraMode = camera.mode || 0;
-        this.followFactor = camera.followFactor || 0.15;
-        this.camCentre = new Vector3(camera.x || 0, camera.y || 0, camera.z || 0);
-        this.upright = camera.upright || false;
-        this.tickLength = stroke.tickLength || 1;
-        this.initDelay = stroke.initDelay || 0;
+        this.cameraMode = (_a = camera.mode) !== null && _a !== void 0 ? _a : 0;
+        this.followFactor = (_b = camera.followFactor) !== null && _b !== void 0 ? _b : 0.15;
+        this.camCentre = new Vector3((_c = camera.x) !== null && _c !== void 0 ? _c : 0, (_d = camera.y) !== null && _d !== void 0 ? _d : 0, (_e = camera.z) !== null && _e !== void 0 ? _e : 0);
+        this.upright = (_f = camera.upright) !== null && _f !== void 0 ? _f : false;
+        this.tickLength = (_g = stroke.tickLength) !== null && _g !== void 0 ? _g : 1;
+        this.initDelay = (_h = stroke.initDelay) !== null && _h !== void 0 ? _h : 0;
         // Loop mode is always 0
         // Whether to reset graph on hitting reset button is a game setting
-        this.loadModels = stroke.loadModels || true;
-        this.quickDraw = stroke.quickDraw || false;
-        this.quickBacktrack = stroke.quickBacktrack || false;
-        this.backtrackTail = stroke.backtrackTail || true;
-        this.hesitateApex = stroke.hesitateApex || true;
-        this.hesitateFork = stroke.hesitateFork || true;
+        this.loadModels = (_j = stroke.loadModels) !== null && _j !== void 0 ? _j : true;
+        this.quickDraw = (_k = stroke.quickDraw) !== null && _k !== void 0 ? _k : false;
+        this.quickBacktrack = (_l = stroke.quickBacktrack) !== null && _l !== void 0 ? _l : false;
+        this.backtrackTail = (_m = stroke.backtrackTail) !== null && _m !== void 0 ? _m : true;
+        this.hesitateApex = (_o = stroke.hesitateApex) !== null && _o !== void 0 ? _o : true;
+        this.hesitateFork = (_p = stroke.hesitateFork) !== null && _p !== void 0 ? _p : true;
         this.sequence = sequence;
         this.params = params;
         this.reset(!graphMode2D);
@@ -1872,35 +1881,30 @@ class Renderer {
 */
 class ColonyManager {
     constructor(object = {}, length, width) {
+        var _a, _b, _c, _d, _e, _f;
         this.length = length;
         this.width = width;
-        this.colonies = object.colonies ||
-            Array.from({ length: this.length }, (_) => []);
+        this.colonies = (_a = object.colonies) !== null && _a !== void 0 ? _a : Array.from({ length: this.length }, (_) => []);
         // Everyone gangsta until a colony starts evolving
         this.gangsta = object.gangsta;
-        this.ancestreeTask = object.ancestreeTask ||
-            {
-                start: 0
-            };
-        this.deriveTask = object.deriveTask ||
-            {
-                start: 0
-            };
-        this.calcTask = object.calcTask ||
-            {
-                start: 0
-            };
+        this.ancestreeTask = (_b = object.ancestreeTask) !== null && _b !== void 0 ? _b : {
+            start: 0
+        };
+        this.deriveTask = (_c = object.deriveTask) !== null && _c !== void 0 ? _c : {
+            start: 0
+        };
+        this.calcTask = (_d = object.calcTask) !== null && _d !== void 0 ? _d : {
+            start: 0
+        };
         // Processed before regular gangsta
         this.actionQueue = new Queue(object.actionQueue);
         this.actionGangsta = object.actionGangsta;
-        this.actionDeriveTask = object.actionDeriveTask ||
-            {
-                start: 0
-            };
-        this.actionCalcTask = object.actionCalcTask ||
-            {
-                start: 0
-            };
+        this.actionDeriveTask = (_e = object.actionDeriveTask) !== null && _e !== void 0 ? _e : {
+            start: 0
+        };
+        this.actionCalcTask = (_f = object.actionCalcTask) !== null && _f !== void 0 ? _f : {
+            start: 0
+        };
     }
     get object() {
         return {
@@ -1978,6 +1982,7 @@ class ColonyManager {
         updateAvailability();
     }
     growAll(di, dg) {
+        var _a;
         if (this.actionGangsta)
             this.continueAction();
         else if (this.actionQueue.length) {
@@ -1989,7 +1994,7 @@ class ColonyManager {
         for (let i = 0; i < this.colonies.length; ++i) {
             for (let j = 0; j < this.colonies[i].length; ++j) {
                 let c = this.colonies[i][j];
-                let notMature = c.stage < (PLANT_DATA[c.id].maxStage || MAX_INT);
+                let notMature = c.stage < ((_a = PLANT_DATA[c.id].maxStage) !== null && _a !== void 0 ? _a : MAX_INT);
                 if (notMature && c.growth >= PLANT_DATA[c.id].growthCost *
                     BigNumber.from(c.sequence.length)) {
                     if (!this.gangsta)
@@ -2023,13 +2028,14 @@ class ColonyManager {
         }
     }
     calculateStats(colony, task = {}, dTask = {}) {
+        var _a, _b, _c, _d, _e;
         // This is the only case where the colony needed
         let harvestable = PLANT_DATA[colony.id].actions[0].symbols;
-        let synthRate = task.synthRate || BigNumber.ZERO;
-        let profit = task.profit || BigNumber.ZERO;
-        let sequence = dTask.derivation || colony.sequence;
-        let params = dTask.parameters || colony.params;
-        let i = task.start || 0;
+        let synthRate = (_a = task.synthRate) !== null && _a !== void 0 ? _a : BigNumber.ZERO;
+        let profit = (_b = task.profit) !== null && _b !== void 0 ? _b : BigNumber.ZERO;
+        let sequence = (_c = dTask.derivation) !== null && _c !== void 0 ? _c : colony.sequence;
+        let params = (_d = dTask.parameters) !== null && _d !== void 0 ? _d : colony.params;
+        let i = (_e = task.start) !== null && _e !== void 0 ? _e : 0;
         for (; i < sequence.length; ++i) {
             if (i - task.start > MAX_CHARS_PER_TICK) {
                 return {
@@ -2050,6 +2056,7 @@ class ColonyManager {
         };
     }
     continueAction() {
+        var _a;
         // Future idea: maybe instead of using an LS to prune/harvest, develop
         // efficient pruner/harvester, like a naked L-system rule???
         let c = this.colonies[this.actionGangsta[0]][this.actionGangsta[1]];
@@ -2102,7 +2109,7 @@ class ColonyManager {
         c.sequence = this.actionDeriveTask.derivation;
         c.params = this.actionDeriveTask.parameters;
         c.energy += c.diReserve * c.synthRate;
-        let notMature = c.stage < (PLANT_DATA[c.id].maxStage || MAX_INT);
+        let notMature = c.stage < ((_a = PLANT_DATA[c.id].maxStage) !== null && _a !== void 0 ? _a : MAX_INT);
         if (notMature) {
             let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
             c.growth += maxdg;
@@ -2153,6 +2160,7 @@ class ColonyManager {
         this.actionGangsta = action;
     }
     evolve() {
+        var _a;
         let c = this.colonies[this.gangsta[0]][this.gangsta[1]];
         if (!c) {
             this.gangsta = null;
@@ -2200,7 +2208,7 @@ class ColonyManager {
         c.profit = this.calcTask.profit;
         c.energy += c.diReserve * c.synthRate;
         ++c.stage;
-        let notMature = c.stage < (PLANT_DATA[c.id].maxStage || MAX_INT);
+        let notMature = c.stage < ((_a = PLANT_DATA[c.id].maxStage) !== null && _a !== void 0 ? _a : MAX_INT);
         if (notMature) {
             let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
             c.growth += maxdg;
@@ -3066,6 +3074,7 @@ let createVariableMenu = (variables) => {
     return menu;
 };
 let createSystemMenu = (id) => {
+    var _a, _b, _c, _d;
     let values = PLANT_DATA[id].system.object;
     let tmpAxiom = values.axiom;
     let axiomEntry = ui.createEntry({
@@ -3104,28 +3113,28 @@ let createSystemMenu = (id) => {
     let ruleStack = ui.createGrid({
         children: ruleEntries
     });
-    let tmpIgnore = values.ignoreList || '';
+    let tmpIgnore = (_a = values.ignoreList) !== null && _a !== void 0 ? _a : '';
     let ignoreEntry = ui.createEntry({
         text: tmpIgnore,
         row: 0,
         column: 1,
         horizontalTextAlignment: TextAlignment.END
     });
-    let tmpCI = values.ctxIgnoreList || '';
+    let tmpCI = (_b = values.ctxIgnoreList) !== null && _b !== void 0 ? _b : '';
     let CIEntry = ui.createEntry({
         text: tmpCI,
         row: 1,
         column: 1,
         horizontalTextAlignment: TextAlignment.END
     });
-    let tmpAngle = values.turnAngle || '0';
+    let tmpAngle = (_c = values.turnAngle) !== null && _c !== void 0 ? _c : '0';
     let angleEntry = ui.createEntry({
         text: tmpAngle.toString(),
         row: 2,
         column: 1,
         horizontalTextAlignment: TextAlignment.END
     });
-    let tmpTropism = values.tropism || '0';
+    let tmpTropism = (_d = values.tropism) !== null && _d !== void 0 ? _d : '0';
     let tropismEntry = ui.createEntry({
         text: tmpTropism.toString(),
         row: 3,
@@ -3133,7 +3142,7 @@ let createSystemMenu = (id) => {
         horizontalTextAlignment: TextAlignment.END
     });
     /*
-    let tmpSeed = values.seed || '0';
+    let tmpSeed = values.seed ?? '0';
     let seedLabel = ui.createGrid
     ({
         row: 4,
@@ -3250,6 +3259,7 @@ let createSystemMenu = (id) => {
     return menu;
 };
 let createColonyViewMenu = (colony) => {
+    var _a;
     if (!colonyViewConfig[colony.id]) {
         colonyViewConfig[colony.id] =
             {
@@ -3313,7 +3323,7 @@ let createColonyViewMenu = (colony) => {
     };
     let tmpCmt = updateCommentary();
     let plantStats = ui.createLatexLabel({
-        text: Localization.format(getLoc('plantStats'), cmtStage, tmpCmt, PLANT_DATA[colony.id].maxStage || '∞', colony.synthRate, PLANT_DATA[colony.id].growthRate, PLANT_DATA[colony.id].growthCost, colony.sequence.length),
+        text: Localization.format(getLoc('plantStats'), cmtStage, tmpCmt, (_a = PLANT_DATA[colony.id].maxStage) !== null && _a !== void 0 ? _a : '∞', colony.synthRate, PLANT_DATA[colony.id].growthRate, PLANT_DATA[colony.id].growthCost, colony.sequence.length),
         margin: new Thickness(0, 6),
         horizontalTextAlignment: TextAlignment.START,
         verticalTextAlignment: TextAlignment.CENTER
@@ -3343,6 +3353,7 @@ let createColonyViewMenu = (colony) => {
     });
     let menu = ui.createPopup({
         title: () => {
+            var _a;
             if (tmpStage != colony.stage) {
                 /*
                 Menu title and commentary are updated dynamically without
@@ -3350,7 +3361,7 @@ let createColonyViewMenu = (colony) => {
                 */
                 tmpTitle = Localization.format(getLoc('colony'), colony.population, getLoc('plants')[colony.id].name, colony.stage);
                 tmpCmt = updateCommentary();
-                plantStats.text = Localization.format(getLoc('plantStats'), cmtStage, tmpCmt, PLANT_DATA[colony.id].maxStage || '∞', PLANT_DATA[colony.id].growthRate, colony.synthRate, PLANT_DATA[colony.id].growthCost, colony.sequence.length);
+                plantStats.text = Localization.format(getLoc('plantStats'), cmtStage, tmpCmt, (_a = PLANT_DATA[colony.id].maxStage) !== null && _a !== void 0 ? _a : '∞', PLANT_DATA[colony.id].growthRate, colony.synthRate, PLANT_DATA[colony.id].growthCost, colony.sequence.length);
                 tmpStage = colony.stage;
                 reconstructionTask =
                     {
@@ -3438,7 +3449,8 @@ let createNotebookMenu = () => {
             keyboard: Keyboard.NUMERIC,
             horizontalTextAlignment: TextAlignment.END,
             onTextChanged: (ot, nt) => {
-                let tmpML = Number(nt) || MAX_INT;
+                var _a;
+                let tmpML = (_a = Number(nt)) !== null && _a !== void 0 ? _a : MAX_INT;
                 for (let j = 0; j < nofPlots; ++j) {
                     let count = 0;
                     for (let k = 0; k < manager.colonies[j].length; ++k) {
