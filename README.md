@@ -1,7 +1,14 @@
 # Lemma's Garden
 
-Reminisce the story of Lemma and her partner as she sows away again on the
-remnants of their old garden.
+> Last night, Lemma didn't sweep away the rubbles on her old garden.
+> 
+> You did. You are her first student in a long while.
+
+Welcome to Lemma's garden, an idle botanical theory built on the grammar of
+L-systems.
+
+Reminisce the story of Lemma and her late partner as she rambles about how much
+she wants to refuse supporting your study with her tight budget.
 
 ## Installation
 

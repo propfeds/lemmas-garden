@@ -31,9 +31,11 @@ var getName = (language) => {
 var getDescription = (language) => {
     var _a;
     const descs = {
-        en: `Last night, Lemma swept away the rubbles on her old garden.
+        en: `Last night, Lemma didn't sweep away the rubbles on her old garden.
+You did. You are her first student in a long while.
 
-You are her first student in a long while.`,
+Welcome to Lemma's garden, an idle botanical theory built on the grammar of ` +
+            `L-systems.`,
     };
     return (_a = descs[language]) !== null && _a !== void 0 ? _a : descs.en;
 };
@@ -170,8 +172,8 @@ known as the golden angle.`,
                     24: 'Wait for it...',
                     25: 'A second flower bud appears!',
                     26: 'The third and final flower appears.',
-                    28: 'My wife loved to eat these flowers raw.',
-                    29: `Try it!\\\\No, don't, we'll sell them.`,
+                    28: 'My wife used to munch on these flowers, raw.',
+                    29: `Try it!\\\\No, haha, I'm jesting. We sell them.`,
                     33: 'The first flower matures.',
                     37: 'The second flower matures.',
                     38: 'All flowers have reached maturity.',

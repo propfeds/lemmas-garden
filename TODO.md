@@ -22,6 +22,7 @@
 - [ ] Newspapers
 
 - [x] Buy All upgrade unlocks maxLevel config
+  - [ ] +/- buttons for adjusting maxLevel
 - [ ] Autobuy upgrade unlocks harvest stage config
   - Only unlocks in a future update (students!)
 
