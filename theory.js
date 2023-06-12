@@ -34,7 +34,7 @@ var getDescription = (language) => {
         en: `Last night, Lemma didn't sweep away the rubbles on her old garden.
 You did. You are her first student in a long while.
 
-Welcome to Lemma's garden, an idle botanical theory built on the grammar of ` +
+Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
             `L-systems.`,
     };
     return (_a = descs[language]) !== null && _a !== void 0 ? _a : descs.en;
