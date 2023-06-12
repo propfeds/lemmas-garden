@@ -35,7 +35,7 @@ var getDescription = (language) => {
 You did. You are her first student in a long while.
 
 Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
-            `L-systems.`,
+            `Lindenmayer systems.`,
     };
     return (_a = descs[language]) !== null && _a !== void 0 ? _a : descs.en;
 };
