@@ -270,7 +270,8 @@ friend of all mathematicians.`
             }
         },
         plantStats: `({0}) {1}\\\\—\\\\Maximum stage: {2}\\\\Synthesis rate: ` +
-`{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} * {6} chars`,
+`{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} * {6} ` +
+`chars\\\\—\\\\Sequence:`,
         noCommentary: 'No commentary.',
 
         chapters:
@@ -1868,10 +1869,10 @@ class Renderer
             this.configure('', []);
             return;
         }
-        this.system = PLANT_DATA[colony.id].system;
+        this.system = plantData[colony.id].system;
         this.configure(colony.sequence, colony.params,
-        PLANT_DATA[colony.id].camera(colony.stage),
-        PLANT_DATA[colony.id].stroke(colony.stage));
+        plantData[colony.id].camera(colony.stage),
+        plantData[colony.id].stroke(colony.stage));
     }
     configure(sequence, params, camera: RendererCamera = {},
     stroke: RendererStroke = {})
@@ -2580,8 +2581,8 @@ class ColonyManager
         {
             id: id,
             population: population,
-            sequence: PLANT_DATA[id].system.axiom,
-            params: PLANT_DATA[id].system.axiomParams,
+            sequence: plantData[id].system.axiom,
+            params: plantData[id].system.axiomParams,
             stage: 0,
 
             energy: BigNumber.ZERO,
@@ -2649,8 +2650,8 @@ class ColonyManager
             for(let j = 0; j < this.colonies[i].length; ++j)
             {
                 let c = this.colonies[i][j];
-                let notMature = c.stage < (PLANT_DATA[c.id].maxStage??MAX_INT);
-                if(notMature && c.growth >= PLANT_DATA[c.id].growthCost *
+                let notMature = c.stage < (plantData[c.id].maxStage??MAX_INT);
+                if(notMature && c.growth >= plantData[c.id].growthCost *
                 BigNumber.from(c.sequence.length))
                 {
                     if(!this.gangsta)
@@ -2682,7 +2683,7 @@ class ColonyManager
                     if(notMature)
                     {
                         let maxdg = c.energy.min(dg *
-                        PLANT_DATA[c.id].growthRate);
+                        plantData[c.id].growthRate);
                         c.growth += maxdg;
                         c.energy -= maxdg;
                     }
@@ -2693,7 +2694,7 @@ class ColonyManager
     calculateStats(colony, task: Task = {}, dTask: Task = {})
     {
         // This is the only case where the colony needed
-        let harvestable = PLANT_DATA[colony.id].actions[0].symbols;
+        let harvestable = plantData[colony.id].actions[0].symbols;
         let synthRate = task.synthRate ?? BigNumber.ZERO;
         let profit = task.profit ?? BigNumber.ZERO;
         let sequence = dTask.derivation ?? colony.sequence;
@@ -2731,7 +2732,7 @@ class ColonyManager
             this.actionGangsta = null;
             return;
         }
-        if(PLANT_DATA[c.id].actions[id].killColony)
+        if(plantData[c.id].actions[id].killColony)
         {
             if(id == 0)
                 currency.value += c.profit * BigNumber.from(c.population) *
@@ -2747,7 +2748,7 @@ class ColonyManager
         if(!('derivation' in this.actionDeriveTask) ||
         ('derivation' in this.actionDeriveTask && this.actionDeriveTask.start))
         {
-            this.actionDeriveTask = PLANT_DATA[c.id].actions[id].system.derive(
+            this.actionDeriveTask = plantData[c.id].actions[id].system.derive(
             c.sequence, c.params, [], [], this.actionDeriveTask);
             return;
         }
@@ -2783,10 +2784,10 @@ class ColonyManager
         c.params = this.actionDeriveTask.parameters;
 
         c.energy += c.diReserve * c.synthRate;
-        let notMature = c.stage < (PLANT_DATA[c.id].maxStage??MAX_INT);
+        let notMature = c.stage < (plantData[c.id].maxStage??MAX_INT);
         if(notMature)
         {
-            let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
+            let maxdg = c.energy.min(c.dgReserve * plantData[c.id].growthRate);
             c.growth += maxdg;
             c.energy -= maxdg;
         }
@@ -2828,7 +2829,7 @@ class ColonyManager
     performAction(plot, index, id)
     {
         let c = this.colonies[plot][index];
-        if(!c || !PLANT_DATA[c.id].actions[id])
+        if(!c || !plantData[c.id].actions[id])
             return;
 
         let action: [number, number, number] = [plot, index, id];
@@ -2851,14 +2852,14 @@ class ColonyManager
         if(!('ancestors' in this.ancestreeTask) ||
         ('ancestors' in this.ancestreeTask && this.ancestreeTask.start))
         {
-            this.ancestreeTask = PLANT_DATA[c.id].system.getAncestree(
+            this.ancestreeTask = plantData[c.id].system.getAncestree(
             c.sequence, this.ancestreeTask);
             return;
         }
         if(!('derivation' in this.deriveTask) ||
         ('derivation' in this.deriveTask && this.deriveTask.start))
         {
-            this.deriveTask = PLANT_DATA[c.id].system.derive(c.sequence,
+            this.deriveTask = plantData[c.id].system.derive(c.sequence,
             c.params, this.ancestreeTask.ancestors, this.ancestreeTask.children,
             this.deriveTask);
             return;
@@ -2887,10 +2888,10 @@ class ColonyManager
             return;
         }
 
-        c.growth -= PLANT_DATA[c.id].growthCost *
+        c.growth -= plantData[c.id].growthCost *
         BigNumber.from(c.sequence.length);
         c.diReserve += c.growth / c.synthRate;
-        c.dgReserve += c.growth / PLANT_DATA[c.id].growthRate;
+        c.dgReserve += c.growth / plantData[c.id].growthRate;
         c.growth = BigNumber.ZERO;
 
         c.sequence = this.deriveTask.derivation;
@@ -2900,10 +2901,10 @@ class ColonyManager
 
         c.energy += c.diReserve * c.synthRate;
         ++c.stage;
-        let notMature = c.stage < (PLANT_DATA[c.id].maxStage??MAX_INT);
+        let notMature = c.stage < (plantData[c.id].maxStage??MAX_INT);
         if(notMature)
         {
-            let maxdg = c.energy.min(c.dgReserve * PLANT_DATA[c.id].growthRate);
+            let maxdg = c.energy.min(c.dgReserve * plantData[c.id].growthRate);
             c.growth += maxdg;
             c.energy -= maxdg;
         }
@@ -2986,7 +2987,7 @@ pubExp * tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
 var getPublicationMultiplierFormula = (symbol) => `\\frac{2}{3}\\times
 {${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
 
-const PLANT_DATA: {[key: number]: Plant} =
+const plantData: {[key: number]: Plant} =
 {
     1:  // Calendula
     {
@@ -3012,9 +3013,9 @@ const PLANT_DATA: {[key: number]: Plant} =
             '~> k(p, a): p<0.3 = [---(a)F(p/2).+^F(p*2).+&F(p).][---(a)F(p/2)[+&F(p*2)[+^F(p).].].]/(137.508)',
             '~> k(p, a) = [---(a)F(p/2).+^F(p*2).&F(p).][---(a)F(p/2)[+&F(p*2)[^F(p).].].]/(137.508)',
             '~> o(p, a) = [-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]',
-            '~> L(p, lim): p<=maxLeafSize/4 = {T(p*0.8)[&F(p).F(p).&-F(p).^^-F(p).^F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].].[^F(p).F(p).^-F(p).&&-F(p).&F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].]}',
-            '~> L(p, lim): p<=maxLeafSize/3 = {T(p*1.4)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
-            '~> L(p, lim) = {T(p*2)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
+            '~> L(p, lim): p<=maxLeafSize/4 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].].[^F(p).F(p).^-F(p).&&-F(p).&F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].]}',
+            '~> L(p, lim): p<=maxLeafSize/3 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
+            '~> L(p, lim) = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
         ], 15, 0, 'AI', '', -0.2, {
             'flowerThreshold': '0.9',
             'maxFlowerSize': '3',
@@ -3294,7 +3295,7 @@ const pruneFrame = createFramedButton
     isVisible: () =>
     {
         let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-        if(!c || !PLANT_DATA[c.id].actions[1])
+        if(!c || !plantData[c.id].actions[1])
             return false;
         return true;
     },
@@ -3308,7 +3309,7 @@ const pruneLabel = ui.createLatexLabel
     isVisible: () =>
     {
         let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-        if(!c || !PLANT_DATA[c.id].actions[1])
+        if(!c || !plantData[c.id].actions[1])
             return false;
         return true;
     },
@@ -3437,7 +3438,7 @@ var init = () =>
         for(let j = 0; j < plantUnlocks.length; ++j)
         {
             plants[i][plantUnlocks[j]] = theory.createUpgrade(i * 100 + j,
-            currency, PLANT_DATA[plantUnlocks[j]].cost);
+            currency, plantData[plantUnlocks[j]].cost);
             plants[i][plantUnlocks[j]].description = Localization.format(
             getLoc('plotPlant'), i + 1, getLoc('plants')[plantUnlocks[j]].name);
             plants[i][plantUnlocks[j]].info = getLoc('plants')[plantUnlocks[j]].
@@ -3821,12 +3822,12 @@ var getSecondaryEquation = () =>
             return `\\text{${Localization.format(getLoc('colonyStats'),
             c.population, getLoc('plants')[c.id].name, c.stage, c.energy,
             c.synthRate * BigNumber.from(insolationCoord), c.growth,
-            PLANT_DATA[c.id].growthCost * BigNumber.from(c.sequence.length),
-            PLANT_DATA[c.id].growthRate * BigNumber.from(growthCoord), c.profit,
+            plantData[c.id].growthCost * BigNumber.from(c.sequence.length),
+            plantData[c.id].growthRate * BigNumber.from(growthCoord), c.profit,
             status)}}`;
             return `\\text{${Localization.format(getLoc('colony'), c.population,
             getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
-            g=${c.growth}/${PLANT_DATA[c.id].growthCost *
+            g=${c.growth}/${plantData[c.id].growthCost *
             BigNumber.from(c.sequence.length)}\\\\
             P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}
             \\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
@@ -3838,13 +3839,13 @@ var getSecondaryEquation = () =>
                 let d = manager.colonies[plotIdx][i];
                 result += `\\text{${Localization.format(getLoc('colonyProg'),
                 d.population, getLoc('plants')[d.id].name, d.stage, d.growth *
-                BigNumber.HUNDRED / (PLANT_DATA[d.id].growthCost *
+                BigNumber.HUNDRED / (plantData[d.id].growthCost *
                 BigNumber.from(d.sequence.length)))}}\\\\`;
             }
             result += `\\underline{\\text{${Localization.format(
             getLoc('colonyProg'), c.population, getLoc('plants')[c.id].name,
             c.stage, c.growth * BigNumber.HUNDRED /
-            (PLANT_DATA[c.id].growthCost *
+            (plantData[c.id].growthCost *
             BigNumber.from(c.sequence.length)))}}}\\\\`;
             for(let i = colonyIdx[plotIdx] + 1;
             i < manager.colonies[plotIdx].length; ++i)
@@ -3852,7 +3853,7 @@ var getSecondaryEquation = () =>
                 let d = manager.colonies[plotIdx][i];
                 result += `\\text{${Localization.format(getLoc('colonyProg'),
                 d.population, getLoc('plants')[d.id].name, d.stage, d.growth *
-                BigNumber.HUNDRED / (PLANT_DATA[d.id].growthCost *
+                BigNumber.HUNDRED / (plantData[d.id].growthCost *
                 BigNumber.from(d.sequence.length)))}}\\\\`;
             }
             return result;
@@ -3983,7 +3984,7 @@ let createVariableMenu = (variables) =>
 
 let createSystemMenu = (id) =>
 {
-    let values = PLANT_DATA[id].system.object;
+    let values = plantData[id].system.object;
 
     let tmpAxiom = values.axiom;
     let axiomEntry = ui.createEntry
@@ -4262,7 +4263,7 @@ let createColonyViewMenu = (colony) =>
         if(!('result' in reconstructionTask) ||
         ('result' in reconstructionTask && reconstructionTask.start))
         {
-            reconstructionTask = PLANT_DATA[colony.id].system.reconstruct(
+            reconstructionTask = plantData[colony.id].system.reconstruct(
             colony.sequence, colonyViewConfig[colony.id].params ?
             colony.params : null, colonyViewConfig[colony.id].filter,
             reconstructionTask);
@@ -4290,8 +4291,8 @@ let createColonyViewMenu = (colony) =>
     let plantStats = ui.createLatexLabel
     ({
         text: Localization.format(getLoc('plantStats'), cmtStage, tmpCmt,
-        PLANT_DATA[colony.id].maxStage ?? '∞', colony.synthRate,
-        PLANT_DATA[colony.id].growthRate, PLANT_DATA[colony.id].growthCost,
+        plantData[colony.id].maxStage ?? '∞', colony.synthRate,
+        plantData[colony.id].growthRate, plantData[colony.id].growthCost,
         colony.sequence.length),
         margin: new Thickness(0, 6),
         horizontalTextAlignment: TextAlignment.START,
@@ -4342,9 +4343,9 @@ let createColonyViewMenu = (colony) =>
                 colony.stage);
                 tmpCmt = updateCommentary();
                 plantStats.text = Localization.format(getLoc('plantStats'),
-                cmtStage, tmpCmt, PLANT_DATA[colony.id].maxStage ?? '∞',
-                PLANT_DATA[colony.id].growthRate, colony.synthRate,
-                PLANT_DATA[colony.id].growthCost, colony.sequence.length);
+                cmtStage, tmpCmt, plantData[colony.id].maxStage ?? '∞',
+                plantData[colony.id].growthRate, colony.synthRate,
+                plantData[colony.id].growthCost, colony.sequence.length);
                 tmpStage = colony.stage;
                 reconstructionTask =
                 {

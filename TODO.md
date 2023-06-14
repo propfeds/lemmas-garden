@@ -6,6 +6,17 @@
 
 ## v0.1: They Breed Like Rabbits!
 
+- [ ] Investigate educational game [design categories](https://www.sciencedirect.com/science/article/abs/pii/S0747563218304771)
+  - Accuracy feedback
+  - Unlimited/multiple attempts
+  - Information tutorials and hints
+  - Focused constraint
+  - Progressive levels
+  - Game efficiency
+
+- [ ] Are single-player games [that weak?](https://www.sciencedirect.com/science/article/abs/pii/S0360131522002214)
+  - Hold on, collaborative and social interactions. Discord! Reddit!
+
 - [ ] Simple solitary flower
   - Tulip?
   - Buttercup
@@ -15,6 +26,7 @@
   - [ ] Hopleek
     - [ ] Biting is on evolution queue instead of action?
     - [ ] Hopleek schedule
+- [ ] Bush (lav? me hate)
 - [ ] Sunflower
 - [ ] Spreadable plants
 - [x] Cap colony count to 5 per plot, unless?
