@@ -39,3 +39,4 @@ export class ScrollView {
 }
 import { ScrollBarVisibility } from "./properties/ScrollBarVisibility";
 import { ScrollOrientation } from "./properties/ScrollOrientation";
+import { View } from "./View";

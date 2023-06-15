@@ -122,7 +122,7 @@ export class CustomCost extends Cost {
      * @param {function(number, number):BigNumber} cumulativeFunction - cumulativeFunction(10, 5) should return the cumulative cost if the current level is 10 and you want to buy 5 more levels.
      * @param {function(number, Bignumber):number} maxFunction - maxFunction(5, BigNumber.from(100)) should return the number of levels that can be bought if you're currently at level 5 and have 100 units of currency to spend.
      */
-    constructor(costFunction: (arg0: number) => BigNumber, cumulativeFunction: (arg0: number, arg1: number) => BigNumber, maxFunction: (arg0: number, arg1: Bignumber) => number);
+    constructor(costFunction: (arg0: number) => BigNumber, cumulativeFunction: (arg0: number, arg1: number) => BigNumber, maxFunction: (arg0: number, arg1: BigNumber) => number);
     /**
      * A sanity check to ensure that the provided cumulative and max functions are
      * correct. The check assumes that the cost function is correct, and calculate

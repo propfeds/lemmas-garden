@@ -165,10 +165,10 @@ export class Game {
      * @returns {StoryChapter[]} List of all story chapters
      */
     get storyChapters(): StoryChapter[];
-    /**
-     * @returns {Story} Story chapters
-     */
-    get story(): Story;
+    // /**
+    //  * @returns {Story} Story chapters
+    //  */
+    // get story(): Story;
     /**
      * @returns {Automation} Automation features
      */

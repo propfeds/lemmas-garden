@@ -1,25 +1,25 @@
-import { BigNumber } from '../../api/BigNumber';
-import { CompositeCost, ConstantCost, ExponentialCost, FirstFreeCost, FreeCost } from '../../api/Costs';
-import { Localization } from '../../api/Localization';
-import { QuaternaryEntry, theory } from '../../api/Theory';
-import { ImageSource } from '../../api/ui/properties/ImageSource';
-import { LayoutOptions } from '../../api/ui/properties/LayoutOptions';
-import { TextAlignment } from '../../api/ui/properties/TextAlignment';
-import { Thickness } from '../../api/ui/properties/Thickness';
-import { Vector3 } from '../../api/Vector3';
-import { log } from '../../api/Utils';
-import { ui } from '../../api/ui/UI';
-import { Aspect } from '../../api/ui/properties/Aspect';
-import { ClearButtonVisibility } from '../../api/ui/properties/ClearButtonVisibility';
-import { Color } from '../../api/ui/properties/Color';
-import { FontFamily } from '../../api/ui/properties/FontFamily';
-import { Keyboard } from '../../api/ui/properties/Keyboard';
-import { LineBreakMode } from '../../api/ui/properties/LineBreakMode';
-import { TouchType } from '../../api/ui/properties/TouchType';
-import { MathExpression } from '../../api/MathExpression';
-import { Theme } from '../../api/Settings';
-import { Sound } from '../../api/Sound';
-import { game } from '../../api/Game';
+import { BigNumber } from './api/BigNumber';
+import { CompositeCost, ConstantCost, ExponentialCost, FirstFreeCost, FreeCost } from './api/Costs';
+import { Localization } from './api/Localization';
+import { QuaternaryEntry, theory } from './api/Theory';
+import { ImageSource } from './api/ui/properties/ImageSource';
+import { LayoutOptions } from './api/ui/properties/LayoutOptions';
+import { TextAlignment } from './api/ui/properties/TextAlignment';
+import { Thickness } from './api/ui/properties/Thickness';
+import { Vector3 } from './api/Vector3';
+import { log } from './api/Utils';
+import { ui } from './api/ui/UI';
+import { Aspect } from './api/ui/properties/Aspect';
+import { ClearButtonVisibility } from './api/ui/properties/ClearButtonVisibility';
+import { Color } from './api/ui/properties/Color';
+import { FontFamily } from './api/ui/properties/FontFamily';
+import { Keyboard } from './api/ui/properties/Keyboard';
+import { LineBreakMode } from './api/ui/properties/LineBreakMode';
+import { TouchType } from './api/ui/properties/TouchType';
+import { MathExpression } from './api/MathExpression';
+import { Theme } from './api/Settings';
+import { Sound } from './api/Sound';
+import { game } from './api/Game';
 var id = 'lemmas_garden';
 var getName = (language) => {
     var _a;
@@ -244,6 +244,7 @@ friend of all mathematicians.`
                 text: `You're not one of my students, are you?
 Surprised anybody would visit this late, let alone
 urge me to let them plant in my ground.
+
 Well then, welcome to class.
 
 Hum. Can't even bear to look at this soil...
@@ -734,15 +735,16 @@ class LSystem {
         this.axiom = axiomMatches.result;
         let axiomParamStrings = axiomMatches.params;
         this.axiomParams = [];
+        this.varGetter = (v) => this.variables.get(v);
         // Manually calculate axiom parameters
-        for (let i = 0; i < this.axiomParams.length; ++i) {
-            if (!this.axiomParams[i])
+        for (let i = 0; i < axiomParamStrings.length; ++i) {
+            if (!axiomParamStrings[i])
                 continue;
-            let paramStrings = this.parseParams(axiomParamStrings[i]);
-            let params = [];
-            for (let j = 0; j < paramStrings.length; ++j)
-                params[j] = MathExpression.parse(paramStrings[j]).evaluate((v) => this.variables.get(v));
-            this.axiomParams[i] = params;
+            let params = this.parseParams(axiomParamStrings[i]);
+            this.axiomParams[i] = [];
+            for (let j = 0; j < params.length; ++j)
+                this.axiomParams[i][j] = MathExpression.parse(params[j]).
+                    evaluate(this.varGetter);
             // Maybe leave them at BigNumber?
         }
         let ruleMatches = [];
@@ -831,11 +833,10 @@ class LSystem {
                 for (let k = 0; k < derivParamStrings.length; ++k) {
                     if (!derivParamStrings[k])
                         continue;
-                    let paramStrings = this.parseParams(derivParamStrings[k]);
-                    let params = [];
-                    for (let l = 0; l < paramStrings.length; ++l)
-                        params[l] = MathExpression.parse(paramStrings[l]);
-                    derivParams[k] = params;
+                    let params = this.parseParams(derivParamStrings[k]);
+                    derivParams[k] = [];
+                    for (let l = 0; l < params.length; ++l)
+                        derivParams[k][l] = MathExpression.parse(params[l]);
                 }
                 if (typeof tmpRule.derivations === 'string') {
                     tmpRule.derivations = [tmpRule.derivations,
@@ -850,7 +851,7 @@ class LSystem {
                 }
                 else if (!tmpRule.derivations) {
                     tmpRule.derivations = tmpDeriv.result;
-                    tmpRule.parameters = derivParamStrings;
+                    tmpRule.parameters = derivParams;
                     if (tmpRuleMatches[j][1])
                         tmpRule.chances = MathExpression.parse(tmpRuleMatches[j][1]);
                     else
@@ -859,7 +860,7 @@ class LSystem {
                 else // Already an array
                  {
                     tmpRule.derivations.push(tmpDeriv.result);
-                    tmpRule.parameters.push(derivParamStrings);
+                    tmpRule.parameters.push(derivParams);
                     if (tmpRuleMatches[j][1])
                         tmpRule.chances.push(MathExpression.parse(tmpRuleMatches[j][1]));
                     else
@@ -881,7 +882,7 @@ class LSystem {
         this.ignoreList = new Set(ignoreList);
         this.ctxIgnoreList = new Set(ctxIgnoreList);
         this.RNG = new Xorshift(seed);
-        this.halfAngle = MathExpression.parse(turnAngle.toString()).evaluate((v) => this.variables.get(v)).toNumber() * Math.PI / 360;
+        this.halfAngle = MathExpression.parse(turnAngle.toString()).evaluate(this.varGetter).toNumber() * Math.PI / 360;
         this.rotations = new Map();
         let s = Math.sin(this.halfAngle);
         let c = Math.cos(this.halfAngle);
@@ -891,7 +892,7 @@ class LSystem {
         this.rotations.set('^', new Quaternion(-c, 0, -s, 0));
         this.rotations.set('\\', new Quaternion(-c, s, 0, 0));
         this.rotations.set('/', new Quaternion(-c, -s, 0, 0));
-        this.tropism = MathExpression.parse(tropism.toString()).evaluate((v) => this.variables.get(v)).toNumber();
+        this.tropism = MathExpression.parse(tropism.toString()).evaluate(this.varGetter).toNumber();
     }
     /**
      * Parse a sequence to return one array of characters and one of parameters.
@@ -1106,7 +1107,7 @@ class LSystem {
                     }
                     let tmpParamMap = (v) => {
                         var _a;
-                        return (_a = this.variables.get(v)) !== null && _a !== void 0 ? _a : tmpRules[j].paramMap(v, seqParams[ancestors[i]], seqParams[i], seqParams[right]);
+                        return (_a = this.varGetter(v)) !== null && _a !== void 0 ? _a : tmpRules[j].paramMap(v, seqParams[ancestors[i]], seqParams[i], seqParams[right]);
                     };
                     // Next up is the condition
                     if (tmpRules[j].condition.evaluate(tmpParamMap) ==
@@ -1118,13 +1119,14 @@ class LSystem {
                         if (tmpRules[j].parameters) {
                             for (let k = 0; k < tmpRules[j].parameters.length; ++k) {
                                 let derivPi = null;
-                                if (tmpRules[j].parameters[k]) {
-                                    for (let l = 0; l < tmpRules[j].parameters[k].length; ++l) {
-                                        if (tmpRules[j].parameters[k][l]) {
+                                let tmpParams = tmpRules[j].
+                                    parameters[k];
+                                if (tmpParams) {
+                                    for (let l = 0; l < tmpParams.length; ++l) {
+                                        if (tmpParams[l]) {
                                             if (!derivPi)
                                                 derivPi = [];
-                                            derivPi.push(tmpRules[j].
-                                                parameters[k][l].evaluate(tmpParamMap));
+                                            derivPi.push(tmpParams[l].evaluate(tmpParamMap));
                                         }
                                     }
                                 }
@@ -1156,15 +1158,13 @@ class LSystem {
                                     for (let l = 0; l < tmpRules[j].
                                         parameters[k].length; ++l) {
                                         let derivPi = null;
-                                        if (tmpRules[j].parameters[k][l]) {
-                                            for (let m = 0; m < tmpRules[j].
-                                                parameters[k][l].length; ++m) {
-                                                if (tmpRules[j].
-                                                    parameters[k][l][m]) {
+                                        let tmpParams = tmpRules[j].parameters[k][l];
+                                        if (tmpParams) {
+                                            for (let m = 0; m < tmpParams.length; ++m) {
+                                                if (tmpParams[m]) {
                                                     if (!derivPi)
                                                         derivPi = [];
-                                                    derivPi.push(tmpRules[j].
-                                                        parameters[k][l][m].
+                                                    derivPi.push(tmpParams[m].
                                                         evaluate(tmpParamMap));
                                                 }
                                             }
@@ -1208,7 +1208,7 @@ class LSystem {
             for (let j = 0; j < tmpRules.length; ++j) {
                 let tmpParamMap = (v) => {
                     var _a;
-                    return (_a = this.variables.get(v)) !== null && _a !== void 0 ? _a : tmpRules[j].paramMap(v, null, null, params);
+                    return (_a = this.varGetter(v)) !== null && _a !== void 0 ? _a : tmpRules[j].paramMap(v, null, null, params);
                 };
                 // Next up is the condition
                 if (tmpRules[j].condition.evaluate(tmpParamMap) ==
@@ -1219,13 +1219,14 @@ class LSystem {
                     if (tmpRules[j].parameters) {
                         for (let k = 0; k < tmpRules[j].parameters.length; ++k) {
                             let derivPi = null;
-                            if (tmpRules[j].parameters[k]) {
-                                for (let l = 0; l < tmpRules[j].parameters[k].
-                                    length; ++l) {
-                                    if (tmpRules[j].parameters[k][l]) {
+                            let tmpParams = tmpRules[j].
+                                parameters[k];
+                            if (tmpParams) {
+                                for (let l = 0; l < tmpParams.length; ++l) {
+                                    if (tmpParams[l]) {
                                         if (!derivPi)
                                             derivPi = [];
-                                        derivPi.push(tmpRules[j].parameters[k][l].evaluate(tmpParamMap));
+                                        derivPi.push(tmpParams[l].evaluate(tmpParamMap));
                                     }
                                 }
                             }
@@ -1257,15 +1258,13 @@ class LSystem {
                                 for (let l = 0; l < tmpRules[j].
                                     parameters[k].length; ++l) {
                                     let derivPi = null;
-                                    if (tmpRules[j].parameters[k][l]) {
-                                        for (let m = 0; m < tmpRules[j].
-                                            parameters[k][l].length; ++m) {
-                                            if (tmpRules[j].
-                                                parameters[k][l][m]) {
+                                    const tmpParams = tmpRules[j].parameters[k][l];
+                                    if (tmpParams) {
+                                        for (let m = 0; m < tmpParams.length; ++m) {
+                                            if (tmpParams[m]) {
                                                 if (!derivPi)
                                                     derivPi = [];
-                                                derivPi.push(tmpRules[j].
-                                                    parameters[k][l][m].
+                                                derivPi.push(tmpParams[m].
                                                     evaluate(tmpParamMap));
                                             }
                                         }
@@ -1471,7 +1470,8 @@ class Renderer {
      * Moves the cursor forward.
      */
     forward(distance = 1) {
-        this.state += this.ori.headingVector * distance;
+        this.state = (this.state +
+            this.ori.headingVector * distance);
     }
     /**
      * Ticks the clock.
@@ -1853,14 +1853,14 @@ class Renderer {
     get centre() {
         if (this.cameraMode)
             return -this.cursor;
-        return this.swizzle(-this.camCentre / this.figureScale);
+        return this.swizzle((-this.camCentre / this.figureScale));
     }
     /**
      * Returns the turtle's coordinates.
      * @returns {Vector3}
      */
     get cursor() {
-        let coords = this.state / this.figureScale;
+        let coords = (this.state / this.figureScale);
         return this.swizzle(coords);
     }
     /**
@@ -1872,10 +1872,11 @@ class Renderer {
         switch (this.cameraMode) {
             case 1:
                 // I accidentally discovered Bézier curves unknowingly.
-                let dist = this.centre - this.lastCamera;
-                newCamera = this.lastCamera + dist * this.followFactor ** 2 +
-                    this.lastCamVel * (1 - this.followFactor) ** 2;
-                this.lastCamVel = newCamera - this.lastCamera;
+                let dist = (this.centre - this.lastCamera);
+                newCamera = (this.lastCamera +
+                    dist * this.followFactor ** 2 +
+                    this.lastCamVel * (1 - this.followFactor) ** 2);
+                this.lastCamVel = (newCamera - this.lastCamera);
                 this.lastCamera = newCamera;
                 return newCamera;
             case 0:
@@ -2002,33 +2003,35 @@ class ColonyManager {
             for (let j = 0; j < this.colonies[i].length; ++j) {
                 let c = this.colonies[i][j];
                 let notMature = c.stage < ((_a = plantData[c.id].maxStage) !== null && _a !== void 0 ? _a : MAX_INT);
-                if (notMature && c.growth >= plantData[c.id].growthCost *
-                    BigNumber.from(c.sequence.length)) {
+                if (notMature && c.growth >= (plantData[c.id].growthCost *
+                    BigNumber.from(c.sequence.length))) {
                     if (!this.gangsta)
                         this.gangsta = [i, j];
                     if (!c.diReserve)
                         c.diReserve = BigNumber.ZERO;
-                    c.diReserve += di;
+                    c.diReserve = (c.diReserve + di);
                     if (!c.dgReserve)
                         c.dgReserve = BigNumber.ZERO;
-                    c.dgReserve += dg;
+                    c.dgReserve = (c.dgReserve + dg);
                 }
                 else if (this.actionGangsta && this.actionGangsta[0] == i &&
                     this.actionGangsta[1] == j) {
                     if (!c.diReserve)
                         c.diReserve = BigNumber.ZERO;
-                    c.diReserve += di;
+                    c.diReserve = (c.diReserve + di);
                     if (!c.dgReserve)
                         c.dgReserve = BigNumber.ZERO;
-                    c.dgReserve += dg;
+                    c.dgReserve = (c.dgReserve + dg);
                 }
                 else {
-                    c.energy += di * c.synthRate;
+                    c.energy = (c.energy +
+                        di * c.synthRate);
                     if (notMature) {
-                        let maxdg = c.energy.min(dg *
-                            plantData[c.id].growthRate);
-                        c.growth += maxdg;
-                        c.energy -= maxdg;
+                        let maxdg = c.energy.min((dg *
+                            plantData[c.id].growthRate));
+                        c.growth = (c.growth + maxdg);
+                        c.energy = (c.energy -
+                            maxdg);
                     }
                 }
             }
@@ -2062,6 +2065,11 @@ class ColonyManager {
             profit: profit
         };
     }
+    reap(colony) {
+        currency.value = (currency.value +
+            colony.profit * BigNumber.from(colony.population) *
+                theory.publicationMultiplier);
+    }
     continueAction() {
         var _a;
         // Future idea: maybe instead of using an LS to prune/harvest, develop
@@ -2074,8 +2082,7 @@ class ColonyManager {
         }
         if (plantData[c.id].actions[id].killColony) {
             if (id == 0)
-                currency.value += c.profit * BigNumber.from(c.population) *
-                    theory.publicationMultiplier;
+                this.reap(c);
             this.killColony(...this.actionGangsta);
             this.actionGangsta = null;
             theory.invalidateSecondaryEquation();
@@ -2091,8 +2098,7 @@ class ColonyManager {
         }
         if (!this.actionDeriveTask.derivation.length) {
             if (id == 0)
-                currency.value += c.profit * BigNumber.from(c.population) *
-                    theory.publicationMultiplier;
+                this.reap(c);
             this.killColony(...this.actionGangsta);
             this.actionDeriveTask =
                 {
@@ -2109,18 +2115,18 @@ class ColonyManager {
             return;
         }
         if (id == 0)
-            currency.value += c.profit * BigNumber.from(c.population) *
-                theory.publicationMultiplier;
+            this.reap(c);
         c.synthRate = this.actionCalcTask.synthRate;
         c.profit = this.actionCalcTask.profit;
         c.sequence = this.actionDeriveTask.derivation;
         c.params = this.actionDeriveTask.parameters;
-        c.energy += c.diReserve * c.synthRate;
+        c.energy = (c.energy +
+            c.diReserve * c.synthRate);
         let notMature = c.stage < ((_a = plantData[c.id].maxStage) !== null && _a !== void 0 ? _a : MAX_INT);
         if (notMature) {
-            let maxdg = c.energy.min(c.dgReserve * plantData[c.id].growthRate);
-            c.growth += maxdg;
-            c.energy -= maxdg;
+            let maxdg = c.energy.min((c.dgReserve * plantData[c.id].growthRate));
+            c.growth = (c.growth + maxdg);
+            c.energy = (c.energy - maxdg);
         }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
@@ -2204,22 +2210,26 @@ class ColonyManager {
             this.calcTask = this.calculateStats(c, this.calcTask, this.deriveTask);
             return;
         }
-        c.growth -= plantData[c.id].growthCost *
-            BigNumber.from(c.sequence.length);
-        c.diReserve += c.growth / c.synthRate;
-        c.dgReserve += c.growth / plantData[c.id].growthRate;
+        c.growth = (c.growth -
+            plantData[c.id].growthCost *
+                BigNumber.from(c.sequence.length));
+        c.diReserve = (c.diReserve +
+            c.growth / c.synthRate);
+        c.dgReserve = (c.dgReserve +
+            c.growth / plantData[c.id].growthRate);
         c.growth = BigNumber.ZERO;
         c.sequence = this.deriveTask.derivation;
         c.params = this.deriveTask.parameters;
         c.synthRate = this.calcTask.synthRate;
         c.profit = this.calcTask.profit;
-        c.energy += c.diReserve * c.synthRate;
+        c.energy = (c.energy +
+            c.diReserve * c.synthRate);
         ++c.stage;
         let notMature = c.stage < ((_a = plantData[c.id].maxStage) !== null && _a !== void 0 ? _a : MAX_INT);
         if (notMature) {
-            let maxdg = c.energy.min(c.dgReserve * plantData[c.id].growthRate);
-            c.growth += maxdg;
-            c.energy -= maxdg;
+            let maxdg = c.energy.min((c.dgReserve * plantData[c.id].growthRate));
+            c.growth = (c.growth + maxdg);
+            c.energy = (c.energy - maxdg);
         }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
@@ -2256,8 +2266,10 @@ const permaCosts = [
 const taxRate = BigNumber.from(-.12);
 const tauRate = BigNumber.TWO;
 const pubCoef = BigNumber.from(2 / 3);
-const pubExp = BigNumber.from(.15) / tauRate;
-var getPublicationMultiplier = (tau) => pubCoef * tau.max(BigNumber.ONE).pow(pubExp * tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
+const pubExp = (BigNumber.from(.15) / tauRate);
+var getPublicationMultiplier = (tau) => (pubCoef *
+    tau.max(BigNumber.ONE).pow((pubExp *
+        tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log())));
 var getPublicationMultiplierFormula = (symbol) => `\\frac{2}{3}\\times
 {${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
 const plantData = {
@@ -2516,8 +2528,8 @@ let createFramedButton = (params, margin, callback, image) => {
 const harvestFrame = createFramedButton({
     row: 0, column: 0,
 }, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 0), game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/herbs-bundle-dark.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/herbs-bundle.png'));
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle-dark.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle.png'));
 const harvestLabel = ui.createLatexLabel({
     row: 0, column: 1,
     // horizontalOptions: LayoutOptions.END,
@@ -2536,8 +2548,8 @@ const pruneFrame = createFramedButton({
     },
     row: 0, column: 2,
 }, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 1), game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands-dark.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/hair-strands.png'));
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/hair-strands-dark.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/hair-strands.png'));
 const pruneLabel = ui.createLatexLabel({
     isVisible: () => {
         let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
@@ -2582,13 +2594,22 @@ const settingsFrame = createFramedButton({
     column: 0,
     horizontalOptions: LayoutOptions.START
 }, 2, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog-dark.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/icons/cog.png'));
-var switchPlant, viewColony, switchColony;
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/cog-dark.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/cog.png'));
+var switchPlant;
+var viewColony;
+var switchColony;
 var plants = Array.from({ length: nofPlots }, (_) => { return {}; });
-var notebookPerma, plotPerma, plantPerma;
-var freePenny, warpTick, warpDay, warpYear, warpZero;
-var currency, taxCurrency;
+var notebookPerma;
+var plotPerma;
+var plantPerma;
+var freePenny;
+var warpTick;
+var warpDay;
+var warpYear;
+var warpZero;
+var currency;
+var taxCurrency;
 var init = () => {
     currency = theory.createCurrency('p', 'p');
     taxCurrency = theory.createCurrency(getLoc('currencyTax'));
@@ -2744,7 +2765,7 @@ var init = () => {
         freePenny = theory.createPermanentUpgrade(9001, currency, new FreeCost);
         freePenny.description = 'Get 1 penny for free';
         freePenny.info = 'Yields 1 penny';
-        freePenny.bought = (_) => currency.value += BigNumber.ONE;
+        freePenny.bought = (_) => currency.value = (currency.value + BigNumber.ONE);
         freePenny.isAvailable = haxEnabled;
     }
     /* Warp tick
@@ -2960,29 +2981,27 @@ var getSecondaryEquation = () => {
                 manager.actionGangsta[0] == plotIdx &&
                 manager.actionGangsta[1] == colonyIdx[plotIdx]) ?
                 getLoc('status').actions[manager.actionGangsta[2]] : '';
-            return `\\text{${Localization.format(getLoc('colonyStats'), c.population, getLoc('plants')[c.id].name, c.stage, c.energy, c.synthRate * BigNumber.from(insolationCoord), c.growth, plantData[c.id].growthCost * BigNumber.from(c.sequence.length), plantData[c.id].growthRate * BigNumber.from(growthCoord), c.profit, status)}}`;
-            return `\\text{${Localization.format(getLoc('colony'), c.population, getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
-            g=${c.growth}/${plantData[c.id].growthCost *
-                BigNumber.from(c.sequence.length)}\\\\
-            P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}
-            \\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
-            \\\\`;
+            return `\\text{${Localization.format(getLoc('colonyStats'), c.population, getLoc('plants')[c.id].name, c.stage, c.energy, (c.synthRate *
+                BigNumber.from(insolationCoord)), c.growth, (plantData[c.id].growthCost *
+                BigNumber.from(c.sequence.length)), (plantData[c.id].growthRate *
+                BigNumber.from(growthCoord)), c.profit, status)}}`;
+        // return `\\text{${Localization.format(getLoc('colony'), c.population, getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace g=${c.growth}/${plantData[c.id].growthCost * BigNumber.from(c.sequence.length)}\\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}\\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})\\\\`;
         case 2:
             let result = '';
             for (let i = 0; i < colonyIdx[plotIdx]; ++i) {
                 let d = manager.colonies[plotIdx][i];
-                result += `\\text{${Localization.format(getLoc('colonyProg'), d.population, getLoc('plants')[d.id].name, d.stage, d.growth *
-                    BigNumber.HUNDRED / (plantData[d.id].growthCost *
-                    BigNumber.from(d.sequence.length)))}}\\\\`;
+                result += `\\text{${Localization.format(getLoc('colonyProg'), d.population, getLoc('plants')[d.id].name, d.stage, (d.growth * BigNumber.HUNDRED /
+                    (plantData[d.id].growthCost *
+                        BigNumber.from(d.sequence.length))))}}\\\\`;
             }
-            result += `\\underline{\\text{${Localization.format(getLoc('colonyProg'), c.population, getLoc('plants')[c.id].name, c.stage, c.growth * BigNumber.HUNDRED /
-                (plantData[c.id].growthCost *
-                    BigNumber.from(c.sequence.length)))}}}\\\\`;
+            result += `\\underline{\\text{${Localization.format(getLoc('colonyProg'), c.population, getLoc('plants')[c.id].name, c.stage, (c.growth *
+                BigNumber.HUNDRED / (plantData[c.id].growthCost *
+                BigNumber.from(c.sequence.length))))}}}\\\\`;
             for (let i = colonyIdx[plotIdx] + 1; i < manager.colonies[plotIdx].length; ++i) {
                 let d = manager.colonies[plotIdx][i];
-                result += `\\text{${Localization.format(getLoc('colonyProg'), d.population, getLoc('plants')[d.id].name, d.stage, d.growth *
-                    BigNumber.HUNDRED / (plantData[d.id].growthCost *
-                    BigNumber.from(d.sequence.length)))}}\\\\`;
+                result += `\\text{${Localization.format(getLoc('colonyProg'), d.population, getLoc('plants')[d.id].name, d.stage, (d.growth * BigNumber.HUNDRED /
+                    (plantData[d.id].growthCost *
+                        BigNumber.from(d.sequence.length))))}}\\\\`;
             }
             return result;
         default:
@@ -2994,7 +3013,7 @@ let getTimeString = () => {
     let weeks = Math.floor(dayofYear / 7);
     let timeofDay = time % 144;
     let hour = Math.floor(timeofDay / 6);
-    let min = Math.round((timeofDay % 6) * 10);
+    let min = 0; //Math.round((timeofDay % 6) * 10);
     return Localization.format(getLoc(actionPanelOnTop ? 'dateTimeBottom' :
         'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1, hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'), haxEnabled ? getLoc('hacks') : '');
 };
@@ -3005,13 +3024,14 @@ var getQuaternaryEntries = () => {
         let sum = BigNumber.ZERO;
         for (let j = 0; j < manager.colonies[i].length; ++j) {
             let c = manager.colonies[i][j];
-            sum += c.profit * BigNumber.from(c.population) *
-                theory.publicationMultiplier;
+            sum = (sum + c.profit *
+                BigNumber.from(c.population) *
+                theory.publicationMultiplier);
         }
         quaternaryEntries[i].value = sum;
     }
     if (theory.publicationUpgrade.level && theory.canPublish) {
-        taxCurrency.value = getCurrencyFromTau(theory.tau)[0] * taxRate;
+        taxCurrency.value = (getCurrencyFromTau(theory.tau)[0] * taxRate);
         taxQuaternaryEntry[0].value = taxCurrency.value;
         return quaternaryEntries.concat(taxQuaternaryEntry);
     }
@@ -3697,11 +3717,12 @@ let createWorldMenu = () => {
 var isCurrencyVisible = (index) => !index;
 var getTau = () => currency.value.max(BigNumber.ZERO).pow(tauRate);
 var getCurrencyFromTau = (tau) => [
-    tau.pow(BigNumber.ONE / tauRate),
+    tau.pow((BigNumber.ONE / tauRate)),
     currency.symbol
 ];
 var prePublish = () => {
-    tmpCurrency = currency.value + taxCurrency.value;
+    // <Vector3><unknown>(<any>curHead - <any>weightVector)
+    tmpCurrency = (currency.value + taxCurrency.value);
     tmpLevels = Array.from({ length: nofPlots }, (_) => []);
 };
 // You can be in debt for this lol

@@ -210,3 +210,4 @@ import { Color } from "./properties/Color";
 import { Thickness } from "./properties/Thickness";
 import { LayoutOptions } from "./properties/LayoutOptions";
 import { TouchEvent } from "./properties/TouchEvent";
+import { Easing } from "./properties/Easing";

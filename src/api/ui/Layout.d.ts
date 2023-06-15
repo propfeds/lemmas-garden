@@ -30,3 +30,5 @@ export class Layout {
     public onLayoutChanged: (arg0: void) => void;
 }
 import { Thickness } from "./properties/Thickness";
+import { View } from "./View";
+

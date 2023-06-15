@@ -120,3 +120,4 @@ import { FontFamily } from "./properties/FontFamily";
 import { TextAlignment } from "./properties/TextAlignment";
 import { Keyboard } from "./properties/Keyboard";
 import { ReturnType } from "./properties/ReturnType";
+import { Color } from "./properties/Color";

@@ -8,6 +8,8 @@ export class QuaternaryEntry {
      * @param {String} value - Right side of the equality sign
      */
     constructor(name: string, value: string);
+    name: string;
+    value: unknown;
 }
 /**
  * Properties of a theory.
@@ -72,9 +74,9 @@ export class Theory {
      */
     get latexSymbol(): string;
     /**
-     * @returns {bool}
+     * @returns {boolean}
      */
-    get isUnlocked(): bool;
+    get isUnlocked(): boolean;
     /**
      * @returns {Currency[]}
      */
@@ -307,7 +309,7 @@ export class Theory {
      * @param {function():number} [progress] - Function returning if the progress towards the achievement. In [0, 1].
      * @returns {Achievement}
      */
-    createAchievement(id: number, category?: AchievementCategory, name: string, description: string, unlockCondition: () => boolean, progress?: () => number): Achievement;
+    createAchievement(id: number, category: AchievementCategory, name: string, description: string, unlockCondition: () => boolean, progress?: () => number): Achievement;
     /**
      * Creates your own secret achievement.
      * @param {number} id - Unique ID within the current custom theory achievements
@@ -318,7 +320,7 @@ export class Theory {
      * @param {function():boolean} unlockCondition - Function returning if the achievement can be unlocked. Checks every second. Stops being called once it is unlocked.
      * @returns {Achievement}
      */
-    createSecretAchievement(id: number, category?: AchievementCategory, name: string, description: string, hint: string, unlockCondition: () => boolean): Achievement;
+    createSecretAchievement(id: number, category: AchievementCategory, name: string, description: string, hint: string, unlockCondition: () => boolean): Achievement;
     /**
      * Creates your own story chapter.
      * @param {number} id - Unique ID within the current custom theory story chapters

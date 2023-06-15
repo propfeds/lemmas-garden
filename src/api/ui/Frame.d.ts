@@ -25,3 +25,4 @@ export class Frame {
     public content: View;
 }
 import { Color } from "./properties/Color";
+import { View } from "./View";

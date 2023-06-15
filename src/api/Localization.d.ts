@@ -8,7 +8,7 @@ export class Localization {
      * @param {...object} args - Values to use in place of {0} and {1}
      * @returns {String}
      */
-    static format(text: string, args: object[]): string;
+    static format(text: string, ...args: unknown[]): string;
     /**
      * Access to the translation service of the game.
      * @param {String} id - ID from the translation source document

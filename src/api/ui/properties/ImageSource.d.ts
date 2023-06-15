@@ -50,5 +50,5 @@ export class ImageSource {
      * @param {string} uri - The URI of the image
      * @returns {ImageSource}
      */
-    fromUri(uri: string): ImageSource;
+    static fromUri(uri: string): ImageSource;
 }

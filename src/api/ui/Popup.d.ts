@@ -46,3 +46,4 @@ export class Popup {
      */
     hide(): any;
 }
+import { View } from "./View";
