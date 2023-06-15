@@ -242,12 +242,13 @@ friend of all mathematicians.`
             intro: {
                 title: `Lemma's garden`,
                 text: `You're not one of my students, are you?
-Surprised anybody would visit this late, let alone
-urge me to let them plant in my ground.
+Surprised anybody would visit this late,
+let alone urge me to let them plant on my ground.
 
 Well then, welcome to class.
 
-Hum. Can't even bear to look at this soil...
+Hum.
+Can't even bear to look at this soil...
 Go till it. We'll start in the morning.`
             },
             basil: {
@@ -3013,7 +3014,8 @@ let getTimeString = () => {
     let weeks = Math.floor(dayofYear / 7);
     let timeofDay = time % 144;
     let hour = Math.floor(timeofDay / 6);
-    let min = 0; //Math.round((timeofDay % 6) * 10);
+    let min = Math.floor((timeofDay % 6) / 1.5) * 15;
+    // let min = Math.round((timeofDay % 6) * 10);
     return Localization.format(getLoc(actionPanelOnTop ? 'dateTimeBottom' :
         'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1, hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'), haxEnabled ? getLoc('hacks') : '');
 };
