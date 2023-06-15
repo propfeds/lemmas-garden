@@ -46,6 +46,7 @@
   - Internal state unfriendly
 
 - [ ] Add a Pruned commentary track
+- [ ] Replace stage 0 commentary with Lemma dialogue
 - [ ] Almanac containing plants, L-system help, etc.
   - [ ] Move notebook inside
   - [ ] Move the teaching from commentary to almanac

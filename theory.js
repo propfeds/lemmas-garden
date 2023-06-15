@@ -159,9 +159,9 @@ marigolds of the genus Tagetes), calendulas are fast growing flowers known for
 numerous medicinal and culinary uses. In fact, the 'pot' in its name refers to
 its role as an ingredient in soups, stews, broths and teas.`,
                     3: 'A little stem has just risen.',
-                    8: `The second pair of leaves appears. For this cultivar, 
-each pair of leaves is rotated to 90° against the previous. Other cultivars may
-generate leaves in a spiral around the stem.`,
+                    8: `The second pair of leaves appears. See that for this
+cultivar, each pair of leaves is rotated to 90° against the previous. Others
+might generate leaves in a spiral around the stem.`,
                     13: 'The third pair of leaves appears.',
                     17: `The stem has split in two. It will start to flower
 soon.`,
@@ -3014,8 +3014,11 @@ let getTimeString = () => {
     let weeks = Math.floor(dayofYear / 7);
     let timeofDay = time % 144;
     let hour = Math.floor(timeofDay / 6);
-    let min = Math.floor((timeofDay % 6) / 1.5) * 15;
-    // let min = Math.round((timeofDay % 6) * 10);
+    let min;
+    if (game.isRewardActive)
+        min = Math.floor((timeofDay % 6) / 1.5) * 15;
+    else
+        min = Math.floor((timeofDay % 6)) * 10;
     return Localization.format(getLoc(actionPanelOnTop ? 'dateTimeBottom' :
         'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1, hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'), haxEnabled ? getLoc('hacks') : '');
 };
