@@ -732,14 +732,16 @@ class LSystem {
                 evaluate());
         let axiomMatches = this.parseSequence(axiom.replace(TRIM_SP, ''));
         this.axiom = axiomMatches.result;
-        this.axiomParams = axiomMatches.params;
+        let axiomParamStrings = axiomMatches.params;
+        this.axiomParams = [];
         // Manually calculate axiom parameters
         for (let i = 0; i < this.axiomParams.length; ++i) {
             if (!this.axiomParams[i])
                 continue;
-            let params = this.parseParams(this.axiomParams[i]);
-            for (let j = 0; j < params.length; ++j)
-                params[j] = MathExpression.parse(params[j]).evaluate((v) => this.variables.get(v));
+            let paramStrings = this.parseParams(axiomParamStrings[i]);
+            let params = [];
+            for (let j = 0; j < paramStrings.length; ++j)
+                params[j] = MathExpression.parse(paramStrings[j]).evaluate((v) => this.variables.get(v));
             this.axiomParams[i] = params;
             // Maybe leave them at BigNumber?
         }
@@ -824,13 +826,15 @@ class LSystem {
                     continue;
                 tmpRuleMatches[j] = tmpRuleMatches[j].split(':');
                 let tmpDeriv = this.parseSequence(tmpRuleMatches[j][0]);
-                let derivParams = tmpDeriv.params;
-                for (let k = 0; k < derivParams.length; ++k) {
-                    if (!derivParams[k])
+                let derivParamStrings = tmpDeriv.params;
+                let derivParams = [];
+                for (let k = 0; k < derivParamStrings.length; ++k) {
+                    if (!derivParamStrings[k])
                         continue;
-                    let params = this.parseParams(derivParams[k]);
-                    for (let l = 0; l < params.length; ++l)
-                        params[l] = MathExpression.parse(params[l]);
+                    let paramStrings = this.parseParams(derivParamStrings[k]);
+                    let params = [];
+                    for (let l = 0; l < paramStrings.length; ++l)
+                        params[l] = MathExpression.parse(paramStrings[l]);
                     derivParams[k] = params;
                 }
                 if (typeof tmpRule.derivations === 'string') {
@@ -846,7 +850,7 @@ class LSystem {
                 }
                 else if (!tmpRule.derivations) {
                     tmpRule.derivations = tmpDeriv.result;
-                    tmpRule.parameters = derivParams;
+                    tmpRule.parameters = derivParamStrings;
                     if (tmpRuleMatches[j][1])
                         tmpRule.chances = MathExpression.parse(tmpRuleMatches[j][1]);
                     else
@@ -855,7 +859,7 @@ class LSystem {
                 else // Already an array
                  {
                     tmpRule.derivations.push(tmpDeriv.result);
-                    tmpRule.parameters.push(derivParams);
+                    tmpRule.parameters.push(derivParamStrings);
                     if (tmpRuleMatches[j][1])
                         tmpRule.chances.push(MathExpression.parse(tmpRuleMatches[j][1]));
                     else
@@ -937,15 +941,15 @@ class LSystem {
     /**
      * Parse a string to return one array of parameter strings.
      * Replaces split(',').
-     * @param {string} string the string to be parsed.
+     * @param {string} sequence the string to be parsed.
      * @returns {string[]}
      */
-    parseParams(string) {
+    parseParams(sequence) {
         let result = [];
         let bracketLvl = 0;
         let start = 0;
-        for (let i = 0; i < string.length; ++i) {
-            switch (string[i]) {
+        for (let i = 0; i < sequence.length; ++i) {
+            switch (sequence[i]) {
                 case ' ':
                     log('Blank space detected.');
                     break;
@@ -961,7 +965,7 @@ class LSystem {
                     break;
                 case ',':
                     if (!bracketLvl) {
-                        result.push(string.slice(start, i));
+                        result.push(sequence.slice(start, i));
                         start = i + 1;
                     }
                     break;
@@ -969,7 +973,7 @@ class LSystem {
                     break;
             }
         }
-        result.push(string.slice(start, string.length));
+        result.push(sequence.slice(start, sequence.length));
         return result;
     }
     /**

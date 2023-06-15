@@ -1,25 +1,25 @@
-import { BigNumber } from '../../api/BigNumber';
-import { CompositeCost, ConstantCost, ExponentialCost, FirstFreeCost, FreeCost } from '../../api/Costs';
-import { Localization } from '../../api/Localization';
-import { QuaternaryEntry, theory } from '../../api/Theory';
-import { ImageSource } from '../../api/ui/properties/ImageSource';
-import { LayoutOptions } from '../../api/ui/properties/LayoutOptions';
-import { TextAlignment } from '../../api/ui/properties/TextAlignment';
-import { Thickness } from '../../api/ui/properties/Thickness';
-import { Vector3 } from '../../api/Vector3';
-import { log } from '../../api/Utils';
-import { ui } from '../../api/ui/UI';
-import { Aspect } from '../../api/ui/properties/Aspect';
-import { ClearButtonVisibility } from '../../api/ui/properties/ClearButtonVisibility';
-import { Color } from '../../api/ui/properties/Color';
-import { FontFamily } from '../../api/ui/properties/FontFamily';
-import { Keyboard } from '../../api/ui/properties/Keyboard';
-import { LineBreakMode } from '../../api/ui/properties/LineBreakMode';
-import { TouchType } from '../../api/ui/properties/TouchType';
-import { MathExpression } from '../../api/MathExpression';
-import { Theme } from '../../api/Settings';
-import { Sound } from '../../api/Sound';
-import { game } from '../../api/Game';
+import { BigNumber } from './api/BigNumber';
+import { CompositeCost, ConstantCost, ExponentialCost, FirstFreeCost, FreeCost } from './api/Costs';
+import { Localization } from './api/Localization';
+import { QuaternaryEntry, theory } from './api/Theory';
+import { ImageSource } from './api/ui/properties/ImageSource';
+import { LayoutOptions } from './api/ui/properties/LayoutOptions';
+import { TextAlignment } from './api/ui/properties/TextAlignment';
+import { Thickness } from './api/ui/properties/Thickness';
+import { Vector3 } from './api/Vector3';
+import { log } from './api/Utils';
+import { ui } from './api/ui/UI';
+import { Aspect } from './api/ui/properties/Aspect';
+import { ClearButtonVisibility } from './api/ui/properties/ClearButtonVisibility';
+import { Color } from './api/ui/properties/Color';
+import { FontFamily } from './api/ui/properties/FontFamily';
+import { Keyboard } from './api/ui/properties/Keyboard';
+import { LineBreakMode } from './api/ui/properties/LineBreakMode';
+import { TouchType } from './api/ui/properties/TouchType';
+import { MathExpression } from './api/MathExpression';
+import { Theme } from './api/Settings';
+import { Sound } from './api/Sound';
+import { game } from './api/Game';
 
 var id = 'lemmas_garden';
 var getName = (language: string): string =>
@@ -920,6 +920,8 @@ interface LSystemRule
     parameters?: MathExpression | MathExpression[];
     chances?: MathExpression | MathExpression[]
 }
+
+type LSystemParams = Array<BigNumber[]>;
 
 interface Task
 {
