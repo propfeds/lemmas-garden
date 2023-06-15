@@ -15,6 +15,7 @@ import { Color } from './api/ui/properties/Color';
 import { FontFamily } from './api/ui/properties/FontFamily';
 import { Keyboard } from './api/ui/properties/Keyboard';
 import { LineBreakMode } from './api/ui/properties/LineBreakMode';
+import { TouchEvent } from './api/ui/properties/TouchEvent';
 import { TouchType } from './api/ui/properties/TouchType';
 import { MathExpression } from './api/MathExpression';
 import { Theme } from './api/Settings';
@@ -77,6 +78,7 @@ const LOC_STRINGS =
         btnClose: 'Close',
         btnSave: 'Save',
         btnReset: 'Reset Graphs',
+        btnRedraw: 'Redraw',
 
         labelActions: 'Actions: ',
         btnHarvest: 'Harvest',
@@ -1860,7 +1862,7 @@ class Renderer
      * Resets the renderer.
      * @param {boolean} clearGraph whether to clear the graph.
      */
-    reset(clearGraph = true)
+    reset(clearGraph: boolean = true)
     {
         this.state = new Vector3(0, 0, 0);
         this.ori = this.upright ? uprightQuat : new Quaternion();
@@ -1882,7 +1884,7 @@ class Renderer
      * Configures the colony.
      * @param {object} colony hmm.
      */
-    set colony(colony)
+    set colony(colony: Colony)
     {
         if(!colony)
         {
@@ -4605,16 +4607,36 @@ let createWorldMenu = () =>
 {
     let GM3Label = ui.createLatexLabel
     ({
+        column: 0,
         text: getLoc('graphMode3D'),
-        row: 4, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
+    });
+    let GM3Button = ui.createButton
+    ({
+        column: 1,
+        text: getLoc('btnRedraw'),
+        onClicked: () =>
+        {
+            Sound.playClick();
+            renderer.reset(false);
+        }
+    });
+    let GM3Grid = ui.createGrid
+    ({
+        row: 4, column: 0,
+        columnDefinitions: ['73*', '60*', '7*'],
+        children:
+        [
+            GM3Label,
+            GM3Button
+        ]
     });
     let GM3Switch = ui.createSwitch
     ({
         isToggled: graphMode3D,
         row: 4, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
-        onTouched: (e) =>
+        onTouched: (e: TouchEvent) =>
         {
             if(e.type == TouchType.SHORTPRESS_RELEASED ||
             e.type == TouchType.LONGPRESS_RELEASED)
@@ -4707,7 +4729,7 @@ let createWorldMenu = () =>
         isToggled: fancyPlotTitle,
         row: 0, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
-        onTouched: (e) =>
+        onTouched: (e: TouchEvent) =>
         {
             if(e.type == TouchType.SHORTPRESS_RELEASED ||
             e.type == TouchType.LONGPRESS_RELEASED)
@@ -4742,7 +4764,7 @@ let createWorldMenu = () =>
                     ],
                     children:
                     [
-                        GM3Label,
+                        GM3Grid,
                         GM3Switch,
                         GM2Label,
                         GM2Slider,

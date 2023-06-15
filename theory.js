@@ -63,6 +63,7 @@ const LOC_STRINGS = {
         btnClose: 'Close',
         btnSave: 'Save',
         btnReset: 'Reset Graphs',
+        btnRedraw: 'Redraw',
         labelActions: 'Actions: ',
         btnHarvest: 'Harvest',
         btnHarvestKill: 'Harvest\\\\(kill)',
@@ -3563,9 +3564,25 @@ let createNotebookMenu = () => {
 };
 let createWorldMenu = () => {
     let GM3Label = ui.createLatexLabel({
+        column: 0,
         text: getLoc('graphMode3D'),
-        row: 4, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
+    });
+    let GM3Button = ui.createButton({
+        column: 1,
+        text: getLoc('btnRedraw'),
+        onClicked: () => {
+            Sound.playClick();
+            renderer.reset(false);
+        }
+    });
+    let GM3Grid = ui.createGrid({
+        row: 4, column: 0,
+        columnDefinitions: ['73*', '60*', '7*'],
+        children: [
+            GM3Label,
+            GM3Button
+        ]
     });
     let GM3Switch = ui.createSwitch({
         isToggled: graphMode3D,
@@ -3673,7 +3690,7 @@ let createWorldMenu = () => {
                         getSmallBtnSize(ui.screenWidth)
                     ],
                     children: [
-                        GM3Label,
+                        GM3Grid,
                         GM3Switch,
                         GM2Label,
                         GM2Slider,

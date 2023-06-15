@@ -31,6 +31,9 @@
 - [ ] Spreadable plants
 - [x] Cap colony count to 5 per plot, unless?
 
+- [ ] Evolution/redraw sends Redraw signal
+  - Instead of going straight to origin, it backtracks
+
 - [ ] Newspapers
 
 - [x] Buy All upgrade unlocks maxLevel config
