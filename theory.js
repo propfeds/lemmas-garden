@@ -739,8 +739,10 @@ class LSystem {
         this.varGetter = (v) => this.variables.get(v);
         // Manually calculate axiom parameters
         for (let i = 0; i < axiomParamStrings.length; ++i) {
-            if (!axiomParamStrings[i])
+            if (!axiomParamStrings[i]) {
+                this.axiomParams[i] = null;
                 continue;
+            }
             let params = this.parseParams(axiomParamStrings[i]);
             this.axiomParams[i] = [];
             for (let j = 0; j < params.length; ++j)
@@ -832,8 +834,10 @@ class LSystem {
                 let derivParamStrings = tmpDeriv.params;
                 let derivParams = [];
                 for (let k = 0; k < derivParamStrings.length; ++k) {
-                    if (!derivParamStrings[k])
+                    if (!derivParamStrings[k]) {
+                        derivParams[k] = null;
                         continue;
+                    }
                     let params = this.parseParams(derivParamStrings[k]);
                     derivParams[k] = [];
                     for (let l = 0; l < params.length; ++l)
@@ -2454,7 +2458,7 @@ let actuallyPlanting = true;
 let graphMode2D = 0;
 let graphMode3D = true;
 let colonyMode = 1;
-let fancyPlotTitle = false;
+let fancyPlotTitle = true;
 let actionPanelOnTop = false;
 let colonyViewConfig = {};
 let notebook = {};

@@ -995,7 +995,10 @@ class LSystem
         for(let i = 0; i < axiomParamStrings.length; ++i)
         {
             if(!axiomParamStrings[i])
+            {
+                this.axiomParams[i] = null;
                 continue;
+            }
 
             let params = this.parseParams(axiomParamStrings[i]);
             this.axiomParams[i] = [];
@@ -1107,7 +1110,10 @@ class LSystem
                 for(let k = 0; k < derivParamStrings.length; ++k)
                 {
                     if(!derivParamStrings[k])
+                    {
+                        derivParams[k] = null;
                         continue;
+                    }
 
                     let params = this.parseParams(derivParamStrings[k]);
                     derivParams[k] = [];
@@ -3215,7 +3221,7 @@ let actuallyPlanting = true;
 let graphMode2D = 0;
 let graphMode3D = true;
 let colonyMode = 1;
-let fancyPlotTitle = false;
+let fancyPlotTitle = true;
 let actionPanelOnTop = false;
 let colonyViewConfig: {[key: number]: ColonyViewEntry} = {};
 let notebook: {[key: number]: NotebookEntry} = {};
