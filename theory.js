@@ -1480,7 +1480,6 @@ class Renderer {
         this.sequence = sequence;
         this.params = params;
         this.redrawing = true;
-        this.reset(!graphMode2D);
     }
     /**
      * Moves the cursor forward.
@@ -2470,7 +2469,7 @@ let colonyIdx = new Array(nofPlots).fill(0);
 let plantIdx = new Array(nofPlots).fill(0);
 let finishedTutorial = false;
 let actuallyPlanting = true;
-let graphMode2D = 0;
+let graphMode2D = 1;
 let graphMode3D = true;
 let colonyMode = 1;
 let fancyPlotTitle = true;
