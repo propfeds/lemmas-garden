@@ -235,7 +235,7 @@ friend of all mathematicians.`
                 }
             }
         },
-        plantStats: `({0}) {1}\\\\—\\\\Maximum stage: {2}\\\\Synthesis rate: ` +
+        plantStats: `({0}) {1}\\\\—\\\\Max. stage: {2}\\\\Synthesis rate: ` +
             `{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} * {6} ` +
             `chars\\\\—\\\\Sequence:`,
         noCommentary: 'No commentary.',
@@ -1418,12 +1418,20 @@ class Renderer {
         this.elapsed = -this.initDelay;
         this.cooldown = 1;
         this.polygonMode = 0;
+        this.redrawing = false;
     }
     /**
      * Resets the renderer.
      * @param {boolean} clearGraph whether to clear the graph.
      */
-    reset(clearGraph = true) {
+    reset(clearGraph = false) {
+        if (!clearGraph && this.stack.length) {
+            // This is what the renderer will do at the end of a loop
+            let t = this.stack.pop();
+            this.state = t[0];
+            this.ori = t[1];
+            return;
+        }
         this.state = new Vector3(0, 0, 0);
         this.ori = this.upright ? uprightQuat : new Quaternion();
         this.stack = [];
@@ -1438,6 +1446,7 @@ class Renderer {
         if (clearGraph) {
             theory.clearGraph();
         }
+        this.redrawing = false;
     }
     /**
      * Configures the colony.
@@ -1470,6 +1479,7 @@ class Renderer {
         this.hesitateFork = (_p = stroke.hesitateFork) !== null && _p !== void 0 ? _p : true;
         this.sequence = sequence;
         this.params = params;
+        this.redrawing = true;
         this.reset(!graphMode2D);
     }
     /**
@@ -1490,6 +1500,10 @@ class Renderer {
      * Computes the next cursor position internally.
      */
     draw() {
+        if (this.redrawing) {
+            this.reset(!graphMode2D);
+            return;
+        }
         this.tick();
         if (this.elapsed % this.tickLength) // Only update on multiples
             return;
@@ -3573,7 +3587,7 @@ let createWorldMenu = () => {
         text: getLoc('btnRedraw'),
         onClicked: () => {
             Sound.playClick();
-            renderer.reset(false);
+            renderer.redrawing = true;
         }
     });
     let GM3Grid = ui.createGrid({
@@ -3730,7 +3744,7 @@ let createWorldMenu = () => {
                             text: getLoc('btnReset'),
                             onClicked: () => {
                                 Sound.playClick();
-                                renderer.reset();
+                                renderer.reset(true);
                             }
                         })
                     ]
@@ -3771,7 +3785,7 @@ var postPublish = () => {
 };
 var canResetStage = () => false;
 var getResetStageMessage = () => getLoc('resetRenderer');
-var resetStage = () => renderer.reset();
+var resetStage = () => renderer.reset(true);
 var canGoToPreviousStage = () => plotPerma.level > 0 && plotIdx > 0;
 var goToPreviousStage = () => {
     --plotIdx;

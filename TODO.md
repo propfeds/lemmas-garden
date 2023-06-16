@@ -31,7 +31,7 @@
 - [ ] Spreadable plants
 - [x] Cap colony count to 5 per plot, unless?
 
-- [ ] Evolution/redraw sends Redraw signal
+- [x] Evolution/redraw sends Redraw signal
   - Instead of going straight to origin, it backtracks
 
 - [ ] Newspapers
@@ -57,7 +57,7 @@
 - Let's think about it. A plant that takes 80 minutes to grow, and you have to
 do nothing. Do you feel like it could be more interesting?
 
-- [ ] Progression (untested)
+- [x] Progression (solid? maybe!)
   - [x] Double tau growth
   - [x] Divide pub mult by 2
   - [x] Don't divide ln by 2

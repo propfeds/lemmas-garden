@@ -273,7 +273,7 @@ friend of all mathematicians.`
                 }
             }
         },
-        plantStats: `({0}) {1}\\\\—\\\\Maximum stage: {2}\\\\Synthesis rate: ` +
+        plantStats: `({0}) {1}\\\\—\\\\Max. stage: {2}\\\\Synthesis rate: ` +
 `{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} * {6} ` +
 `chars\\\\—\\\\Sequence:`,
         noCommentary: 'No commentary.',
@@ -485,7 +485,7 @@ class Queue
         };
     }
 
-    enqueue(data)
+    enqueue(data: unknown)
     {
         this.storage[this.newestIndex] = data;
         this.newestIndex++;
@@ -495,7 +495,7 @@ class Queue
     {
         var oldestIndex = this.oldestIndex,
             newestIndex = this.newestIndex,
-            deletedData;
+            deletedData: unknown;
 
         if (oldestIndex !== newestIndex)
         {
@@ -534,7 +534,7 @@ class Xorshift
      * Returns a random integer within [0, 2^31) probably.
      * @returns {number}
      */
-    get nextInt()
+    get nextInt(): number
     {
         let t = this.x ^ (this.x << 11);
         this.x = this.y;
@@ -547,7 +547,7 @@ class Xorshift
      * Returns a random floating point number within [0, 1).
      * @returns {number}
      */
-    get nextFloat()
+    get nextFloat(): number
     {
         return (this.nextInt >>> 0) / ((1 << 30) * 2);
     }
@@ -555,9 +555,9 @@ class Xorshift
      * Returns a full random double floating point number using 2 rolls.
      * @returns {number}
      */
-    get nextDouble()
+    get nextDouble(): number
     {
-        let top, bottom, result;
+        let top: number, bottom: number, result: number;
         do
         {
             top = this.nextInt >>> 10;
@@ -573,7 +573,7 @@ class Xorshift
      * @param {number} end the range's upper bound, plus 1.
      * @returns {number}
      */
-    nextRange(start, end)
+    nextRange(start: number, end: number): number
     {
         // [start, end)
         let size = end - start;
@@ -584,7 +584,7 @@ class Xorshift
      * @param {any[]} array the array.
      * @returns {any}
      */
-    choice(array)
+    choice(array: unknown[]): unknown
     {
         return array[this.nextRange(0, array.length)];
     }
@@ -635,7 +635,7 @@ class Quaternion
      * @param {Quaternion} quat this other quaternion.
      * @returns {Quaternion}
      */
-    add(quat)
+    add(quat: Quaternion): Quaternion
     {
         return new Quaternion(
             this.r + quat.r,
@@ -650,7 +650,7 @@ class Quaternion
      * @param {Quaternion} quat this other quaternion.
      * @returns {Quaternion}
      */
-    mul(quat)
+    mul(quat: Quaternion): Quaternion
     {
         let t0 = this.r * quat.r - this.i * quat.i -
         this.j * quat.j - this.k * quat.k;
@@ -672,7 +672,7 @@ class Quaternion
      * @param {number} degrees degrees.
      * @param {string} symbol the corresponding symbol in L-system language.
      */
-    rotate(degrees = 0, symbol = '+')
+    rotate(degrees: number = 0, symbol: string = '+'): Quaternion
     {
         if(degrees == 0)
             return this;
@@ -680,7 +680,7 @@ class Quaternion
         let halfAngle = degrees * Math.PI / 360;
         let s = Math.sin(halfAngle);
         let c = Math.cos(halfAngle);
-        let rotation;
+        let rotation: Quaternion;
         switch(symbol)
         {
             case '+':
@@ -712,7 +712,7 @@ class Quaternion
      * quaternions.
      * @returns {Quaternion}
      */
-    get neg()
+    get neg(): Quaternion
     {
         return new Quaternion(this.r, -this.i, -this.j, -this.k);
     }
@@ -720,7 +720,7 @@ class Quaternion
      * Computes the norm of a quaternion.
      * @returns {number}
      */
-    get norm()
+    get norm(): number
     {
         return Math.sqrt(this.r ** 2 + this.i ** 2 + this.j ** 2 + this.k ** 2);
     }
@@ -728,7 +728,7 @@ class Quaternion
      * Normalises a quaternion.
      * @returns {Quaternion}
      */
-    get normalise()
+    get normalise(): Quaternion
     {
         let n = this.norm;
         return new Quaternion(this.r / n, this.i / n, this.j / n, this.k / n);
@@ -737,7 +737,7 @@ class Quaternion
      * Returns a heading vector from the quaternion.
      * @returns {Vector3}
      */
-    get headingVector()
+    get headingVector(): Vector3
     {
         if(!this.head)
         {
@@ -750,7 +750,7 @@ class Quaternion
      * Returns an up vector from the quaternion.
      * @returns {Vector3}
      */
-    get upVector()
+    get upVector(): Vector3
     {
         if(!this.up)
         {
@@ -763,7 +763,7 @@ class Quaternion
      * Returns a side vector (left or right?) from the quaternion.
      * @returns {Vector3}
      */
-    get sideVector()
+    get sideVector(): Vector3
     {
         if(!this.side)
         {
@@ -778,11 +778,11 @@ class Quaternion
      * @param {Vector3} dst the target heading.
      * @returns {Quaternion}
      */
-    rotateFrom(src, dst)
+    rotateFrom(src: Vector3, dst: Vector3): Quaternion
     {
         let dp = src.x * dst.x + src.y * dst.y +
         src.z * dst.z;
-        let rotAxis;
+        let rotAxis: Vector3;
         if(dp < -1 + 1e-8)
         {
             /* Edge case
@@ -810,7 +810,7 @@ class Quaternion
      * @param {number} weight the vector's length (negative for upwards).
      * @returns {Quaternion}
      */
-    applyTropismVector(weight = 0)
+    applyTropismVector(weight: number = 0): Quaternion
     {
         if(weight == 0)
             return this;
@@ -834,7 +834,8 @@ class Quaternion
      * @param {number} z the tropism vector's z component.
      * @returns {Quaternion}
      */
-    applyTropism(weight = 0, x = 0, y = -1, z = 0)
+    applyTropism(weight: number = 0, x: number = 0, y: number = -1,
+    z: number = 0): Quaternion
     {
         if(weight == 0)
             return this;
@@ -867,7 +868,7 @@ class Quaternion
      * Rolls the quaternion so that its up vector aligns with the earth.
      * @returns {Quaternion}
      */
-    alignToVertical()
+    alignToVertical(): Quaternion
     {
         // L = V×H / |V×H|
         let curHead = this.headingVector;
@@ -896,7 +897,7 @@ class Quaternion
      * Returns the quaternion's string representation.
      * @returns {string}
      */
-    toString()
+    toString(): string
     {
         return `${getCoordString(this.r)} + ${getCoordString(this.i)}i + ${getCoordString(this.j)}j + ${getCoordString(this.k)}k`;
     }
@@ -1819,8 +1820,9 @@ class Renderer
     elapsed: number;
     cooldown: number;
     polygonMode: number;
-    constructor(system, sequence, params, camera: RendererCamera = {},
-    stroke: RendererStroke = {})
+    redrawing: boolean;
+    constructor(system: LSystem, sequence: string, params: LSystemParams,
+    camera: RendererCamera = {}, stroke: RendererStroke = {})
     {
         this.figureScale = camera.scale || 1;
         this.cameraMode = camera.mode ?? 0;
@@ -1856,14 +1858,23 @@ class Renderer
         this.elapsed = -this.initDelay;
         this.cooldown = 1;
         this.polygonMode = 0;
+        this.redrawing = false;
     }
 
     /**
      * Resets the renderer.
      * @param {boolean} clearGraph whether to clear the graph.
      */
-    reset(clearGraph: boolean = true)
+    reset(clearGraph: boolean = false)
     {
+        if(!clearGraph && this.stack.length)
+        {
+            // This is what the renderer will do at the end of a loop
+            let t = this.stack.pop();
+            this.state = t[0];
+            this.ori = t[1];
+            return;
+        }
         this.state = new Vector3(0, 0, 0);
         this.ori = this.upright ? uprightQuat : new Quaternion();
         this.stack = [];
@@ -1879,6 +1890,7 @@ class Renderer
         {
             theory.clearGraph();
         }
+        this.redrawing = false;
     }
     /**
      * Configures the colony.
@@ -1896,8 +1908,8 @@ class Renderer
         plantData[colony.id].camera(colony.stage),
         plantData[colony.id].stroke(colony.stage));
     }
-    configure(sequence, params, camera: RendererCamera = {},
-    stroke: RendererStroke = {})
+    configure(sequence: string, params: LSystemParams,
+    camera: RendererCamera = {}, stroke: RendererStroke = {})
     {
         this.figureScale = camera.scale || 1;
         this.cameraMode = camera.mode ?? 0;
@@ -1920,6 +1932,7 @@ class Renderer
         this.sequence = sequence;
         this.params = params;
 
+        this.redrawing = true;
         this.reset(!graphMode2D);
     }
     /**
@@ -1943,11 +1956,17 @@ class Renderer
      */
     draw()
     {
+        if(this.redrawing)
+        {
+            this.reset(!graphMode2D);
+            return;
+        }
+
         this.tick();
         if(this.elapsed % this.tickLength)  // Only update on multiples
             return;
 
-        let j, t, moved;
+        let j: number, t: [Vector3, Quaternion], moved: boolean;
         let loopLimit = 2;  // Shenanigans may arise with models? Try this
         for(j = 0; j < loopLimit; ++j)
         {
@@ -2666,7 +2685,7 @@ class ColonyManager
             this.continueAction();
         else if(this.actionQueue.length)
         {
-            let action: [number, number, number] = this.actionQueue.dequeue();
+            let action = <[number, number, number]>this.actionQueue.dequeue();
             this.performAction(...action);
         }
         else if(this.gangsta)
@@ -3957,7 +3976,7 @@ var getQuaternaryEntries = () =>
     return quaternaryEntries;   //.slice(0, plotPerma.level);
 }
 
-let createVariableMenu = (variables) =>
+let createVariableMenu = (variables: [string, string][]) =>
 {
     // Q: Does Object.entries mean that its contents are references, and 
     // therefore overwritable from afar?
@@ -4038,7 +4057,7 @@ let createVariableMenu = (variables) =>
     return menu;
 }
 
-let createSystemMenu = (id) =>
+let createSystemMenu = (id: number) =>
 {
     let values = plantData[id].system.object;
 
@@ -4264,7 +4283,7 @@ let createSystemMenu = (id) =>
     return menu;
 }
 
-let createColonyViewMenu = (colony) =>
+let createColonyViewMenu = (colony: Colony) =>
 {
     if(!colonyViewConfig[colony.id])
     {
@@ -4284,7 +4303,7 @@ let createColonyViewMenu = (colony) =>
         column: 1,
         text: colonyViewConfig[colony.id].filter,
         clearButtonVisibility: ClearButtonVisibility.WHILE_EDITING,
-        onTextChanged: (ot, nt) =>
+        onTextChanged: (ot: string, nt: string) =>
         {
             colonyViewConfig[colony.id].filter = nt;
             reconstructionTask =
@@ -4298,7 +4317,7 @@ let createColonyViewMenu = (colony) =>
         column: 3,
         isToggled: colonyViewConfig[colony.id].params,
         horizontalOptions: LayoutOptions.CENTER,
-        onTouched: (e) =>
+        onTouched: (e: TouchEvent) =>
         {
             if(e.type == TouchType.SHORTPRESS_RELEASED ||
             e.type == TouchType.LONGPRESS_RELEASED)
@@ -4508,7 +4527,7 @@ let createNotebookMenu = () =>
             notebook[plantUnlocks[i]].maxLevel.toString(),
             keyboard: Keyboard.NUMERIC,
             horizontalTextAlignment: TextAlignment.END,
-            onTextChanged: (ot, nt) =>
+            onTextChanged: (ot: string, nt: string) =>
             {
                 let tmpML = Number(nt) ?? MAX_INT;
                 for(let j = 0; j < nofPlots; ++j)
@@ -4618,7 +4637,7 @@ let createWorldMenu = () =>
         onClicked: () =>
         {
             Sound.playClick();
-            renderer.reset(false);
+            renderer.redrawing = true;
         }
     });
     let GM3Grid = ui.createGrid
@@ -4812,7 +4831,7 @@ let createWorldMenu = () =>
                             onClicked: () =>
                             {
                                 Sound.playClick();
-                                renderer.reset();
+                                renderer.reset(true);
                             }
                         })
                     ]
@@ -4869,7 +4888,7 @@ var canResetStage = () => false;
 
 var getResetStageMessage = () => getLoc('resetRenderer');
 
-var resetStage = () => renderer.reset();
+var resetStage = () => renderer.reset(true);
 
 var canGoToPreviousStage = () => plotPerma.level > 0 && plotIdx > 0;
 
