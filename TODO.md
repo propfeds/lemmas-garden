@@ -1,10 +1,11 @@
 # To-do List
 
 - [To-do List](#to-do-list)
-  - [v0.1: They Breed Like Rabbits!](#v01-they-breed-like-rabbits)
+  - [Don't delete](#dont-delete)
+  - [v0.1: Rabbits update](#v01-rabbits-update)
   - [v0: Completed](#v0-completed)
 
-## v0.1: They Breed Like Rabbits!
+## Don't delete
 
 - [ ] Investigate educational game [design categories](https://www.sciencedirect.com/science/article/abs/pii/S0747563218304771)
   - Accuracy feedback
@@ -17,18 +18,27 @@
 - [ ] Are single-player games [that weak?](https://www.sciencedirect.com/science/article/abs/pii/S0360131522002214)
   - Hold on, collaborative and social interactions. Discord! Reddit!
 
+- [ ] Colour schemes?
+- [ ] Timer function to measure growth
+  - Device time measured by user is suffice?
+
+- [ ] Gangsta should actually store the colony reference?
+  - Internal state unfriendly
+
+## v0.1: Rabbits update
+
 - [ ] Simple solitary flower
   - Tulip?
   - Buttercup
 - Leap years and hopleeks
-  - [x] Leap years calculation
-    - [ ] 400-year cycle wrapping
   - [ ] Hopleek
-    - [ ] Biting is on evolution queue instead of action?
+    - Biting is on evolution queue instead of action?
+    - [x] Leap years calculation
+      - [ ] 400-year cycle wrapping
     - [ ] Hopleek schedule
-- [ ] Bush (lav? me hate)
+- [ ] Rose campion as first bush plant
+  - Spreadable
 - [ ] Sunflower
-- [ ] Spreadable plants
 - [x] Cap colony count to 5 per plot, unless?
 
 - [x] Evolution/redraw sends Redraw signal
@@ -40,13 +50,6 @@
   - [ ] +/- buttons for adjusting maxLevel
 - [ ] Autobuy upgrade unlocks harvest stage config
   - Only unlocks in a future update (students!)
-
-- [ ] Colour schemes?
-- [ ] Timer function to measure growth
-  - Device time measured by user is suffice?
-
-- [ ] Gangsta should actually store the colony reference?
-  - Internal state unfriendly
 
 - [ ] Add a Pruned commentary track
 - [ ] Replace stage 0 commentary with Lemma dialogue

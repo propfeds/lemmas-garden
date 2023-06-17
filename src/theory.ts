@@ -100,16 +100,19 @@ const LOC_STRINGS =
         labelVars: 'Variables: {0}',
 
         plotTitle: `\\text{{Plot }}{{{0}}}`,
-        plotTitleFancy: `\\mathcal{{P}}{{\\mkern -1mu}}lo{{\\mkern 1mu}}t
-\\enspace #{{\\mkern 2mu}}{{{0}}}`,
+        plotTitleF: `\\mathcal{{P}} \\mkern -1mu l \\mkern -0.5mu o
+\\mkern 1mu t \\enspace #{{\\mkern 2mu}}{{{0}}}`,
+        riverTitle: `\\text{{River }}`,
+        riverTitleF: `\\mathcal{{R}} \\mkern -0.5mu i \\mkern -0.5mu v
+\\mkern 0.5mu e \\mkern 0.5mu r`,
+        forestTitle: `\\text{{Lemma }}{{{0}}}`,
+        forestTitleF: `\\mathcal{{L}} \\mkern -0.5mu e \\mkern 0.5mu mm
+\\mkern 0.5mu a \\enspace #{{\\mkern 2mu}}{{{0}}}`,
+
         unlockPlot: `\\text{{plot }}{{{0}}}`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
-        challengeTitle: `\\text{{Lesson }}{{{0}}}`,
-        challengeTitleFancy: `\\mathcal{{L}}e{{\\mkern -1mu}}s{{\\mkern -1mu}}so
-{{\\mkern 1mu}}n \\enspace #{{\\mkern 2mu}}{{{0}}}`,
         lockedPlot: `\\text{Untilled soil.}`,
-
         permaNote: 'Notebook',
         permaNoteInfo: 'Manage populations and harvests',
         permaSettings: 'Theory settings',
@@ -3860,7 +3863,7 @@ var getEquationOverlay = () =>
 
 var getPrimaryEquation = () =>
 {
-    return Localization.format(getLoc(fancyPlotTitle ? 'plotTitleFancy' :
+    return Localization.format(getLoc(fancyPlotTitle ? 'plotTitleF' :
     'plotTitle'), plotIdx + 1);
 }
 
