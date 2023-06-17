@@ -25,6 +25,10 @@
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
 
+- [ ] Autobuy upgrade unlocks harvest stage config
+  - Only unlocks in a future update (classmates!)
+  - Hard to implement since there's more to LG than when to harvest
+
 ## v0.1: Rabbits update
 
 - [ ] Simple solitary flower
@@ -47,9 +51,7 @@
 - [ ] Newspapers
 
 - [x] Buy All upgrade unlocks maxLevel config
-  - [ ] +/- buttons for adjusting maxLevel
-- [ ] Autobuy upgrade unlocks harvest stage config
-  - Only unlocks in a future update (students!)
+  - [x] +/- buttons for adjusting maxLevel
 
 - [ ] Add a Pruned commentary track
 - [ ] Replace stage 0 commentary with Lemma dialogue

@@ -3495,8 +3495,8 @@ let createNotebookMenu = () => {
             row: i, column: 0,
             verticalTextAlignment: TextAlignment.CENTER
         }));
-        maxLevelEntries.push(ui.createEntry({
-            row: i, column: 1,
+        let tmpEntry = ui.createEntry({
+            column: 0,
             text: notebook[plantUnlocks[i]].maxLevel == MAX_INT ? '' :
                 notebook[plantUnlocks[i]].maxLevel.toString(),
             keyboard: Keyboard.NUMERIC,
@@ -3518,12 +3518,46 @@ let createNotebookMenu = () => {
                 for (let j = 0; j < nofPlots; ++j)
                     plants[j][plantUnlocks[i]].maxLevel = tmpML;
             }
-        }));
+        });
+        let tmpMinusBtn = ui.createButton({
+            column: 1,
+            text: '–',
+            onClicked: () => {
+                Sound.playClick();
+                let l = notebook[plantUnlocks[i]].maxLevel;
+                if (l > 0)
+                    tmpEntry.text = (l - 1).toString();
+                else
+                    tmpEntry.text = '';
+            }
+        });
+        let tmpPlusBtn = ui.createButton({
+            column: 2,
+            text: '+',
+            onClicked: () => {
+                Sound.playClick();
+                let l = notebook[plantUnlocks[i]].maxLevel;
+                if (l < MAX_INT)
+                    tmpEntry.text = (l + 1).toString();
+                else
+                    tmpEntry.text = '0';
+            }
+        });
+        let tmpGrid = ui.createGrid({
+            row: i, column: 1,
+            columnDefinitions: ['2*', '1*', '1*'],
+            children: [
+                tmpEntry,
+                tmpMinusBtn,
+                tmpPlusBtn
+            ]
+        });
+        maxLevelEntries.push(tmpGrid);
         // TODO: Create harvest entry
     }
     let noteGrid = ui.createGrid({
         columnDefinitions: theory.isAutoBuyerAvailable ? ['40*', '30*', '30*'] :
-            ['70*', '30*'],
+            ['50*', '50*'],
         children: [...plantLabels, ...maxLevelEntries]
     });
     let menu = ui.createPopup({
