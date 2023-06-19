@@ -2,7 +2,7 @@
  * CheckBox view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.checkbox
  */
-export class CheckBox {
+export class CheckBox extends View {
     /**
      * @type {Color}
      * @public
@@ -20,3 +20,4 @@ export class CheckBox {
     public onCheckedChanged: (arg0: void) => void;
 }
 import { Color } from "./properties/Color";
+import { View } from "./View";

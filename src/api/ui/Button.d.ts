@@ -2,7 +2,7 @@
  * Button view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.button
  */
-export class Button {
+export class Button extends View {
     /**
      * @type {Color}
      * @public
@@ -68,3 +68,4 @@ import { Color } from "./properties/Color";
 import { FontAttributes } from "./properties/FontAttributes";
 import { FontFamily } from "./properties/FontFamily";
 import { Thickness } from "./properties/Thickness";
+import { View } from "./View";

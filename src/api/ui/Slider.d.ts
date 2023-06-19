@@ -2,7 +2,7 @@
  * Slider view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.slider
  */
-export class Slider {
+export class Slider extends View {
     /**
      * @type {number}
      * @public
@@ -54,5 +54,6 @@ export class Slider {
      */
     public onDragCompleted: (arg0: void) => void;
 }
+import { View } from "./View";
 import { Color } from "./properties/Color";
 import { ImageSource } from "./properties/ImageSource";

@@ -2,7 +2,7 @@
  * Scroll area view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.scrollview
  */
-export class ScrollView {
+export class ScrollView extends View {
     /**
      * @type {View}
      * @public

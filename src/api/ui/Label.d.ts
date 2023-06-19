@@ -2,7 +2,7 @@
  * Label view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.label
  */
-export class Label {
+export class Label extends View {
     /**
      * @type {number}
      * @public
@@ -75,4 +75,5 @@ import { TextAlignment } from "./properties/TextAlignment";
 import { LineBreakMode } from "./properties/LineBreakMode";
 import { Thickness } from "./properties/Thickness";
 import { Color } from "./properties/Color";
-import { TextDecorations } from "./properties/TextDecorations";
+import { TextDecorations } from "./properties/TextDecorations";import { View } from "./View";
+

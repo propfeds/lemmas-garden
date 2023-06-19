@@ -2,7 +2,7 @@
  * Layout view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.layout
  */
-export class Layout {
+export class Layout extends View {
     /**
      * @type {boolean}
      * @public

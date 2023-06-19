@@ -2,7 +2,7 @@
  * Image view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.image
  */
-export class Image {
+export class Image extends View {
     /**
      * @type {Aspect}
      * @public
@@ -19,5 +19,6 @@ export class Image {
      */
     public useTint: boolean;
 }
+import { View } from "./View";
 import { Aspect } from "./properties/Aspect";
 import { ImageSource } from "./properties/ImageSource";

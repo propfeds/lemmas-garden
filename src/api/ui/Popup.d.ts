@@ -1,7 +1,7 @@
 /**
  * Popup view
  */
-export class Popup {
+export class Popup extends View {
     /**
      * @type {string}
      * @public

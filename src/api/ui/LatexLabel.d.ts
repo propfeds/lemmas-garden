@@ -2,7 +2,7 @@
  * LaTeX label view
  * Reference: https://github.com/verybadcat/CSharpMath
  */
-export class LatexLabel {
+export class LatexLabel extends View {
     /**
      * @type {number}
      * @public
@@ -51,4 +51,5 @@ export class LatexLabel {
 }
 import { TextAlignment } from "./properties/TextAlignment";
 import { Thickness } from "./properties/Thickness";
-import { Color } from "./properties/Color";
+import { Color } from "./properties/Color";import { View } from "./View";
+

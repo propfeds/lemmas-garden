@@ -2,7 +2,7 @@
  * Activity Indicator view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.activityindicator
  */
-export class ActivityIndicator {
+export class ActivityIndicator extends View {
     /**
      * @type {Color}
      * @public
@@ -15,3 +15,4 @@ export class ActivityIndicator {
     public isRunning: boolean;
 }
 import { Color } from "./properties/Color";
+import { View } from "./View";

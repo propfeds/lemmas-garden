@@ -20,6 +20,7 @@ import { MathExpression } from './api/MathExpression';
 import { Theme } from './api/Settings';
 import { Sound } from './api/Sound';
 import { game } from './api/Game';
+import { Easing } from './api/ui/properties/Easing';
 var id = 'lemmas_garden';
 var getName = (language) => {
     var _a;
@@ -2864,6 +2865,17 @@ var updateAvailability = () => {
     }
     notebookPerma.isAvailable = theory.isBuyAllAvailable;
 };
+let floatingWipLabel = ui.createLatexLabel({
+    row: 0, column: 0,
+    rotation: -24,
+    horizontalOptions: LayoutOptions.CENTER,
+    verticalOptions: LayoutOptions.END,
+    // verticalTextAlignment: TextAlignment.CENTER,
+    margin: new Thickness(8, 32),
+    text: getLoc('wip'),
+    fontSize: 9,
+    textColor: Color.TEXT_MEDIUM
+});
 var tick = (elapsedTime, multiplier) => {
     // Without the multiplier, one year is 14.6 hours (14:36)
     // With the multiplier, one year is 9.7(3) hours (9:44)
@@ -2890,6 +2902,7 @@ var tick = (elapsedTime, multiplier) => {
         let timeCos = Math.cos(time * Math.PI / 72);
         insolationCoord = Math.max(0, -timeCos);
         growthCoord = (timeCos + 1) / 2;
+        floatingWipLabel.rotateTo(-6 - Math.cos(time * Math.PI / 6) * 12, 120, Easing.LINEAR);
     }
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
@@ -2904,18 +2917,7 @@ var getEquationOverlay = () => {
             // For reference
             // ui.createFrame({row: 0, column: 2}),
             // ui.createFrame({row: 1, column: 2}),
-            // ui.createLatexLabel
-            // ({
-            //     row: 0, column: 0,
-            //     rotation: -24,
-            //     horizontalOptions: LayoutOptions.CENTER,
-            //     verticalOptions: LayoutOptions.END,
-            //     // verticalTextAlignment: TextAlignment.CENTER,
-            //     margin: new Thickness(8, 32),
-            //     text: getLoc('wip'),
-            //     fontSize: 9,
-            //     textColor: Color.TEXT_MEDIUM
-            // }),
+            floatingWipLabel,
             ui.createLatexLabel({
                 row: 0, column: 0,
                 horizontalTextAlignment: TextAlignment.CENTER,

@@ -2,7 +2,7 @@
  * Entry view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.entry
  */
-export class Entry {
+export class Entry extends View {
     /**
      * @type {number}
      * @public
@@ -121,3 +121,4 @@ import { TextAlignment } from "./properties/TextAlignment";
 import { Keyboard } from "./properties/Keyboard";
 import { ReturnType } from "./properties/ReturnType";
 import { Color } from "./properties/Color";
+import { View } from "./View";

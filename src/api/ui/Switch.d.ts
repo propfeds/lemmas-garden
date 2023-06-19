@@ -2,7 +2,7 @@
  * Switch view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.switch
  */
-export class Switch {
+export class Switch extends View {
     /**
      * @type {Color}
      * @public
@@ -24,4 +24,5 @@ export class Switch {
      */
     public onToggled: (arg0: void) => void;
 }
+import { View } from "./View";
 import { Color } from "./properties/Color";
