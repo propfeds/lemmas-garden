@@ -2899,7 +2899,7 @@ let floatingWipLabel = ui.createLatexLabel({
     horizontalOptions: LayoutOptions.CENTER,
     verticalOptions: LayoutOptions.END,
     // verticalTextAlignment: TextAlignment.CENTER,
-    margin: new Thickness(8, 32),
+    margin: new Thickness(8, 40),
     text: getLoc('wip'),
     fontSize: 9,
     textColor: Color.TEXT_MEDIUM
@@ -2930,7 +2930,7 @@ var tick = (elapsedTime, multiplier) => {
         let timeCos = Math.cos(time * Math.PI / 72);
         insolationCoord = Math.max(0, -timeCos);
         growthCoord = (timeCos + 1) / 2;
-        floatingWipLabel.rotateTo(-6 - Math.cos(time * Math.PI / 6) * 12, 120, Easing.LINEAR);
+        floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12, 180, Easing.LINEAR);
     }
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
