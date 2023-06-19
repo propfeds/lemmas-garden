@@ -821,13 +821,13 @@ class Quaternion
             return this;
 
         let curHead = this.headingVector;
-        let weightVector = new Vector3(0, weight, 0);
-        let newHead = <Vector3><unknown>(<any>curHead - <any>weightVector);
+        // @ts-expect-error
+        let newHead: Vector3 = curHead - new Vector3(0, weight, 0);
         let n = newHead.length;
         if(n == 0)
             return this;
-        // newHead /= n;
-        newHead = <Vector3><unknown>(<any>newHead / <any>n);
+        // @ts-expect-error
+        newHead /= n;
         let result = this.rotateFrom(curHead, newHead);
         return result;
     }
@@ -855,8 +855,8 @@ class Quaternion
         let n = rotAxis.length;
         if(n == 0)
             return this;
-        // rotAxis /= n;
-        rotAxis = <Vector3><unknown>(<any>rotAxis / <any>n);
+        // @ts-expect-error
+        rotAxis /= n;
         let a = weight * n / 2;
         let s = Math.sin(a);
         let c = Math.cos(a);
@@ -882,8 +882,8 @@ class Quaternion
         let n = side.length;
         if(n == 0)
             return this;
-        // side /= n;
-        side = <Vector3><unknown>(<any>side / <any>n);
+        // @ts-expect-error
+        side /= n;
         // U = HxL
         let newUp = new Vector3(
             curHead.y * side.z - curHead.z * side.y,
@@ -1944,8 +1944,8 @@ class Renderer
      */
     forward(distance = 1)
     {
-        this.state = <Vector3><unknown>(<any>this.state +
-        <any>this.ori.headingVector * distance);
+        // @ts-expect-error
+        this.state += this.ori.headingVector * distance;
     }
     /**
      * Ticks the clock.
@@ -2473,18 +2473,19 @@ class Renderer
     get centre(): Vector3
     {
         if(this.cameraMode)
-            return <Vector3><unknown>-this.cursor;
-
-        return this.swizzle(<Vector3><unknown>(
-        -this.camCentre / this.figureScale));
+            // @ts-expect-error
+            return -this.cursor;
+        // @ts-expect-error
+        return this.swizzle(-this.camCentre / this.figureScale);
     }
     /**
      * Returns the turtle's coordinates.
      * @returns {Vector3}
      */
-    get cursor()
+    get cursor(): Vector3
     {
-        let coords = <Vector3><unknown>(<any>this.state / this.figureScale);
+        // @ts-expect-error
+        let coords: Vector3 = this.state / this.figureScale;
         return this.swizzle(coords);
     }
     /**
@@ -2498,13 +2499,14 @@ class Renderer
         {
             case 1:
                 // I accidentally discovered Bézier curves unknowingly.
-                let dist = <Vector3><unknown>(
-                <any>this.centre - <any>this.lastCamera);
-                newCamera = <Vector3><unknown>(<any>this.lastCamera +
-                <any>dist * this.followFactor ** 2 +
-                <any>this.lastCamVel * (1 - this.followFactor) ** 2);
-                this.lastCamVel = <Vector3><unknown>(
-                <any>newCamera - <any>this.lastCamera);
+                // @ts-expect-error
+                let dist = this.centre - this.lastCamera;
+                // @ts-expect-error
+                newCamera = this.lastCamera + dist * this.followFactor ** 2 +
+                // @ts-expect-error
+                this.lastCamVel * (1 - this.followFactor) ** 2;
+                // @ts-expect-error
+                this.lastCamVel = newCamera - this.lastCamera;
                 this.lastCamera = newCamera;
                 return newCamera;
             case 0:
@@ -2701,50 +2703,58 @@ class ColonyManager
             {
                 let c = this.colonies[i][j];
                 let notMature = c.stage < (plantData[c.id].maxStage??MAX_INT);
-                if(notMature && <number><unknown>c.growth >= <number><unknown>(
-                <any>plantData[c.id].growthCost *
-                <any>BigNumber.from(c.sequence.length)))
+                // @ts-expect-error
+                if(notMature && c.growth >= plantData[c.id].growthCost *
+                // @ts-expect-error
+                BigNumber.from(c.sequence.length))
                 {
                     if(!this.gangsta)
                         this.gangsta = [i, j];
 
                     if(!c.diReserve)
                         c.diReserve = BigNumber.ZERO;
-                    c.diReserve = <BigNumber><unknown>(<any>c.diReserve + di);
+                    // @ts-expect-error
+                    c.diReserve += di;
 
                     if(!c.dgReserve)
                         c.dgReserve = BigNumber.ZERO;
-                    c.dgReserve = <BigNumber><unknown>(<any>c.dgReserve + dg);
+                    // @ts-expect-error
+                    c.dgReserve += dg;
                 }
                 else if(this.actionGangsta && this.actionGangsta[0] == i &&
                 this.actionGangsta[1] == j)
                 {
                     if(!c.diReserve)
                         c.diReserve = BigNumber.ZERO;
-                    c.diReserve = <BigNumber><unknown>(<any>c.diReserve + di);
+                    // @ts-expect-error
+                    c.diReserve += di;
 
                     if(!c.dgReserve)
                         c.dgReserve = BigNumber.ZERO;
-                    c.dgReserve = <BigNumber><unknown>(<any>c.dgReserve + dg);
+                    // @ts-expect-error
+                    c.dgReserve += dg;
                 }
                 else
                 {
-                    c.energy = <BigNumber><unknown>(<any>c.energy +
-                    <any>di * <any>c.synthRate);
+                    // @ts-expect-error
+                    c.energy += di * c.synthRate;
 
                     if(notMature)
                     {
-                        let maxdg = c.energy.min(<BigNumber><unknown>(<any>dg *
-                        <any>plantData[c.id].growthRate));
-                        c.growth = <BigNumber><unknown>(<any>c.growth + maxdg);
-                        c.energy = <BigNumber><unknown>(<any>c.energy -
-                        <any>maxdg);
+                        // @ts-expect-error
+                        let maxdg = c.energy.min(dg *
+                        // @ts-expect-error
+                        plantData[c.id].growthRate);
+                        // @ts-expect-error
+                        c.growth += maxdg;
+                        // @ts-expect-error
+                        c.energy -= maxdg;
                     }
                 }
             }
         }
     }
-    calculateStats(colony, task: Task = {}, dTask: Task = {})
+    calculateStats(colony: Colony, task: Task = {}, dTask: Task = {})
     {
         // This is the only case where the colony needed
         let harvestable = plantData[colony.id].actions[0].symbols;
@@ -2776,9 +2786,10 @@ class ColonyManager
     }
     reap(colony: Colony)
     {
-        currency.value = <BigNumber><unknown>(<any>currency.value +
-        <any>colony.profit * <any>BigNumber.from(colony.population) *
-        <any>theory.publicationMultiplier);
+        // @ts-expect-error
+        currency.value += colony.profit * BigNumber.from(colony.population) *
+        // @ts-expect-error
+        theory.publicationMultiplier;
     }
     continueAction()
     {
@@ -2839,15 +2850,17 @@ class ColonyManager
         c.sequence = this.actionDeriveTask.derivation;
         c.params = this.actionDeriveTask.parameters;
 
-        c.energy = <BigNumber><unknown>(<any>c.energy +
-        <any>c.diReserve * <any>c.synthRate);
-        let notMature = c.stage < (plantData[c.id].maxStage??MAX_INT);
+        // @ts-expect-error
+        c.energy += c.diReserve * c.synthRate;
+        let notMature = c.stage < (plantData[c.id].maxStage ?? MAX_INT);
         if(notMature)
         {
-            let maxdg = c.energy.min(<BigNumber><unknown>(
-            <any>c.dgReserve * <any>plantData[c.id].growthRate));
-            c.growth = <BigNumber><unknown>(<any>c.growth + maxdg);
-            c.energy = <BigNumber><unknown>(<any>c.energy - <any>maxdg);
+            // @ts-expect-error
+            let maxdg = c.energy.min(c.dgReserve * plantData[c.id].growthRate);
+            // @ts-expect-error
+            c.growth += maxdg;
+            // @ts-expect-error
+            c.energy -= maxdg;
         }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
@@ -2946,13 +2959,14 @@ class ColonyManager
             return;
         }
 
-        c.growth = <BigNumber><unknown>(<any>c.growth -
-        <any>plantData[c.id].growthCost *
-        <any>BigNumber.from(c.sequence.length));
-        c.diReserve = <BigNumber><unknown>(<any>c.diReserve +
-        <any>c.growth / <any>c.synthRate);
-        c.dgReserve = <BigNumber><unknown>(<any>c.dgReserve +
-        <any>c.growth / <any>plantData[c.id].growthRate);
+        // @ts-expect-error
+        c.growth -= plantData[c.id].growthCost *
+        // @ts-expect-error
+        BigNumber.from(c.sequence.length);
+        // @ts-expect-error
+        c.diReserve += c.growth / c.synthRate;
+        // @ts-expect-error
+        c.dgReserve += c.growth / plantData[c.id].growthRate;
         c.growth = BigNumber.ZERO;
 
         c.sequence = this.deriveTask.derivation;
@@ -2960,16 +2974,18 @@ class ColonyManager
         c.synthRate = this.calcTask.synthRate;
         c.profit = this.calcTask.profit;
 
-        c.energy = <BigNumber><unknown>(<any>c.energy +
-        <any>c.diReserve * <any>c.synthRate);
+        // @ts-expect-error
+        c.energy += c.diReserve * c.synthRate;
         ++c.stage;
         let notMature = c.stage < (plantData[c.id].maxStage??MAX_INT);
         if(notMature)
-        {   
-            let maxdg = c.energy.min(<BigNumber><unknown>(
-            <any>c.dgReserve * <any>plantData[c.id].growthRate));
-            c.growth = <BigNumber><unknown>(<any>c.growth + maxdg);
-            c.energy = <BigNumber><unknown>(<any>c.energy - <any>maxdg);
+        {
+            // @ts-expect-error
+            let maxdg = c.energy.min(c.dgReserve * plantData[c.id].growthRate);
+            // @ts-expect-error
+            c.growth += maxdg;
+            // @ts-expect-error
+            c.energy -= maxdg;
         }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
@@ -3044,11 +3060,14 @@ const permaCosts =
 const taxRate = BigNumber.from(-.12);
 const tauRate = BigNumber.TWO;
 const pubCoef = BigNumber.from(2/3);
-const pubExp = <BigNumber><unknown>(<any>BigNumber.from(.15) / <any>tauRate);
-var getPublicationMultiplier = (tau: BigNumber) =>
-<BigNumber><unknown>(<any>pubCoef *
-<any>tau.max(BigNumber.ONE).pow(<BigNumber><unknown>(<any>pubExp *
-<any>tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log())));
+// @ts-expect-error
+const pubExp = BigNumber.from(.15) / tauRate;
+// @ts-expect-error
+var getPublicationMultiplier = (tau: BigNumber) => pubCoef *
+// @ts-expect-error
+tau.max(BigNumber.ONE).pow(pubExp *
+    // @ts-expect-error
+tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
 var getPublicationMultiplierFormula = (symbol: string) => `\\frac{2}{3}\\times
 {${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
 
@@ -3635,8 +3654,8 @@ var init = () =>
         new FreeCost);
         freePenny.description = 'Get 1 penny for free';
         freePenny.info = 'Yields 1 penny';
-        freePenny.bought = (_) => currency.value = <BigNumber><unknown>(
-        <any>currency.value + BigNumber.ONE);
+        // @ts-expect-error
+        freePenny.bought = (_) => currency.value += BigNumber.ONE;
         freePenny.isAvailable = haxEnabled;
     }
     /* Warp tick
@@ -3900,12 +3919,13 @@ var getSecondaryEquation = () =>
             getLoc('status').actions[manager.actionGangsta[2]] : '';
             return `\\text{${Localization.format(getLoc('colonyStats'),
             c.population, getLoc('plants')[c.id].name, c.stage, c.energy,
-            <BigNumber><unknown>(<any>c.synthRate *
-            <any>BigNumber.from(insolationCoord)), c.growth,
-            <BigNumber><unknown>(<any>plantData[c.id].growthCost *
-            <any>BigNumber.from(c.sequence.length)),
-            <BigNumber><unknown>(<any>plantData[c.id].growthRate *
-            <any>BigNumber.from(growthCoord)), c.profit, status)}}`;
+            // @ts-expect-error
+            c.synthRate * BigNumber.from(insolationCoord), c.growth,
+            // @ts-expect-error
+            plantData[c.id].growthCost * BigNumber.from(c.sequence.length),
+            // @ts-expect-error
+            plantData[c.id].growthRate * BigNumber.from(growthCoord), c.profit,
+            status)}}`;
             // return `\\text{${Localization.format(getLoc('colony'), c.population, getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace g=${c.growth}/${plantData[c.id].growthCost * BigNumber.from(c.sequence.length)}\\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}\\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})\\\\`;
         case 2:
             let result = '';
@@ -3914,24 +3934,29 @@ var getSecondaryEquation = () =>
                 let d = manager.colonies[plotIdx][i];
                 result += `\\text{${Localization.format(getLoc('colonyProg'),
                 d.population, getLoc('plants')[d.id].name, d.stage,
-                <BigNumber><unknown>(<any>d.growth * <any>BigNumber.HUNDRED /
-                (<any>plantData[d.id].growthCost *
-                <any>BigNumber.from(d.sequence.length))))}}\\\\`;
+                // @ts-expect-error
+                d.growth * BigNumber.HUNDRED / (plantData[d.id].growthCost *
+                // @ts-expect-error
+                BigNumber.from(d.sequence.length)))}}\\\\`;
             }
             result += `\\underline{\\text{${Localization.format(
             getLoc('colonyProg'), c.population, getLoc('plants')[c.id].name,
-            c.stage, <BigNumber><unknown>(<any>c.growth *
-            <any>BigNumber.HUNDRED / (<any>plantData[c.id].growthCost *
-            <any>BigNumber.from(c.sequence.length))))}}}\\\\`;
+            // @ts-expect-error
+            c.stage, c.growth * BigNumber.HUNDRED /
+            // @ts-expect-error
+            (plantData[c.id].growthCost *
+            // @ts-expect-error
+            BigNumber.from(c.sequence.length)))}}}\\\\`;
             for(let i = colonyIdx[plotIdx] + 1;
             i < manager.colonies[plotIdx].length; ++i)
             {
                 let d = manager.colonies[plotIdx][i];
                 result += `\\text{${Localization.format(getLoc('colonyProg'),
                 d.population, getLoc('plants')[d.id].name, d.stage,
-                <BigNumber><unknown>(<any>d.growth * <any>BigNumber.HUNDRED /
-                (<any>plantData[d.id].growthCost *
-                <any>BigNumber.from(d.sequence.length))))}}\\\\`;
+                // @ts-expect-error
+                d.growth * BigNumber.HUNDRED / (plantData[d.id].growthCost *
+                // @ts-expect-error
+                BigNumber.from(d.sequence.length)))}}\\\\`;
             }
             return result;
         default:
@@ -3968,16 +3993,17 @@ var getQuaternaryEntries = () =>
         for(let j = 0; j < manager.colonies[i].length; ++j)
         {
             let c = manager.colonies[i][j];
-            sum = <BigNumber><unknown>(<any>sum + <any>c.profit *
-            <any>BigNumber.from(c.population) *
-            <any>theory.publicationMultiplier);
+            // @ts-expect-error
+            sum += c.profit * BigNumber.from(c.population) *
+            // @ts-expect-error
+            theory.publicationMultiplier;
         }
         quaternaryEntries[i].value = sum;
     }
     if(theory.publicationUpgrade.level && theory.canPublish)
     {
-        taxCurrency.value = <BigNumber><unknown>(
-        <any>getCurrencyFromTau(theory.tau)[0] * <any>taxRate);
+        // @ts-expect-error
+        taxCurrency.value = getCurrencyFromTau(theory.tau)[0] * taxRate;
         taxQuaternaryEntry[0].value = taxCurrency.value;
         return quaternaryEntries.concat(taxQuaternaryEntry);
     }
@@ -4896,15 +4922,15 @@ var getTau = () => currency.value.max(BigNumber.ZERO).pow(tauRate);
 
 var getCurrencyFromTau = (tau: BigNumber) =>
 [
-    tau.pow(<BigNumber><unknown>(<any>BigNumber.ONE / <any>tauRate)),
+    // @ts-expect-error
+    tau.pow(BigNumber.ONE / tauRate),
     currency.symbol
 ];
 
 var prePublish = () =>
 {
-    // <Vector3><unknown>(<any>curHead - <any>weightVector)
-    tmpCurrency = <BigNumber><unknown>(
-    <any>currency.value + <any>taxCurrency.value);
+    // @ts-expect-error
+    tmpCurrency = currency.value + taxCurrency.value;
     tmpLevels = Array.from({length: nofPlots}, (_) => []);
 }
 
