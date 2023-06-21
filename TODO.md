@@ -56,7 +56,7 @@
 - [ ] Add a Pruned commentary track
 - [ ] Replace stage 0 commentary with Lemma dialogue
 - [ ] Almanac containing plants, L-system help, etc.
-  - [ ] Move notebook inside
+  - [x] Move notebook inside
   - [ ] Move the teaching from commentary to almanac
 
 - Let's think about it. A plant that takes 80 minutes to grow, and you have to

@@ -55,7 +55,7 @@ const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS = {
     en: {
-        versionName: `Version: 0.0.5, Axiom`,
+        versionName: `Version: 0.0.6, Slumber Seeds`,
         wip: 'v0.1, Work in Progress',
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish',
@@ -65,11 +65,12 @@ const LOC_STRINGS = {
         btnSave: 'Save',
         btnReset: 'Reset Graphs',
         btnRedraw: 'Redraw',
-        labelActions: 'Actions: ',
+        btnPrev: 'Prev',
+        btnNext: 'Next',
+        btnContents: 'Table of\nContents',
+        btnPage: 'p. {0}',
         btnHarvest: 'Harvest',
-        btnHarvestKill: 'Harvest\\\\(kill)',
         btnPrune: 'Prune',
-        btnPruneKill: 'Prune\\\\(kill)',
         labelSettings: 'Settings',
         labelFilter: 'Filter: ',
         labelParams: 'Parameters: ',
@@ -149,7 +150,7 @@ Growth: {5}/{6} (+{7}/s)\\\\Profit: {8}p\\\\{9}`,
                 info: 'A classic flower to start the month.',
                 LsDetails: `Symbols:\\\\A: apex (stem shoot)\\\\F: internode
 \\\\I : flower stem (not internode)\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest
-returns profit as the sum of all K.\\\\—\\\\The Model specification section can
+returns profit as the sum of all K.\\\\—\\\\The Model specification section may
 be ignored.`,
                 stages: {
                     index: [
@@ -190,7 +191,7 @@ known as the golden angle.`,
                 LsDetails: `Symbols:\\\\A: apex (stem shoot)\\\\B: base\\\\F:
 internode\\\\I : shortened stem (not internode)\\\\K: flower\\\\L: leaf\\\\—
 \\\\Harvest returns profit as the sum of all L.\\\\Prune cuts off all A and K.
-\\\\—\\\\The Model specification section can be ignored.`,
+\\\\—\\\\The Model specification section may be ignored.`,
                 stages: {
                     index: [
                         0, 4, 8, 9, 12, 13, 14, 17, 20,
@@ -243,10 +244,42 @@ friend of all mathematicians.`
             `{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} * {6} ` +
             `chars\\\\—\\\\Sequence:`,
         noCommentary: 'No commentary.',
+        permaShelf: 'Bookshelf',
+        permaShelfInfo: 'Access instructions and other tools',
+        menuToC: 'Table of Contents',
+        labelSource: 'Reference: ',
+        bookTitleFormat: '{0} ({1}/{2})',
+        almanacTitle: `Lemma's Catalogue of Plants`,
+        almanac: [
+            {
+                title: 'Cover',
+                contents: `Lemma's Catalogue of Plants, for Students
+Third Edition
+
+🪴🌻🌿
+
+Lena Ruddles, Madeline H. Ruddles
+
+Tau Publishing`
+            },
+        ],
+        manualTitle: 'Lindenmayer Systems Basics',
+        manual: [
+            {
+                title: `Foreword`,
+                contents: `This manuscript was found scattered around a corner of the forest. Seems ` +
+                    `like someone knows a way to turn plants into alphabets.
+- Lena`
+            },
+            {
+                title: `Hello`,
+                contents: `Welcome to L-systems Renderer!`
+            }
+        ],
         chapters: {
             intro: {
                 title: `Lemma's garden`,
-                text: `You're not one of my students, are you?
+                contents: `You're not one of my students, are you?
 Surprised anybody would visit this late,
 let alone urge me to let them plant on my ground.
 
@@ -258,13 +291,21 @@ Go till it. We'll start in the morning.`
             },
             basil: {
                 title: `Corollary`,
-                text: `Sorry for letting you wait this long.
+                contents: `Sorry for letting you wait this long.
 I have a friend who... supplies me with seeds.
 For my old students, not you.
 It's a bit exorbitant, but consistent.
 
 ...She didn't return until today. Apologies.
 Wee bit sick of that calendula?`
+            },
+            notebook: {
+                title: `A notebook`,
+                contents: `As you gather enough pennies to keep
+the batches going, you decided to
+buy yourself a notebook.
+
+This will help you keep track of things.`
             }
         }
     }
@@ -2298,6 +2339,24 @@ class ColonyManager {
         theory.invalidateQuaternaryValues();
     }
 }
+class Book {
+    constructor(title, pages) {
+        this.title = title;
+        this.pages = pages;
+        this.tableofContents = [];
+        for (let i = 0; i < pages.length; ++i)
+            if (pages[i].pinned)
+                this.tableofContents.push(i);
+    }
+}
+const almanac = new Book(getLoc('almanacTitle'), [
+    Object.assign(Object.assign({}, getLoc('almanac')[0]), { horizontalAlignment: TextAlignment.CENTER }),
+    getLoc('almanac')[0]
+]);
+const LsManual = new Book(getLoc('manualTitle'), [
+    Object.assign(Object.assign({}, getLoc('manual')[0]), { systemID: 1 }),
+    Object.assign(Object.assign({}, getLoc('manual')[1]), { source: 'bread' }),
+]);
 // Balance parameters
 const nofPlots = 6;
 const maxColoniesPerPlot = 5;
@@ -2485,6 +2544,74 @@ const plantData = {
                 // hesitateFork: true,
             };
         }
+    },
+    9002: // Rose campion (test)
+    {
+        // Unknown symbols: !;#QE
+        system: new LSystem('E/(45)&(5)A(0.25, 0)', [
+            'A(r, t): t>0 = A(r+0.05, t-1)',
+            'A(r, t): t==0 = F(S0)X(LEN1)[L][/(180)L][!F(S0)X(LEN2);(120)QB(0)][@v-!!!!A(r-0.3, D2)][@v+!!!!A(r-0.2, D1)]',
+            'X(a) : a>0 = F(S0)X(a-1)',
+            'Q = ;;;Q',
+            'E = E#',
+            'B(a) : a==0 = B(1)~b(1.0)',
+            '~b(s) : s<1.4 = ~b(s*1.1)',
+            'B(a) : a==T1 = B(a+1)%',
+            'B(a) : a==T1+1 = B(a+1)~k(1.0)^(90)[&(36)~p(1.0)]+(72)[&(36)~p(1.0)]+(72)[&(36)~p(1.0)]+(72)[&(36)~p(1.0)]+(72)[&(36)~p(1.0)]',
+            'B(a) : a==T2 = B(a+1)%',
+            'B(a) : a==T2+1 = B(a+1)~k(1.33)^(90)[~p(2.0)]+(72)[~p(2.0)]+(72)[~p(2.0)]+(72)[~p(2.0)]+(72)[~p(2.0)]',
+            '~k(s) : s<1.5 = ~k(s*1.1)',
+            '~p(s) : s<2.5 = ~p(s*1.15)',
+            'B(a) : a==T3 = B(a+1)%',
+            'B(a) : a==T3+1 = ;(192)Q~f(1.0)',
+            'B(a) = B(a+1)',
+            '~f(s) : s>.6 = ~f(s*.9)',
+            'L = ~l(0.1)',
+            '~l(s) : s<L_SIZE = ~l(s+.05)',
+            '~> *= Model specification',
+            // Surfaces: bud, calyx, fruit, leaf, line, petal
+            // Bud: shape of an elongated ghost cosplay blanket, with 4 way sym
+            // Calyx: I don't know, 4 way sym
+            // Fruit: sharp, 4 way sym
+            // Leaf: like the calendula model but even curvier
+            // Line: cylinder
+            // Petal: elongated heart (flower is 5 way sym)
+        ], 31, 0, '', '', 1, {
+            'S0': '100',
+            'L_SIZE': '1.5',
+            'D1': '3',
+            'D2': '7',
+            'LEN1': '20',
+            'LEN2': '10',
+            'T1': '1',
+            'T2': '5',
+            'T3': '11'
+        }),
+        maxStage: 28,
+        cost: new FirstFreeCost(new ExponentialCost(1, 1)),
+        growthRate: BigNumber.TWO,
+        growthCost: BigNumber.from(45),
+        actions: [
+            {
+                symbols: new Set('K'),
+                system: new LSystem('', ['K=']),
+                killColony: false
+            }
+        ],
+        camera: (stage) => {
+            return {
+                scale: 8,
+                x: 0,
+                y: 5,
+                Z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) => {
+            return {
+                tickLength: 1
+            };
+        }
     }
 };
 let haxEnabled = false;
@@ -2650,7 +2777,7 @@ var switchPlant;
 var viewColony;
 var switchColony;
 var plants = Array.from({ length: nofPlots }, (_) => { return {}; });
-var notebookPerma;
+var shelfPerma;
 var plotPerma;
 var plantPerma;
 var freePenny;
@@ -2734,15 +2861,14 @@ var init = () => {
     Unlocks when acquiring Buy All.
     */
     {
-        notebookPerma = theory.createPermanentUpgrade(10, currency, new FreeCost);
-        notebookPerma.description = getLoc('permaNote');
-        notebookPerma.info = getLoc('permaNoteInfo');
-        notebookPerma.bought = (_) => {
-            notebookPerma.level = 0;
-            let noteMenu = createNotebookMenu();
-            noteMenu.show();
+        shelfPerma = theory.createPermanentUpgrade(10, currency, new FreeCost);
+        shelfPerma.description = getLoc('permaShelf');
+        shelfPerma.info = getLoc('permaShelfInfo');
+        shelfPerma.bought = (_) => {
+            shelfPerma.level = 0;
+            let menu = createShelfMenu();
+            menu.show();
         };
-        notebookPerma.isAvailable = false;
     }
     /* Settings
     World menu.
@@ -2806,7 +2932,6 @@ var init = () => {
     }
     theory.createPublicationUpgrade(1, currency, permaCosts[0]);
     theory.createBuyAllUpgrade(2, currency, permaCosts[1]);
-    theory.buyAllUpgrade.bought = (_) => updateAvailability();
     // theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
     /* Free penny
     For testing purposes
@@ -2870,8 +2995,10 @@ var init = () => {
     }
     // To do: challenge plot (-1)
     // Next: milestones
-    theory.createStoryChapter(0, getLoc('chapters').intro.title, getLoc('chapters').intro.text, () => true);
-    theory.createStoryChapter(1, getLoc('chapters').basil.title, getLoc('chapters').basil.text, () => plantPerma.level > 0);
+    let chapters = getLoc('chapters');
+    theory.createStoryChapter(0, chapters.intro.title, chapters.intro.contents, () => true);
+    theory.createStoryChapter(1, chapters.basil.title, chapters.basil.contents, () => plantPerma.level > 0);
+    theory.createStoryChapter(2, chapters.notebook.title, chapters.notebook.contents, () => theory.buyAllUpgrade.level > 0);
     theory.primaryEquationHeight = 30;
     theory.primaryEquationScale = 0.96;
     theory.secondaryEquationHeight = 105;
@@ -2891,7 +3018,6 @@ var updateAvailability = () => {
                 plants[i][plantUnlocks[j]].level > 0 ||
                     (j == plantIdx[i] && j <= plantPerma.level);
     }
-    notebookPerma.isAvailable = theory.isBuyAllAvailable;
 };
 let floatingWipLabel = ui.createLatexLabel({
     row: 0, column: 0,
@@ -3521,6 +3647,173 @@ let createColonyViewMenu = (colony) => {
     });
     return menu;
 };
+let createBookMenu = (book) => {
+    var _a, _b;
+    let title = book.title;
+    let pages = book.pages;
+    let tableofContents = book.tableofContents;
+    let page = 0;
+    let pageTitle = ui.createLatexLabel({
+        text: pages[page].title,
+        margin: new Thickness(0, 4),
+        heightRequest: 20,
+        horizontalTextAlignment: TextAlignment.CENTER,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let pageContents = ui.createLabel({
+        fontFamily: FontFamily.CMU_REGULAR,
+        fontSize: 16,
+        text: pages[page].contents,
+        horizontalTextAlignment: (_a = pages[page].horizontalAlignment) !== null && _a !== void 0 ? _a : TextAlignment.START,
+        verticalTextAlignment: (_b = pages[page].verticalAlignment) !== null && _b !== void 0 ? _b : TextAlignment.START
+    });
+    let sourceEntry = ui.createEntry({
+        row: 0,
+        column: 1,
+        text: 'source' in pages[page] ? pages[page].source : ''
+    });
+    let sourceGrid = ui.createGrid({
+        isVisible: 'source' in pages[page],
+        columnDefinitions: ['auto', '1*'],
+        children: [
+            ui.createLatexLabel({
+                text: getLoc('labelSource'),
+                row: 0,
+                column: 0,
+                horizontalTextAlignment: TextAlignment.START,
+                verticalTextAlignment: TextAlignment.CENTER
+            }),
+            sourceEntry
+        ]
+    });
+    let prevButton = ui.createButton({
+        text: getLoc('btnPrev'),
+        row: 0,
+        column: 0,
+        isVisible: page > 0,
+        onClicked: () => {
+            Sound.playClick();
+            if (page > 0)
+                setPage(page - 1);
+        }
+    });
+    let viewButton = ui.createButton({
+        text: getLoc('btnView'),
+        row: 0,
+        column: 1,
+        isVisible: 'systemID' in pages[page],
+        onClicked: () => {
+            Sound.playClick();
+            let menu = createSystemMenu(pages[page].systemID);
+            menu.show();
+        }
+    });
+    let tocButton = ui.createButton({
+        text: getLoc('btnContents'),
+        row: 0,
+        column: 1,
+        isVisible: !('systemID' in pages[page]),
+        onClicked: () => {
+            Sound.playClick();
+            TOCMenu.show();
+        }
+    });
+    let nextButton = ui.createButton({
+        text: getLoc('btnNext'),
+        row: 0,
+        column: 2,
+        isVisible: page < pages.length - 1,
+        onClicked: () => {
+            Sound.playClick();
+            if (page < pages.length - 1)
+                setPage(page + 1);
+        }
+    });
+    let setPage = (p) => {
+        var _a, _b;
+        page = p;
+        menu.title = Localization.format(getLoc('bookTitleFormat'), title, page + 1, pages.length);
+        pageTitle.text = pages[page].title;
+        pageContents.text = pages[page].contents;
+        pageContents.horizontalTextAlignment =
+            (_a = pages[page].horizontalAlignment) !== null && _a !== void 0 ? _a : TextAlignment.START;
+        pageContents.verticalTextAlignment = (_b = pages[page].verticalAlignment) !== null && _b !== void 0 ? _b : TextAlignment.START;
+        sourceGrid.isVisible = 'source' in pages[page];
+        sourceEntry.text = 'source' in pages[page] ? pages[page].source : '';
+        prevButton.isVisible = page > 0;
+        nextButton.isVisible = page < pages.length - 1;
+        viewButton.isVisible = 'systemID' in pages[page];
+        tocButton.isVisible = !('systemID' in pages[page]);
+    };
+    let getContentsTable = () => {
+        let children = [];
+        for (let i = 0; i < tableofContents.length; ++i) {
+            children.push(ui.createLatexLabel({
+                text: pages[tableofContents[i]].title,
+                row: i,
+                column: 0,
+                verticalTextAlignment: TextAlignment.CENTER
+            }));
+            children.push(ui.createButton({
+                text: Localization.format(getLoc('btnPage'), tableofContents[i] + 1),
+                row: i,
+                column: 1,
+                heightRequest: getSmallBtnSize(ui.screenWidth),
+                onClicked: () => {
+                    Sound.playClick();
+                    setPage(tableofContents[i]);
+                    TOCMenu.hide();
+                }
+            }));
+        }
+        return children;
+    };
+    let TOCMenu = ui.createPopup({
+        title: getLoc('menuToC'),
+        content: ui.createScrollView({
+            heightRequest: ui.screenHeight * 0.36,
+            content: ui.createGrid({
+                columnDefinitions: ['80*', '20*'],
+                children: getContentsTable()
+            })
+        })
+    });
+    let menu = ui.createPopup({
+        title: Localization.format(getLoc('bookTitleFormat'), title, page + 1, pages.length),
+        isPeekable: true,
+        content: ui.createStackLayout({
+            children: [
+                pageTitle,
+                ui.createFrame({
+                    padding: new Thickness(8, 6),
+                    heightRequest: ui.screenHeight * 0.28,
+                    content: ui.createScrollView({
+                        content: ui.createStackLayout({
+                            children: [
+                                pageContents,
+                                sourceGrid
+                            ]
+                        })
+                    })
+                }),
+                ui.createBox({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                ui.createGrid({
+                    columnDefinitions: ['30*', '30*', '30*'],
+                    children: [
+                        prevButton,
+                        viewButton,
+                        tocButton,
+                        nextButton
+                    ]
+                })
+            ]
+        })
+    });
+    return menu;
+};
 let createNotebookMenu = () => {
     let plantLabels = [];
     let maxLevelEntries = [];
@@ -3648,6 +3941,42 @@ let createNotebookMenu = () => {
                     onClicked: () => {
                         Sound.playClick();
                         menu.hide();
+                    }
+                }),
+            ]
+        })
+    });
+    return menu;
+};
+let createShelfMenu = () => {
+    let menu = ui.createPopup({
+        isPeekable: true,
+        title: getLoc('permaShelf'),
+        content: ui.createStackLayout({
+            children: [
+                ui.createButton({
+                    text: almanac.title,
+                    onClicked: () => {
+                        Sound.playClick();
+                        let menu = createBookMenu(almanac);
+                        menu.show();
+                    }
+                }),
+                ui.createButton({
+                    text: LsManual.title,
+                    onClicked: () => {
+                        Sound.playClick();
+                        let menu = createBookMenu(LsManual);
+                        menu.show();
+                    }
+                }),
+                ui.createButton({
+                    isVisible: theory.isBuyAllAvailable,
+                    text: getLoc('permaNote'),
+                    onClicked: () => {
+                        Sound.playClick();
+                        let menu = createNotebookMenu();
+                        menu.show();
                     }
                 }),
             ]
