@@ -3,6 +3,7 @@
 - [To-do List](#to-do-list)
   - [Don't delete](#dont-delete)
   - [v0.2: Rabbits update](#v02-rabbits-update)
+  - [v0.1: Slumber Seeds](#v01-slumber-seeds)
   - [v0: Completed](#v0-completed)
 
 ## Don't delete
@@ -20,7 +21,7 @@
 
 - [ ] Colour schemes?
 - [ ] Timer function to measure growth
-  - Device time measured by user is suffice?
+  - Device time measured by user is sufficient?
 
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
@@ -28,6 +29,9 @@
 - [ ] Autobuy upgrade unlocks harvest stage config
   - Only unlocks in a future update (classmates!)
   - Hard to implement since there's more to LG than when to harvest
+
+- Let's think about it. A plant that takes 80 minutes to grow, and you have to
+do nothing. Do you feel like it could be more interesting?
 
 ## v0.2: Rabbits update
 
@@ -43,26 +47,32 @@
       - [ ] 400-year cycle wrapping
     - [ ] Hopleek schedule
 - [ ] Rose campion as first bush plant
-  - Spreadable
+  - Spreadable?
+  - Passive income?
 - [ ] Sunflower
+
+- [ ] Newspapers
+- [ ] Add a Pruned commentary track
+  - 2 lazy
+
+## v0.1: Slumber Seeds
+
 - [x] Cap colony count to 5 per plot, unless?
+
+- [x] Remove seed field from L-s menu
 
 - [x] Evolution/redraw sends Redraw signal
   - Instead of going straight to origin, it backtracks
 
-- [ ] Newspapers
-
 - [x] Buy All upgrade unlocks maxLevel config
   - [x] +/- buttons for adjusting maxLevel
 
-- [ ] Add a Pruned commentary track
-- [ ] Replace stage 0 commentary with Lemma dialogue
+- [x] Make the colony menu give commentary, while the stats are always
+displayed on screen
+  - [x] Replace stage 0 commentary with Lemma dialogue
 - [x] Almanac containing plants, L-system help, etc.
   - [x] Move notebook inside
   - [x] Move the teaching from commentary to almanac
-
-- Let's think about it. A plant that takes 80 minutes to grow, and you have to
-do nothing. Do you feel like it could be more interesting?
 
 - [x] Progression (solid? maybe!)
   - [x] Double tau growth
@@ -71,10 +81,9 @@ do nothing. Do you feel like it could be more interesting?
   - [x] Double initial price of calendula and basil
 
 - [x] Buff basil
-- [x] Make the colony menu give commentary, while the stats are always displayed on screen
-  - [x] If stage lower than first leaf, give the usual intro (move that inside the stages object)
-- [x] Rewrite descriptions for basil to reflect new balance changes
-- [x] Remove seed field from L-s menu
+  - [x] Rewrite descriptions for basil to reflect new balance changes
+  - [x] If stage lower than first leaf, give the usual intro (move that inside
+  the stages object)
 
 ## v0: Completed
 

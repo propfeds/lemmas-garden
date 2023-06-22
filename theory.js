@@ -20,7 +20,6 @@ import { MathExpression } from './api/MathExpression';
 import { Theme } from './api/Settings';
 import { Sound } from './api/Sound';
 import { game } from './api/Game';
-import { Easing } from './api/ui/properties/Easing';
 var id = 'lemmas_garden';
 var getName = (language) => {
     var _a;
@@ -2473,8 +2472,8 @@ class Book {
 }
 const almanac = new Book(getLoc('almanacTitle'), [
     Object.assign(Object.assign({}, getLoc('almanac')[0]), { horizontalAlignment: TextAlignment.CENTER }),
-    Object.assign(Object.assign({}, getLoc('almanac')[1]), { pinned: true, source: 'https://www.tasteofyummy.com/calendula-bread-for-bread-lovers/' }),
-    Object.assign(Object.assign({}, getLoc('almanac')[2]), { systemID: 1 }),
+    Object.assign(Object.assign({}, getLoc('almanac')[1]), { pinned: true }),
+    Object.assign(Object.assign({}, getLoc('almanac')[2]), { systemID: 1, source: 'https://www.tasteofyummy.com/calendula-bread-for-bread-lovers/' }),
     Object.assign(Object.assign({}, getLoc('almanac')[3]), { systemID: 2 }),
 ]);
 const LsManual = new Book(getLoc('manualTitle'), [
@@ -3147,17 +3146,18 @@ var updateAvailability = () => {
                     (j == plantIdx[i] && j <= plantPerma.level);
     }
 };
-let floatingWipLabel = ui.createLatexLabel({
-    row: 0, column: 0,
-    rotation: -24,
-    horizontalOptions: LayoutOptions.CENTER,
-    verticalOptions: LayoutOptions.END,
-    // verticalTextAlignment: TextAlignment.CENTER,
-    margin: new Thickness(8, 40),
-    text: getLoc('wip'),
-    fontSize: 9,
-    textColor: Color.TEXT_MEDIUM
-});
+// let floatingWipLabel = ui.createLatexLabel
+// ({
+//     row: 0, column: 0,
+//     rotation: -24,
+//     horizontalOptions: LayoutOptions.CENTER,
+//     verticalOptions: LayoutOptions.END,
+//     // verticalTextAlignment: TextAlignment.CENTER,
+//     margin: new Thickness(8, 40),
+//     text: getLoc('wip'),
+//     fontSize: 9,
+//     textColor: Color.TEXT_MEDIUM
+// });
 var tick = (elapsedTime, multiplier) => {
     // Without the multiplier, one year is 14.6 hours (14:36)
     // With the multiplier, one year is 9.7(3) hours (9:44)
@@ -3184,7 +3184,8 @@ var tick = (elapsedTime, multiplier) => {
         let timeCos = Math.cos(time * Math.PI / 72);
         insolationCoord = Math.max(0, -timeCos);
         growthCoord = (timeCos + 1) / 2;
-        floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12, 180, Easing.LINEAR);
+        // floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
+        // 180, Easing.LINEAR);
     }
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
@@ -3196,10 +3197,7 @@ var getEquationOverlay = () => {
         inputTransparent: true,
         cascadeInputTransparent: false,
         children: [
-            // For reference
-            // ui.createFrame({row: 0, column: 2}),
-            // ui.createFrame({row: 1, column: 2}),
-            floatingWipLabel,
+            // floatingWipLabel,
             ui.createLatexLabel({
                 row: 0, column: 0,
                 horizontalTextAlignment: TextAlignment.CENTER,

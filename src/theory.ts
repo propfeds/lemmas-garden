@@ -3227,12 +3227,12 @@ const almanac = new Book(getLoc('almanacTitle'),
     },
     {
         ...getLoc('almanac')[1],
-        pinned: true,
-        source: 'https://www.tasteofyummy.com/calendula-bread-for-bread-lovers/'
+        pinned: true
     },
     {
         ...getLoc('almanac')[2],
-        systemID: 1
+        systemID: 1,
+        source: 'https://www.tasteofyummy.com/calendula-bread-for-bread-lovers/'
     },
     {
         ...getLoc('almanac')[3],
@@ -4065,18 +4065,18 @@ var updateAvailability = () =>
     }
 }
 
-let floatingWipLabel = ui.createLatexLabel
-({
-    row: 0, column: 0,
-    rotation: -24,
-    horizontalOptions: LayoutOptions.CENTER,
-    verticalOptions: LayoutOptions.END,
-    // verticalTextAlignment: TextAlignment.CENTER,
-    margin: new Thickness(8, 40),
-    text: getLoc('wip'),
-    fontSize: 9,
-    textColor: Color.TEXT_MEDIUM
-});
+// let floatingWipLabel = ui.createLatexLabel
+// ({
+//     row: 0, column: 0,
+//     rotation: -24,
+//     horizontalOptions: LayoutOptions.CENTER,
+//     verticalOptions: LayoutOptions.END,
+//     // verticalTextAlignment: TextAlignment.CENTER,
+//     margin: new Thickness(8, 40),
+//     text: getLoc('wip'),
+//     fontSize: 9,
+//     textColor: Color.TEXT_MEDIUM
+// });
 
 var tick = (elapsedTime: number, multiplier: number) =>
 {
@@ -4107,8 +4107,8 @@ var tick = (elapsedTime: number, multiplier: number) =>
         let timeCos = Math.cos(time * Math.PI / 72);
         insolationCoord = Math.max(0, -timeCos);
         growthCoord = (timeCos + 1) / 2;
-        floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
-        180, Easing.LINEAR);
+        // floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
+        // 180, Easing.LINEAR);
     }
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
@@ -4124,10 +4124,7 @@ var getEquationOverlay = () =>
         cascadeInputTransparent: false,
         children:
         [
-            // For reference
-            // ui.createFrame({row: 0, column: 2}),
-            // ui.createFrame({row: 1, column: 2}),
-            floatingWipLabel,
+            // floatingWipLabel,
             ui.createLatexLabel
             ({
                 row: 0, column: 0,
