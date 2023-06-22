@@ -55,8 +55,8 @@ const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS = {
     en: {
-        versionName: `Version: 0.0.6, Slumber Seeds`,
-        wip: 'v0.1, Work in Progress',
+        versionName: `Version: 0.1, Slumber Seeds`,
+        wip: 'Work in Progress',
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish',
         btnView: 'View L-system',
@@ -65,7 +65,7 @@ const LOC_STRINGS = {
         btnSave: 'Save',
         btnReset: 'Reset Graphs',
         btnRedraw: 'Redraw',
-        btnPrev: 'Prev',
+        btnPrev: 'Prev.',
         btnNext: 'Next',
         btnContents: 'Table of\nContents',
         btnPage: 'p. {0}',
@@ -104,8 +104,10 @@ const LOC_STRINGS = {
         labelMaxLevel: 'Max. level',
         labelHarvestStage: 'Harvest stage',
         colony: `{0} of {1}, stage {2}`,
-        colonyStats: `{0} of {1}, stage {2}\\\\Energy: {3} (+{4}/s)\\\\
-Growth: {5}/{6} (+{7}/s)\\\\Profit: {8}p\\\\{9}`,
+        colonyStats: `{0} of {1}, stage {2}\\\\
+Energy\\colon\\enspace {3} (+{4}/s)\\\\
+Growth\\colon\\enspace {5}/{6} (+{7}/s)\\\\
+Profit\\colon\\enspace {8}p\\\\{9}`,
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
         dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}\\\\{5}',
         dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\{5}',
@@ -160,10 +162,7 @@ be ignored.`,
                         19,
                         21, 24, 25, 26, 28, 29, 33, 37, 38
                     ],
-                    0: `Commonly called pot marigold (not to be confused with
-marigolds of the genus Tagetes), calendulas are fast growing flowers known for
-numerous medicinal and culinary uses. In fact, the 'pot' in its name refers to
-its role as an ingredient in soups, stews, broths and teas.`,
+                    0: 'A seedling in its warm slumber.',
                     3: 'A little stem has just risen.',
                     8: `The second pair of leaves appears. See that for this
 cultivar, each pair of leaves is rotated to 90° against the previous. Others
@@ -195,14 +194,9 @@ internode\\\\I : shortened stem (not internode)\\\\K: flower\\\\L: leaf\\\\—
                 stages: {
                     index: [
                         0, 4, 8, 9, 12, 13, 14, 17, 20,
-                        21,
-                        22,
-                        32, 33,
-                        54
+                        21, 22
                     ],
-                    0: `Hailed as the 'king/queen of herbs' all throughout the
-world, basil is used as a spice in a vast number of recipes. Even dogs enjoy
-basil from time to time.`,
+                    0: 'A seedling in its sweet slumber.',
                     4: 'The first pair of leaves pops up. A stem, as well.',
                     8: 'The second pair of leaves appears.',
                     9: 'Little leaves start to grow over the first node.',
@@ -212,15 +206,10 @@ basil from time to time.`,
                     17: `I'll show you what to do when it flowers, soon.`,
                     20: `It's about to flower. You can nip the stem now if you
 don't feel confident.`,
-                    21: `The first flower appears. If you're to harvest later,
-nip it in the bud. Otherwise, the plant will go into seed and its leaves will
-lose flavour.`,
+                    21: `The first flower appears.`,
                     22: `If the flower's still there, imagine it's sending a
-signal from top to bottom, all the way to basil base.`,
-                    32: `Basil base catches the signal.`,
-                    33: `Basil base sends a return signal, reminding the leaves
-to go absolutely bitter.`,
-                    54: `A basil plant has sacrificed itself for science.`
+signal from top to bottom, all the way to basil base. Then, basil base will
+send another one back to the leaves.`,
                 }
             },
             9001: {
@@ -238,6 +227,15 @@ to go absolutely bitter.`,
                     4: `What do you expect? It\'s a fractal. Arrow weed is the
 friend of all mathematicians.`
                 }
+            },
+            9002: {
+                name: '(Test) Rose campion',
+                info: 'Not balanced for regular play.',
+                LsDetails: `Bread.`,
+                stages: {
+                    index: [0],
+                    0: 'The first shoot rises.'
+                }
             }
         },
         plantStats: `({0}) {1}\\\\—\\\\Max. stage: {2}\\\\Synthesis rate: ` +
@@ -252,29 +250,152 @@ friend of all mathematicians.`
         almanacTitle: `Lemma's Catalogue of Plants`,
         almanac: [
             {
-                title: 'Cover',
+                title: 'Title Cover',
                 contents: `Lemma's Catalogue of Plants, for Students
 Third Edition
 
-🪴🌻🌿
+🌾🌻🌿
+
 
 Lena Ruddles, Madeline H. Ruddles
 
 Tau Publishing`
             },
+            {
+                title: 'Preparations!',
+                contents: `Before you begin to sow your seeds, make sure to check the plot's ` +
+                    `elevation, as well as the amount of sun you're going to see each day. Test ` +
+                    `the soil for acidity, and scatter some ash for balance. Till it, pluck the ` +
+                    `weeds, supply manure, all needed for a healthy plot.
+
+For the seeds, I recommend purchasing from Corollary's. The seeds here are ` +
+                    `consistent in growth time, perfect for setting up experiments. However, ` +
+                    `they can be a bit expensive, so it's best to buy them in small batches, in ` +
+                    `order to avoid turning a loss.
+
+Ready to sow?`
+            },
+            {
+                title: 'Calendula',
+                contents: `Commonly called pot marigold (not to be confused with marigolds of the ` +
+                    `genus Tagetes), calendulas are easy-going flowers known for numerous ` +
+                    `medicinal and culinary uses. From inflammations to sunburns, scorpion ` +
+                    `stings to hair care, you're going to see it everywhere! The 'pot' in its ` +
+                    `name should also suggest it's uses as a cooking herb in stews and soups too.
+
+Time to maturity: ~7 weeks
+
+Here's a recipe to make some delicious calendula bread:`
+            },
+            {
+                title: 'Basil',
+                contents: `Hailed as the 'king/queen of herbs' all throughout the world, basil is used ` +
+                    `as a spice in a vast number of recipes with its fragrance and a sweet, ` +
+                    `slightly intoxicating flavour.
+Even my dog loves it from time to time.
+
+Time to maturity: 6~7 weeks
+
+If you intend to harvest, snip off the stem before it flowers. Otherwise, ` +
+                    `the plant will go into the end of its life cycle, and the leaves will lose ` +
+                    `flavour.`
+            }
         ],
-        manualTitle: 'Lindenmayer Systems Basics',
+        manualTitle: 'Lindenmayer Systems',
         manual: [
             {
                 title: `Foreword`,
                 contents: `This manuscript was found scattered around a corner of the forest. Seems ` +
-                    `like someone knows a way to turn plants into alphabets.
+                    `like someone knows a way to turn plants into alphabets. Perhaps even from ` +
+                    `the future. Thrilling!
+
 - Lena`
             },
             {
-                title: `Hello`,
-                contents: `Welcome to L-systems Renderer!`
-            }
+                title: 'L-systems: A primer',
+                contents: `Developed in 1968 by biologist Aristid Lindenmayer, an L-system is a formal ` +
+                    `grammar that describes the growth of a sequence (string). It is often used ` +
+                    `to model plants and draw fractal figures.
+
+Every L-system starts with a sequence, called the axiom. From the axiom, the ` +
+                    `sequence grows according to a set of production rules that describe how ` +
+                    `each symbol (character) in the sequence would be rewritten in the next level.
+Each rule is represented in the form of:
+{symbol} = {derivation(s)}
+
+Considering a simple system with the axiom of b and the rules:
+b = a
+a = ab,
+the sequence will grow as follows:
+Level 0: b
+Level 1: a
+Level 2: ab
+Level 3: aba
+Level 4: abaab
+Level 5: abaababa`
+            },
+            {
+                title: 'Context-sensitivity',
+                contents: `Context-sensitive L-systems allow each symbol to interact with nearby ` +
+                    `symbols, by letting an individual behave differently depending on its ` +
+                    `ancestor (the symbol to its immediate left), and its child to the right ` +
+                    `(children, if it opens up multiple branches). They are often used to model ` +
+                    `forms of communication between a plant's organs.
+
+A context-sensitive rule goes as follows:
+{left} < {symbol} > {right} = {derivation}
+The symbol will only evolve according to this rule if its ancestor bears the ` +
+                    `same symbol as {left}, and one of its children bears the same symbol as ` +
+                    `{right}.`
+            },
+            {
+                title: 'Parametric L-systems',
+                contents: `Beyond geometric applications, parametric L-systems allow individual ` +
+                    `symbols to hold additional information such as its state of growth, elapsed ` +
+                    `time, etc. They can be even peeked at in context-sensitive rules!
+
+The syntax for a parametric rule goes as follows:
+{symbol}({param_0},...) : {condition*} = {derivation_0} : {probability**} ;...
+Examples:
+I(t) : t>0 = FI(t-1)
+A(t) : t>5 = B(t+1)CD(t^0.5, t-2)
+Including context:
+A(x) < B(y) > C(z) : x+y+z>10 = E((x+y)/2)F((y+z)/2)
+
+* When omitted, the condition is assumed to be always true.
+** When omitted, the chance is assumed to be 100%.`
+            },
+            {
+                title: 'Appendix: Common symbols',
+                contents: `A: apex (stem shoot). Can photo-synthesise.
+B: base. Is often used to receive and send signals.
+I: alternate stem. May transform into a flower, or something else.
+K: flower. Looks pretty.
+L: leaf. Can photo-synthesise.
+S: signal. Is used to communicate between organs.`
+            },
+            {
+                title: 'Appendix: Geometric symbols',
+                contents: `F(l): moves forward and draw a line of length l.
++(n), -(n): perform yaw rotation by n degrees.
+&(n), ^(n): perform pitch rotation by n degrees.
+\\(n), /(n): perform roll rotation by n degrees.
+
+|: reverses direction.
+T(n): applies tropism (gravity) with a weight of n.
+T(n, x, y, z): applies tropism along a custom axis.
+$: aligns the up vector closest to vertical.
+
+[: pushes turtle position & rotation onto a stack.
+]: pops the stack's topmost element onto the turtle.
+%: cuts off the remainder of a branch.
+
+{: initiates polygon drawing mode.
+.: sets a polygon vertex.
+}: ends the polygon drawing mode.
+
+~: declares a symbol's model.`
+            },
         ],
         chapters: {
             intro: {
@@ -301,11 +422,12 @@ Wee bit sick of that calendula?`
             },
             notebook: {
                 title: `A notebook`,
-                contents: `As you gather enough pennies to keep
-the batches going, you decided to
-buy yourself a notebook.
+                contents: `As you gather enough pennies to keep the batches
+going, you decide to buy yourself a notebook.
 
-This will help you keep track of things.`
+This will help you keep track of your plantations.
+
+(Notebook is accessible at the bookshelf.)`
             }
         }
     }
@@ -2351,11 +2473,17 @@ class Book {
 }
 const almanac = new Book(getLoc('almanacTitle'), [
     Object.assign(Object.assign({}, getLoc('almanac')[0]), { horizontalAlignment: TextAlignment.CENTER }),
-    getLoc('almanac')[0]
+    Object.assign(Object.assign({}, getLoc('almanac')[1]), { pinned: true, source: 'https://www.tasteofyummy.com/calendula-bread-for-bread-lovers/' }),
+    Object.assign(Object.assign({}, getLoc('almanac')[2]), { systemID: 1 }),
+    Object.assign(Object.assign({}, getLoc('almanac')[3]), { systemID: 2 }),
 ]);
 const LsManual = new Book(getLoc('manualTitle'), [
-    Object.assign(Object.assign({}, getLoc('manual')[0]), { systemID: 1 }),
-    Object.assign(Object.assign({}, getLoc('manual')[1]), { source: 'bread' }),
+    getLoc('manual')[0],
+    Object.assign(Object.assign({}, getLoc('manual')[1]), { pinned: true }),
+    getLoc('manual')[2],
+    getLoc('manual')[3],
+    Object.assign(Object.assign({}, getLoc('manual')[4]), { pinned: true }),
+    getLoc('manual')[5],
 ]);
 // Balance parameters
 const nofPlots = 6;
@@ -3771,7 +3899,7 @@ let createBookMenu = (book) => {
     let TOCMenu = ui.createPopup({
         title: getLoc('menuToC'),
         content: ui.createScrollView({
-            heightRequest: ui.screenHeight * 0.36,
+            // heightRequest: ui.screenHeight * 0.36,
             content: ui.createGrid({
                 columnDefinitions: ['80*', '20*'],
                 children: getContentsTable()
@@ -3897,6 +4025,7 @@ let createNotebookMenu = () => {
         children: [...plantLabels, ...maxLevelEntries]
     });
     let menu = ui.createPopup({
+        isPeekable: true,
         title: getLoc('permaNote'),
         content: ui.createStackLayout({
             children: [
@@ -3950,7 +4079,7 @@ let createNotebookMenu = () => {
 };
 let createShelfMenu = () => {
     let menu = ui.createPopup({
-        isPeekable: true,
+        // isPeekable: true,
         title: getLoc('permaShelf'),
         content: ui.createStackLayout({
             children: [

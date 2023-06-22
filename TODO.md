@@ -2,7 +2,7 @@
 
 - [To-do List](#to-do-list)
   - [Don't delete](#dont-delete)
-  - [v0.1: Rabbits update](#v01-rabbits-update)
+  - [v0.2: Rabbits update](#v02-rabbits-update)
   - [v0: Completed](#v0-completed)
 
 ## Don't delete
@@ -29,7 +29,9 @@
   - Only unlocks in a future update (classmates!)
   - Hard to implement since there's more to LG than when to harvest
 
-## v0.1: Rabbits update
+## v0.2: Rabbits update
+
+- [ ] updateAvailability() slow
 
 - [ ] Simple solitary flower
   - Tulip?
@@ -55,9 +57,9 @@
 
 - [ ] Add a Pruned commentary track
 - [ ] Replace stage 0 commentary with Lemma dialogue
-- [ ] Almanac containing plants, L-system help, etc.
+- [x] Almanac containing plants, L-system help, etc.
   - [x] Move notebook inside
-  - [ ] Move the teaching from commentary to almanac
+  - [x] Move the teaching from commentary to almanac
 
 - Let's think about it. A plant that takes 80 minutes to grow, and you have to
 do nothing. Do you feel like it could be more interesting?
