@@ -2267,7 +2267,8 @@ class ColonyManager {
                         c.ddReserve += dd;
                     }
                 }
-                else {
+                else // Normal growth
+                 {
                     // @ts-expect-error
                     c.energy += di * c.synthRate;
                     if (notMature) {
@@ -2280,7 +2281,7 @@ class ColonyManager {
                         // @ts-expect-error
                         c.energy -= maxdg;
                     }
-                    if (c.diReserve /*&& c.dgReserve*/) {
+                    if (c.diReserve && !c.diReserve.isZero) {
                         // @ts-expect-error
                         c.energy += c.diReserve * c.synthRate;
                         if (notMature) {
@@ -2296,7 +2297,7 @@ class ColonyManager {
                     }
                     if (plantData[c.id].dailyIncome) {
                         this.reap(c, dd);
-                        if (c.ddReserve) {
+                        if (c.ddReserve && !c.ddReserve.isZero) {
                             this.reap(c, c.ddReserve);
                             c.ddReserve = BigNumber.ZERO;
                         }

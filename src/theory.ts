@@ -2981,7 +2981,7 @@ class ColonyManager
                         c.ddReserve += dd;
                     }
                 }
-                else
+                else    // Normal growth
                 {
                     // @ts-expect-error
                     c.energy += di * c.synthRate;
@@ -2998,7 +2998,7 @@ class ColonyManager
                         c.energy -= maxdg;
                     }
 
-                    if(c.diReserve /*&& c.dgReserve*/)
+                    if(c.diReserve && !c.diReserve.isZero)
                     {
                         // @ts-expect-error
                         c.energy += c.diReserve * c.synthRate;
@@ -3019,7 +3019,7 @@ class ColonyManager
                     {
                         this.reap(c, dd);
                         
-                        if(c.ddReserve)
+                        if(c.ddReserve && !c.ddReserve.isZero)
                         {
                             this.reap(c, c.ddReserve);
                             c.ddReserve = BigNumber.ZERO;
