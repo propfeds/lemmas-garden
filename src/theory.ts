@@ -2837,6 +2837,8 @@ class ColonyManager
 
     reap(colony: Colony, multiplier: BigNumber = BigNumber.ONE)
     {
+        if(multiplier.isZero)
+            return;
         // @ts-expect-error
         currency.value += colony.profit * BigNumber.from(colony.population) *
         // @ts-expect-error
@@ -2984,12 +2986,12 @@ class ColonyManager
                 else    // Normal growth
                 {
                     // @ts-expect-error
-                    c.energy += di * c.synthRate;
+                    c.energy += (di + c.diReserve) * c.synthRate;
 
                     if(notMature)
                     {
                         // @ts-expect-error
-                        let maxdg = c.energy.min(dg *
+                        let maxdg = c.energy.min((dg + c.dgReserve) *
                         // @ts-expect-error
                         plantData[c.id].growthRate);
                         // @ts-expect-error
@@ -2998,32 +3000,14 @@ class ColonyManager
                         c.energy -= maxdg;
                     }
 
-                    if(c.diReserve && !c.diReserve.isZero)
-                    {
-                        // @ts-expect-error
-                        c.energy += c.diReserve * c.synthRate;
-                        if(notMature)
-                        {
-                            // @ts-expect-error
-                            let maxdg = c.energy.min(c.dgReserve * plantData[c.id].growthRate);
-                            // @ts-expect-error
-                            c.growth += maxdg;
-                            // @ts-expect-error
-                            c.energy -= maxdg;
-                        }
-                        c.diReserve = BigNumber.ZERO;
-                        c.dgReserve = BigNumber.ZERO;
-                    }
+                    c.diReserve = BigNumber.ZERO;
+                    c.dgReserve = BigNumber.ZERO;
 
                     if(plantData[c.id].dailyIncome)
                     {
-                        this.reap(c, dd);
-                        
-                        if(c.ddReserve && !c.ddReserve.isZero)
-                        {
-                            this.reap(c, c.ddReserve);
-                            c.ddReserve = BigNumber.ZERO;
-                        }
+                        // @ts-expect-error
+                        this.reap(c, dd + c.ddReserve);
+                        c.ddReserve = BigNumber.ZERO;
                     }
                 }
             }
