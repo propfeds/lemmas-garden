@@ -149,10 +149,9 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
             1: {
                 name: 'Calendula',
                 info: 'A classic flower to start the month.',
-                LsDetails: `Symbols:\\\\A: apex (stem shoot)\\\\F: internode
-\\\\I : flower stem (not internode)\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest
-returns profit as the sum of all K.\\\\—\\\\The Model specification section may
-be ignored.`,
+                LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\I : flower
+stem\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest returns profit as the sum of all K.
+\\\\—\\\\The Model specification section may be ignored.`,
                 stages: {
                     index: [
                         0,
@@ -186,10 +185,10 @@ known as the golden angle.`,
             2: {
                 name: 'Basil',
                 info: 'A fast growing herb that requires a bit of care.',
-                LsDetails: `Symbols:\\\\A: apex (stem shoot)\\\\B: base\\\\F:
-internode\\\\I : shortened stem (not internode)\\\\K: flower\\\\L: leaf\\\\—
-\\\\Harvest returns profit as the sum of all L.\\\\Prune cuts off all A and K.
-\\\\—\\\\The Model specification section may be ignored.`,
+                LsDetails: `A: apex (stem shoot)\\\\B: base\\\\F: internode\\\\
+I : shortened stem\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest returns profit as the
+sum of all L.\\\\Prune cuts off all A and K.\\\\—\\\\The Model specification
+section may be ignored.`,
                 stages: {
                     index: [
                         0, 4, 8, 9, 12, 13, 14, 17, 20,
@@ -214,11 +213,28 @@ send another one back to the leaves.`,
             3: {
                 name: 'Rose campion',
                 info: 'A great sight for your garden. Provides daily income.',
-                LsDetails: `Bread.`,
+                LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\I : flower
+                stem\\\\K: flower\\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns
+profit as the sum of all K.\\\\Passively provides income per day equal to total
+profit.\\\\—\\\\The Model specification section may be ignored.`,
                 stages: {
-                    index: [0, 1],
+                    index: [
+                        0, 1, 3,
+                        5, 9,
+                        14,
+                        16
+                    ],
                     0: 'A seedling basking in its own dazing lullaby.',
-                    1: 'A flower bud already?'
+                    1: 'A flower bud already?',
+                    3: `Most gardeners are early birds. Now, why are you still
+counting pennies in the middle of the night?`,
+                    5: 'Anyway, new stem rises from a side shoot.',
+                    9: `New stems have risen. This pattern will repeat
+periodically.`,
+                    14: `You see the first fruit on that stem?\\\\Too late for
+munch.`,
+                    16: `Go to sleep. Is the campion sedative not good enough
+for you?`
                 }
             },
             9001: {
@@ -299,6 +315,19 @@ Time to maturity: 6~7 weeks
 If you intend to harvest, snip off the stem before it flowers. Otherwise, ` +
                     `the plant will go into the end of its life cycle, and the leaves will lose ` +
                     `flavour.`
+            },
+            {
+                title: 'Rose campion',
+                contents: `Pest repellent, drought tolerant, and a great pollinator attractor. And ` +
+                    `occasionally, visitors and artists, generous donors, might toss a few ` +
+                    `pennies as gratitude to keep the gardens running. But mostly, bees.
+Rose campion is also used as a sedative, or for wound treatments, or wicks ` +
+                    `for a lamp.
+
+Time to maturity: 'I haven't timed it yet'
+
+Every midnight, pollinators will pay you a penny or two after a hearty meal ` +
+                    `during the day.`
             }
         ],
         manualTitle: 'Lindenmayer Systems',
@@ -2478,16 +2507,17 @@ class Book {
 const almanac = new Book(getLoc('almanacTitle'), [
     Object.assign(Object.assign({}, getLoc('almanac')[0]), { horizontalAlignment: TextAlignment.CENTER }),
     Object.assign(Object.assign({}, getLoc('almanac')[1]), { pinned: true }),
-    Object.assign(Object.assign({}, getLoc('almanac')[2]), { systemID: 1, source: 'https://www.tasteofyummy.com/calendula-bread-for-bread-lovers/' }),
-    Object.assign(Object.assign({}, getLoc('almanac')[3]), { systemID: 2 }),
+    Object.assign(Object.assign({}, getLoc('almanac')[2]), { systemID: 1, source: 'https://www.tasteofyummy.com/calendula-bread-for-bread-lovers/', pinned: true }),
+    Object.assign(Object.assign({}, getLoc('almanac')[3]), { systemID: 2, pinned: true }),
+    Object.assign(Object.assign({}, getLoc('almanac')[4]), { systemID: 3, pinned: true }),
 ]);
 const LsManual = new Book(getLoc('manualTitle'), [
     getLoc('manual')[0],
     Object.assign(Object.assign({}, getLoc('manual')[1]), { pinned: true }),
-    getLoc('manual')[2],
-    getLoc('manual')[3],
+    Object.assign(Object.assign({}, getLoc('manual')[2]), { pinned: true }),
+    Object.assign(Object.assign({}, getLoc('manual')[3]), { pinned: true }),
     Object.assign(Object.assign({}, getLoc('manual')[4]), { pinned: true }),
-    getLoc('manual')[5],
+    Object.assign(Object.assign({}, getLoc('manual')[5]), { pinned: true }),
 ]);
 // Balance parameters
 const nofPlots = 6;
@@ -2638,19 +2668,19 @@ const plantData = {
         system: new LSystem('/(45)&(5)A(0.25, 0)', [
             'A(r, t): t>0 = A(r+0.05, t-1)',
             'A(r, t) = F(stemInc, 20)T[&L(0.05)][/(180)&L(0.05)][F(stemInc, 10)K(0.25, 0)][^$A(r-0.2, 7)][&$A(r-0.15, 3)]',
-            'F(l, t): t>0 = F(l+stemInc, t-1)',
             'K(p, t): t<2 = K(p*1.1, t+1)',
             'K(p, t): t<3 = K(0.375, t+1)',
             'K(p, t): t<12 = K(1.35*p-0.4*p^2, t+1)',
             'K(p, t) = O(1)',
             'L(s): s<maxLeafSize = L(s+0.05)',
-            'O(s): s>.6 = O(s*0.9)',
+            'O(s): s>0.6 = O(s*0.9)',
+            'F(l, t): t>0 = F(l+stemInc, t-1)',
             '~> #= Model specification',
             '~> K(p, t): t<3 = {[+(90)b(p*2)b(p*2)b(p*2)b(p*2)b(p*2)]}',
             '~> b(s) = -[^-F(s).][--F(s*2)..][&-F(s).]+^(72)',
             '~> K(p, t) = {[c(p)-(p*100)k(1.2*p+0.6)]/(72)[c(p)-(p*100)k(1.2*p+0.6)]/(72)[c(p)-(p*100)k(1.2*p+0.6)]/(72)[c(p)-(p*100)k(1.2*p+0.6)]/(72)[c(p)-(p*100)k(1.2*p+0.6)]}',
             '~> c(s) = +F(s).-F(s).-F(s).+',
-            '~> k(s) = [^(40)F(s/2).&(10)F(s/2).&F(s/4).][F(s/2)+(10)F(s).][&(40)F(s/2)[^(10)F(s/2)[^F(s/4).].].].',
+            '~> k(s) = [^(40)F(s/2).&(10)F(s/2).&F(s/4).][F(s/2)-(10)F(s).][&(40)F(s/2)[^(10)F(s/2)[^F(s/4).].].].',
             '~> L(s) = {T(s*0.4)F(sqrt(s)).[-(48)F(s).+F(s).+&F(s).+F(s).][F(s)[&F(s)[F(s)[^F(s).].].].].[+(48)F(s).-F(s).-&F(s).-F(s).][F(s)[&F(s)[F(s)[^F(s).].].].]}',
             '~> O(s) = {[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].].}'
         ], 31, 0, 'A', '', -0.6, {
@@ -2660,7 +2690,7 @@ const plantData = {
         maxStage: 28,
         cost: new ExponentialCost(10000, Math.log2(5)),
         growthRate: BigNumber.TEN,
-        growthCost: BigNumber.FIVE,
+        growthCost: BigNumber.FOUR,
         dailyIncome: true,
         actions: [
             {

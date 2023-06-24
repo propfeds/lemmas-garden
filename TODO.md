@@ -46,9 +46,10 @@ do nothing. Do you feel like it could be more interesting?
     - [x] Leap years calculation
       - [ ] 400-year cycle wrapping
     - [ ] Hopleek schedule
-- [ ] Rose campion as first bush plant
-  - Spreadable?
-  - Passive income?
+    - [ ] Repelled by rose campions and sunflowers
+- [x] Rose campion as first bush plant
+  - [ ] Death? Propagation?
+  - [x] Passive income
 - [ ] Sunflower
 
 - [ ] Newspapers

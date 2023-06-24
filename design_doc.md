@@ -150,6 +150,8 @@ between tau not feeling bloated and pub multipliers not too small)
 
 - **Bush**:
   - Look at ur window, you have a tinny bush of english lavender
+  - Rose campion from the Abop
+    - Repels rabbits
 - **Sunflowers** & sunflower batteries!
   - This cultivar of sunflowers is dysfunctional. They cannot turn their heads to face the sun, even when they're young. Regardless, Lemma often brushes over their heads as if they were her children.
   - Its ability to head towards the sun will get weaker as it gets older,
