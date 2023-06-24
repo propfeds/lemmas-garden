@@ -83,6 +83,10 @@ export class BigNumber {
      */
     get sign(): number;
     /**
+     * @returns {boolean} Whether 'this' is equal (close?) to zero
+     */
+    get isZero(): boolean;
+    /**
      * @param {BigNumber} value
      * @returns {BigNumber} this^value
      */
