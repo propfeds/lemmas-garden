@@ -185,7 +185,7 @@ known as the golden angle.`,
             },
             2: {
                 name: 'Basil',
-                info: 'A fast growing herb, regularly used for spicing.',
+                info: 'A fast growing herb that requires a bit of care.',
                 LsDetails: `Symbols:\\\\A: apex (stem shoot)\\\\B: base\\\\F:
 internode\\\\I : shortened stem (not internode)\\\\K: flower\\\\L: leaf\\\\—
 \\\\Harvest returns profit as the sum of all L.\\\\Prune cuts off all A and K.
@@ -211,6 +211,16 @@ signal from top to bottom, all the way to basil base. Then, basil base will
 send another one back to the leaves.`,
                 }
             },
+            3: {
+                name: 'Rose campion',
+                info: 'A great sight for your garden. Provides daily income.',
+                LsDetails: `Bread.`,
+                stages: {
+                    index: [0, 1],
+                    0: 'A seedling basking in its own dazing lullaby.',
+                    1: 'A flower bud already?'
+                }
+            },
             9001: {
                 name: '(Test) Arrow weed',
                 info: 'Not balanced for regular play.',
@@ -227,15 +237,6 @@ send another one back to the leaves.`,
 friend of all mathematicians.`
                 }
             },
-            9002: {
-                name: '(Test) Rose campion',
-                info: 'Not balanced for regular play.',
-                LsDetails: `Bread.`,
-                stages: {
-                    index: [0],
-                    0: 'The first shoot rises.'
-                }
-            }
         },
         plantStats: `({0}) {1}\\\\—\\\\Max. stage: {2}\\\\Synthesis rate: ` +
             `{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} * {6} ` +
@@ -1219,7 +1220,7 @@ class LSystem {
      * @returns {{start: number, result: string}}
      */
     derive(sequence, seqParams, ancestors, children, task = {}) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d;
         let result = (_a = task.derivation) !== null && _a !== void 0 ? _a : '';
         let resultParams = (_b = task.parameters) !== null && _b !== void 0 ? _b : [];
         let i = (_c = task.start) !== null && _c !== void 0 ? _c : 0;
@@ -1282,7 +1283,7 @@ class LSystem {
                         return (_a = this.varGetter(v)) !== null && _a !== void 0 ? _a : tmpRules[j].paramMap(v, seqParams[ancestors[i]], seqParams[i], seqParams[right]);
                     };
                     // Next up is the condition
-                    if (tmpRules[j].condition.evaluate(tmpParamMap).isZero)
+                    if ((_d = tmpRules[j].condition.evaluate(tmpParamMap)) === null || _d === void 0 ? void 0 : _d.isZero)
                         continue;
                     if (typeof tmpRules[j].derivations === 'string') {
                         result += tmpRules[j].derivations;
@@ -1372,6 +1373,7 @@ class LSystem {
         };
     }
     deriveModel(symbol, params) {
+        var _a;
         let result = '';
         let resultParams = [];
         if (this.models.has(symbol)) {
@@ -1382,7 +1384,7 @@ class LSystem {
                     return (_a = this.varGetter(v)) !== null && _a !== void 0 ? _a : tmpRules[j].paramMap(v, null, null, params);
                 };
                 // Next up is the condition
-                if (tmpRules[j].condition.evaluate(tmpParamMap).isZero)
+                if ((_a = tmpRules[j].condition.evaluate(tmpParamMap)) === null || _a === void 0 ? void 0 : _a.isZero)
                     continue;
                 if (typeof tmpRules[j].derivations === 'string') {
                     result = tmpRules[j].derivations;
@@ -2491,7 +2493,7 @@ const LsManual = new Book(getLoc('manualTitle'), [
 const nofPlots = 6;
 const maxColoniesPerPlot = 5;
 const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(100)));
-const plantUnlocks = [1, 2, 9002];
+const plantUnlocks = [1, 2, 3];
 const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2200), new ConstantCost(145000));
 const permaCosts = [
     BigNumber.from(27),
@@ -2631,6 +2633,57 @@ const plantData = {
             };
         }
     },
+    3: // Rose campion
+    {
+        system: new LSystem('/(45)&(5)A(0.25, 0)', [
+            'A(r, t): t>0 = A(r+0.05, t-1)',
+            'A(r, t) = F(stemInc, 20)T[&L(0.05)][/(180)&L(0.05)][F(stemInc, 10)K(0.25, 0)][^$A(r-0.2, 7)][&$A(r-0.15, 3)]',
+            'F(l, t): t>0 = F(l+stemInc, t-1)',
+            'K(p, t): t<2 = K(p*1.1, t+1)',
+            'K(p, t): t<3 = K(0.375, t+1)',
+            'K(p, t): t<12 = K(1.35*p-0.4*p^2, t+1)',
+            'K(p, t) = O(1)',
+            'L(s): s<maxLeafSize = L(s+0.05)',
+            'O(s): s>.6 = O(s*0.9)',
+            '~> #= Model specification',
+            '~> K(p, t): t<3 = {[+(90)b(p*2)b(p*2)b(p*2)b(p*2)b(p*2)]}',
+            '~> b(s) = -[^-F(s).][--F(s*2)..][&-F(s).]+^(72)',
+            '~> K(p, t) = {[c(p)-(p*100)k(1.2*p+0.6)]/(72)[c(p)-(p*100)k(1.2*p+0.6)]/(72)[c(p)-(p*100)k(1.2*p+0.6)]/(72)[c(p)-(p*100)k(1.2*p+0.6)]/(72)[c(p)-(p*100)k(1.2*p+0.6)]}',
+            '~> c(s) = +F(s).-F(s).-F(s).+',
+            '~> k(s) = [^(40)F(s/2).&(10)F(s/2).&F(s/4).][F(s/2)+(10)F(s).][&(40)F(s/2)[^(10)F(s/2)[^F(s/4).].].].',
+            '~> L(s) = {T(s*0.4)F(sqrt(s)).[-(48)F(s).+F(s).+&F(s).+F(s).][F(s)[&F(s)[F(s)[^F(s).].].].].[+(48)F(s).-F(s).-&F(s).-F(s).][F(s)[&F(s)[F(s)[^F(s).].].].]}',
+            '~> O(s) = {[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].].}'
+        ], 31, 0, 'A', '', -0.6, {
+            'stemInc': '0.4',
+            'maxLeafSize': '1.5'
+        }),
+        maxStage: 28,
+        cost: new ExponentialCost(10000, Math.log2(5)),
+        growthRate: BigNumber.TEN,
+        growthCost: BigNumber.FIVE,
+        dailyIncome: true,
+        actions: [
+            {
+                symbols: new Set('K'),
+                system: new LSystem('', ['K=']),
+                killColony: true
+            }
+        ],
+        camera: (stage) => {
+            return {
+                scale: 16,
+                x: 0,
+                y: saturate(stage, 10, 25),
+                Z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) => {
+            return {
+                tickLength: 1
+            };
+        }
+    },
     9001: // Arrow weed (test)
     {
         system: new LSystem('A(1)', [
@@ -2675,58 +2728,6 @@ const plantData = {
             };
         }
     },
-    9002: // Rose campion (test)
-    {
-        // Unknown symbols: !;#QE
-        system: new LSystem('/(45)&(5)A(0.25, 0)', [
-            'A(r, t): t>0 = A(r+0.05, t-1)',
-            'A(r, t): t==0 = F(stemInc, 20)T[&L(0.05)][/(180)&L(0.05)][F(stemInc, 10)K(0.5, 0)][^$A(r-0.2, 7)][&$A(r-0.15, 3)]',
-            'F(l, t): t>0 = F(l+stemInc, t-1)',
-            'K(p, t): t<2 = K(p*1.1, t+1)',
-            'K(p, t): t<3 = K(0.75, t+1)',
-            'K(p, t): t<12 = K(1.35*p-0.2*p^2, t+1)',
-            'K(p, t) = O(1)',
-            'L(s): s<maxLeafSize = L(s+0.05)',
-            'O(s): s>.6 = O(s*0.9)',
-            '~> #= Model specification',
-            '~> K(p, t): t<3 = [+(90)b(p)b(p)b(p)b(p)b(p)]',
-            '~> b(s) = -{[^-F(s).][--F(s*2).][&-F(s).].}+^(72)',
-            '~> K(p, t) = {[c(p/2)-(p*50)k(0.6*p+0.5)]/(72)[c(p/2)-(p*50)k(0.6*p+0.5)]/(72)[c(p/2)-(p*50)k(0.6*p+0.5)]/(72)[c(p/2)-(p*50)k(0.6*p+0.5)]/(72)[c(p/2)-(p*50)k(0.6*p+0.5)]}',
-            '~> c(s) = +F(s).-F(s).-F(s).+',
-            '~> k(s) = [^(40)F(s/2).&(10)F(s/2).&F(s/4).][F(s/2)+(10)F(s).][&(40)F(s/2)[^(10)F(s/2)[^F(s/4).].].].',
-            '~> L(s) = {T(s*0.4)F(sqrt(s)).[-(48)F(s).+F(s).+&F(s).+F(s).][F(s)[&F(s)[F(s)[^F(s).].].].].[+(48)F(s).-F(s).-&F(s).-F(s).][F(s)[&F(s)[F(s)[^F(s).].].].]}',
-            '~> O(s) = {[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].].}'
-        ], 31, 0, 'A', '', -0.6, {
-            'stemInc': '0.4',
-            'maxLeafSize': '1.5'
-        }),
-        maxStage: 28,
-        cost: new FirstFreeCost(new ExponentialCost(100000, Math.log2(5))),
-        growthRate: BigNumber.FOUR,
-        growthCost: BigNumber.from(10),
-        dailyIncome: true,
-        actions: [
-            {
-                symbols: new Set('K'),
-                system: new LSystem('', ['K=']),
-                killColony: true
-            }
-        ],
-        camera: (stage) => {
-            return {
-                scale: 16,
-                x: 0,
-                y: saturate(stage, 10, 25),
-                Z: 0,
-                upright: true
-            };
-        },
-        stroke: (stage) => {
-            return {
-                tickLength: 1
-            };
-        }
-    }
 };
 let haxEnabled = false;
 let time = 0;
