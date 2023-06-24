@@ -318,9 +318,9 @@ If you intend to harvest, snip off the stem before it flowers. Otherwise, ` +
             },
             {
                 title: 'Rose campion',
-                contents: `Pest repellent, drought tolerant, and a great pollinator attractor. And ` +
-                    `occasionally, visitors and artists, generous donors, might toss a few ` +
-                    `pennies as gratitude to keep the gardens running. But mostly, bees.
+                contents: `Pest repellent, drought tolerant, and a great pollinator attractor. ` +
+                    `Occasionally, visitors and artists, generous donors, they might come and ` +
+                    `toss a few pennies as gratitude to keep the gardens running. But mostly, bees.
 Rose campion is also used as a sedative, or for wound treatments, or wicks ` +
                     `for a lamp.
 
