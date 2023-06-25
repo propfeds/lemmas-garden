@@ -40,7 +40,7 @@ Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
     return (_a = descs[language]) !== null && _a !== void 0 ? _a : descs.en;
 };
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
-var version = 0.05;
+var version = 0.1;
 const MAX_INT = 0x7fffffff;
 const TRIM_SP = /\s+/g;
 const LS_RULE = /([^:]+)(:(.+))?=(.*)/;
@@ -214,9 +214,9 @@ send another one back to the leaves.`,
                 name: 'Rose campion',
                 info: 'A great sight for your garden. Provides daily income.',
                 LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\I : flower
-                stem\\\\K: flower\\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns
-profit as the sum of all K.\\\\Passively provides income per day equal to total
-profit.\\\\—\\\\The Model specification section may be ignored.`,
+stem\\\\K: flower\\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns profit as the
+sum of all K.\\\\Passively provides income per day equal to total profit.
+\\\\—\\\\The Model specification section may be ignored.`,
                 stages: {
                     index: [
                         0, 1, 3,
@@ -264,8 +264,8 @@ friend of all mathematicians.`
         labelSource: 'Reference: ',
         bookTitleFormat: '{0} ({1}/{2})',
         almanacTitle: `Lemma's Catalogue of Plants`,
-        almanac: [
-            {
+        almanac: {
+            cover: {
                 title: 'Title Cover',
                 contents: `Lemma's Catalogue of Plants, for Students
 Third Edition
@@ -277,7 +277,7 @@ Lena Ruddles, Madeline H. Ruddles
 
 Tau Publishing`
             },
-            {
+            prep: {
                 title: 'Preparations!',
                 contents: `Before you begin to sow your seeds, make sure to check the plot's ` +
                     `elevation, as well as the amount of sun you're going to see each day. Test ` +
@@ -291,7 +291,7 @@ For the seeds, I recommend purchasing from Corollary's. The seeds here are ` +
 
 Ready to sow?`
             },
-            {
+            1: {
                 title: 'Calendula',
                 contents: `Commonly called pot marigold (not to be confused with marigolds of the ` +
                     `genus Tagetes), calendulas are easy-going flowers known for numerous ` +
@@ -303,7 +303,7 @@ Time to maturity: ~7 weeks
 
 Here's a recipe to make some delicious calendula bread:`
             },
-            {
+            2: {
                 title: 'Basil',
                 contents: `Hailed as the 'king/queen of herbs' all throughout the world, basil is used ` +
                     `as a spice in a vast number of recipes with its fragrance and a sweet, ` +
@@ -316,7 +316,7 @@ If you intend to harvest, snip off the stem before it flowers. Otherwise, ` +
                     `the plant will go into the end of its life cycle, and the leaves will lose ` +
                     `flavour.`
             },
-            {
+            3: {
                 title: 'Rose campion',
                 contents: `Pest repellent, drought tolerant, and a great pollinator attractor. ` +
                     `Occasionally, visitors and artists, generous donors, they might come and ` +
@@ -329,10 +329,10 @@ Time to maturity: 'I haven't timed it yet'
 Every midnight, pollinators will pay you a penny or two after a hearty meal ` +
                     `during the day.`
             }
-        ],
+        },
         manualTitle: 'Lindenmayer Systems',
-        manual: [
-            {
+        manual: {
+            foreword: {
                 title: `Foreword`,
                 contents: `This manuscript was found scattered around a corner of the forest. Seems ` +
                     `like someone knows a way to turn plants into alphabets. Perhaps even from ` +
@@ -340,8 +340,20 @@ Every midnight, pollinators will pay you a penny or two after a hearty meal ` +
 
 - Lena`
             },
-            {
-                title: 'L-systems: A primer',
+            cover: {
+                title: 'Title Cover',
+                contents: `User's Guide to the L-systems Renderer
+Second Edition
+
+🐢💨
+
+
+'propfeds'
+
+Draft, not for sale`
+            },
+            intro: {
+                title: 'Lindenmayer systems: A primer',
                 contents: `Developed in 1968 by biologist Aristid Lindenmayer, an L-system is a formal ` +
                     `grammar that describes the growth of a sequence (string). It is often used ` +
                     `to model plants and draw fractal figures.
@@ -363,7 +375,7 @@ Level 3: aba
 Level 4: abaab
 Level 5: abaababa`
             },
-            {
+            context: {
                 title: 'Context-sensitivity',
                 contents: `Context-sensitive L-systems allow each symbol to interact with nearby ` +
                     `symbols, by letting an individual behave differently depending on its ` +
@@ -377,7 +389,7 @@ The symbol will only evolve according to this rule if its ancestor bears the ` +
                     `same symbol as {left}, and one of its children bears the same symbol as ` +
                     `{right}.`
             },
-            {
+            parametric: {
                 title: 'Parametric L-systems',
                 contents: `Beyond geometric applications, parametric L-systems allow individual ` +
                     `symbols to hold additional information such as its state of growth, elapsed ` +
@@ -394,7 +406,7 @@ A(x) < B(y) > C(z) : x+y+z>10 = E((x+y)/2)F((y+z)/2)
 * When omitted, the condition is assumed to be always true.
 ** When omitted, the chance is assumed to be 100%.`
             },
-            {
+            symbols: {
                 title: 'Appendix: Common symbols',
                 contents: `A: apex (stem shoot). Can photo-synthesise.
 B: base. Is often used to receive and send signals.
@@ -403,7 +415,7 @@ K: flower. Looks pretty.
 L: leaf. Can photo-synthesise.
 S: signal. Is used to communicate between organs.`
             },
-            {
+            turtleSymbols: {
                 title: 'Appendix: Geometric symbols',
                 contents: `F(l): moves forward and draw a line of length l.
 +(n), -(n): perform yaw rotation by n degrees.
@@ -425,7 +437,7 @@ $: aligns the up vector closest to vertical.
 
 ~: declares a symbol's model.`
             },
-        ],
+        },
         chapters: {
             intro: {
                 title: `Lemma's garden`,
@@ -2486,19 +2498,20 @@ class Book {
     }
 }
 const almanac = new Book(getLoc('almanacTitle'), [
-    Object.assign(Object.assign({}, getLoc('almanac')[0]), { horizontalAlignment: TextAlignment.CENTER }),
-    Object.assign(Object.assign({}, getLoc('almanac')[1]), { pinned: true }),
-    Object.assign(Object.assign({}, getLoc('almanac')[2]), { systemID: 1, source: 'https://www.tasteofyummy.com/calendula-bread-for-bread-lovers/', pinned: true }),
-    Object.assign(Object.assign({}, getLoc('almanac')[3]), { systemID: 2, pinned: true }),
-    Object.assign(Object.assign({}, getLoc('almanac')[4]), { systemID: 3, pinned: true }),
+    Object.assign(Object.assign({}, getLoc('almanac').cover), { horizontalAlignment: TextAlignment.CENTER }),
+    Object.assign(Object.assign({}, getLoc('almanac').prep), { pinned: true }),
+    Object.assign(Object.assign({}, getLoc('almanac')[1]), { systemID: 1, source: 'https://www.tasteofyummy.com/calendula-bread-for-bread-lovers/', pinned: true }),
+    Object.assign(Object.assign({}, getLoc('almanac')[2]), { systemID: 2, pinned: true }),
+    Object.assign(Object.assign({}, getLoc('almanac')[3]), { systemID: 3, pinned: true }),
 ]);
 const LsManual = new Book(getLoc('manualTitle'), [
-    getLoc('manual')[0],
-    Object.assign(Object.assign({}, getLoc('manual')[1]), { pinned: true }),
-    Object.assign(Object.assign({}, getLoc('manual')[2]), { pinned: true }),
-    Object.assign(Object.assign({}, getLoc('manual')[3]), { pinned: true }),
-    Object.assign(Object.assign({}, getLoc('manual')[4]), { pinned: true }),
-    Object.assign(Object.assign({}, getLoc('manual')[5]), { pinned: true }),
+    getLoc('manual').foreword,
+    Object.assign(Object.assign({}, getLoc('manual').cover), { horizontalAlignment: TextAlignment.CENTER }),
+    Object.assign(Object.assign({}, getLoc('manual').intro), { pinned: true }),
+    Object.assign(Object.assign({}, getLoc('manual').context), { pinned: true }),
+    Object.assign(Object.assign({}, getLoc('manual').parametric), { pinned: true }),
+    Object.assign(Object.assign({}, getLoc('manual').symbols), { pinned: true }),
+    Object.assign(Object.assign({}, getLoc('manual').turtleSymbols), { pinned: true }),
 ]);
 // Balance parameters
 const nofPlots = 6;

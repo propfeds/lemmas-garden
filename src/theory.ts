@@ -51,7 +51,7 @@ Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
     return descs[language] ?? descs.en;
 }
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
-var version = 0.05;
+var version = 0.1;
 
 const MAX_INT = 0x7fffffff;
 const TRIM_SP = /\s+/g;
@@ -252,9 +252,9 @@ send another one back to the leaves.`,
                 name: 'Rose campion',
                 info: 'A great sight for your garden. Provides daily income.',
                 LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\I : flower
-                stem\\\\K: flower\\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns
-profit as the sum of all K.\\\\Passively provides income per day equal to total
-profit.\\\\—\\\\The Model specification section may be ignored.`,
+stem\\\\K: flower\\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns profit as the
+sum of all K.\\\\Passively provides income per day equal to total profit.
+\\\\—\\\\The Model specification section may be ignored.`,
                 stages:
                 {
                     index:
@@ -309,7 +309,8 @@ friend of all mathematicians.`
 
         almanacTitle: `Lemma's Catalogue of Plants`,
         almanac:
-        [
+        {
+            cover:
             {
                 title: 'Title Cover',
                 contents:
@@ -323,6 +324,7 @@ Lena Ruddles, Madeline H. Ruddles
 
 Tau Publishing`
             },
+            prep:
             {
                 title: 'Preparations!',
                 contents:
@@ -338,6 +340,7 @@ For the seeds, I recommend purchasing from Corollary's. The seeds here are ` +
 
 Ready to sow?`
             },
+            1:
             {
                 title: 'Calendula',
                 contents:
@@ -351,6 +354,7 @@ Time to maturity: ~7 weeks
 
 Here's a recipe to make some delicious calendula bread:`
             },
+            2:
             {
                 title: 'Basil',
                 contents:
@@ -365,6 +369,7 @@ If you intend to harvest, snip off the stem before it flowers. Otherwise, ` +
 `the plant will go into the end of its life cycle, and the leaves will lose ` +
 `flavour.`
             },
+            3:
             {
                 title: 'Rose campion',
                 contents:
@@ -379,11 +384,12 @@ Time to maturity: 'I haven't timed it yet'
 Every midnight, pollinators will pay you a penny or two after a hearty meal ` +
 `during the day.`
             }
-        ],
+        },
 
         manualTitle: 'Lindenmayer Systems',
         manual:
-        [
+        {
+            foreword:
             {
                 title: `Foreword`,
                 contents:
@@ -393,8 +399,23 @@ Every midnight, pollinators will pay you a penny or two after a hearty meal ` +
 
 - Lena`
             },
+            cover:
             {
-                title: 'L-systems: A primer',
+                title: 'Title Cover',
+                contents:
+`User's Guide to the L-systems Renderer
+Second Edition
+
+🐢💨
+
+
+'propfeds'
+
+Draft, not for sale`
+            },
+            intro:
+            {
+                title: 'Lindenmayer systems: A primer',
                 contents:
 `Developed in 1968 by biologist Aristid Lindenmayer, an L-system is a formal ` +
 `grammar that describes the growth of a sequence (string). It is often used ` +
@@ -417,6 +438,7 @@ Level 3: aba
 Level 4: abaab
 Level 5: abaababa`
             },
+            context:
             {
                 title: 'Context-sensitivity',
                 contents:
@@ -432,6 +454,7 @@ The symbol will only evolve according to this rule if its ancestor bears the ` +
 `same symbol as {left}, and one of its children bears the same symbol as ` +
 `{right}.`
             },
+            parametric:
             {
                 title: 'Parametric L-systems',
                 contents:
@@ -450,6 +473,7 @@ A(x) < B(y) > C(z) : x+y+z>10 = E((x+y)/2)F((y+z)/2)
 * When omitted, the condition is assumed to be always true.
 ** When omitted, the chance is assumed to be 100%.`
             },
+            symbols:
             {
                 title: 'Appendix: Common symbols',
                 contents:
@@ -460,6 +484,7 @@ K: flower. Looks pretty.
 L: leaf. Can photo-synthesise.
 S: signal. Is used to communicate between organs.`
             },
+            turtleSymbols:
             {
                 title: 'Appendix: Geometric symbols',
                 contents:
@@ -483,7 +508,7 @@ $: aligns the up vector closest to vertical.
 
 ~: declares a symbol's model.`
             },
-        ],
+        },
 
         chapters:
         {
@@ -3254,26 +3279,26 @@ class Book
 const almanac = new Book(getLoc('almanacTitle'),
 [
     {
-        ...getLoc('almanac')[0],
+        ...getLoc('almanac').cover,
         horizontalAlignment: TextAlignment.CENTER
     },
     {
-        ...getLoc('almanac')[1],
+        ...getLoc('almanac').prep,
         pinned: true
     },
     {
-        ...getLoc('almanac')[2],
+        ...getLoc('almanac')[1],
         systemID: 1,
         source: 'https://www.tasteofyummy.com/calendula-bread-for-bread-lovers/',
         pinned: true
     },
     {
-        ...getLoc('almanac')[3],
+        ...getLoc('almanac')[2],
         systemID: 2,
         pinned: true
     },
     {
-        ...getLoc('almanac')[4],
+        ...getLoc('almanac')[3],
         systemID: 3,
         pinned: true
     },
@@ -3281,25 +3306,29 @@ const almanac = new Book(getLoc('almanacTitle'),
 
 const LsManual = new Book(getLoc('manualTitle'),
 [
-    getLoc('manual')[0],
+    getLoc('manual').foreword,
     {
-        ...getLoc('manual')[1],
+        ...getLoc('manual').cover,
+        horizontalAlignment: TextAlignment.CENTER
+    },
+    {
+        ...getLoc('manual').intro,
         pinned: true
     },
     {
-        ...getLoc('manual')[2],
+        ...getLoc('manual').context,
         pinned: true
     },
     {
-        ...getLoc('manual')[3],
+        ...getLoc('manual').parametric,
         pinned: true
     },
     {
-        ...getLoc('manual')[4],
+        ...getLoc('manual').symbols,
         pinned: true
     },
     {
-        ...getLoc('manual')[5],
+        ...getLoc('manual').turtleSymbols,
         pinned: true
     },
 ]);
