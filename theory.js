@@ -2175,8 +2175,12 @@ class ColonyManager {
             params: plantData[id].system.axiomParams,
             stage: 0,
             energy: BigNumber.ZERO,
-            growth: BigNumber.ZERO
+            growth: BigNumber.ZERO,
+            diReserve: BigNumber.ZERO,
+            dgReserve: BigNumber.ZERO
         };
+        if (plantData[c.id].dailyIncome)
+            c.ddReserve = BigNumber.ZERO;
         let stats = this.calculateStats(c);
         c.synthRate = stats.synthRate;
         c.profit = stats.profit;
@@ -2237,34 +2241,22 @@ class ColonyManager {
                     BigNumber.from(c.sequence.length)) {
                     if (!this.gangsta)
                         this.gangsta = [i, j];
-                    if (!c.diReserve)
-                        c.diReserve = BigNumber.ZERO;
                     // @ts-expect-error
                     c.diReserve += di;
-                    if (!c.dgReserve)
-                        c.dgReserve = BigNumber.ZERO;
                     // @ts-expect-error
                     c.dgReserve += dg;
                     if (plantData[c.id].dailyIncome) {
-                        if (!c.ddReserve)
-                            c.ddReserve = BigNumber.ZERO;
                         // @ts-expect-error
                         c.ddReserve += dd;
                     }
                 }
                 else if (this.actionGangsta && this.actionGangsta[0] == i &&
                     this.actionGangsta[1] == j) {
-                    if (!c.diReserve)
-                        c.diReserve = BigNumber.ZERO;
                     // @ts-expect-error
                     c.diReserve += di;
-                    if (!c.dgReserve)
-                        c.dgReserve = BigNumber.ZERO;
                     // @ts-expect-error
                     c.dgReserve += dg;
                     if (plantData[c.id].dailyIncome) {
-                        if (!c.ddReserve)
-                            c.ddReserve = BigNumber.ZERO;
                         // @ts-expect-error
                         c.ddReserve += dd;
                     }
@@ -2656,18 +2648,18 @@ const plantData = {
     {
         system: new LSystem('/(45)&(5)A(0.25, 0)', [
             'A(r, t): t>0 = A(r+0.05, t-1)',
-            'A(r, t) = F(stemInc, 20)T[&L(0.05)][/(180)&L(0.05)][F(stemInc, 10)K(0.25, 0)][^$A(r-0.2, 7)][&$A(r-0.15, 3)]',
+            'A(r, t) = F(stemInc, 20)T[&L(0.05)][/(180)&L(0.05)][F(stemInc, 10)K(0.125, 0)][^$A(r-0.2, 7)][&$A(r-0.15, 3)]',
             'K(p, t): t<2 = K(p*1.1, t+1)',
-            'K(p, t): t<3 = K(0.375, t+1)',
-            'K(p, t): t<12 = K(1.35*p-0.4*p^2, t+1)',
+            'K(p, t): t<3 = K(0.1875, t+1)',
+            'K(p, t): t<12 = K(1.35*p-0.8*p^2, t+1)',
             'K(p, t) = O(1)',
             'L(s): s<maxLeafSize = L(s+0.05)',
             'O(s): s>0.6 = O(s*0.9)',
             'F(l, t): t>0 = F(l+stemInc, t-1)',
             '~> #= Model specification',
-            '~> K(p, t): t<3 = {[+(90)b(p*2)b(p*2)b(p*2)b(p*2)b(p*2)]}',
+            '~> K(p, t): t<3 = {[+(90)b(p*4)b(p*4)b(p*4)b(p*4)b(p*4)]}',
             '~> b(s) = -[^-F(s).][--F(s*2)..][&-F(s).]+^(72)',
-            '~> K(p, t) = {[c(p)-(p*100)k(1.2*p+0.6)]/(72)[c(p)-(p*100)k(1.2*p+0.6)]/(72)[c(p)-(p*100)k(1.2*p+0.6)]/(72)[c(p)-(p*100)k(1.2*p+0.6)]/(72)[c(p)-(p*100)k(1.2*p+0.6)]}',
+            '~> K(p, t) = {[c(p*2)-(p*200)k(3*p^2+0.2*p+0.1)]/(72)[c(p*2)-(p*200)k(3*p^2+0.2*p+0.1)]/(72)[c(p*2)-(p*200)k(3*p^2+0.2*p+0.1)]/(72)[c(p*2)-(p*200)k(3*p^2+0.2*p+0.1)]/(72)[c(p*2)-(p*200)k(3*p^2+0.2*p+0.1)]}',
             '~> c(s) = +F(s).-F(s).-F(s).+',
             '~> k(s) = [^(40)F(s/2).&(10)F(s/2).&F(s/4).][F(s/2)-(10)F(s).][&(40)F(s/2)[^(10)F(s/2)[^F(s/4).].].].',
             '~> L(s) = {T(s*0.4)F(sqrt(s)).[-(48)F(s).+F(s).+&F(s).+F(s).][F(s)[&F(s)[F(s)[^F(s).].].].].[+(48)F(s).-F(s).-&F(s).-F(s).][F(s)[&F(s)[F(s)[^F(s).].].].]}',
@@ -2679,7 +2671,7 @@ const plantData = {
         maxStage: 28,
         cost: new ExponentialCost(10000, Math.log2(5)),
         growthRate: BigNumber.TEN,
-        growthCost: BigNumber.FOUR,
+        growthCost: BigNumber.FIVE,
         dailyIncome: true,
         actions: [
             {
@@ -4449,6 +4441,14 @@ var setInternalState = (stateStr) => {
     for (let i = 0; i < nofPlots; ++i) {
         for (let j = 0; j < manager.colonies[i].length; ++j) {
             let c = manager.colonies[i][j];
+            if (v < 0.1) {
+                if (!c.diReserve)
+                    c.diReserve = BigNumber.ZERO;
+                if (!c.dgReserve)
+                    c.dgReserve = BigNumber.ZERO;
+                if (plantData[c.id].dailyIncome && !c.ddReserve)
+                    c.ddReserve = BigNumber.ZERO;
+            }
             if (!tmpLevels[i][c.id])
                 tmpLevels[i][c.id] = 0;
             tmpLevels[i][c.id] += c.population;
