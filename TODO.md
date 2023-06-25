@@ -57,6 +57,8 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Add a Pruned commentary track
   - 2 lazy
 
+- [x] Bookshelf unlocks after tutorial to avoid confusion with unlock plot
+
 ## v0.1: Slumber Seeds
 
 - [x] Cap colony count to 5 per plot, unless?

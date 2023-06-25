@@ -2461,7 +2461,7 @@ class Renderer
 
                             if(this.quickBacktrack && breakAhead)
                                 this.stack.push([this.state, this.ori]);
-                            
+
                             if(this.quickDraw && !btAhead)
                                 break;
                             else if(this.polygonMode <= 0  && !ignored)
@@ -3937,6 +3937,7 @@ var init = () =>
             let menu = createShelfMenu();
             menu.show();
         }
+        shelfPerma.isAvailable = false;
     }
     /* Settings
     World menu.
@@ -4113,6 +4114,7 @@ var updateAvailability = () =>
     }
     else
     {
+        shelfPerma.isAvailable = finishedTutorial;
         switchPlant.isAvailable = !manager.colonies[plotIdx].length;
         viewColony.isAvailable = manager.colonies[plotIdx].length >= 1;
         switchColony.isAvailable = manager.colonies[plotIdx].length > 1;

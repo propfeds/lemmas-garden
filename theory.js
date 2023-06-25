@@ -3008,6 +3008,7 @@ var init = () => {
             let menu = createShelfMenu();
             menu.show();
         };
+        shelfPerma.isAvailable = false;
     }
     /* Settings
     World menu.
@@ -3147,6 +3148,7 @@ var updateAvailability = () => {
         finishedTutorial = plotPerma.level > 0;
     }
     else {
+        shelfPerma.isAvailable = finishedTutorial;
         switchPlant.isAvailable = !manager.colonies[plotIdx].length;
         viewColony.isAvailable = manager.colonies[plotIdx].length >= 1;
         switchColony.isAvailable = manager.colonies[plotIdx].length > 1;
