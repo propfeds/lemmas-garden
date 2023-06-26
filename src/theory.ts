@@ -3408,12 +3408,12 @@ const plantData: {[key: number]: Plant} =
     {
         system: new LSystem('-(3)A(0.12, 0)',
         [
-            'A(r, t): t>=2 && r>=flowerThreshold = F(0.9, 2.1)K(0)',
+            'A(r, t): t>=2 && r>=flowerThreshold = F(0.78, 2.1)K(0)',
             'A(r, t): r>=flowerThreshold = [&A(r-0.15, 0)][^I(0)]',
             'A(r, t): t<2 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.24, 0.72)T[-L(0.06, maxLeafSize-r/4)]/(180)[-L(0.06, maxLeafSize-r/4)]/(90)A(r, -2)',
-            'I(t): t<3 = F(0.36, 0.84)T[-L(0.06, maxLeafSize/3)]/(137.508)I(t+1)',
-            'I(t) = F(0.6, 1.44)K(0)',
+            'A(r, t) = F(0.12, 0.6)T[-L(0.06, maxLeafSize-r/4)]/(180)[-L(0.06, maxLeafSize-r/4)]/(90)A(r, -2)',
+            'I(t): t<3 = F(0.24, 0.84)T[-L(0.06, maxLeafSize/3)]/(137.508)I(t+1)',
+            'I(t) = F(0.48, 1.44)K(0)',
             'K(p): p<maxFlowerSize = K(p+0.25)',
             'L(r, lim): r<lim = L(r+0.02, lim)',
             'F(l, lim): l<lim = F(l+0.12, lim)',
@@ -3456,6 +3456,7 @@ const plantData: {[key: number]: Plant} =
             'I': [0],
             'K': [2],
             'L': [2, 2],
+            '-': [0],
             '/': [1]
         },
         camera: (stage) =>
@@ -3481,10 +3482,10 @@ const plantData: {[key: number]: Plant} =
         [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.24, 1.44)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
+            'A(r, t) = F(0.12, 1.44)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
             'I(t) > S(type): type<=0 = S(type)I(t)',
             'I(t): t<4 = I(t+1)',
-            'I(t) = F(0, 0.36)[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]',
+            'I(t) = F(0.12, 0.36)[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]',
             'K(t): t<=signalThreshold = S(0)/(90)[+K(1)][-K(1)]K(t+1)',
             'K(t): t-2 = K(t+1)',
             'K(t) = K(t+1)K(1)',
@@ -3554,14 +3555,14 @@ const plantData: {[key: number]: Plant} =
     {
         system: new LSystem('/(45)&(5)A(0.1, 3)', [
             'A(r, t): t>0 = A(r+0.05, t-1)',
-            'A(r, t) = F(stemInc, 20)T[&L(0.025)][/(180)&L(0.025)][F(stemInc, 10)K(0.125, 0)][^$A(r-0.2, 7)][&$A(r-0.15, 3)]',
+            'A(r, t) = F(0.4, 20)T[&L(0.025)][/(180)&L(0.025)][F(0.4, 10)K(0.125, 0)][^$A(r-0.2, 7)][&$A(r-0.15, 3)]',
             'K(p, t): t<2 = K(p*1.1, t+1)',
             'K(p, t): t<3 = K(0.1875, t+1)',
             'K(p, t): t<12 = K(1.35*p-0.8*p^2, t+1)',
             'K(p, t) = O(1)',
             'L(s): s<maxLeafSize = L(s+0.025)',
             'O(s): s>0.6 = O(s*0.9)',
-            'F(l, t): t>0 = F(l+stemInc, t-1)',
+            'F(l, t): t>0 = F(l+0.4, t-1)',
             '~> #= Model specification',
             '~> K(p, t): t<3 = {[+(90)b(p*4)b(p*4)b(p*4)b(p*4)b(p*4)]}',
             '~> b(s) = -[^-F(s).][--F(s*2)..][&-F(s).]+^(72)',
@@ -3571,7 +3572,6 @@ const plantData: {[key: number]: Plant} =
             '~> L(s) = {T(s*0.5)F(sqrt(s)).[-(48)F(s*2).+F(s*2).+&F(s*2).+F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].].[+(48)F(s*2).-F(s*2).-&F(s*2).-F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].]}',
             '~> O(s) = {[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].].}'
         ], 31, 0, 'A', '', -0.6, {
-            'stemInc': '0.4',
             'maxLeafSize': '0.625'
         }),
         maxStage: 30,

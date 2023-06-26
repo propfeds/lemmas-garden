@@ -206,7 +206,7 @@ between tau not feeling bloated and pub multipliers not too small)
   - You can eat sunflower sprouts, aaa
 - **Poison ivy**
 - **Rhizomes?**
-- **Paleobotany** - time travelley stuff like cooksonia
+- **Paleobotany** - time travelley stuff like cooksonia and zosterophyllum
 - **Fungi** - foraging?
 - **Flower gender** mechanic?
 
