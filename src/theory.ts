@@ -3896,9 +3896,12 @@ var init = () =>
             switchPlant.level = 0;
             if(manager.colonies[plotIdx].length)
                 return;
+            plants[plotIdx][plantUnlocks[plantIdx[plotIdx]]].isAvailable =
+            false;
             plantIdx[plotIdx] = (plantIdx[plotIdx] + 1) %
             (plantPerma.level + 1);
-            updateAvailability();
+            plants[plotIdx][plantUnlocks[plantIdx[plotIdx]]].isAvailable = true;
+            // updateAvailability();
         };
         switchPlant.isAvailable = false;
     }

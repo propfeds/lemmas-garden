@@ -44,7 +44,7 @@ do nothing. Do you feel like it could be more interesting?
   - [ ] Apex decreases synthesis when spawning leaves
   - [ ] Side shoots grow more leaves but smaller
 
-- [ ] updateAvailability() slow
+- [x] updateAvailability() slow
 
 - [x] Rose campion as first bush plant
   - [ ] Death? Propagation?
