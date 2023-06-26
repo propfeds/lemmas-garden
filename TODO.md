@@ -35,6 +35,8 @@ do nothing. Do you feel like it could be more interesting?
 
 ## v0.2: Rabbits update
 
+- [ ] Different aspect ratios hav different graph bounds
+
 - [x] Preference table for decimal places
 
 - [ ] Basil

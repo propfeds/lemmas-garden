@@ -1607,13 +1607,10 @@ class LSystem
     }
 
     /**
-     * Derive a sequence from the input string. `next` denotes the starting
-     * position to be derived next tick. `result` contains the work completed
-     * for the current tick.
-     * @param {string} sequence the input string.
-     * @returns {{start: number, result: string}}
+     * Derive a sequence from the input string. Returns the work completed for
+     * the current tick. `start` denotes the next tick's starting position.
      */
-    derive(sequence, seqParams, ancestors, children, task: Task = {})
+    derive(sequence: string, seqParams: LSystemParams, ancestors: (string | number)[], children: number[][], task: Task = {}): Task
     {
         let result = task.derivation ?? '';
         let resultParams = task.parameters ?? [];

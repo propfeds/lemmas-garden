@@ -1254,11 +1254,8 @@ class LSystem {
         };
     }
     /**
-     * Derive a sequence from the input string. `next` denotes the starting
-     * position to be derived next tick. `result` contains the work completed
-     * for the current tick.
-     * @param {string} sequence the input string.
-     * @returns {{start: number, result: string}}
+     * Derive a sequence from the input string. Returns the work completed for
+     * the current tick. `start` denotes the next tick's starting position.
      */
     derive(sequence, seqParams, ancestors, children, task = {}) {
         var _a, _b, _c, _d;

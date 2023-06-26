@@ -21,6 +21,6 @@ paste the URL in.
 
 ## Screenshots
 
-![ss1](screenshots/00.png "Hail the Basil Tower.")
+![ss](screenshots/01.png "Purple calendula alarm.")
 
-> Hail the Basil Tower.
+> Purple calendula alarm.
