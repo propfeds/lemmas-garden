@@ -37,20 +37,21 @@ do nothing. Do you feel like it could be more interesting?
 
 - [ ] updateAvailability() slow
 
-- [ ] Simple solitary flower
-  - Tulip?
-  - Buttercup
-- Leap years and hopleeks
-  - [ ] Hopleek
-    - Biting is on evolution queue instead of action?
-    - [x] Leap years calculation
-      - [ ] 400-year cycle wrapping
-    - [ ] Hopleek schedule
-    - [ ] Repelled by rose campions and sunflowers
 - [x] Rose campion as first bush plant
   - [ ] Death? Propagation?
   - [x] Passive income
-  - [ ] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
+  - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
+  - [x] Extend rose campion seed period by a few stages
+
+- [ ] Simple solitary flower
+  - Tulip?
+  - Buttercup
+- [ ] Hopleek
+  - Biting is on evolution queue instead of action?
+  - [x] Leap years calculation
+    - [ ] 400-year cycle wrapping
+  - [ ] Hopleek schedule
+  - [ ] Repelled by rose campions and sunflowers
 - [ ] Sunflower
 
 - [ ] Newspapers

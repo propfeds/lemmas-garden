@@ -219,21 +219,21 @@ sum of all K.\\\\Passively provides income per day equal to total profit.
 \\\\—\\\\The Model specification section may be ignored.`,
                 stages: {
                     index: [
-                        0, 1, 3,
-                        5, 9,
-                        14,
-                        16
+                        0, 4, 6,
+                        8, 12,
+                        17,
+                        20
                     ],
                     0: 'A seedling basking in its own dazing lullaby.',
-                    1: 'A flower bud already?',
-                    3: `Most gardeners are early birds. Now, why are you still
+                    4: 'A flower bud already?',
+                    6: `Most gardeners are early birds. Now, why are you still
 counting pennies in the middle of the night?`,
-                    5: 'Anyway, new stem rises from a side shoot.',
-                    9: `New stems have risen. This pattern will repeat
+                    8: 'Anyway, new stem rises from a side shoot.',
+                    12: `New stems have risen. This pattern will repeat
 periodically.`,
-                    14: `You see the first fruit on that stem?\\\\Too late for
+                    17: `You see the first fruit on that stem?\\\\Too late for
 munch.`,
-                    16: `Go to sleep. Is the campion sedative not good enough
+                    20: `Go to sleep. Is the campion sedative not good enough
 for you?`
                 }
             },
@@ -1520,7 +1520,7 @@ class LSystem {
         let result = (_a = task.result) !== null && _a !== void 0 ? _a : '';
         let i = (_b = task.start) !== null && _b !== void 0 ? _b : 0;
         for (; i < sequence.length; ++i) {
-            if ((i - task.start) * (task.start + 1) > MAX_CHARS_PER_TICK) {
+            if ((i - task.start) * 2 > MAX_CHARS_PER_TICK) {
                 return {
                     start: i,
                     result: result
@@ -2659,7 +2659,7 @@ const plantData = {
     },
     3: // Rose campion
     {
-        system: new LSystem('/(45)&(5)A(0.25, 0)', [
+        system: new LSystem('/(45)&(5)A(0.1, 3)', [
             'A(r, t): t>0 = A(r+0.05, t-1)',
             'A(r, t) = F(stemInc, 20)T[&L(0.05)][/(180)&L(0.05)][F(stemInc, 10)K(0.125, 0)][^$A(r-0.2, 7)][&$A(r-0.15, 3)]',
             'K(p, t): t<2 = K(p*1.1, t+1)',
@@ -2681,7 +2681,7 @@ const plantData = {
             'stemInc': '0.4',
             'maxLeafSize': '1.25'
         }),
-        maxStage: 28,
+        maxStage: 30,
         cost: new ExponentialCost(10000, Math.log2(5)),
         growthRate: BigNumber.TEN,
         growthCost: BigNumber.FIVE,
