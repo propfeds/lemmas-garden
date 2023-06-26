@@ -69,6 +69,7 @@ const LOC_STRINGS = {
         btnContents: 'Table of\nContents',
         btnPage: 'p. {0}',
         btnHarvest: 'Harvest',
+        btnNoHarvest: 'Not harvestable',
         btnPrune: 'Prune',
         labelSettings: 'Settings',
         labelFilter: 'Filter: ',
@@ -2799,6 +2800,7 @@ let growthIntegral = 0;
 let plotIdx = 0;
 let colonyIdx = new Array(nofPlots).fill(0);
 let plantIdx = new Array(nofPlots).fill(0);
+let selectedColony = null;
 let finishedTutorial = false;
 let actuallyPlanting = true;
 let graphMode2D = 1;
@@ -2866,8 +2868,7 @@ let createFramedButton = (params, margin, callback, image) => {
 };
 // const actionsLabel = ui.createLatexLabel
 // ({
-//     isVisible: () => manager.colonies[plotIdx][colonyIdx[plotIdx]] ?
-//     true : false,
+//     isVisible: () => currentColony ? true : false,
 //     column: 0,
 //     horizontalOptions: LayoutOptions.END,
 //     verticalOptions: LayoutOptions.START,
@@ -2877,11 +2878,13 @@ let createFramedButton = (params, margin, callback, image) => {
 //     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
 // });
 const harvestFrame = createFramedButton({
+    isVisible: () => (selectedColony === null || selectedColony === void 0 ? void 0 : selectedColony.profit) > BigNumber.ZERO,
     row: 0, column: 0,
 }, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 0), game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle-dark.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle.png'));
 const harvestLabel = ui.createLatexLabel({
+    isVisible: () => (selectedColony === null || selectedColony === void 0 ? void 0 : selectedColony.profit) > BigNumber.ZERO,
     row: 0, column: 1,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
@@ -2892,8 +2895,7 @@ const harvestLabel = ui.createLatexLabel({
 });
 const pruneFrame = createFramedButton({
     isVisible: () => {
-        let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-        if (!c || !plantData[c.id].actions[1])
+        if (!selectedColony || !plantData[selectedColony.id].actions[1])
             return false;
         return true;
     },
@@ -2903,8 +2905,7 @@ const pruneFrame = createFramedButton({
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/hair-strands.png'));
 const pruneLabel = ui.createLatexLabel({
     isVisible: () => {
-        let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-        if (!c || !plantData[c.id].actions[1])
+        if (!selectedColony || !plantData[selectedColony.id].actions[1])
             return false;
         return true;
     },
@@ -2993,10 +2994,10 @@ var init = () => {
         viewColony.info = getLoc('viewColonyInfo');
         viewColony.bought = (_) => {
             viewColony.level = 0;
-            let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-            if (!c)
+            selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+            if (!selectedColony)
                 return;
-            let seqMenu = createColonyViewMenu(c);
+            let seqMenu = createColonyViewMenu(selectedColony);
             seqMenu.show();
         };
         viewColony.isAvailable = false;
@@ -3014,8 +3015,8 @@ var init = () => {
                 return;
             colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) %
                 manager.colonies[plotIdx].length;
-            let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-            renderer.colony = c;
+            selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+            renderer.colony = selectedColony;
         };
         switchColony.isAvailable = false;
     }
@@ -3322,7 +3323,8 @@ var getPrimaryEquation = () => {
 var getSecondaryEquation = () => {
     if (!plotPerma.level)
         return getLoc('lockedPlot');
-    let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    let c = selectedColony;
     if (!c) {
         let taxInfo = `\\text{${getLoc('pubTax')}}\\colon\\\\
         T_{\\text{p}}=${taxRate}\\times\\max\\text{p}\\\\\\\\`;
@@ -3377,6 +3379,7 @@ var getSecondaryEquation = () => {
             return '';
     }
 };
+// var getTertiaryEquation = () => ' ';
 let getTimeString = () => {
     let dayofYear = days - yearStartLookup[years];
     let weeks = Math.floor(dayofYear / 7);
@@ -4378,9 +4381,9 @@ var resetStage = () => renderer.reset(true);
 var canGoToPreviousStage = () => plotPerma.level > 0 && plotIdx > 0;
 var goToPreviousStage = () => {
     --plotIdx;
-    let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    if (c)
-        renderer.colony = c;
+    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    if (selectedColony)
+        renderer.colony = selectedColony;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     updateAvailability();
@@ -4388,9 +4391,9 @@ var goToPreviousStage = () => {
 var canGoToNextStage = () => plotIdx < plotPerma.level - 1;
 var goToNextStage = () => {
     ++plotIdx;
-    let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    if (c)
-        renderer.colony = c;
+    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    if (selectedColony)
+        renderer.colony = selectedColony;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     updateAvailability();
@@ -4513,9 +4516,9 @@ var setInternalState = (stateStr) => {
         }
     }
     actuallyPlanting = true;
-    let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    if (c)
-        renderer.colony = c;
+    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    if (selectedColony)
+        renderer.colony = selectedColony;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
