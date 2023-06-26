@@ -35,6 +35,13 @@ do nothing. Do you feel like it could be more interesting?
 
 ## v0.2: Rabbits update
 
+- [x] Preference table for decimal places
+
+- [ ] Basil
+  - [ ] More delay before flowering
+  - [ ] Apex decreases synthesis when spawning leaves
+  - [ ] Side shoots grow more leaves but smaller
+
 - [ ] updateAvailability() slow
 
 - [x] Rose campion as first bush plant

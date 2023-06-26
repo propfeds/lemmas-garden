@@ -251,10 +251,10 @@ send another one back to the leaves.`,
             {
                 name: 'Rose campion',
                 info: 'A great sight for your garden. Provides daily income.',
-                LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\I : flower
-stem\\\\K: flower\\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns profit as the
-sum of all K.\\\\Passively provides income per day equal to total profit.
-\\\\—\\\\The Model specification section may be ignored.`,
+                LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\K: flower
+\\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns profit as the sum of all K.\\\\
+Passively provides income per day equal to total profit.\\\\—\\\\The Model
+specification section may be ignored.`,
                 stages:
                 {
                     index:
@@ -1909,16 +1909,19 @@ class LSystem
 
     /**
      * Reconstructs the string representation of a sequence.
-     * @param {string} sequence the sequence.
-     * @param {any[]} params parameters (optional).
+     * @param {Colony} colony the plant colony.
      * @param {string} filter the filter.
+     * @param {boolean} displayParams whether to display parameters.
      * @param {{start: number, result: string}} task the current task.
      * @returns {{start: number, result: string}}
      */
-    reconstruct(sequence: string, params: LSystemParams = null,
-    filter: string = '', task: Task = {}): Task
+    reconstruct(colony: Colony, filter: string = '',
+    displayParams: boolean = true, task: Task = {}): Task
     {
-        if(!params && !filter)
+        let sequence = colony.sequence;
+        let params = colony.params;
+        let decimalTable = plantData[colony.id].decimals;
+        if(!displayParams && !filter)
         {
             return {
                 start: 0,
@@ -1940,8 +1943,14 @@ class LSystem
             if(!filter || filterSet.has(sequence[i]))
             {
                 result += sequence[i];
-                if(params && params[i])
-                    result += `(${params[i].join(', ')})`;
+                if(displayParams && params[i])
+                {
+                    let charDT = decimalTable[sequence[i]] ?? [];
+                    let paramStrings: string[] = [];
+                    for(let j = 0; j < params[i].length; ++j)
+                        paramStrings[j] = params[i][j].toString(charDT[j] ?? 2);
+                    result += `(${paramStrings.join(', ')})`;
+                }
                 // result += '\n';
             }
         }
@@ -3349,6 +3358,7 @@ interface Plant
     growthCost: BigNumber;
     dailyIncome?: boolean;
     actions: Action[];
+    decimals: {[key: string]: number[]};
     camera: (stage: number) => RendererCamera;
     stroke: (stage: number) => RendererStroke;
 }
@@ -3442,6 +3452,15 @@ const plantData: {[key: number]: Plant} =
             }
             // No prune
         ],
+        decimals:
+        {
+            'A': [2, 0],
+            'F': [2, 2],
+            'I': [0],
+            'K': [2],
+            'L': [2, 2],
+            '/': [1]
+        },
         camera: (stage) =>
         {
             return {
@@ -3507,6 +3526,16 @@ const plantData: {[key: number]: Plant} =
                 killColony: false
             }
         ],
+        decimals:
+        {
+            'A': [2, 0],
+            'B': null,
+            'F': [2, 2],
+            'I': [0],
+            'K': [0],
+            'L': [2, 2, 0],
+            '/': [0]
+        },
         camera: (stage) =>
         {
             return {
@@ -3561,6 +3590,16 @@ const plantData: {[key: number]: Plant} =
                 killColony: true
             }
         ],
+        decimals:
+        {
+            'A': [2, 0],
+            'F': [1, 0],
+            'K': [3],
+            'L': [3],
+            'O': [2],
+            '&': [0],
+            '/': [0]
+        },
         camera: (stage) =>
         {
             return {
@@ -3599,6 +3638,11 @@ const plantData: {[key: number]: Plant} =
                 killColony: false
             }
         ],
+        decimals:
+        {
+            'A': [3],
+            'F': [0]
+        },
         camera: (stage) =>
         {
             return {
@@ -4751,9 +4795,8 @@ let createColonyViewMenu = (colony: Colony) =>
         ('result' in reconstructionTask && reconstructionTask.start))
         {
             reconstructionTask = plantData[colony.id].system.reconstruct(
-            colony.sequence, colonyViewConfig[colony.id].params ?
-            colony.params : null, colonyViewConfig[colony.id].filter,
-            reconstructionTask);
+            colony, colonyViewConfig[colony.id].filter,
+            colonyViewConfig[colony.id].params, reconstructionTask);
         }
         return reconstructionTask.result;
     }
