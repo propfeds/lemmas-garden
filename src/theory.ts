@@ -51,7 +51,7 @@ Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
     return descs[language] ?? descs.en;
 }
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
-var version = 0.1;
+var version = 0.101;
 
 const MAX_INT = 0x7fffffff;
 const TRIM_SP = /\s+/g;
@@ -69,7 +69,7 @@ const LOC_STRINGS =
 {
     en:
     {
-        versionName: `Version: 0.1, Slumber Seeds`,
+        versionName: `Version: 0.1.1, Slumber Seeds`,
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
