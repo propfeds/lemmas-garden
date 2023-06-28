@@ -40,7 +40,7 @@ Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
     return (_a = descs[language]) !== null && _a !== void 0 ? _a : descs.en;
 };
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
-var version = 0.101;
+var version = 0.102;
 const MAX_INT = 0x7fffffff;
 const TRIM_SP = /\s+/g;
 const LS_RULE = /([^:]+)(:(.+))?=(.*)/;
@@ -54,7 +54,7 @@ const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS = {
     en: {
-        versionName: `Version: 0.1.1, Slumber Seeds`,
+        versionName: `Version: 0.1.2, Slumber Seeds`,
         wip: 'Work in Progress',
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish',
@@ -68,8 +68,12 @@ const LOC_STRINGS = {
         btnNext: 'Next',
         btnContents: 'Table of\nContents',
         btnPage: 'p. {0}',
-        btnHarvest: 'Harvest',
-        btnPrune: 'Prune',
+        btnYes: 'Yes',
+        btnNo: 'No',
+        menuConfirm: 'Confirmation',
+        actionConfirmDialogue: `You are about to perform a {0} on\\\\
+plot {1}, colony {2}.\\\\\n\n\\\\Do you want to continue?`,
+        labelActions: ['Harvest', 'Prune'],
         labelSettings: 'Settings',
         labelFilter: 'Filter: ',
         labelParams: 'Parameters: ',
@@ -100,7 +104,7 @@ const LOC_STRINGS = {
         permaSettings: 'Theory settings',
         permaSettingsInfo: `Decorate your teacher's garden`,
         labelPlants: 'Plants',
-        labelMaxLevel: 'Max. level',
+        labelMaxLevel: 'Max. size',
         labelHarvestStage: 'Harvest stage',
         colony: `{0} of {1}, stage {2}`,
         colonyStats: `{0} of {1}, stage {2}\\\\
@@ -126,7 +130,8 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
         switchColony: 'Switch colony ({0}/{1})',
         switchColonyInfo: 'Cycles through the list of colonies',
         menuSettings: 'Theory Settings',
-        graphMode3D: '3D graph: ',
+        labelGM3D: '3D graph: ',
+        labelActionConfirm: 'Action confirmations: ',
         graphModes2D: [
             '2D graph: Off',
             '2D graph: Photo-synthesis',
@@ -213,10 +218,10 @@ send another one back to the leaves.`,
             3: {
                 name: 'Rose campion',
                 info: 'A great sight for your garden. Provides daily income.',
-                LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\I : flower
-stem\\\\K: flower\\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns profit as the
-sum of all K.\\\\Passively provides income per day equal to total profit.
-\\\\—\\\\The Model specification section may be ignored.`,
+                LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\K: flower
+\\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns profit as the sum of all K.\\\\
+Passively provides income per day equal to total profit.\\\\—\\\\The Model
+specification section may be ignored.`,
                 stages: {
                     index: [
                         0, 4, 6,
@@ -1254,11 +1259,8 @@ class LSystem {
         };
     }
     /**
-     * Derive a sequence from the input string. `next` denotes the starting
-     * position to be derived next tick. `result` contains the work completed
-     * for the current tick.
-     * @param {string} sequence the input string.
-     * @returns {{start: number, result: string}}
+     * Derive a sequence from the input string. Returns the work completed for
+     * the current tick. `start` denotes the next tick's starting position.
      */
     derive(sequence, seqParams, ancestors, children, task = {}) {
         var _a, _b, _c, _d;
@@ -1502,15 +1504,18 @@ class LSystem {
     }
     /**
      * Reconstructs the string representation of a sequence.
-     * @param {string} sequence the sequence.
-     * @param {any[]} params parameters (optional).
+     * @param {Colony} colony the plant colony.
      * @param {string} filter the filter.
+     * @param {boolean} displayParams whether to display parameters.
      * @param {{start: number, result: string}} task the current task.
      * @returns {{start: number, result: string}}
      */
-    reconstruct(sequence, params = null, filter = '', task = {}) {
-        var _a, _b;
-        if (!params && !filter) {
+    reconstruct(colony, filter = '', displayParams = true, task = {}) {
+        var _a, _b, _c, _d;
+        let sequence = colony.sequence;
+        let params = colony.params;
+        let decimalTable = plantData[colony.id].decimals;
+        if (!displayParams && !filter) {
             return {
                 start: 0,
                 result: sequence
@@ -1520,7 +1525,7 @@ class LSystem {
         let result = (_a = task.result) !== null && _a !== void 0 ? _a : '';
         let i = (_b = task.start) !== null && _b !== void 0 ? _b : 0;
         for (; i < sequence.length; ++i) {
-            if ((i - task.start) * 2 > MAX_CHARS_PER_TICK) {
+            if ((i - task.start) > MAX_CHARS_PER_TICK) {
                 return {
                     start: i,
                     result: result
@@ -1528,8 +1533,13 @@ class LSystem {
             }
             if (!filter || filterSet.has(sequence[i])) {
                 result += sequence[i];
-                if (params && params[i])
-                    result += `(${params[i].join(', ')})`;
+                if (displayParams && params[i]) {
+                    let charDT = (_c = decimalTable[sequence[i]]) !== null && _c !== void 0 ? _c : [];
+                    let paramStrings = [];
+                    for (let j = 0; j < params[i].length; ++j)
+                        paramStrings[j] = params[i][j].toString((_d = charDT[j]) !== null && _d !== void 0 ? _d : 2);
+                    result += `(${paramStrings.join(', ')})`;
+                }
                 // result += '\n';
             }
         }
@@ -2541,12 +2551,12 @@ const plantData = {
     1: // Calendula
     {
         system: new LSystem('-(3)A(0.12, 0)', [
-            'A(r, t): t>=2 && r>=flowerThreshold = F(0.9, 2.1)K(0)',
+            'A(r, t): t>=2 && r>=flowerThreshold = F(0.78, 2.1)K(0)',
             'A(r, t): r>=flowerThreshold = [&A(r-0.15, 0)][^I(0)]',
             'A(r, t): t<2 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.24, 0.72)T[-L(0.06, maxLeafSize-r/4)]/(180)[-L(0.06, maxLeafSize-r/4)]/(90)A(r, -2)',
-            'I(t): t<3 = F(0.36, 0.84)T[-L(0.06, maxLeafSize/3)]/(137.508)I(t+1)',
-            'I(t) = F(0.6, 1.44)K(0)',
+            'A(r, t) = F(0.12, 0.6)T[-L(0.06, maxLeafSize-r/4)]/(180)[-L(0.06, maxLeafSize-r/4)]/(90)A(r, -2)',
+            'I(t): t<3 = F(0.24, 0.84)T[-L(0.06, maxLeafSize/3)]/(137.508)I(t+1)',
+            'I(t) = F(0.48, 1.44)K(0)',
             'K(p): p<maxFlowerSize = K(p+0.25)',
             'L(r, lim): r<lim = L(r+0.02, lim)',
             'F(l, lim): l<lim = F(l+0.12, lim)',
@@ -2581,6 +2591,15 @@ const plantData = {
             }
             // No prune
         ],
+        decimals: {
+            'A': [2, 0],
+            'F': [2, 2],
+            'I': [0],
+            'K': [2],
+            'L': [2, 2],
+            '-': [0],
+            '/': [1]
+        },
         camera: (stage) => {
             return {
                 scale: 6,
@@ -2601,10 +2620,10 @@ const plantData = {
         system: new LSystem('BA(0.18, 0)', [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.24, 1.44)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
+            'A(r, t) = F(0.12, 1.44)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
             'I(t) > S(type): type<=0 = S(type)I(t)',
             'I(t): t<4 = I(t+1)',
-            'I(t) = F(0, 0.36)[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]',
+            'I(t) = F(0.12, 0.36)[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]',
             'K(t): t<=signalThreshold = S(0)/(90)[+K(1)][-K(1)]K(t+1)',
             'K(t): t-2 = K(t+1)',
             'K(t) = K(t+1)K(1)',
@@ -2642,6 +2661,15 @@ const plantData = {
                 killColony: false
             }
         ],
+        decimals: {
+            'A': [2, 0],
+            'B': null,
+            'F': [2, 2],
+            'I': [0],
+            'K': [0],
+            'L': [2, 2, 0],
+            '/': [0]
+        },
         camera: (stage) => {
             return {
                 scale: 8,
@@ -2661,14 +2689,14 @@ const plantData = {
     {
         system: new LSystem('/(45)&(5)A(0.1, 3)', [
             'A(r, t): t>0 = A(r+0.05, t-1)',
-            'A(r, t) = F(stemInc, 20)T[&L(0.025)][/(180)&L(0.025)][F(stemInc, 10)K(0.125, 0)][^$A(r-0.2, 7)][&$A(r-0.15, 3)]',
+            'A(r, t) = F(0.4, 20)T[&L(0.025)][/(180)&L(0.025)][F(0.4, 10)K(0.125, 0)][^$A(r-0.2, 7)][&$A(r-0.15, 3)]',
             'K(p, t): t<2 = K(p*1.1, t+1)',
             'K(p, t): t<3 = K(0.1875, t+1)',
             'K(p, t): t<12 = K(1.35*p-0.8*p^2, t+1)',
             'K(p, t) = O(1)',
             'L(s): s<maxLeafSize = L(s+0.025)',
             'O(s): s>0.6 = O(s*0.9)',
-            'F(l, t): t>0 = F(l+stemInc, t-1)',
+            'F(l, t): t>0 = F(l+0.4, t-1)',
             '~> #= Model specification',
             '~> K(p, t): t<3 = {[+(90)b(p*4)b(p*4)b(p*4)b(p*4)b(p*4)]}',
             '~> b(s) = -[^-F(s).][--F(s*2)..][&-F(s).]+^(72)',
@@ -2678,7 +2706,6 @@ const plantData = {
             '~> L(s) = {T(s*0.5)F(sqrt(s)).[-(48)F(s*2).+F(s*2).+&F(s*2).+F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].].[+(48)F(s*2).-F(s*2).-&F(s*2).-F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].]}',
             '~> O(s) = {[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].].}'
         ], 31, 0, 'A', '', -0.6, {
-            'stemInc': '0.4',
             'maxLeafSize': '0.625'
         }),
         maxStage: 30,
@@ -2693,11 +2720,20 @@ const plantData = {
                 killColony: true
             }
         ],
+        decimals: {
+            'A': [2, 0],
+            'F': [1, 0],
+            'K': [3],
+            'L': [3],
+            'O': [2],
+            '&': [0],
+            '/': [0]
+        },
         camera: (stage) => {
             return {
                 scale: 12,
                 x: 0,
-                y: saturate(stage, 7.5, 20),
+                y: saturate(stage, 7.5, 22.5),
                 Z: 0,
                 upright: true
             };
@@ -2728,6 +2764,10 @@ const plantData = {
                 killColony: false
             }
         ],
+        decimals: {
+            'A': [3],
+            'F': [0]
+        },
         camera: (stage) => {
             return {
                 scale: 2 ** stage,
@@ -2764,6 +2804,7 @@ let growthIntegral = 0;
 let plotIdx = 0;
 let colonyIdx = new Array(nofPlots).fill(0);
 let plantIdx = new Array(nofPlots).fill(0);
+let selectedColony = null;
 let finishedTutorial = false;
 let actuallyPlanting = true;
 let graphMode2D = 1;
@@ -2771,6 +2812,7 @@ let graphMode3D = true;
 let colonyMode = 1;
 let fancyPlotTitle = true;
 let actionPanelOnTop = false;
+let actionConfirm = true;
 let colonyViewConfig = {};
 let notebook = {};
 let tmpCurrency;
@@ -2831,8 +2873,7 @@ let createFramedButton = (params, margin, callback, image) => {
 };
 // const actionsLabel = ui.createLatexLabel
 // ({
-//     isVisible: () => manager.colonies[plotIdx][colonyIdx[plotIdx]] ?
-//     true : false,
+//     isVisible: () => currentColony ? true : false,
 //     column: 0,
 //     horizontalOptions: LayoutOptions.END,
 //     verticalOptions: LayoutOptions.START,
@@ -2842,34 +2883,48 @@ let createFramedButton = (params, margin, callback, image) => {
 //     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
 // });
 const harvestFrame = createFramedButton({
+    isVisible: () => (selectedColony === null || selectedColony === void 0 ? void 0 : selectedColony.profit) > BigNumber.ZERO,
     row: 0, column: 0,
-}, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 0), game.settings.theme == Theme.LIGHT ?
+}, 2, () => {
+    if (actionConfirm) {
+        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 0);
+        menu.show();
+    }
+    else
+        manager.performAction(plotIdx, colonyIdx[plotIdx], 0);
+}, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle-dark.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle.png'));
 const harvestLabel = ui.createLatexLabel({
+    isVisible: () => (selectedColony === null || selectedColony === void 0 ? void 0 : selectedColony.profit) > BigNumber.ZERO,
     row: 0, column: 1,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9, 1, 9),
-    text: getLoc('btnHarvest'),
+    text: getLoc('labelActions')[0],
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
 const pruneFrame = createFramedButton({
     isVisible: () => {
-        let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-        if (!c || !plantData[c.id].actions[1])
+        if (!selectedColony || !plantData[selectedColony.id].actions[1])
             return false;
         return true;
     },
     row: 0, column: 2,
-}, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 1), game.settings.theme == Theme.LIGHT ?
+}, 2, () => {
+    if (actionConfirm) {
+        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 1);
+        menu.show();
+    }
+    else
+        manager.performAction(plotIdx, colonyIdx[plotIdx], 1);
+}, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/hair-strands-dark.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/hair-strands.png'));
 const pruneLabel = ui.createLatexLabel({
     isVisible: () => {
-        let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-        if (!c || !plantData[c.id].actions[1])
+        if (!selectedColony || !plantData[selectedColony.id].actions[1])
             return false;
         return true;
     },
@@ -2877,7 +2932,7 @@ const pruneLabel = ui.createLatexLabel({
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9, 1, 9),
-    text: getLoc('btnPrune'),
+    text: getLoc('labelActions')[1],
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
@@ -2940,9 +2995,12 @@ var init = () => {
             switchPlant.level = 0;
             if (manager.colonies[plotIdx].length)
                 return;
+            plants[plotIdx][plantUnlocks[plantIdx[plotIdx]]].isAvailable =
+                false;
             plantIdx[plotIdx] = (plantIdx[plotIdx] + 1) %
                 (plantPerma.level + 1);
-            updateAvailability();
+            plants[plotIdx][plantUnlocks[plantIdx[plotIdx]]].isAvailable = true;
+            // updateAvailability();
         };
         switchPlant.isAvailable = false;
     }
@@ -2955,10 +3013,10 @@ var init = () => {
         viewColony.info = getLoc('viewColonyInfo');
         viewColony.bought = (_) => {
             viewColony.level = 0;
-            let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-            if (!c)
+            selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+            if (!selectedColony)
                 return;
-            let seqMenu = createColonyViewMenu(c);
+            let seqMenu = createColonyViewMenu(selectedColony);
             seqMenu.show();
         };
         viewColony.isAvailable = false;
@@ -2976,8 +3034,8 @@ var init = () => {
                 return;
             colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) %
                 manager.colonies[plotIdx].length;
-            let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-            renderer.colony = c;
+            selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+            renderer.colony = selectedColony;
         };
         switchColony.isAvailable = false;
     }
@@ -3071,6 +3129,7 @@ var init = () => {
         plantPerma.maxLevel = plantUnlocks.length - 1;
     }
     theory.createPublicationUpgrade(1, currency, permaCosts[0]);
+    theory.publicationUpgrade.bought = (_) => theory.invalidateQuaternaryValues();
     theory.createBuyAllUpgrade(2, currency, permaCosts[1]);
     // theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
     /* Free penny
@@ -3284,7 +3343,8 @@ var getPrimaryEquation = () => {
 var getSecondaryEquation = () => {
     if (!plotPerma.level)
         return getLoc('lockedPlot');
-    let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    let c = selectedColony;
     if (!c) {
         let taxInfo = `\\text{${getLoc('pubTax')}}\\colon\\\\
         T_{\\text{p}}=${taxRate}\\times\\max\\text{p}\\\\\\\\`;
@@ -3667,8 +3727,7 @@ let createColonyViewMenu = (colony) => {
     let updateReconstruction = () => {
         if (!('result' in reconstructionTask) ||
             ('result' in reconstructionTask && reconstructionTask.start)) {
-            reconstructionTask = plantData[colony.id].system.reconstruct(colony.sequence, colonyViewConfig[colony.id].params ?
-                colony.params : null, colonyViewConfig[colony.id].filter, reconstructionTask);
+            reconstructionTask = plantData[colony.id].system.reconstruct(colony, colonyViewConfig[colony.id].filter, colonyViewConfig[colony.id].params, reconstructionTask);
         }
         return reconstructionTask.result;
     };
@@ -3943,7 +4002,7 @@ let createBookMenu = (book) => {
                     margin: new Thickness(0, 6)
                 }),
                 ui.createGrid({
-                    columnDefinitions: ['30*', '30*', '30*'],
+                    columnDefinitions: ['30*', '40*', '30*'],
                     children: [
                         prevButton,
                         viewButton,
@@ -4127,10 +4186,53 @@ let createShelfMenu = () => {
     });
     return menu;
 };
+let createConfirmationMenu = (plot, index, id) => {
+    let menu = ui.createPopup({
+        // isPeekable: true,
+        title: getLoc('menuConfirm'),
+        content: ui.createStackLayout({
+            children: [
+                ui.createLatexLabel({
+                    text: Localization.format(getLoc('actionConfirmDialogue'), getLoc('labelActions')[id], plot + 1, index + 1),
+                    horizontalTextAlignment: TextAlignment.CENTER,
+                    margin: new Thickness(0, 15)
+                }),
+                // ui.createBox
+                // ({
+                //     heightRequest: 1,
+                //     margin: new Thickness(0, 6)
+                // }),
+                ui.createGrid({
+                    columnDefinitions: ['1*', '1*'],
+                    children: [
+                        ui.createButton({
+                            column: 0,
+                            text: getLoc('btnYes'),
+                            onClicked: () => {
+                                Sound.playClick();
+                                manager.performAction(plot, index, id);
+                                menu.hide();
+                            }
+                        }),
+                        ui.createButton({
+                            column: 1,
+                            text: getLoc('btnNo'),
+                            onClicked: () => {
+                                Sound.playClick();
+                                menu.hide();
+                            }
+                        }),
+                    ]
+                })
+            ]
+        })
+    });
+    return menu;
+};
 let createWorldMenu = () => {
     let GM3Label = ui.createLatexLabel({
         column: 0,
-        text: getLoc('graphMode3D'),
+        text: getLoc('labelGM3D'),
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM3Button = ui.createButton({
@@ -4142,7 +4244,7 @@ let createWorldMenu = () => {
         }
     });
     let GM3Grid = ui.createGrid({
-        row: 4, column: 0,
+        row: 5, column: 0,
         columnDefinitions: ['73*', '60*', '7*'],
         children: [
             GM3Label,
@@ -4151,7 +4253,7 @@ let createWorldMenu = () => {
     });
     let GM3Switch = ui.createSwitch({
         isToggled: graphMode3D,
-        row: 4, column: 1,
+        row: 5, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e) => {
             if (e.type == TouchType.SHORTPRESS_RELEASED ||
@@ -4164,11 +4266,11 @@ let createWorldMenu = () => {
     });
     let GM2Label = ui.createLatexLabel({
         text: getLoc('graphModes2D')[graphMode2D],
-        row: 3, column: 0,
+        row: 4, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM2Slider = ui.createSlider({
-        row: 3, column: 1,
+        row: 4, column: 1,
         minimum: 0,
         maximum: 2,
         value: graphMode2D,
@@ -4183,11 +4285,11 @@ let createWorldMenu = () => {
     });
     let CMLabel = ui.createLatexLabel({
         text: getLoc('colonyModes')[colonyMode],
-        row: 2, column: 0,
+        row: 3, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let CMSlider = ui.createSlider({
-        row: 2, column: 1,
+        row: 3, column: 1,
         minimum: 0,
         maximum: 2,
         value: colonyMode,
@@ -4202,12 +4304,12 @@ let createWorldMenu = () => {
     });
     let APLabel = ui.createLatexLabel({
         text: getLoc('actionPanelLocations')[Number(actionPanelOnTop)],
-        row: 1, column: 0,
+        row: 2, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let APSwitch = ui.createSwitch({
         isToggled: actionPanelOnTop,
-        row: 1, column: 1,
+        row: 2, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e) => {
             if (e.type == TouchType.SHORTPRESS_RELEASED ||
@@ -4240,6 +4342,24 @@ let createWorldMenu = () => {
             }
         }
     });
+    let ACLabel = ui.createLatexLabel({
+        text: getLoc('labelActionConfirm'),
+        row: 1, column: 0,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let ACSwitch = ui.createSwitch({
+        isToggled: actionConfirm,
+        row: 1, column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        onTouched: (e) => {
+            if (e.type == TouchType.SHORTPRESS_RELEASED ||
+                e.type == TouchType.LONGPRESS_RELEASED) {
+                Sound.playClick();
+                actionConfirm = !actionConfirm;
+                APSwitch.isToggled = actionConfirm;
+            }
+        }
+    });
     let menu = ui.createPopup({
         isPeekable: true,
         title: getLoc('menuSettings'),
@@ -4248,6 +4368,7 @@ let createWorldMenu = () => {
                 ui.createGrid({
                     columnDefinitions: ['70*', '30*'],
                     rowDefinitions: [
+                        getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
@@ -4264,7 +4385,9 @@ let createWorldMenu = () => {
                         APLabel,
                         APSwitch,
                         PTLabel,
-                        PTSwitch
+                        PTSwitch,
+                        ACLabel,
+                        ACSwitch
                     ]
                 }),
                 ui.createLatexLabel({
@@ -4341,9 +4464,9 @@ var resetStage = () => renderer.reset(true);
 var canGoToPreviousStage = () => plotPerma.level > 0 && plotIdx > 0;
 var goToPreviousStage = () => {
     --plotIdx;
-    let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    if (c)
-        renderer.colony = c;
+    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    if (selectedColony)
+        renderer.colony = selectedColony;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     updateAvailability();
@@ -4351,9 +4474,9 @@ var goToPreviousStage = () => {
 var canGoToNextStage = () => plotIdx < plotPerma.level - 1;
 var goToNextStage = () => {
     ++plotIdx;
-    let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    if (c)
-        renderer.colony = c;
+    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    if (selectedColony)
+        renderer.colony = selectedColony;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     updateAvailability();
@@ -4389,7 +4512,8 @@ var getInternalState = () => JSON.stringify({
         graphMode3D: graphMode3D,
         colonyMode: colonyMode,
         fancyPlotTitle: fancyPlotTitle,
-        actionPanelOnTop: actionPanelOnTop
+        actionPanelOnTop: actionPanelOnTop,
+        actionConfirm: actionConfirm
     },
     colonyViewConfig: colonyViewConfig,
     notebook: notebook
@@ -4439,6 +4563,8 @@ var setInternalState = (stateStr) => {
             fancyPlotTitle = state.fancyPlotTitle;
         if ('actionPanelOnTop' in state)
             actionPanelOnTop = state.actionPanelOnTop;
+        if ('actionConfirm' in state)
+            actionConfirm = state.actionConfirm;
     }
     else if ('settings' in state) {
         graphMode2D = state.settings.graphMode2D;
@@ -4476,9 +4602,9 @@ var setInternalState = (stateStr) => {
         }
     }
     actuallyPlanting = true;
-    let c = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    if (c)
-        renderer.colony = c;
+    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    if (selectedColony)
+        renderer.colony = selectedColony;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();

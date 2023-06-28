@@ -1,12 +1,13 @@
 # To-do List
 
 - [To-do List](#to-do-list)
-  - [Don't delete](#dont-delete)
+  - [Research](#research)
+  - [Compost bin](#compost-bin)
   - [v0.2: Rabbits update](#v02-rabbits-update)
   - [v0.1: Slumber Seeds](#v01-slumber-seeds)
   - [v0: Completed](#v0-completed)
 
-## Don't delete
+## Research
 
 - [ ] Investigate educational game [design categories](https://www.sciencedirect.com/science/article/abs/pii/S0747563218304771)
   - Accuracy feedback
@@ -19,6 +20,15 @@
 - [ ] Are single-player games [that weak?](https://www.sciencedirect.com/science/article/abs/pii/S0360131522002214)
   - Hold on, collaborative and social interactions. Discord! Reddit!
 
+- [ ] Research notes
+  - Some players understand the profit puzzle for calendula, some don't
+  - Players enjoy watching plants grow idly
+
+- Let's think about it. A plant that takes 80 minutes to grow, and you have to
+do nothing. Do you feel like it could be more interesting?
+
+## Compost bin
+
 - [ ] Colour schemes?
 - [ ] Timer function to measure growth
   - Device time measured by user is sufficient?
@@ -26,16 +36,31 @@
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
 
-- [ ] Autobuy upgrade unlocks harvest stage config
+- [ ] Autobuy upgrade unlocks harvest automation config
   - Only unlocks in a future update (classmates!)
   - Hard to implement since there's more to LG than when to harvest
 
-- Let's think about it. A plant that takes 80 minutes to grow, and you have to
-do nothing. Do you feel like it could be more interesting?
-
 ## v0.2: Rabbits update
 
-- [ ] updateAvailability() slow
+- [ ] Tag various stuffs with readonly
+
+- [ ] Different aspect ratios hav different graph bounds
+
+- [x] Preference table for decimal places
+
+- [x] Confirmation to harvest/prune
+  - Options menu
+
+- [ ] Basil
+  - [ ] More delay before flowering (maybe stg 24 flowers)
+  - [ ] Apex decreases synthesis when spawning leaves
+  - [ ] Side shoots grow more leaves but smaller
+  - [ ] Flower gives income? Can be made into tea - although should shrink
+  their power immensely
+  - [ ] Bees love flowers too?!!
+  - [ ] https://gardenbenchtop.com/what-happens-when-basil-flowers/
+
+- [x] updateAvailability() slow
 
 - [x] Rose campion as first bush plant
   - [ ] Death? Propagation?
