@@ -249,6 +249,7 @@ All plants afterwards will display 'No commentary'.
   - After this, unlock Students
     - Unlocks more challenges
     - Unlocks auto-plant/harvest (NO AUTO-PRUNE)
+    - Each student provides 12% income, up to 30 students: `1.12^30 ~= 30`
 
 - **Intro dialogue**: Hint at grief.
 - **First publish**: 'We've... this much from last harvest.

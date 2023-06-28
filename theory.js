@@ -68,9 +68,12 @@ const LOC_STRINGS = {
         btnNext: 'Next',
         btnContents: 'Table of\nContents',
         btnPage: 'p. {0}',
-        btnHarvest: 'Harvest',
-        btnNoHarvest: 'Not harvestable',
-        btnPrune: 'Prune',
+        btnYes: 'Yes',
+        btnNo: 'No',
+        menuConfirm: 'Confirmation',
+        actionConfirmDialogue: `You are about to perform a {0} on\\\\
+plot {1}, colony {2}.\\\\\n\n\\\\Do you want to continue?`,
+        labelActions: ['Harvest', 'Prune'],
         labelSettings: 'Settings',
         labelFilter: 'Filter: ',
         labelParams: 'Parameters: ',
@@ -101,7 +104,7 @@ const LOC_STRINGS = {
         permaSettings: 'Theory settings',
         permaSettingsInfo: `Decorate your teacher's garden`,
         labelPlants: 'Plants',
-        labelMaxLevel: 'Max. level',
+        labelMaxLevel: 'Max. size',
         labelHarvestStage: 'Harvest stage',
         colony: `{0} of {1}, stage {2}`,
         colonyStats: `{0} of {1}, stage {2}\\\\
@@ -127,7 +130,8 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
         switchColony: 'Switch colony ({0}/{1})',
         switchColonyInfo: 'Cycles through the list of colonies',
         menuSettings: 'Theory Settings',
-        graphMode3D: '3D graph: ',
+        labelGM3D: '3D graph: ',
+        labelActionConfirm: 'Actions require confirmation: ',
         graphModes2D: [
             '2D graph: Off',
             '2D graph: Photo-synthesis',
@@ -1521,7 +1525,7 @@ class LSystem {
         let result = (_a = task.result) !== null && _a !== void 0 ? _a : '';
         let i = (_b = task.start) !== null && _b !== void 0 ? _b : 0;
         for (; i < sequence.length; ++i) {
-            if ((i - task.start) * 2 > MAX_CHARS_PER_TICK) {
+            if ((i - task.start) > MAX_CHARS_PER_TICK) {
                 return {
                     start: i,
                     result: result
@@ -2729,7 +2733,7 @@ const plantData = {
             return {
                 scale: 12,
                 x: 0,
-                y: saturate(stage, 7.5, 20),
+                y: saturate(stage, 7.5, 22.5),
                 Z: 0,
                 upright: true
             };
@@ -2808,6 +2812,7 @@ let graphMode3D = true;
 let colonyMode = 1;
 let fancyPlotTitle = true;
 let actionPanelOnTop = false;
+let actionConfirm = true;
 let colonyViewConfig = {};
 let notebook = {};
 let tmpCurrency;
@@ -2880,7 +2885,14 @@ let createFramedButton = (params, margin, callback, image) => {
 const harvestFrame = createFramedButton({
     isVisible: () => (selectedColony === null || selectedColony === void 0 ? void 0 : selectedColony.profit) > BigNumber.ZERO,
     row: 0, column: 0,
-}, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 0), game.settings.theme == Theme.LIGHT ?
+}, 2, () => {
+    if (actionConfirm) {
+        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 0);
+        menu.show();
+    }
+    else
+        manager.performAction(plotIdx, colonyIdx[plotIdx], 0);
+}, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle-dark.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle.png'));
 const harvestLabel = ui.createLatexLabel({
@@ -2889,7 +2901,7 @@ const harvestLabel = ui.createLatexLabel({
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9, 1, 9),
-    text: getLoc('btnHarvest'),
+    text: getLoc('labelActions')[0],
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
@@ -2900,7 +2912,14 @@ const pruneFrame = createFramedButton({
         return true;
     },
     row: 0, column: 2,
-}, 2, () => manager.performAction(plotIdx, colonyIdx[plotIdx], 1), game.settings.theme == Theme.LIGHT ?
+}, 2, () => {
+    if (actionConfirm) {
+        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 1);
+        menu.show();
+    }
+    else
+        manager.performAction(plotIdx, colonyIdx[plotIdx], 1);
+}, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/hair-strands-dark.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/hair-strands.png'));
 const pruneLabel = ui.createLatexLabel({
@@ -2913,7 +2932,7 @@ const pruneLabel = ui.createLatexLabel({
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9, 1, 9),
-    text: getLoc('btnPrune'),
+    text: getLoc('labelActions')[1],
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
@@ -3110,6 +3129,7 @@ var init = () => {
         plantPerma.maxLevel = plantUnlocks.length - 1;
     }
     theory.createPublicationUpgrade(1, currency, permaCosts[0]);
+    theory.publicationUpgrade.bought = (_) => theory.invalidateQuaternaryValues();
     theory.createBuyAllUpgrade(2, currency, permaCosts[1]);
     // theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
     /* Free penny
@@ -3379,7 +3399,6 @@ var getSecondaryEquation = () => {
             return '';
     }
 };
-// var getTertiaryEquation = () => ' ';
 let getTimeString = () => {
     let dayofYear = days - yearStartLookup[years];
     let weeks = Math.floor(dayofYear / 7);
@@ -3983,7 +4002,7 @@ let createBookMenu = (book) => {
                     margin: new Thickness(0, 6)
                 }),
                 ui.createGrid({
-                    columnDefinitions: ['30*', '30*', '30*'],
+                    columnDefinitions: ['30*', '40*', '30*'],
                     children: [
                         prevButton,
                         viewButton,
@@ -4167,10 +4186,53 @@ let createShelfMenu = () => {
     });
     return menu;
 };
+let createConfirmationMenu = (plot, index, id) => {
+    let menu = ui.createPopup({
+        // isPeekable: true,
+        title: getLoc('menuConfirm'),
+        content: ui.createStackLayout({
+            children: [
+                ui.createLatexLabel({
+                    text: Localization.format(getLoc('actionConfirmDialogue'), getLoc('labelActions')[id], plot + 1, index + 1),
+                    horizontalTextAlignment: TextAlignment.CENTER,
+                    margin: new Thickness(0, 15)
+                }),
+                // ui.createBox
+                // ({
+                //     heightRequest: 1,
+                //     margin: new Thickness(0, 6)
+                // }),
+                ui.createGrid({
+                    columnDefinitions: ['1*', '1*'],
+                    children: [
+                        ui.createButton({
+                            column: 0,
+                            text: getLoc('btnYes'),
+                            onClicked: () => {
+                                Sound.playClick();
+                                manager.performAction(plot, index, id);
+                                menu.hide();
+                            }
+                        }),
+                        ui.createButton({
+                            column: 1,
+                            text: getLoc('btnNo'),
+                            onClicked: () => {
+                                Sound.playClick();
+                                menu.hide();
+                            }
+                        }),
+                    ]
+                })
+            ]
+        })
+    });
+    return menu;
+};
 let createWorldMenu = () => {
     let GM3Label = ui.createLatexLabel({
         column: 0,
-        text: getLoc('graphMode3D'),
+        text: getLoc('labelGM3D'),
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM3Button = ui.createButton({
@@ -4182,7 +4244,7 @@ let createWorldMenu = () => {
         }
     });
     let GM3Grid = ui.createGrid({
-        row: 4, column: 0,
+        row: 5, column: 0,
         columnDefinitions: ['73*', '60*', '7*'],
         children: [
             GM3Label,
@@ -4191,7 +4253,7 @@ let createWorldMenu = () => {
     });
     let GM3Switch = ui.createSwitch({
         isToggled: graphMode3D,
-        row: 4, column: 1,
+        row: 5, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e) => {
             if (e.type == TouchType.SHORTPRESS_RELEASED ||
@@ -4204,11 +4266,11 @@ let createWorldMenu = () => {
     });
     let GM2Label = ui.createLatexLabel({
         text: getLoc('graphModes2D')[graphMode2D],
-        row: 3, column: 0,
+        row: 4, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM2Slider = ui.createSlider({
-        row: 3, column: 1,
+        row: 4, column: 1,
         minimum: 0,
         maximum: 2,
         value: graphMode2D,
@@ -4223,11 +4285,11 @@ let createWorldMenu = () => {
     });
     let CMLabel = ui.createLatexLabel({
         text: getLoc('colonyModes')[colonyMode],
-        row: 2, column: 0,
+        row: 3, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let CMSlider = ui.createSlider({
-        row: 2, column: 1,
+        row: 3, column: 1,
         minimum: 0,
         maximum: 2,
         value: colonyMode,
@@ -4242,12 +4304,12 @@ let createWorldMenu = () => {
     });
     let APLabel = ui.createLatexLabel({
         text: getLoc('actionPanelLocations')[Number(actionPanelOnTop)],
-        row: 1, column: 0,
+        row: 2, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let APSwitch = ui.createSwitch({
         isToggled: actionPanelOnTop,
-        row: 1, column: 1,
+        row: 2, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e) => {
             if (e.type == TouchType.SHORTPRESS_RELEASED ||
@@ -4280,6 +4342,24 @@ let createWorldMenu = () => {
             }
         }
     });
+    let ACLabel = ui.createLatexLabel({
+        text: getLoc('labelActionConfirm'),
+        row: 1, column: 0,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let ACSwitch = ui.createSwitch({
+        isToggled: actionConfirm,
+        row: 1, column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        onTouched: (e) => {
+            if (e.type == TouchType.SHORTPRESS_RELEASED ||
+                e.type == TouchType.LONGPRESS_RELEASED) {
+                Sound.playClick();
+                actionConfirm = !actionConfirm;
+                APSwitch.isToggled = actionConfirm;
+            }
+        }
+    });
     let menu = ui.createPopup({
         isPeekable: true,
         title: getLoc('menuSettings'),
@@ -4288,6 +4368,7 @@ let createWorldMenu = () => {
                 ui.createGrid({
                     columnDefinitions: ['70*', '30*'],
                     rowDefinitions: [
+                        getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
@@ -4304,7 +4385,9 @@ let createWorldMenu = () => {
                         APLabel,
                         APSwitch,
                         PTLabel,
-                        PTSwitch
+                        PTSwitch,
+                        ACLabel,
+                        ACSwitch
                     ]
                 }),
                 ui.createLatexLabel({
@@ -4429,7 +4512,8 @@ var getInternalState = () => JSON.stringify({
         graphMode3D: graphMode3D,
         colonyMode: colonyMode,
         fancyPlotTitle: fancyPlotTitle,
-        actionPanelOnTop: actionPanelOnTop
+        actionPanelOnTop: actionPanelOnTop,
+        actionConfirm: actionConfirm
     },
     colonyViewConfig: colonyViewConfig,
     notebook: notebook
@@ -4479,6 +4563,8 @@ var setInternalState = (stateStr) => {
             fancyPlotTitle = state.fancyPlotTitle;
         if ('actionPanelOnTop' in state)
             actionPanelOnTop = state.actionPanelOnTop;
+        if ('actionConfirm' in state)
+            actionConfirm = state.actionConfirm;
     }
     else if ('settings' in state) {
         graphMode2D = state.settings.graphMode2D;
