@@ -40,7 +40,7 @@ Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
     return (_a = descs[language]) !== null && _a !== void 0 ? _a : descs.en;
 };
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
-var version = 0.101;
+var version = 0.102;
 const MAX_INT = 0x7fffffff;
 const TRIM_SP = /\s+/g;
 const LS_RULE = /([^:]+)(:(.+))?=(.*)/;
@@ -54,7 +54,7 @@ const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS = {
     en: {
-        versionName: `Version: 0.1.1, Slumber Seeds`,
+        versionName: `Version: 0.1.2, Slumber Seeds`,
         wip: 'Work in Progress',
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish',
@@ -131,7 +131,7 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
         switchColonyInfo: 'Cycles through the list of colonies',
         menuSettings: 'Theory Settings',
         labelGM3D: '3D graph: ',
-        labelActionConfirm: 'Actions require confirmation: ',
+        labelActionConfirm: 'Action confirmations: ',
         graphModes2D: [
             '2D graph: Off',
             '2D graph: Photo-synthesis',
