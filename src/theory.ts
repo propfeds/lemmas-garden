@@ -70,7 +70,7 @@ const LOC_STRINGS =
 {
     en:
     {
-        versionName: `Version: 0.1.2, Slumber Seeds`,
+        versionName: `Version: 0.1.2h1, Slumber Seeds`,
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
@@ -3787,7 +3787,7 @@ let createFramedButton = (params, margin, callback, image) =>
 // });
 const harvestFrame = createFramedButton
 ({
-    isVisible: () => selectedColony?.profit > BigNumber.ZERO,
+    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 0,
 }, 2, () =>
 {
@@ -3804,7 +3804,7 @@ ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/tr
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle.png'));
 const harvestLabel = ui.createLatexLabel
 ({
-    isVisible: () => selectedColony?.profit > BigNumber.ZERO,
+    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 1,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
