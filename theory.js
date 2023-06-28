@@ -54,7 +54,7 @@ const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS = {
     en: {
-        versionName: `Version: 0.1.2, Slumber Seeds`,
+        versionName: `Version: 0.1.2h1, Slumber Seeds`,
         wip: 'Work in Progress',
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish',
@@ -2883,7 +2883,7 @@ let createFramedButton = (params, margin, callback, image) => {
 //     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
 // });
 const harvestFrame = createFramedButton({
-    isVisible: () => (selectedColony === null || selectedColony === void 0 ? void 0 : selectedColony.profit) > BigNumber.ZERO,
+    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 0,
 }, 2, () => {
     if (actionConfirm) {
@@ -2896,7 +2896,7 @@ const harvestFrame = createFramedButton({
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle-dark.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle.png'));
 const harvestLabel = ui.createLatexLabel({
-    isVisible: () => (selectedColony === null || selectedColony === void 0 ? void 0 : selectedColony.profit) > BigNumber.ZERO,
+    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 1,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
