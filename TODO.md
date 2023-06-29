@@ -29,6 +29,11 @@ do nothing. Do you feel like it could be more interesting?
 
 ## Compost bin
 
+- [ ] Simple solitary flower
+  - Tulip?
+  - Buttercup
+  - No need, Cally is already easy to play
+
 - [ ] Colour schemes?
 - [ ] Timer function to measure growth
   - Device time measured by user is sufficient?
@@ -40,37 +45,14 @@ do nothing. Do you feel like it could be more interesting?
   - Only unlocks in a future update (classmates!)
   - Hard to implement since there's more to LG than when to harvest
 
-## v0.2: Rabbits update
-
-- [ ] Tag various stuffs with readonly
-
 - [ ] Different aspect ratios hav different graph bounds
 
-- [x] Preference table for decimal places
+- [ ] Newspapers
+- [ ] Add a Pruned commentary track
+  - 2 lazy
 
-- [x] Confirmation to harvest/prune
-  - Options menu
+## v0.2: Rabbits update
 
-- [ ] Basil
-  - [ ] More delay before flowering (maybe stg 24 flowers)
-  - [ ] Apex decreases synthesis when spawning leaves
-  - [ ] Side shoots grow more leaves but smaller
-  - [ ] Flower gives income? Can be made into tea - although should shrink
-  their power immensely
-  - [ ] Bees love flowers too?!!
-  - [ ] https://gardenbenchtop.com/what-happens-when-basil-flowers/
-
-- [x] updateAvailability() slow
-
-- [x] Rose campion as first bush plant
-  - [ ] Death? Propagation?
-  - [x] Passive income
-  - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
-  - [x] Extend rose campion seed period by a few stages
-
-- [ ] Simple solitary flower
-  - Tulip?
-  - Buttercup
 - [ ] Hopleek
   - Biting is on evolution queue instead of action?
   - [x] Leap years calculation
@@ -79,10 +61,33 @@ do nothing. Do you feel like it could be more interesting?
   - [ ] Repelled by rose campions and sunflowers
 - [ ] Sunflower
 
-- [ ] Newspapers
-- [ ] Add a Pruned commentary track
-  - 2 lazy
+- [ ] Align the vibes of basil & campion to make it feel smoother
 
+- [ ] Basil
+  - [ ] More delay before flowering (maybe stg 24 flowers)
+    - [ ] Delete the `I < S` rule
+  - [ ] Decrease max stage
+  - [ ] Apex decreases synthesis when spawning leaves
+  - [ ] Side shoots grow more leaves but smaller
+  - [ ] Flower gives income? Can be made into tea - although should shrink
+  their power immensely
+  - [ ] Bees love flowers too?!!
+  - [ ] https://gardenbenchtop.com/what-happens-when-basil-flowers/
+- [ ] Tag various stuffs with readonly
+
+- [x] Rose campion as first bush plant
+  - [ ] Death? Propagation?
+    - [ ] How long does it live? When does it spread seeds?
+    - [ ] Cost increases when it spreads, so need to shovel old ones before new
+    - [ ] Propagation ratio: 0.5, rounded up
+  - [x] Passive income
+  - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
+  - [x] Extend rose campion seed period by a few stages
+
+- [x] Preference table for decimal places
+- [x] Confirmation to harvest/prune
+  - Options menu
+- [x] updateAvailability() slow
 - [x] Bookshelf unlocks after tutorial to avoid confusion with unlock plot
 
 ## v0.1: Slumber Seeds

@@ -205,6 +205,8 @@ between tau not feeling bloated and pub multipliers not too small)
 - **Active sprouts? (Micro greens)**
   - You can eat sunflower sprouts, aaa
 - **Poison ivy**
+- **Gooseberry**, behaves like a goose and eats things
+  - Name origin is actually unrelated to geese
 - **Rhizomes?**
 - **Paleobotany** - time travelley stuff like cooksonia and zosterophyllum
 - **Fungi** - foraging?

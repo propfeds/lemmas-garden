@@ -140,6 +140,7 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
         colonyModes: [
             'Colony view: Off',
             'Colony view: Single',
+            'Colony view: Single 2',
             'Colony view: List'
         ],
         actionPanelLocations: [
@@ -3368,8 +3369,14 @@ var getSecondaryEquation = () => {
             plantData[c.id].growthCost * BigNumber.from(c.sequence.length), 
             // @ts-expect-error
             plantData[c.id].growthRate * BigNumber.from(growthCoord), c.profit, status)}}`;
-        // return `\\text{${Localization.format(getLoc('colony'), c.population, getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace g=${c.growth}/${plantData[c.id].growthCost * BigNumber.from(c.sequence.length)}\\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}\\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})\\\\`;
         case 2:
+            return `\\text{${Localization.format(getLoc('colony'), c.population, getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
+            g=${c.growth}/${ // @ts-expect-error
+            plantData[c.id].growthCost * BigNumber.from(c.sequence.length)}
+            \\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}
+            \\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
+            \\\\`;
+        case 3:
             let result = '';
             for (let i = 0; i < colonyIdx[plotIdx]; ++i) {
                 let d = manager.colonies[plotIdx][i];
@@ -4291,7 +4298,7 @@ let createWorldMenu = () => {
     let CMSlider = ui.createSlider({
         row: 3, column: 1,
         minimum: 0,
-        maximum: 2,
+        maximum: 3,
         value: colonyMode,
         onValueChanged: () => {
             colonyMode = Math.round(CMSlider.value);
