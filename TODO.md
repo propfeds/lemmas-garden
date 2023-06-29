@@ -23,6 +23,8 @@
 - [ ] Research notes
   - Some players understand the profit puzzle for calendula, some don't
   - Players enjoy watching plants grow idly
+  - Some players can't get pruning basil
+  - Some players mistake max stage with max profit
 
 - Let's think about it. A plant that takes 80 minutes to grow, and you have to
 do nothing. Do you feel like it could be more interesting?

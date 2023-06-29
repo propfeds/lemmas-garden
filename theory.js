@@ -192,9 +192,9 @@ known as the golden angle.`,
                 name: 'Basil',
                 info: 'A fast growing herb that requires a bit of care.',
                 LsDetails: `A: apex (stem shoot)\\\\B: base\\\\F: internode\\\\
-I : shortened stem\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest returns profit as the
-sum of all L.\\\\Prune cuts off all A and K.\\\\—\\\\The Model specification
-section may be ignored.`,
+I : shortened stem\\\\K: flower\\\\L: leaf\\\\S: signal (type 0 travels down,
+type 1 travels up)\\\\—\\\\Harvest returns profit as the sum of all L.\\\\Prune
+cuts off all A and K.\\\\—\\\\The Model specification section may be ignored.`,
                 stages: {
                     index: [
                         0, 4, 8, 9, 12, 13, 14, 17, 20,
@@ -541,6 +541,9 @@ let getSmallBtnSize = (width) => {
     if (width >= 360)
         return 40;
     return 32;
+};
+let getProgBarSize = (width) => {
+    return getSmallBtnSize(width) / 2;
 };
 /**
  * Returns the index of the first smaller/equal element than target.
@@ -2669,6 +2672,7 @@ const plantData = {
             'I': [0],
             'K': [0],
             'L': [2, 2, 0],
+            'S': [0],
             '/': [0]
         },
         camera: (stage) => {
@@ -3864,7 +3868,7 @@ let createBookMenu = (book) => {
     let pageTitle = ui.createLatexLabel({
         text: pages[page].title,
         margin: new Thickness(0, 4),
-        heightRequest: 20,
+        heightRequest: getProgBarSize(ui.screenWidth),
         horizontalTextAlignment: TextAlignment.CENTER,
         verticalTextAlignment: TextAlignment.CENTER
     });
