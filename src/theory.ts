@@ -4842,7 +4842,7 @@ let createColonyViewMenu = (colony: Colony) =>
     let tmpTitle = Localization.format(getLoc('colony'), colony.population,
     getLoc('plants')[colony.id].name, colony.stage);
     let tmpStage = colony.stage;
-    let cmtStage;
+    let cmtStage: number;
     let updateCommentary = () =>
     {
         let stages = getLoc('plants')[colony.id].stages;
@@ -4912,7 +4912,7 @@ let createColonyViewMenu = (colony: Colony) =>
                 tmpCmt = updateCommentary();
                 plantStats.text = Localization.format(getLoc('plantStats'),
                 cmtStage, tmpCmt, plantData[colony.id].maxStage ?? '∞',
-                plantData[colony.id].growthRate, colony.synthRate,
+                colony.synthRate, plantData[colony.id].growthRate,
                 plantData[colony.id].growthCost, colony.sequence.length);
                 tmpStage = colony.stage;
                 reconstructionTask =
