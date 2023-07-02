@@ -74,7 +74,7 @@ const LOC_STRINGS =
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
-        pubTax: 'Publish tax',
+        pubTax: 'Tax on publish\\colon',
 
         btnView: 'View L-system',
         btnVar: 'Variables',
@@ -1961,7 +1961,7 @@ class LSystem
         let i = task.start ?? 0;
         for(; i < sequence.length; ++i)
         {
-            if((i - task.start) > MAX_CHARS_PER_TICK)
+            if(i - task.start > MAX_CHARS_PER_TICK)
             {
                 return {
                     start: i,
@@ -2847,6 +2847,7 @@ class ColonyManager
     actionAncestreeTask: Task;
     actionDeriveTask: Task;
     actionCalcTask: Task;
+    restTick: number;
     constructor(object: ManagerInput = {}, length: number, width: number)
     {
         this.length = length;
@@ -2880,6 +2881,7 @@ class ColonyManager
         {
             start: 0
         };
+        // this.restTick = 0;
     }
 
     get object()
@@ -2897,6 +2899,13 @@ class ColonyManager
         };
     }
 
+    get busy()
+    {
+        if(this.gangsta || this.actionGangsta)
+            return true;
+        return false;
+    }
+
     reap(colony: Colony, multiplier: BigNumber = BigNumber.ONE)
     {
         if(multiplier.isZero)
@@ -2907,9 +2916,9 @@ class ColonyManager
         multiplier * theory.publicationMultiplier;
     }
 
-    addColony(plot: number, id: number, population: number)
+    addColony(plot: number, id: number, population: number, forceSplit = false)
     {
-        for(let i = 0; i < this.colonies[plot].length; ++i)
+        for(let i = 0; !forceSplit && i < this.colonies[plot].length; ++i)
         {
             if(this.colonies[plot][i].id == id && !this.colonies[plot][i].stage)
             {
@@ -2921,7 +2930,7 @@ class ColonyManager
         // Max 5, unless invading
         if(this.colonies[plot].length >= this.width)
         {
-            plants[plot][id].refund(population);
+            plants[plot][id]?.refund?.(population);
             return;
         }
         let c: Colony =
@@ -2949,7 +2958,7 @@ class ColonyManager
         theory.invalidateQuaternaryValues();
         updateAvailability();
     }
-    killColony(plot, index, id?: number)
+    killColony(plot: number, index: number, id?: number)
     {
         let c = this.colonies[plot][index];
         if(!c)
@@ -3099,6 +3108,12 @@ class ColonyManager
     }
     continueAction()
     {
+        // if(this.restTick)
+        // {
+        //     --this.restTick;
+        //     return;
+        // }
+
         // Future idea: maybe instead of using an LS to prune/harvest, develop
         // efficient pruner/harvester, like a naked L-system rule???
         let c = this.colonies[this.actionGangsta[0]][this.actionGangsta[1]];
@@ -3187,6 +3202,8 @@ class ColonyManager
         this.actionGangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
+
+        // this.restTick = 5;
     }
     performAction(plot: number, index: number, id: number)
     {
@@ -3204,6 +3221,12 @@ class ColonyManager
     }
     evolve()
     {
+        // if(this.restTick)
+        // {
+        //     --this.restTick;
+        //     return;
+        // }
+
         let c = this.colonies[this.gangsta[0]][this.gangsta[1]];
         if(!c)
         {
@@ -3284,6 +3307,8 @@ class ColonyManager
         this.gangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
+
+        // this.restTick = 5;
     }
 }
 
@@ -3608,7 +3633,7 @@ const plantData: {[key: number]: Plant} =
         maxStage: 30,
         cost: new ExponentialCost(10000, Math.log2(5)),
         growthRate: BigNumber.FIVE,
-        growthCost: BigNumber.from(2.5),
+        growthCost: BigNumber.FIVE,//BigNumber.from(2.5),
         dailyIncome: true,
         actions:
         [
@@ -4460,11 +4485,11 @@ var getSecondaryEquation = () =>
     let c = selectedColony;
     if(!c)
     {
-        let taxInfo = `\\text{${getLoc('pubTax')}}\\colon\\\\
-        T_{\\text{p}}=${taxRate}\\times\\max\\text{p}\\\\\\\\`;
+        let taxInfo = `\\text{${getLoc('pubTax')}}\\\\
+        T_{\\text{p}}=${taxRate}\\times\\max\\text{p}`;
         let tauInfo = `${theory.latexSymbol}=\\max\\text{p}^
         ${tauRate.toString(0)}`;
-        return `\\begin{array}{c}${taxInfo}${tauInfo}\\end{array}`;
+        return `\\begin{array}{c}${tauInfo}\\\\\\\\${taxInfo}\\end{array}`;
     }
 
     switch(colonyMode)
@@ -6069,7 +6094,7 @@ var get2DGraphValue = () =>
 
 var get3DGraphPoint = () =>
 {
-    if(graphMode3D)
+    if(graphMode3D && !manager.busy)
         renderer.draw();
     return renderer.cursor;
 }

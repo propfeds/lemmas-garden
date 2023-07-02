@@ -71,8 +71,8 @@ do nothing. Do you feel like it could be more interesting?
 
 - [ ] Align the vibes of basil & campion to make it feel smoother
 
-- [ ] Basil
-  - [ ] Adjusted starting cost: 1 → 1.25
+- [x] Basil
+  - [x] Adjust starting cost: 1 → 1.25
   - [ ] Double starting cost but 2, 10 stepwise?
   - [x] More delay before flowering (maybe stg 24 flowers)
   - [x] Decrease max stage
@@ -87,7 +87,7 @@ do nothing. Do you feel like it could be more interesting?
   - [ ] Maximum statements
   - [ ] Death? Propagation?
   - [ ] Income per evolution instead of night
-  - [ ] Double growth cost
+  - [x] Double growth cost
   - [ ] Flower turns into fruit faster
   - [ ] Fruit falls off
   - [ ] Loading SLOW
