@@ -74,7 +74,7 @@ const LOC_STRINGS =
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
-        pubTax: 'Tax on publish',
+        pubTax: 'Publish tax',
 
         btnView: 'View L-system',
         btnVar: 'Variables',
@@ -236,23 +236,23 @@ cuts off all A and K.\\\\—\\\\The Model specification section may be ignored.`
                 {
                     index:
                     [
-                        0, 4, 8, 9, 12, 13, 14, 17, 20,
-                        21, 22
+                        0, 4, 8, 10, 12, 14, 15, 18, 20,
+                        23, 24
                     ],
                     0: 'A seedling in its sweet slumber.',
                     4: 'The first pair of leaves pops up. A stem, as well.',
                     8: 'The second pair of leaves appears.',
-                    9: 'Little leaves start to grow over the first node.',
+                    10: 'Little leaves start to grow over the first node.',
                     12: 'The third pair of leaves appears.',
-                    13: 'Little leaves now grow over the second node.',
-                    14: 'This rhythm will repeat for a while.',
-                    17: `I'll show you what to do when it flowers, soon.`,
+                    14: 'Little leaves now grow over the second node.',
+                    15: 'This rhythm will repeat for a while.',
+                    18: `I'll show you what to do when it flowers, soon.`,
                     20: `It's about to flower. You can nip the stem now if you
 don't feel confident.`,
-                    21: `The first flower appears.`,
-                    22: `If the flower's still there, imagine it's sending a
-signal from top to bottom, all the way to basil base. Then, basil base will
-send another one back to the leaves.`,
+                    23: `The first flower will appear soon.`,
+                    24: `If the flower's there, imagine it's sending a signal
+from top to bottom, all the way to basil base. Then, basil base will send
+another one back to the leaves.`,
                 }
             },
             3:
@@ -389,7 +389,7 @@ Here's a recipe to make some delicious calendula bread:`
 `slightly intoxicating flavour.
 Even my dog loves it from time to time.
 
-Time to maturity: 6~7 weeks
+Time to maturity: 'I haven't timed it yet'
 
 If you intend to harvest, snip off the stem before it flowers. Otherwise, ` +
 `the plant will go into the end of its life cycle, and the leaves will lose ` +
@@ -3512,15 +3512,14 @@ const plantData: {[key: number]: Plant} =
     {
         system: new LSystem('BA(0.18, 0)',
         [
-            'A(r, t): r>=flowerThreshold = K(0)',
+            'A(r, t): r>=flowerThreshold = S(0)K(0.02, 8)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.12, 1.44)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
+            'A(r, t) = F(0.12, 1.44)[+[I(0)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.06, 0)',
             'I(t) > S(type): type<=0 = S(type)I(t)',
-            'I(t): t<4 = I(t+1)',
-            'I(t) = F(0.12, 0.36)[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]',
-            'K(t): t<=signalThreshold = S(0)/(90)[+K(1)][-K(1)]K(t+1)',
-            'K(t): t-2 = K(t+1)',
-            'K(t) = K(t+1)K(1)',
+            'I(t): t<5 = I(t+1)',
+            'I(t) = /(90)F(0.12, 0.72)T[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]I(-6)',
+            'K(s, t): t>0 = K(s+0.02, 0)K(0.02, t-1)',
+            'K(s, t): s<1 = K(s+0.02, t)',
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
             'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
             'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
@@ -3530,24 +3529,23 @@ const plantData: {[key: number]: Plant} =
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)',
             '~> #= Model specification',
-            '~> K(t) = /(90)F(min(1.25, sqrt(t/4)))T(-0.2){[k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//]}',
-            '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
+            '~> K(t) = /(90)F(min(1.25, sqrt(t*2))){[k(min(0.75, t*4))//k(min(0.75, t*4))//k(min(0.75, t*4))//k(min(0.75, t*4))//k(min(0.75, t*4))//k(min(0.75, t*4))//]}',
+            '~> k(size): size<0.75 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
-            '~> L(p, lim, s): s<1 = {\\(90)T(p*0.8)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
-            '~> L(p, lim, s) = {\\(90)T(lim)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
-        ], 30, 0, 'BASIL', '+-&^/\\T', 1, {
-            'flowerThreshold': '1.38',
-            'maxLeafSize': '0.66',
-            'signalThreshold': '0'
+            '~> L(p, lim, s): s<1 = {[\\(90)T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]]}',
+            '~> L(p, lim, s) = {[\\(90)T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]]}',
+        ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
+            'flowerThreshold': '0.96',
+            'maxLeafSize': '0.66'
         }),
-        maxStage: 54,
-        cost: new ExponentialCost(1, 1),
+        maxStage: 46,
+        cost: new ExponentialCost(1.25, 1),
         growthRate: BigNumber.FOUR,
-        growthCost: BigNumber.THREE,
+        growthCost: BigNumber.from(2.5),
         actions:
         [
             {   // Always a harvest
-                symbols: new Set('L'),
+                symbols: new Set('KL'),
                 // system: new LSystem('', ['L=']),
                 killColony: true
             },
@@ -3562,7 +3560,7 @@ const plantData: {[key: number]: Plant} =
             'B': null,
             'F': [2, 2],
             'I': [0],
-            'K': [0],
+            'K': [2, 0],
             'L': [2, 2, 0],
             'S': [0],
             '/': [0]
@@ -3584,7 +3582,7 @@ const plantData: {[key: number]: Plant} =
             };
         }
     },
-    3:   // Rose campion
+    3:  // Rose campion
     {
         system: new LSystem('/(45)&(5)A(0.1, 3)', [
             'A(r, t): t>0 = A(r+0.05, t-1)',
@@ -3699,16 +3697,16 @@ const plantData: {[key: number]: Plant} =
             };
         }
     },
-    9002:  // BRasil (test)
+    9002:   // BRasil (test)
     {
         system: new LSystem('BA(0.18, 0)',
         [
             'A(r, t): r>=flowerThreshold = S(0)K(0.02, 8)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.12, 1.44)[+[I(0)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.12, 0)',
+            'A(r, t) = F(0.12, 1.44)[+[I(0)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.06, 0)',
             'I(t) > S(type): type<=0 = S(type)I(t)',
-            'I(t): t<7 = I(t+1)',
-            'I(t) = /(90)F(0.12, 0.72)T[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]I(-8)',
+            'I(t): t<5 = I(t+1)',
+            'I(t) = /(90)F(0.12, 0.72)T[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]I(-6)',
             'K(s, t): t>0 = K(s+0.02, 0)K(0.02, t-1)',
             'K(s, t): s<1 = K(s+0.02, t)',
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
@@ -3725,12 +3723,12 @@ const plantData: {[key: number]: Plant} =
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
             '~> L(p, lim, s): s<1 = {[\\(90)T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]]}',
             '~> L(p, lim, s) = {[\\(90)T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]]}',
-        ], 30, 0, 'BASIL', '+-&^/\\T', -0.2, {
-            'flowerThreshold': '0.66',
+        ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
+            'flowerThreshold': '0.96',
             'maxLeafSize': '0.66'
         }),
-        maxStage: 50,
-        cost: new ExponentialCost(1, 1),
+        maxStage: 46,
+        cost: new ExponentialCost(1.25, 1),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.from(2.5),
         actions:
@@ -3751,7 +3749,7 @@ const plantData: {[key: number]: Plant} =
             'B': null,
             'F': [2, 2],
             'I': [0],
-            'K': [0],
+            'K': [2, 0],
             'L': [2, 2, 0],
             'S': [0],
             '/': [0]
@@ -3773,6 +3771,16 @@ const plantData: {[key: number]: Plant} =
             };
         }
     },
+}
+// For reference only
+const plantIDLookup =
+{
+    calendula: 1,
+    basil: 2,
+    campion: 3,
+    rose: 3,
+    arrow: 9001,
+    brasil: 9002
 }
 
 let haxEnabled = false;
@@ -4456,8 +4464,7 @@ var getSecondaryEquation = () =>
         T_{\\text{p}}=${taxRate}\\times\\max\\text{p}\\\\\\\\`;
         let tauInfo = `${theory.latexSymbol}=\\max\\text{p}^
         ${tauRate.toString(0)}`;
-        return `\\begin{array}{c}${theory.publicationUpgrade.level &&
-        theory.canPublish ? taxInfo : ''}${tauInfo}\\end{array}`;
+        return `\\begin{array}{c}${taxInfo}${tauInfo}\\end{array}`;
     }
 
     switch(colonyMode)

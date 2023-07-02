@@ -72,13 +72,13 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Align the vibes of basil & campion to make it feel smoother
 
 - [ ] Basil
+  - [ ] Adjusted starting cost: 1 → 1.25
   - [ ] Double starting cost but 2, 10 stepwise?
-  - [ ] More delay before flowering (maybe stg 24 flowers)
-    - [ ] Delete the `I < S` rule
-  - [ ] Decrease max stage
-  - [ ] Apex decreases synthesis when spawning leaves
-  - [ ] Side shoots grow more leaves but smaller
-  - [ ] Flower gives income? Can be made into tea - although should shrink
+  - [x] More delay before flowering (maybe stg 24 flowers)
+  - [x] Decrease max stage
+  - [x] Apex decreases synthesis when spawning leaves
+  - [x] Side shoots grow more leaves but smaller
+  - [x] Flower gives income? Can be made into tea - although should shrink
   their power immensely
   - [ ] Bees love flowers too?!!
   - [ ] https://gardenbenchtop.com/what-happens-when-basil-flowers/
