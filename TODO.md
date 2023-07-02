@@ -21,10 +21,13 @@
   - Hold on, collaborative and social interactions. Discord! Reddit!
 
 - [ ] Research notes
+  - Two players share progress with each other daily
   - Some players understand the profit puzzle for calendula, some don't
   - Players enjoy watching plants grow idly
   - Some players can't get pruning basil
   - Some players mistake max stage with max profit
+  - Many players are cautious about purchasing expensive items, which isn't the 
+  case usually for other theories
 
 - Let's think about it. A plant that takes 80 minutes to grow, and you have to
 do nothing. Do you feel like it could be more interesting?
@@ -55,6 +58,9 @@ do nothing. Do you feel like it could be more interesting?
 
 ## v0.2: Rabbits update
 
+- [ ] Notebook shows next cost
+- [ ] Tag various stuffs with readonly
+
 - [ ] Hopleek
   - Biting is on evolution queue instead of action?
   - [x] Leap years calculation
@@ -66,6 +72,7 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Align the vibes of basil & campion to make it feel smoother
 
 - [ ] Basil
+  - [ ] Double starting cost but 2, 10 stepwise?
   - [ ] More delay before flowering (maybe stg 24 flowers)
     - [ ] Delete the `I < S` rule
   - [ ] Decrease max stage
@@ -75,13 +82,19 @@ do nothing. Do you feel like it could be more interesting?
   their power immensely
   - [ ] Bees love flowers too?!!
   - [ ] https://gardenbenchtop.com/what-happens-when-basil-flowers/
-- [ ] Tag various stuffs with readonly
 
 - [x] Rose campion as first bush plant
+  - [ ] Maximum statements
   - [ ] Death? Propagation?
-    - [ ] How long does it live? When does it spread seeds?
-    - [ ] Cost increases when it spreads, so need to shovel old ones before new
-    - [ ] Propagation ratio: 0.5, rounded up
+  - [ ] Income per evolution instead of night
+  - [ ] Double growth cost
+  - [ ] Flower turns into fruit faster
+  - [ ] Fruit falls off
+  - [ ] Loading SLOW
+  - [ ] How long does it live? When does it spread seeds?
+  - [ ] Cost increases when it spreads, so need to shovel old ones before new
+  - [ ] Propagation ratio: 0.5, rounded up
+  - [ ] Add a parameter to adjust stagely income multiplier (1/4th is ok?)
   - [x] Passive income
   - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
   - [x] Extend rose campion seed period by a few stages

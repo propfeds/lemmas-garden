@@ -63,7 +63,7 @@ const LS_CONTEXT =
 const BACKTRACK_LIST = new Set('+-&^\\/|[$T');
 // Leaves and apices
 const SYNTHABLE_SYMBOLS = new Set('AL');
-const MAX_CHARS_PER_TICK = 200;
+const MAX_CHARS_PER_TICK = 150;
 const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS =
@@ -288,6 +288,24 @@ for you?`
             9001:
             {
                 name: '(Test) Arrow weed',
+                info: 'Not balanced for regular play.',
+                LsDetails: `The symbol A represents a rising shoot (apex), ` +
+`while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
+`F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
+`kills the colony.`,
+                stages:
+                {
+                    index: [0, 1, 2, 4],
+                    0: 'The first shoot rises.\\\\Already harvestable.',
+                    1: 'The shoot splits in three.\\\\The stem lengthens.',
+                    2: 'The shoots continue to divide.',
+                    4: `What do you expect? It\'s a fractal. Arrow weed is the
+friend of all mathematicians.`
+                }
+            },
+            9002:
+            {
+                name: 'Brasil',
                 info: 'Not balanced for regular play.',
                 LsDetails: `The symbol A represents a rising shoot (apex), ` +
 `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
@@ -2889,7 +2907,7 @@ class ColonyManager
         multiplier * theory.publicationMultiplier;
     }
 
-    addColony(plot, id, population)
+    addColony(plot: number, id: number, population: number)
     {
         for(let i = 0; i < this.colonies[plot].length; ++i)
         {
@@ -2937,8 +2955,9 @@ class ColonyManager
         if(!c)
             return;
 
-        plants[plot][c.id].level -= Math.min(plants[plot][c.id].level,
-        c.population);
+        if(plantUnlocks.includes(c.id))
+            plants[plot][c.id].level -= Math.min(plants[plot][c.id].level,
+            c.population);
         if(index == this.colonies[plot].length - 1)
             switchColony.buy(1);
         if(this.gangsta && plot == this.gangsta[0])
@@ -3677,6 +3696,80 @@ const plantData: {[key: number]: Plant} =
                 // backtrackTail: true,
                 // hesitateApex: true,
                 // hesitateFork: true,
+            };
+        }
+    },
+    9002:  // BRasil (test)
+    {
+        system: new LSystem('BA(0.18, 0)',
+        [
+            'A(r, t): r>=flowerThreshold = S(0)K(0.02, 8)',
+            'A(r, t): t<3 = A(r+0.06, t+1)',
+            'A(r, t) = F(0.12, 1.44)[+[I(0)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.12, 0)',
+            'I(t) > S(type): type<=0 = S(type)I(t)',
+            'I(t): t<7 = I(t+1)',
+            'I(t) = /(90)F(0.12, 0.72)T[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]I(-8)',
+            'K(s, t): t>0 = K(s+0.02, 0)K(0.02, t-1)',
+            'K(s, t): s<1 = K(s+0.02, t)',
+            'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
+            'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
+            'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
+            'F(l, lim) > S(type): type<=0 = S(type)F(l, lim)',
+            'S(type) < F(l, lim): type>=1 = F(l, lim)S(type)',
+            'S(type) =',
+            'B > S(type): type<=0 = BS(1)',
+            'F(l, lim): l<lim = F(l+0.12, lim)',
+            '~> #= Model specification',
+            '~> K(t) = /(90)F(min(1.25, sqrt(t*2))){[k(min(0.75, t*3))//k(min(0.75, t*3))//k(min(0.75, t*3))//k(min(0.75, t*3))//k(min(0.75, t*3))//k(min(0.75, t*3))//]}',
+            '~> k(size): size<0.75 = [++F(size/2).[-F(size/2).].]',
+            '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
+            '~> L(p, lim, s): s<1 = {[\\(90)T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]]}',
+            '~> L(p, lim, s) = {[\\(90)T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]]}',
+        ], 30, 0, 'BASIL', '+-&^/\\T', -0.2, {
+            'flowerThreshold': '0.66',
+            'maxLeafSize': '0.66'
+        }),
+        maxStage: 50,
+        cost: new ExponentialCost(1, 1),
+        growthRate: BigNumber.FOUR,
+        growthCost: BigNumber.from(2.5),
+        actions:
+        [
+            {   // Always a harvest
+                symbols: new Set('KL'),
+                // system: new LSystem('', ['L=']),
+                killColony: true
+            },
+            {   // Always a prune
+                system: new LSystem('', ['K=', 'A=']),
+                killColony: false
+            }
+        ],
+        decimals:
+        {
+            'A': [2, 0],
+            'B': null,
+            'F': [2, 2],
+            'I': [0],
+            'K': [0],
+            'L': [2, 2, 0],
+            'S': [0],
+            '/': [0]
+        },
+        camera: (stage) =>
+        {
+            return {
+                scale: 8,
+                x: 0,
+                y: <number>saturate(stage / 4, 5, 9),
+                Z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) =>
+        {
+            return {
+                tickLength: 1
             };
         }
     },
