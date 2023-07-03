@@ -71,6 +71,7 @@ const LOC_STRINGS = {
         menuConfirm: 'Confirmation',
         actionConfirmDialogue: `You are about to perform a {0} on\\\\
 plot {1}, colony {2}.\\\\\n\n\\\\Do you want to continue?`,
+        labelSave: 'Last save: {0}s',
         labelActions: ['Harvest', 'Prune'],
         labelSettings: 'Settings',
         labelFilter: 'Filter: ',
@@ -154,8 +155,8 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
                 name: 'Calendula',
                 info: 'A classic flower to start the month.',
                 LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\I : flower
-stem\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest returns profit as the sum of all K.
-\\\\—\\\\The Model specification section may be ignored.`,
+stem\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest returns profit as the sum of all K
+(first parameter).\\\\—\\\\The Model specification section may be ignored.`,
                 stages: {
                     index: [
                         0,
@@ -191,8 +192,9 @@ known as the golden angle.`,
                 info: 'A fast growing herb that requires a bit of care.',
                 LsDetails: `A: apex (stem shoot)\\\\B: base\\\\F: internode\\\\
 I : shortened stem\\\\K: flower\\\\L: leaf\\\\S: signal (type 0 travels down,
-type 1 travels up)\\\\—\\\\Harvest returns profit as the sum of all L.\\\\Prune
-cuts off all A and K.\\\\—\\\\The Model specification section may be ignored.`,
+type 1 travels up)\\\\—\\\\Harvest returns profit as the sum of all L and K.\\\\
+Prune cuts off all A and K.\\\\—\\\\The Model specification section may be
+ignored.`,
                 stages: {
                     index: [
                         0, 4, 8, 10, 12, 14, 15, 18, 20,
@@ -2938,6 +2940,7 @@ const plantIDLookup = {
 };
 let haxEnabled = false;
 let time = 0;
+let lastSave = 0;
 let days = 0;
 let years = 0;
 let insolationCoord = 0;
@@ -3104,7 +3107,13 @@ const settingsLabel = ui.createLatexLabel({
     row: 0, column: 1,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9),
-    text: getLoc('labelSettings'),
+    text: () => {
+        let multiplier = game.isRewardActive ? 1.5 : 1;
+        let dt = (time - lastSave) / multiplier;
+        if (dt < 30)
+            return getLoc('labelSettings');
+        return Localization.format(getLoc('labelSave'), dt.toFixed(1));
+    },
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
@@ -4660,8 +4669,9 @@ let unBigStringify = (_, val) => {
     return val;
 };
 var getInternalState = () => {
-    // if(manager.busy)
-    //     return '';
+    if (manager.busy)
+        return '';
+    lastSave = time;
     return JSON.stringify({
         version: version,
         haxEnabled: haxEnabled,
@@ -4706,6 +4716,7 @@ var setInternalState = (stateStr) => {
             (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
         growthIntegral = time / 2 + 36 * Math.sin(time * Math.PI / 72) /
             Math.PI;
+        lastSave = state.time;
     }
     if ('plotIdx' in state)
         plotIdx = state.plotIdx;
