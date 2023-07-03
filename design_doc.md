@@ -129,6 +129,13 @@ between tau not feeling bloated and pub multipliers not too small)
   - Name: Excursions? Lessons? ... Lemmas?
   - Beating them will unlock new plant types
   - Ideas: 5x+1 Cotton Conjecture, ~~Botched~~ Bloated Linden (lol)
+- **Floodplains**: plots that are to the right of river
+  - Hostile plants
+  - Multiple plants per plot
+  - Only either garden or this can be active at a time
+  - Labelled on 4ary values as `f_1`, `f_2`, ...
+- Etymologically and geologically, prairies are not possible
+- Rainforests are also too many trees for LG
 
 ## Plants
 
@@ -205,8 +212,12 @@ between tau not feeling bloated and pub multipliers not too small)
 - **Active sprouts? (Micro greens)**
   - You can eat sunflower sprouts, aaa
 - **Poison ivy**
+- **Gooseberry**, behaves like a goose and eats things
+  - Name origin is actually unrelated to geese
+- **Hibiscus**
 - **Rhizomes?**
-- **Paleobotany** - time travelley stuff like cooksonia and zosterophyllum
+- **Bank vegetation near floodplains**: willow, ash (grows mistletoe)
+- **Silurian Paleobotany** - time travelley stuff: cooksonia, zosterophyllum
 - **Fungi** - foraging?
 - **Flower gender** mechanic?
 

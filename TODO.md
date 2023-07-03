@@ -21,13 +21,23 @@
   - Hold on, collaborative and social interactions. Discord! Reddit!
 
 - [ ] Research notes
+  - Two players share progress with each other daily
   - Some players understand the profit puzzle for calendula, some don't
   - Players enjoy watching plants grow idly
+  - Some players can't get pruning basil
+  - Some players mistake max stage with max profit
+  - Many players are cautious about purchasing expensive items, which isn't the 
+  case usually for other theories
 
 - Let's think about it. A plant that takes 80 minutes to grow, and you have to
 do nothing. Do you feel like it could be more interesting?
 
 ## Compost bin
+
+- [ ] Simple solitary flower
+  - Tulip?
+  - Buttercup
+  - No need, Cally is already easy to play
 
 - [ ] Colour schemes?
 - [ ] Timer function to measure growth
@@ -40,37 +50,17 @@ do nothing. Do you feel like it could be more interesting?
   - Only unlocks in a future update (classmates!)
   - Hard to implement since there's more to LG than when to harvest
 
-## v0.2: Rabbits update
-
-- [ ] Tag various stuffs with readonly
-
 - [ ] Different aspect ratios hav different graph bounds
 
-- [x] Preference table for decimal places
+- [ ] Newspapers
+- [ ] Add a Pruned commentary track
+  - 2 lazy
 
-- [x] Confirmation to harvest/prune
-  - Options menu
+## v0.2: Rabbits update
 
-- [ ] Basil
-  - [ ] More delay before flowering (maybe stg 24 flowers)
-  - [ ] Apex decreases synthesis when spawning leaves
-  - [ ] Side shoots grow more leaves but smaller
-  - [ ] Flower gives income? Can be made into tea - although should shrink
-  their power immensely
-  - [ ] Bees love flowers too?!!
-  - [ ] https://gardenbenchtop.com/what-happens-when-basil-flowers/
+- [ ] Notebook shows next cost
+- [ ] Tag various stuffs with readonly
 
-- [x] updateAvailability() slow
-
-- [x] Rose campion as first bush plant
-  - [ ] Death? Propagation?
-  - [x] Passive income
-  - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
-  - [x] Extend rose campion seed period by a few stages
-
-- [ ] Simple solitary flower
-  - Tulip?
-  - Buttercup
 - [ ] Hopleek
   - Biting is on evolution queue instead of action?
   - [x] Leap years calculation
@@ -79,10 +69,40 @@ do nothing. Do you feel like it could be more interesting?
   - [ ] Repelled by rose campions and sunflowers
 - [ ] Sunflower
 
-- [ ] Newspapers
-- [ ] Add a Pruned commentary track
-  - 2 lazy
+- [ ] Align the vibes of basil & campion to make it feel smoother
 
+- [x] Basil
+  - [x] Adjust starting cost: 1 → 1.25
+  - [ ] Double starting cost but 2, 10 stepwise?
+  - [x] More delay before flowering (maybe stg 24 flowers)
+  - [x] Decrease max stage
+  - [x] Apex decreases synthesis when spawning leaves
+  - [x] Side shoots grow more leaves but smaller
+  - [x] Flower gives income? Can be made into tea - although should shrink
+  their power immensely
+  - [ ] Bees love flowers too?!!
+  - [ ] https://gardenbenchtop.com/what-happens-when-basil-flowers/
+
+- [x] Rose campion as first bush plant
+  - [ ] Maximum statements
+  - [ ] Death? Propagation?
+  - [x] Income per evolution instead of night
+  - [x] Double growth cost
+  - [ ] Flower turns into fruit faster
+  - [ ] Fruit falls off
+  - [ ] Loading SLOW
+  - [ ] How long does it live? When does it spread seeds?
+  - [ ] Cost increases when it spreads, so need to shovel old ones before new
+  - [ ] Propagation ratio: 0.5, rounded up
+  - [ ] Add a parameter to adjust stagely income multiplier (1/2x for now?)
+  - [x] Passive income
+  - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
+  - [x] Extend rose campion seed period by a few stages
+
+- [x] Preference table for decimal places
+- [x] Confirmation to harvest/prune
+  - Options menu
+- [x] updateAvailability() slow
 - [x] Bookshelf unlocks after tutorial to avoid confusion with unlock plot
 
 ## v0.1: Slumber Seeds

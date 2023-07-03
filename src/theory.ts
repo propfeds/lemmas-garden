@@ -52,7 +52,7 @@ Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
     return descs[language] ?? descs.en;
 }
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
-var version = 0.102;
+var version = 0.103;
 
 const MAX_INT = 0x7fffffff;
 const TRIM_SP = /\s+/g;
@@ -63,18 +63,18 @@ const LS_CONTEXT =
 const BACKTRACK_LIST = new Set('+-&^\\/|[$T');
 // Leaves and apices
 const SYNTHABLE_SYMBOLS = new Set('AL');
-const MAX_CHARS_PER_TICK = 200;
+const MAX_CHARS_PER_TICK = 500;
 const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS =
 {
     en:
     {
-        versionName: `Version: 0.1.2h1, Slumber Seeds`,
+        versionName: `Version: 0.1.3, Slumber Seeds`,
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
-        pubTax: 'Tax on publish',
+        pubTax: 'Tax on publish\\colon',
 
         btnView: 'View L-system',
         btnVar: 'Variables',
@@ -91,8 +91,9 @@ const LOC_STRINGS =
 
         menuConfirm: 'Confirmation',
         actionConfirmDialogue: `You are about to perform a {0} on\\\\
-plot {1}, colony {2}.\\\\\n\n\\\\Do you want to continue?`,
+{3} (plot {1}-{2}).\\\\\n\n\\\\Do you want to continue?`,
 
+        labelSave: 'Last save: {0}s',
         labelActions: ['Harvest', 'Prune'],
         labelSettings: 'Settings',
         labelFilter: 'Filter: ',
@@ -169,6 +170,7 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
         [
             'Colony view: Off',
             'Colony view: Single',
+            'Colony view: Single 2',
             'Colony view: List'
         ],
         actionPanelLocations:
@@ -189,8 +191,8 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
                 name: 'Calendula',
                 info: 'A classic flower to start the month.',
                 LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\I : flower
-stem\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest returns profit as the sum of all K.
-\\\\—\\\\The Model specification section may be ignored.`,
+stem\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest returns profit as the sum of all K
+(first parameter).\\\\—\\\\The Model specification section may be ignored.`,
                 stages:
                 {
                     index:
@@ -228,30 +230,31 @@ known as the golden angle.`,
                 name: 'Basil',
                 info: 'A fast growing herb that requires a bit of care.',
                 LsDetails: `A: apex (stem shoot)\\\\B: base\\\\F: internode\\\\
-I : shortened stem\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest returns profit as the
-sum of all L.\\\\Prune cuts off all A and K.\\\\—\\\\The Model specification
-section may be ignored.`,
+I : shortened stem\\\\K: flower\\\\L: leaf\\\\S: signal (type 0 travels down,
+type 1 travels up)\\\\—\\\\Harvest returns profit as the sum of all L and K.\\\\
+Prune cuts off all A and K.\\\\—\\\\The Model specification section may be
+ignored.`,
                 stages:
                 {
                     index:
                     [
-                        0, 4, 8, 9, 12, 13, 14, 17, 20,
-                        21, 22
+                        0, 4, 8, 10, 12, 14, 15, 18, 20,
+                        23, 24
                     ],
                     0: 'A seedling in its sweet slumber.',
                     4: 'The first pair of leaves pops up. A stem, as well.',
                     8: 'The second pair of leaves appears.',
-                    9: 'Little leaves start to grow over the first node.',
+                    10: 'Little leaves start to grow over the first node.',
                     12: 'The third pair of leaves appears.',
-                    13: 'Little leaves now grow over the second node.',
-                    14: 'This rhythm will repeat for a while.',
-                    17: `I'll show you what to do when it flowers, soon.`,
+                    14: 'Little leaves now grow over the second node.',
+                    15: 'This rhythm will repeat for a while.',
+                    18: `I'll show you what to do when it flowers, soon.`,
                     20: `It's about to flower. You can nip the stem now if you
 don't feel confident.`,
-                    21: `The first flower appears.`,
-                    22: `If the flower's still there, imagine it's sending a
-signal from top to bottom, all the way to basil base. Then, basil base will
-send another one back to the leaves.`,
+                    23: `The first flower will appear soon.`,
+                    24: `If the flower's there, imagine it's sending a signal
+from top to bottom, all the way to basil base. Then, basil base will send
+another one back to the leaves.`,
                 }
             },
             3:
@@ -260,7 +263,7 @@ send another one back to the leaves.`,
                 info: 'A great sight for your garden. Provides daily income.',
                 LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\K: flower
 \\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns profit as the sum of all K.\\\\
-Passively provides income per day equal to total profit.\\\\—\\\\The Model
+Passively provides income per stage equal to total profit.\\\\—\\\\The Model
 specification section may be ignored.`,
                 stages:
                 {
@@ -287,6 +290,24 @@ for you?`
             9001:
             {
                 name: '(Test) Arrow weed',
+                info: 'Not balanced for regular play.',
+                LsDetails: `The symbol A represents a rising shoot (apex), ` +
+`while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
+`F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
+`kills the colony.`,
+                stages:
+                {
+                    index: [0, 1, 2, 4],
+                    0: 'The first shoot rises.\\\\Already harvestable.',
+                    1: 'The shoot splits in three.\\\\The stem lengthens.',
+                    2: 'The shoots continue to divide.',
+                    4: `What do you expect? It\'s a fractal. Arrow weed is the
+friend of all mathematicians.`
+                }
+            },
+            9002:
+            {
+                name: 'Brasil',
                 info: 'Not balanced for regular play.',
                 LsDetails: `The symbol A represents a rising shoot (apex), ` +
 `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
@@ -370,7 +391,7 @@ Here's a recipe to make some delicious calendula bread:`
 `slightly intoxicating flavour.
 Even my dog loves it from time to time.
 
-Time to maturity: 6~7 weeks
+Time to maturity: 'I haven't timed it yet'
 
 If you intend to harvest, snip off the stem before it flowers. Otherwise, ` +
 `the plant will go into the end of its life cycle, and the leaves will lose ` +
@@ -388,8 +409,8 @@ Rose campion is also used as a sedative, or for wound treatments, or wicks ` +
 
 Time to maturity: 'I haven't timed it yet'
 
-Every midnight, pollinators will pay you a penny or two after a hearty meal ` +
-`during the day.`
+Every time it grows, pollinators will pay you a few pennies for having ` +
+`provided them much hearty meals.`
             }
         },
 
@@ -637,6 +658,11 @@ let getSmallBtnSize = (width: number): number =>
         return 40;
 
     return 32;
+}
+
+let getProgBarSize = (width: number): number =>
+{
+    return getSmallBtnSize(width) / 2;
 }
 
 /**
@@ -1937,7 +1963,7 @@ class LSystem
         let i = task.start ?? 0;
         for(; i < sequence.length; ++i)
         {
-            if((i - task.start) > MAX_CHARS_PER_TICK)
+            if(i - task.start > MAX_CHARS_PER_TICK)
             {
                 return {
                     start: i,
@@ -2823,6 +2849,7 @@ class ColonyManager
     actionAncestreeTask: Task;
     actionDeriveTask: Task;
     actionCalcTask: Task;
+    restTick: number;
     constructor(object: ManagerInput = {}, length: number, width: number)
     {
         this.length = length;
@@ -2856,6 +2883,7 @@ class ColonyManager
         {
             start: 0
         };
+        // this.restTick = 0;
     }
 
     get object()
@@ -2873,6 +2901,13 @@ class ColonyManager
         };
     }
 
+    get busy()
+    {
+        if(this.gangsta || this.actionGangsta)
+            return true;
+        return false;
+    }
+
     reap(colony: Colony, multiplier: BigNumber = BigNumber.ONE)
     {
         if(multiplier.isZero)
@@ -2883,9 +2918,9 @@ class ColonyManager
         multiplier * theory.publicationMultiplier;
     }
 
-    addColony(plot, id, population)
+    addColony(plot: number, id: number, population: number, forceSplit = false)
     {
-        for(let i = 0; i < this.colonies[plot].length; ++i)
+        for(let i = 0; !forceSplit && i < this.colonies[plot].length; ++i)
         {
             if(this.colonies[plot][i].id == id && !this.colonies[plot][i].stage)
             {
@@ -2897,7 +2932,7 @@ class ColonyManager
         // Max 5, unless invading
         if(this.colonies[plot].length >= this.width)
         {
-            plants[plot][id].refund(population);
+            plants[plot][id]?.refund?.(population);
             return;
         }
         let c: Colony =
@@ -2925,14 +2960,15 @@ class ColonyManager
         theory.invalidateQuaternaryValues();
         updateAvailability();
     }
-    killColony(plot, index, id?: number)
+    killColony(plot: number, index: number, id?: number)
     {
         let c = this.colonies[plot][index];
         if(!c)
             return;
 
-        plants[plot][c.id].level -= Math.min(plants[plot][c.id].level,
-        c.population);
+        if(plantUnlocks.includes(c.id))
+            plants[plot][c.id].level -= Math.min(plants[plot][c.id].level,
+            c.population);
         if(index == this.colonies[plot].length - 1)
             switchColony.buy(1);
         if(this.gangsta && plot == this.gangsta[0])
@@ -3074,6 +3110,12 @@ class ColonyManager
     }
     continueAction()
     {
+        // if(this.restTick)
+        // {
+        //     --this.restTick;
+        //     return;
+        // }
+
         // Future idea: maybe instead of using an LS to prune/harvest, develop
         // efficient pruner/harvester, like a naked L-system rule???
         let c = this.colonies[this.actionGangsta[0]][this.actionGangsta[1]];
@@ -3162,6 +3204,8 @@ class ColonyManager
         this.actionGangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
+
+        // this.restTick = 5;
     }
     performAction(plot: number, index: number, id: number)
     {
@@ -3179,6 +3223,12 @@ class ColonyManager
     }
     evolve()
     {
+        // if(this.restTick)
+        // {
+        //     --this.restTick;
+        //     return;
+        // }
+
         let c = this.colonies[this.gangsta[0]][this.gangsta[1]];
         if(!c)
         {
@@ -3238,6 +3288,10 @@ class ColonyManager
         c.sequence = this.deriveTask.derivation;
         c.params = this.deriveTask.parameters;
         c.synthRate = this.calcTask.synthRate;
+        
+        if(plantData[c.id].stagelyIncome)
+            this.reap(c, plantData[c.id].stagelyIncome);
+
         c.profit = this.calcTask.profit;
 
         ++c.stage;
@@ -3259,6 +3313,8 @@ class ColonyManager
         this.gangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
+
+        // this.restTick = 5;
     }
 }
 
@@ -3361,6 +3417,7 @@ interface Plant
     growthRate: BigNumber;
     growthCost: BigNumber;
     dailyIncome?: boolean;
+    stagelyIncome?: BigNumber;
     actions: Action[];
     decimals: {[key: string]: number[]};
     camera: (stage: number) => RendererCamera;
@@ -3487,15 +3544,14 @@ const plantData: {[key: number]: Plant} =
     {
         system: new LSystem('BA(0.18, 0)',
         [
-            'A(r, t): r>=flowerThreshold = K(0)',
+            'A(r, t): r>=flowerThreshold = S(0)K(0.02, 8)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.12, 1.44)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
+            'A(r, t) = F(0.12, 1.44)[+[I(0)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.06, 0)',
             'I(t) > S(type): type<=0 = S(type)I(t)',
-            'I(t): t<4 = I(t+1)',
-            'I(t) = F(0.12, 0.36)[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]',
-            'K(t): t<=signalThreshold = S(0)/(90)[+K(1)][-K(1)]K(t+1)',
-            'K(t): t-2 = K(t+1)',
-            'K(t) = K(t+1)K(1)',
+            'I(t): t<5 = I(t+1)',
+            'I(t) = /(90)F(0.12, 0.72)T[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]I(-6)',
+            'K(s, t): t>0 = K(s+0.02, 0)K(0.02, t-1)',
+            'K(s, t): s<1 = K(s+0.02, t)',
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
             'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
             'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
@@ -3505,24 +3561,23 @@ const plantData: {[key: number]: Plant} =
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)',
             '~> #= Model specification',
-            '~> K(t) = /(90)F(min(1.25, sqrt(t/4)))T(-0.2){[k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//]}',
-            '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
+            '~> K(t) = /(90)F(min(1.25, sqrt(t*2))){[k(min(0.75, t*4))//k(min(0.75, t*4))//k(min(0.75, t*4))//k(min(0.75, t*4))//k(min(0.75, t*4))//k(min(0.75, t*4))//]}',
+            '~> k(size): size<0.75 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
-            '~> L(p, lim, s): s<1 = {\\(90)T(p*0.8)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
-            '~> L(p, lim, s) = {\\(90)T(lim)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
-        ], 30, 0, 'BASIL', '+-&^/\\T', 1, {
-            'flowerThreshold': '1.38',
-            'maxLeafSize': '0.66',
-            'signalThreshold': '0'
+            '~> L(p, lim, s): s<1 = {[\\(90)T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]]}',
+            '~> L(p, lim, s) = {[\\(90)T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]]}',
+        ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
+            'flowerThreshold': '0.96',
+            'maxLeafSize': '0.66'
         }),
-        maxStage: 54,
-        cost: new ExponentialCost(1, 1),
+        maxStage: 46,
+        cost: new ExponentialCost(1.25, 1),
         growthRate: BigNumber.FOUR,
-        growthCost: BigNumber.THREE,
+        growthCost: BigNumber.from(2.5),
         actions:
         [
             {   // Always a harvest
-                symbols: new Set('L'),
+                symbols: new Set('KL'),
                 // system: new LSystem('', ['L=']),
                 killColony: true
             },
@@ -3537,8 +3592,9 @@ const plantData: {[key: number]: Plant} =
             'B': null,
             'F': [2, 2],
             'I': [0],
-            'K': [0],
+            'K': [2, 0],
             'L': [2, 2, 0],
+            'S': [0],
             '/': [0]
         },
         camera: (stage) =>
@@ -3558,7 +3614,7 @@ const plantData: {[key: number]: Plant} =
             };
         }
     },
-    3:   // Rose campion
+    3:  // Rose campion
     {
         system: new LSystem('/(45)&(5)A(0.1, 3)', [
             'A(r, t): t>0 = A(r+0.05, t-1)',
@@ -3581,11 +3637,11 @@ const plantData: {[key: number]: Plant} =
         ], 31, 0, 'A', '', -0.6, {
             'maxLeafSize': '0.625'
         }),
-        maxStage: 30,
+        maxStage: 28,
         cost: new ExponentialCost(10000, Math.log2(5)),
         growthRate: BigNumber.FIVE,
-        growthCost: BigNumber.from(2.5),
-        dailyIncome: true,
+        growthCost: BigNumber.FIVE,//BigNumber.from(2.5),
+        stagelyIncome: BigNumber.ONE,
         actions:
         [
             {
@@ -3673,10 +3729,95 @@ const plantData: {[key: number]: Plant} =
             };
         }
     },
+    9002:   // BRasil (test)
+    {
+        system: new LSystem('BA(0.18, 0)',
+        [
+            'A(r, t): r>=flowerThreshold = S(0)K(0.02, 8)',
+            'A(r, t): t<3 = A(r+0.06, t+1)',
+            'A(r, t) = F(0.12, 1.44)[+[I(0)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.06, 0)',
+            'I(t) > S(type): type<=0 = S(type)I(t)',
+            'I(t): t<5 = I(t+1)',
+            'I(t) = /(90)F(0.12, 0.72)T[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]I(-6)',
+            'K(s, t): t>0 = K(s+0.02, 0)K(0.02, t-1)',
+            'K(s, t): s<1 = K(s+0.02, t)',
+            'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
+            'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
+            'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
+            'F(l, lim) > S(type): type<=0 = S(type)F(l, lim)',
+            'S(type) < F(l, lim): type>=1 = F(l, lim)S(type)',
+            'S(type) =',
+            'B > S(type): type<=0 = BS(1)',
+            'F(l, lim): l<lim = F(l+0.12, lim)',
+            '~> #= Model specification',
+            '~> K(t) = /(90)F(min(1.25, sqrt(t*2))){[k(min(0.75, t*3))//k(min(0.75, t*3))//k(min(0.75, t*3))//k(min(0.75, t*3))//k(min(0.75, t*3))//k(min(0.75, t*3))//]}',
+            '~> k(size): size<0.75 = [++F(size/2).[-F(size/2).].]',
+            '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
+            '~> L(p, lim, s): s<1 = {[\\(90)T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]]}',
+            '~> L(p, lim, s) = {[\\(90)T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]]}',
+        ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
+            'flowerThreshold': '0.96',
+            'maxLeafSize': '0.66'
+        }),
+        maxStage: 46,
+        cost: new ExponentialCost(1.25, 1),
+        growthRate: BigNumber.FOUR,
+        growthCost: BigNumber.from(2.5),
+        actions:
+        [
+            {   // Always a harvest
+                symbols: new Set('KL'),
+                // system: new LSystem('', ['L=']),
+                killColony: true
+            },
+            {   // Always a prune
+                system: new LSystem('', ['K=', 'A=']),
+                killColony: false
+            }
+        ],
+        decimals:
+        {
+            'A': [2, 0],
+            'B': null,
+            'F': [2, 2],
+            'I': [0],
+            'K': [2, 0],
+            'L': [2, 2, 0],
+            'S': [0],
+            '/': [0]
+        },
+        camera: (stage) =>
+        {
+            return {
+                scale: 8,
+                x: 0,
+                y: <number>saturate(stage / 4, 5, 9),
+                Z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) =>
+        {
+            return {
+                tickLength: 1
+            };
+        }
+    },
+}
+// For reference only
+const plantIDLookup =
+{
+    calendula: 1,
+    basil: 2,
+    campion: 3,
+    rose: 3,
+    arrow: 9001,
+    brasil: 9002
 }
 
 let haxEnabled = false;
 let time = 0;
+let lastSave = 0;
 let days = 0;
 let years = 0;
 let insolationCoord = 0;
@@ -3874,7 +4015,14 @@ const settingsLabel = ui.createLatexLabel
     row: 0, column: 1,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9),
-    text: getLoc('labelSettings'),
+    text: () =>
+    {
+        let multiplier = game.isRewardActive ? 1.5 : 1;
+        let dt = (time - lastSave) / multiplier;
+        if(dt < 30)
+            return getLoc('labelSettings');
+        return Localization.format(getLoc('labelSave'), dt.toFixed(1));
+    },
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
@@ -4247,10 +4395,21 @@ var tick = (elapsedTime: number, multiplier: number) =>
         growthCoord = (timeCos + 1) / 2;
         // floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
         // 180, Easing.LINEAR);
+        managerLoadingInd.isRunning = manager.busy;
     }
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
 }
+
+let managerLoadingInd = ui.createActivityIndicator
+({
+    margin: new Thickness(4),
+    horizontalOptions: LayoutOptions.END,
+    verticalOptions: LayoutOptions.END,
+    heightRequest: getImageSize(ui.screenWidth),
+    widthRequest: getImageSize(ui.screenWidth),
+    isRunning: manager.busy
+});
 
 var getEquationOverlay = () =>
 {
@@ -4263,6 +4422,7 @@ var getEquationOverlay = () =>
         children:
         [
             // floatingWipLabel,
+            managerLoadingInd,
             ui.createLatexLabel
             ({
                 row: 0, column: 0,
@@ -4352,12 +4512,11 @@ var getSecondaryEquation = () =>
     let c = selectedColony;
     if(!c)
     {
-        let taxInfo = `\\text{${getLoc('pubTax')}}\\colon\\\\
-        T_{\\text{p}}=${taxRate}\\times\\max\\text{p}\\\\\\\\`;
+        let taxInfo = `\\text{${getLoc('pubTax')}}\\\\
+        T_{\\text{p}}=${taxRate}\\times\\max\\text{p}`;
         let tauInfo = `${theory.latexSymbol}=\\max\\text{p}^
         ${tauRate.toString(0)}`;
-        return `\\begin{array}{c}${theory.publicationUpgrade.level &&
-        theory.canPublish ? taxInfo : ''}${tauInfo}\\end{array}`;
+        return `\\begin{array}{c}${tauInfo}\\\\\\\\${taxInfo}\\end{array}`;
     }
 
     switch(colonyMode)
@@ -4378,8 +4537,15 @@ var getSecondaryEquation = () =>
             // @ts-expect-error
             plantData[c.id].growthRate * BigNumber.from(growthCoord), c.profit,
             status)}}`;
-            // return `\\text{${Localization.format(getLoc('colony'), c.population, getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace g=${c.growth}/${plantData[c.id].growthCost * BigNumber.from(c.sequence.length)}\\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}\\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})\\\\`;
         case 2:
+            return `\\text{${Localization.format(getLoc('colony'), c.population,
+            getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
+            g=${c.growth}/${// @ts-expect-error
+            plantData[c.id].growthCost * BigNumber.from(c.sequence.length)}
+            \\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}
+            \\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
+            \\\\`;
+        case 3:
             let result = '';
             for(let i = 0; i < colonyIdx[plotIdx]; ++i)
             {
@@ -4821,6 +4987,9 @@ let createColonyViewMenu = (colony: Colony) =>
     });
     let updateReconstruction = () =>
     {
+        if(manager.busy)
+            return reconstructionTask.result;
+
         if(!('result' in reconstructionTask) ||
         ('result' in reconstructionTask && reconstructionTask.start))
         {
@@ -4834,7 +5003,7 @@ let createColonyViewMenu = (colony: Colony) =>
     let tmpTitle = Localization.format(getLoc('colony'), colony.population,
     getLoc('plants')[colony.id].name, colony.stage);
     let tmpStage = colony.stage;
-    let cmtStage;
+    let cmtStage: number;
     let updateCommentary = () =>
     {
         let stages = getLoc('plants')[colony.id].stages;
@@ -4904,7 +5073,7 @@ let createColonyViewMenu = (colony: Colony) =>
                 tmpCmt = updateCommentary();
                 plantStats.text = Localization.format(getLoc('plantStats'),
                 cmtStage, tmpCmt, plantData[colony.id].maxStage ?? '∞',
-                plantData[colony.id].growthRate, colony.synthRate,
+                colony.synthRate, plantData[colony.id].growthRate,
                 plantData[colony.id].growthCost, colony.sequence.length);
                 tmpStage = colony.stage;
                 reconstructionTask =
@@ -4996,7 +5165,7 @@ let createBookMenu = (book: Book) =>
     ({
         text: pages[page].title,
         margin: new Thickness(0, 4),
-        heightRequest: 20,
+        heightRequest: getProgBarSize(ui.screenWidth),
         horizontalTextAlignment: TextAlignment.CENTER,
         verticalTextAlignment: TextAlignment.CENTER
     });
@@ -5408,6 +5577,7 @@ let createShelfMenu = () =>
 
 let createConfirmationMenu = (plot: number, index: number, id: number) =>
 {
+    let c = manager.colonies[plot][index];
     let menu = ui.createPopup
     ({
         // isPeekable: true,
@@ -5419,7 +5589,9 @@ let createConfirmationMenu = (plot: number, index: number, id: number) =>
                 ui.createLatexLabel
                 ({
                     text: Localization.format(getLoc('actionConfirmDialogue'),
-                    getLoc('labelActions')[id], plot + 1, index + 1),
+                    getLoc('labelActions')[id], plot + 1, index + 1,
+                    Localization.format(getLoc('colony'), c.population,
+                    getLoc('plants')[c.id].name, c.stage)),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     margin: new Thickness(0, 15)
                 }),
@@ -5539,7 +5711,7 @@ let createWorldMenu = () =>
     ({
         row: 3, column: 1,
         minimum: 0,
-        maximum: 2,
+        maximum: 3,
         value: colonyMode,
         onValueChanged: () =>
         {
@@ -5619,7 +5791,7 @@ let createWorldMenu = () =>
             {
                 Sound.playClick();
                 actionConfirm = !actionConfirm;
-                APSwitch.isToggled = actionConfirm;
+                ACSwitch.isToggled = actionConfirm;
             }
         }
     });
@@ -5801,28 +5973,35 @@ let unBigStringify = (_, val) =>
     return val;
 }
 
-var getInternalState = () => JSON.stringify
-({
-    version: version,
-    haxEnabled: haxEnabled,
-    time: time,
-    plotIdx: plotIdx,
-    colonyIdx: colonyIdx,
-    plantIdx: plantIdx,
-    finishedTutorial: finishedTutorial,
-    manager: manager.object,
-    settings:
-    {
-        graphMode2D: graphMode2D,
-        graphMode3D: graphMode3D,
-        colonyMode: colonyMode,
-        fancyPlotTitle: fancyPlotTitle,
-        actionPanelOnTop: actionPanelOnTop,
-        actionConfirm: actionConfirm
-    },
-    colonyViewConfig: colonyViewConfig,
-    notebook: notebook
-}, bigStringify);
+var getInternalState = () =>
+{
+    if(manager.busy)
+        return '';
+
+    lastSave = time;
+    return JSON.stringify
+    ({
+        version: version,
+        haxEnabled: haxEnabled,
+        time: time,
+        plotIdx: plotIdx,
+        colonyIdx: colonyIdx,
+        plantIdx: plantIdx,
+        finishedTutorial: finishedTutorial,
+        manager: manager.object,
+        settings:
+        {
+            graphMode2D: graphMode2D,
+            graphMode3D: graphMode3D,
+            colonyMode: colonyMode,
+            fancyPlotTitle: fancyPlotTitle,
+            actionPanelOnTop: actionPanelOnTop,
+            actionConfirm: actionConfirm
+        },
+        colonyViewConfig: colonyViewConfig,
+        notebook: notebook
+    }, bigStringify);
+}
 
 var setInternalState = (stateStr: string) =>
 {
@@ -5853,6 +6032,8 @@ var setInternalState = (stateStr: string) =>
         (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
         growthIntegral = time / 2 + 36 * Math.sin(time * Math.PI / 72) /
         Math.PI;
+
+        lastSave = state.time;
     }
 
     if('plotIdx' in state)
@@ -5890,6 +6071,7 @@ var setInternalState = (stateStr: string) =>
         colonyMode = state.settings.colonyMode;
         fancyPlotTitle = state.settings.fancyPlotTitle;
         actionPanelOnTop = state.settings.actionPanelOnTop;
+        actionConfirm = state.settings.actionConfirm;
     }
 
     if('colonyViewConfig' in state)
@@ -5955,7 +6137,7 @@ var get2DGraphValue = () =>
 
 var get3DGraphPoint = () =>
 {
-    if(graphMode3D)
+    if(graphMode3D && !manager.busy)
         renderer.draw();
     return renderer.cursor;
 }
