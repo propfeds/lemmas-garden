@@ -5791,7 +5791,7 @@ let createWorldMenu = () =>
             {
                 Sound.playClick();
                 actionConfirm = !actionConfirm;
-                APSwitch.isToggled = actionConfirm;
+                ACSwitch.isToggled = actionConfirm;
             }
         }
     });
@@ -6071,6 +6071,7 @@ var setInternalState = (stateStr: string) =>
         colonyMode = state.settings.colonyMode;
         fancyPlotTitle = state.settings.fancyPlotTitle;
         actionPanelOnTop = state.settings.actionPanelOnTop;
+        actionConfirm = state.settings.actionConfirm;
     }
 
     if('colonyViewConfig' in state)

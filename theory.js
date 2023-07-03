@@ -4529,7 +4529,7 @@ let createWorldMenu = () => {
                 e.type == TouchType.LONGPRESS_RELEASED) {
                 Sound.playClick();
                 actionConfirm = !actionConfirm;
-                APSwitch.isToggled = actionConfirm;
+                ACSwitch.isToggled = actionConfirm;
             }
         }
     });
@@ -4751,6 +4751,7 @@ var setInternalState = (stateStr) => {
         colonyMode = state.settings.colonyMode;
         fancyPlotTitle = state.settings.fancyPlotTitle;
         actionPanelOnTop = state.settings.actionPanelOnTop;
+        actionConfirm = state.settings.actionConfirm;
     }
     if ('colonyViewConfig' in state)
         colonyViewConfig = state.colonyViewConfig;
