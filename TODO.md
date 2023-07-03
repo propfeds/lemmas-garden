@@ -86,7 +86,7 @@ do nothing. Do you feel like it could be more interesting?
 - [x] Rose campion as first bush plant
   - [ ] Maximum statements
   - [ ] Death? Propagation?
-  - [ ] Income per evolution instead of night
+  - [x] Income per evolution instead of night
   - [x] Double growth cost
   - [ ] Flower turns into fruit faster
   - [ ] Fruit falls off

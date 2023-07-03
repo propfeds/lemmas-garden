@@ -70,7 +70,7 @@ const LOC_STRINGS = {
         btnNo: 'No',
         menuConfirm: 'Confirmation',
         actionConfirmDialogue: `You are about to perform a {0} on\\\\
-plot {1}, colony {2}.\\\\\n\n\\\\Do you want to continue?`,
+{3} (plot {1}-{2}).\\\\\n\n\\\\Do you want to continue?`,
         labelSave: 'Last save: {0}s',
         labelActions: ['Harvest', 'Prune'],
         labelSettings: 'Settings',
@@ -221,7 +221,7 @@ another one back to the leaves.`,
                 info: 'A great sight for your garden. Provides daily income.',
                 LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\K: flower
 \\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns profit as the sum of all K.\\\\
-Passively provides income per day equal to total profit.\\\\—\\\\The Model
+Passively provides income per stage equal to total profit.\\\\—\\\\The Model
 specification section may be ignored.`,
                 stages: {
                     index: [
@@ -348,8 +348,8 @@ Rose campion is also used as a sedative, or for wound treatments, or wicks ` +
 
 Time to maturity: 'I haven't timed it yet'
 
-Every midnight, pollinators will pay you a penny or two after a hearty meal ` +
-                    `during the day.`
+Every time it grows, pollinators will pay you a few pennies for having ` +
+                    `provided them much hearty meals.`
             }
         },
         manualTitle: 'Lindenmayer Systems',
@@ -2506,6 +2506,8 @@ class ColonyManager {
         c.sequence = this.deriveTask.derivation;
         c.params = this.deriveTask.parameters;
         c.synthRate = this.calcTask.synthRate;
+        if (plantData[c.id].stagelyIncome)
+            this.reap(c, plantData[c.id].stagelyIncome);
         c.profit = this.calcTask.profit;
         ++c.stage;
         this.ancestreeTask =
@@ -2775,11 +2777,11 @@ const plantData = {
         ], 31, 0, 'A', '', -0.6, {
             'maxLeafSize': '0.625'
         }),
-        maxStage: 30,
+        maxStage: 28,
         cost: new ExponentialCost(10000, Math.log2(5)),
         growthRate: BigNumber.FIVE,
         growthCost: BigNumber.FIVE,
-        dailyIncome: true,
+        stagelyIncome: BigNumber.ONE,
         actions: [
             {
                 symbols: new Set('K'),
@@ -4357,13 +4359,14 @@ let createShelfMenu = () => {
     return menu;
 };
 let createConfirmationMenu = (plot, index, id) => {
+    let c = manager.colonies[plot][index];
     let menu = ui.createPopup({
         // isPeekable: true,
         title: getLoc('menuConfirm'),
         content: ui.createStackLayout({
             children: [
                 ui.createLatexLabel({
-                    text: Localization.format(getLoc('actionConfirmDialogue'), getLoc('labelActions')[id], plot + 1, index + 1),
+                    text: Localization.format(getLoc('actionConfirmDialogue'), getLoc('labelActions')[id], plot + 1, index + 1, Localization.format(getLoc('colony'), c.population, getLoc('plants')[c.id].name, c.stage)),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     margin: new Thickness(0, 15)
                 }),
