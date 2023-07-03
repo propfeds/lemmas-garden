@@ -94,7 +94,7 @@ do nothing. Do you feel like it could be more interesting?
   - [ ] How long does it live? When does it spread seeds?
   - [ ] Cost increases when it spreads, so need to shovel old ones before new
   - [ ] Propagation ratio: 0.5, rounded up
-  - [ ] Add a parameter to adjust stagely income multiplier (1/4th is ok?)
+  - [ ] Add a parameter to adjust stagely income multiplier (1/2x for now?)
   - [x] Passive income
   - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
   - [x] Extend rose campion seed period by a few stages

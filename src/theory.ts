@@ -63,7 +63,7 @@ const LS_CONTEXT =
 const BACKTRACK_LIST = new Set('+-&^\\/|[$T');
 // Leaves and apices
 const SYNTHABLE_SYMBOLS = new Set('AL');
-const MAX_CHARS_PER_TICK = 150;
+const MAX_CHARS_PER_TICK = 500;
 const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS =
@@ -4380,10 +4380,21 @@ var tick = (elapsedTime: number, multiplier: number) =>
         growthCoord = (timeCos + 1) / 2;
         // floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
         // 180, Easing.LINEAR);
+        managerLoadingInd.isRunning = manager.busy;
     }
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
 }
+
+let managerLoadingInd = ui.createActivityIndicator
+({
+    margin: new Thickness(4),
+    horizontalOptions: LayoutOptions.END,
+    verticalOptions: LayoutOptions.END,
+    heightRequest: getImageSize(ui.screenWidth),
+    widthRequest: getImageSize(ui.screenWidth),
+    isRunning: manager.busy
+});
 
 var getEquationOverlay = () =>
 {
@@ -4396,6 +4407,7 @@ var getEquationOverlay = () =>
         children:
         [
             // floatingWipLabel,
+            managerLoadingInd,
             ui.createLatexLabel
             ({
                 row: 0, column: 0,
@@ -4960,6 +4972,9 @@ let createColonyViewMenu = (colony: Colony) =>
     });
     let updateReconstruction = () =>
     {
+        if(manager.busy)
+            return reconstructionTask.result;
+
         if(!('result' in reconstructionTask) ||
         ('result' in reconstructionTask && reconstructionTask.start))
         {
@@ -5940,28 +5955,33 @@ let unBigStringify = (_, val) =>
     return val;
 }
 
-var getInternalState = () => JSON.stringify
-({
-    version: version,
-    haxEnabled: haxEnabled,
-    time: time,
-    plotIdx: plotIdx,
-    colonyIdx: colonyIdx,
-    plantIdx: plantIdx,
-    finishedTutorial: finishedTutorial,
-    manager: manager.object,
-    settings:
-    {
-        graphMode2D: graphMode2D,
-        graphMode3D: graphMode3D,
-        colonyMode: colonyMode,
-        fancyPlotTitle: fancyPlotTitle,
-        actionPanelOnTop: actionPanelOnTop,
-        actionConfirm: actionConfirm
-    },
-    colonyViewConfig: colonyViewConfig,
-    notebook: notebook
-}, bigStringify);
+var getInternalState = () =>
+{
+    // if(manager.busy)
+    //     return '';
+    return JSON.stringify
+    ({
+        version: version,
+        haxEnabled: haxEnabled,
+        time: time,
+        plotIdx: plotIdx,
+        colonyIdx: colonyIdx,
+        plantIdx: plantIdx,
+        finishedTutorial: finishedTutorial,
+        manager: manager.object,
+        settings:
+        {
+            graphMode2D: graphMode2D,
+            graphMode3D: graphMode3D,
+            colonyMode: colonyMode,
+            fancyPlotTitle: fancyPlotTitle,
+            actionPanelOnTop: actionPanelOnTop,
+            actionConfirm: actionConfirm
+        },
+        colonyViewConfig: colonyViewConfig,
+        notebook: notebook
+    }, bigStringify);
+}
 
 var setInternalState = (stateStr: string) =>
 {
