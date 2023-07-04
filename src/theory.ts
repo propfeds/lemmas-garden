@@ -3439,7 +3439,7 @@ interface NotebookEntry
 // Balance parameters
 
 const nofPlots = 6;
-const maxColoniesPerPlot = 5;
+const maxColoniesPerPlot = 4;
 const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(100)));
 const plantUnlocks = [1, 2, 3];
 const plantUnlockCosts = new CompositeCost(1,
@@ -3561,19 +3561,19 @@ const plantData: {[key: number]: Plant} =
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)',
             '~> #= Model specification',
-            '~> K(t) = /(90)F(min(1.25, sqrt(t*2))){[k(min(0.75, t*4))//k(min(0.75, t*4))//k(min(0.75, t*4))//k(min(0.75, t*4))//k(min(0.75, t*4))//k(min(0.75, t*4))//]}',
+            '~> K(t) = /(90)F(min(1.25, sqrt(t*2))){[k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//]}',
             '~> k(size): size<0.75 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
-            '~> L(p, lim, s): s<1 = {[\\(90)T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]]}',
-            '~> L(p, lim, s) = {[\\(90)T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]]}',
+            '~> L(p, lim, s): s<1 = {\\(90)T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
+            '~> L(p, lim, s) = {\\(90)T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
         ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
             'flowerThreshold': '0.96',
-            'maxLeafSize': '0.66'
+            'maxLeafSize': '0.6'
         }),
         maxStage: 46,
-        cost: new ExponentialCost(1.25, 1),
+        cost: new ExponentialCost(5, 1),
         growthRate: BigNumber.FOUR,
-        growthCost: BigNumber.from(2.5),
+        growthCost: BigNumber.TWO,
         actions:
         [
             {   // Always a harvest
@@ -4564,7 +4564,8 @@ var getSecondaryEquation = () =>
             // @ts-expect-error
             (plantData[c.id].growthCost *
             // @ts-expect-error
-            BigNumber.from(c.sequence.length)))}}}\\\\`;
+            BigNumber.from(c.sequence.length)))}}}\\\\E=${c.energy},\\enspace
+            \\pi =${c.profit}\\\\`;
             for(let i = colonyIdx[plotIdx] + 1;
             i < manager.colonies[plotIdx].length; ++i)
             {
