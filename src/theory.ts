@@ -5975,8 +5975,8 @@ let unBigStringify = (_, val) =>
 
 var getInternalState = () =>
 {
-    if(manager.busy)
-        return '';
+    // if(manager.busy)
+    //     return '';
 
     lastSave = time;
     return JSON.stringify
