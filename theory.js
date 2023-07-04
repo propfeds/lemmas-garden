@@ -155,8 +155,8 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
                 name: 'Calendula',
                 info: 'A classic flower to start the month.',
                 LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\I : flower
-stem\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest returns profit as the sum of all K
-(first parameter).\\\\—\\\\The Model specification section may be ignored.`,
+stem\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest returns profit as the sum of all K.
+\\\\—\\\\The Model specification section may be ignored.`,
                 stages: {
                     index: [
                         0,
@@ -192,9 +192,9 @@ known as the golden angle.`,
                 info: 'A fast growing herb that requires a bit of care.',
                 LsDetails: `A: apex (stem shoot)\\\\B: base\\\\F: internode\\\\I
 : shortened stem\\\\K: flower\\\\L: leaf\\\\S: signal (type 0 travels down,
-type 1 travels up)\\\\—\\\\Harvest returns profit as the sum of all L and K.
-\\\\Prune cuts off all A and K.\\\\—\\\\The Model specification section may be
-ignored.`,
+type 1 travels up)\\\\—\\\\Harvest returns profit as the sum of all L and K
+(first parameter).\\\\Prune cuts off all A and K.\\\\—\\\\The Model
+specification section may be ignored.`,
                 stages: {
                     index: [
                         0, 4, 8, 10, 12, 14, 15, 18, 20,
@@ -220,9 +220,9 @@ another one back to the leaves.`,
                 name: 'Rose campion',
                 info: 'A great sight for your garden. Provides daily income.',
                 LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\K: flower
-\\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns profit as the sum of all K.\\\\
-Passively provides income per stage equal to total profit.\\\\—\\\\The Model
-specification section may be ignored.`,
+\\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns profit as the sum of all K
+(first parameter).\\\\Passively provides income per stage equal to total profit.
+\\\\—\\\\The Model specification section may be ignored.`,
                 stages: {
                     index: [
                         0, 4, 6,
@@ -332,7 +332,7 @@ Here's a recipe to make some delicious calendula bread:`
                     `slightly intoxicating flavour.
 Even my dog loves it from time to time.
 
-Time to maturity: 'I haven't timed it yet'
+Time to maturity: 6~7 weeks
 
 If you intend to harvest, snip off the stem before it flowers. Otherwise, ` +
                     `the plant will go into the end of its life cycle, and the leaves will lose ` +
@@ -470,8 +470,7 @@ let alone urge me to let them plant on my ground.
 Well then, welcome to class.
 
 Hum.
-Can't even bear to look at this soil...
-Go till it. We'll start in the morning.`
+Can't even bear to look at this soil...`
             },
             basil: {
                 title: `Corollary`,
@@ -2687,13 +2686,13 @@ const plantData = {
     },
     2: // Basil
     {
-        system: new LSystem('BA(0.18, 0)', [
+        system: new LSystem('/(90)BA(0.18, 0)', [
             'A(r, t): r>=flowerThreshold = S(0)K(0.02, 8)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.12, 1.44)[+[I(0)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.06, 0)',
+            'A(r, t) = F(0.12, 1.44)[&[I(0)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[&L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.06, 0)',
             'I(t) > S(type): type<=0 = S(type)I(t)',
             'I(t): t<5 = I(t+1)',
-            'I(t) = /(90)F(0.12, 0.72)T[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]I(-6)',
+            'I(t) = /(90)F(0.12, 0.72)T[&L(0.03, maxLeafSize/2, 0)]/(180)[&L(0.03, maxLeafSize/2, 0)]I(-6)',
             'K(s, t): t>0 = K(s+0.02, 0)K(0.02, t-1)',
             'K(s, t): s<1 = K(s+0.02, t)',
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
@@ -2708,8 +2707,8 @@ const plantData = {
             '~> K(t) = /(90)F(min(1.25, sqrt(t*2))){[k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//]}',
             '~> k(size): size<0.75 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
-            '~> L(p, lim, s): s<1 = {\\(90)T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
-            '~> L(p, lim, s) = {\\(90)T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
+            '~> L(p, lim, s): s<1 = {T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
+            '~> L(p, lim, s) = {T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
         ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
             'flowerThreshold': '0.96',
             'maxLeafSize': '0.6'
@@ -3559,7 +3558,7 @@ var getSecondaryEquation = () => {
                 (plantData[c.id].growthCost *
                     // @ts-expect-error
                     BigNumber.from(c.sequence.length)))}}}\\\\E=${c.energy},\\enspace
-            \\pi =${c.profit}\\\\`;
+            \\pi =${c.profit}\\text{p}\\\\`;
             for (let i = colonyIdx[plotIdx] + 1; i < manager.colonies[plotIdx].length; ++i) {
                 let d = manager.colonies[plotIdx][i];
                 result += `\\text{${Localization.format(getLoc('colonyProg'), d.population, getLoc('plants')[d.id].name, d.stage, 
