@@ -190,10 +190,10 @@ known as the golden angle.`,
             2: {
                 name: 'Basil',
                 info: 'A fast growing herb that requires a bit of care.',
-                LsDetails: `A: apex (stem shoot)\\\\B: base\\\\F: internode\\\\
-I : shortened stem\\\\K: flower\\\\L: leaf\\\\S: signal (type 0 travels down,
-type 1 travels up)\\\\—\\\\Harvest returns profit as the sum of all L and K.\\\\
-Prune cuts off all A and K.\\\\—\\\\The Model specification section may be
+                LsDetails: `A: apex (stem shoot)\\\\B: base\\\\F: internode\\\\I
+: shortened stem\\\\K: flower\\\\L: leaf\\\\S: signal (type 0 travels down,
+type 1 travels up)\\\\—\\\\Harvest returns profit as the sum of all L and K.
+\\\\Prune cuts off all A and K.\\\\—\\\\The Model specification section may be
 ignored.`,
                 stages: {
                     index: [
@@ -4697,66 +4697,69 @@ var getInternalState = () => {
     }, bigStringify);
 };
 var setInternalState = (stateStr) => {
-    if (!stateStr)
-        return;
-    let state = JSON.parse(stateStr, unBigStringify);
-    let v = state.version;
-    if ('haxEnabled' in state) {
-        haxEnabled = state.haxEnabled;
-        freePenny.isAvailable = haxEnabled;
-        warpTick.isAvailable = haxEnabled;
-        warpDay.isAvailable = haxEnabled;
-        warpYear.isAvailable = haxEnabled;
-        warpZero.isAvailable = haxEnabled;
+    let state;
+    let v = version;
+    if (stateStr) {
+        state = JSON.parse(stateStr, unBigStringify);
+        v = state.version ?? version;
+        if ('haxEnabled' in state) {
+            haxEnabled = state.haxEnabled ?? haxEnabled;
+            freePenny.isAvailable = haxEnabled;
+            warpTick.isAvailable = haxEnabled;
+            warpDay.isAvailable = haxEnabled;
+            warpYear.isAvailable = haxEnabled;
+            warpZero.isAvailable = haxEnabled;
+        }
+        if ('time' in state) {
+            time = state.time ?? time;
+            let cycles = time / 144;
+            days = Math.floor(cycles);
+            years = binarySearch(yearStartLookup, days);
+            let phase = saturate(cycles - days - 0.25, 0, 0.5);
+            insolationIntegral = days * 144 / Math.PI - 72 *
+                (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
+            growthIntegral = time / 2 + 36 * Math.sin(time * Math.PI / 72) /
+                Math.PI;
+            lastSave = time;
+        }
+        if ('plotIdx' in state)
+            plotIdx = state.plotIdx ?? plotIdx;
+        if ('colonyIdx' in state)
+            colonyIdx = state.colonyIdx ?? colonyIdx;
+        if ('plantIdx' in state)
+            plantIdx = state.plantIdx ?? plantIdx;
+        if ('finishedTutorial' in state)
+            finishedTutorial = state.finishedTutorial ?? finishedTutorial;
+        if ('manager' in state)
+            manager = new ColonyManager(state.manager, nofPlots, maxColoniesPerPlot) ?? manager;
+        if (v < 0.04) {
+            if ('graphMode2D' in state)
+                graphMode2D = state.graphMode2D ?? graphMode2D;
+            if ('graphMode3D' in state)
+                graphMode3D = state.graphMode3D ?? graphMode3D;
+            if ('colonyMode' in state)
+                colonyMode = state.colonyMode ?? colonyMode;
+            if ('fancyPlotTitle' in state)
+                fancyPlotTitle = state.fancyPlotTitle ?? fancyPlotTitle;
+            if ('actionPanelOnTop' in state)
+                actionPanelOnTop = state.actionPanelOnTop ?? actionPanelOnTop;
+            if ('actionConfirm' in state)
+                actionConfirm = state.actionConfirm ?? actionConfirm;
+        }
+        else if ('settings' in state) {
+            graphMode2D = state.settings.graphMode2D ?? graphMode2D;
+            graphMode3D = state.settings.graphMode3D ?? graphMode3D;
+            colonyMode = state.settings.colonyMode ?? colonyMode;
+            fancyPlotTitle = state.settings.fancyPlotTitle ?? fancyPlotTitle;
+            actionPanelOnTop = state.settings.actionPanelOnTop ??
+                actionPanelOnTop;
+            actionConfirm = state.settings.actionConfirm ?? actionConfirm;
+        }
+        if ('colonyViewConfig' in state)
+            colonyViewConfig = state.colonyViewConfig ?? colonyViewConfig;
+        if ('notebook' in state)
+            notebook = state.notebook ?? notebook;
     }
-    if ('time' in state) {
-        time = state.time;
-        let cycles = time / 144;
-        days = Math.floor(cycles);
-        years = binarySearch(yearStartLookup, days);
-        let phase = saturate(cycles - days - 0.25, 0, 0.5);
-        insolationIntegral = days * 144 / Math.PI - 72 *
-            (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
-        growthIntegral = time / 2 + 36 * Math.sin(time * Math.PI / 72) /
-            Math.PI;
-        lastSave = state.time;
-    }
-    if ('plotIdx' in state)
-        plotIdx = state.plotIdx;
-    if ('colonyIdx' in state)
-        colonyIdx = state.colonyIdx;
-    if ('plantIdx' in state)
-        plantIdx = state.plantIdx;
-    if ('finishedTutorial' in state)
-        finishedTutorial = state.finishedTutorial;
-    if ('manager' in state)
-        manager = new ColonyManager(state.manager, nofPlots, maxColoniesPerPlot);
-    if (v < 0.04) {
-        if ('graphMode2D' in state)
-            graphMode2D = state.graphMode2D;
-        if ('graphMode3D' in state)
-            graphMode3D = state.graphMode3D;
-        if ('colonyMode' in state)
-            colonyMode = state.colonyMode;
-        if ('fancyPlotTitle' in state)
-            fancyPlotTitle = state.fancyPlotTitle;
-        if ('actionPanelOnTop' in state)
-            actionPanelOnTop = state.actionPanelOnTop;
-        if ('actionConfirm' in state)
-            actionConfirm = state.actionConfirm;
-    }
-    else if ('settings' in state) {
-        graphMode2D = state.settings.graphMode2D;
-        graphMode3D = state.settings.graphMode3D;
-        colonyMode = state.settings.colonyMode;
-        fancyPlotTitle = state.settings.fancyPlotTitle;
-        actionPanelOnTop = state.settings.actionPanelOnTop;
-        actionConfirm = state.settings.actionConfirm;
-    }
-    if ('colonyViewConfig' in state)
-        colonyViewConfig = state.colonyViewConfig;
-    if ('notebook' in state)
-        notebook = state.notebook;
     actuallyPlanting = false;
     tmpLevels = Array.from({ length: nofPlots }, (_) => { return {}; });
     for (let i = 0; i < nofPlots; ++i) {
