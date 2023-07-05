@@ -2761,7 +2761,7 @@ const plantData = {
         ], 31, 0, 'A', '', -0.6, {
             'maxLeafSize': '0.625'
         }),
-        maxStage: 28,
+        maxStage: 27,
         cost: new ExponentialCost(10000, Math.log2(5)),
         growthRate: BigNumber.FIVE,
         growthCost: BigNumber.FIVE,
@@ -2845,17 +2845,18 @@ const plantData = {
             };
         }
     },
-    9002: // BRasil (test)
+    9002: // Old basil
     {
         system: new LSystem('BA(0.18, 0)', [
-            'A(r, t): r>=flowerThreshold = S(0)K(0.02, 8)',
+            'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.12, 1.44)[+[I(0)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.06, 0)',
+            'A(r, t) = F(0.12, 1.44)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
             'I(t) > S(type): type<=0 = S(type)I(t)',
-            'I(t): t<5 = I(t+1)',
-            'I(t) = /(90)F(0.12, 0.72)T[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]I(-6)',
-            'K(s, t): t>0 = K(s+0.02, 0)K(0.02, t-1)',
-            'K(s, t): s<1 = K(s+0.02, t)',
+            'I(t): t<4 = I(t+1)',
+            'I(t) = F(0.12, 0.36)[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]',
+            'K(t): t<=signalThreshold = S(0)/(90)[+K(1)][-K(1)]K(t+1)',
+            'K(t): t-2 = K(t+1)',
+            'K(t) = K(t+1)K(1)',
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
             'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
             'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
@@ -2865,22 +2866,23 @@ const plantData = {
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)',
             '~> #= Model specification',
-            '~> K(t) = /(90)F(min(1.25, sqrt(t*2))){[k(min(0.75, t*3))//k(min(0.75, t*3))//k(min(0.75, t*3))//k(min(0.75, t*3))//k(min(0.75, t*3))//k(min(0.75, t*3))//]}',
-            '~> k(size): size<0.75 = [++F(size/2).[-F(size/2).].]',
+            '~> K(t) = /(90)F(min(1.25, sqrt(t/4)))T(-0.2){[k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//]}',
+            '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
-            '~> L(p, lim, s): s<1 = {[\\(90)T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]]}',
-            '~> L(p, lim, s) = {[\\(90)T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]]}',
-        ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
-            'flowerThreshold': '0.96',
-            'maxLeafSize': '0.66'
+            '~> L(p, lim, s): s<1 = {\\(90)T(p*0.8)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
+            '~> L(p, lim, s) = {\\(90)T(lim)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
+        ], 30, 0, 'BASIL', '+-&^/\\T', 1, {
+            'flowerThreshold': '1.38',
+            'maxLeafSize': '0.66',
+            'signalThreshold': '0'
         }),
-        maxStage: 46,
-        cost: new ExponentialCost(1.25, 1),
+        maxStage: 54,
+        cost: new ExponentialCost(1, 1),
         growthRate: BigNumber.FOUR,
-        growthCost: BigNumber.from(2.5),
+        growthCost: BigNumber.THREE,
         actions: [
             {
-                symbols: new Set('KL'),
+                symbols: new Set('L'),
                 // system: new LSystem('', ['L=']),
                 killColony: true
             },
@@ -2894,9 +2896,8 @@ const plantData = {
             'B': null,
             'F': [2, 2],
             'I': [0],
-            'K': [2, 0],
+            'K': [0],
             'L': [2, 2, 0],
-            'S': [0],
             '/': [0]
         },
         camera: (stage) => {
