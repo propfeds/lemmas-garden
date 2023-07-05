@@ -259,27 +259,12 @@ for you?`
 friend of all mathematicians.`
                 }
             },
-            9002: {
-                name: 'Brasil',
-                info: 'Not balanced for regular play.',
-                LsDetails: `The symbol A represents a rising shoot (apex), ` +
-                    `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
-                    `F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
-                    `kills the colony.`,
-                stages: {
-                    index: [0, 1, 2, 4],
-                    0: 'The first shoot rises.\\\\Already harvestable.',
-                    1: 'The shoot splits in three.\\\\The stem lengthens.',
-                    2: 'The shoots continue to divide.',
-                    4: `What do you expect? It\'s a fractal. Arrow weed is the
-friend of all mathematicians.`
-                }
-            },
         },
         plantStats: `({0}) {1}\\\\—\\\\Max. stage: {2}\\\\Synthesis rate: ` +
             `{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} * {6} ` +
             `chars\\\\—\\\\Sequence:`,
         noCommentary: 'No commentary.',
+        noLsDetails: 'No explanations.',
         permaShelf: 'Bookshelf',
         permaShelfInfo: 'Access instructions and other tools',
         menuToC: 'Table of Contents',
@@ -3503,6 +3488,15 @@ var getEquationOverlay = () => {
     });
     return result;
 };
+/**
+ * Returns the colony title for representation.
+ */
+let getColonyTitle = (colony, prog = false) => Localization.format(getLoc(prog ? 'colonyProg' : 'colony'), colony.population, getLoc('plants')[colony.id]?.name ?? `#${colony.id}`, 
+// @ts-expect-error
+colony.stage, prog ? colony.growth * BigNumber.HUNDRED /
+    // @ts-expect-error
+    (plantData[colony.id].growthCost * BigNumber.from(colony.sequence.length)) :
+    '');
 var getPrimaryEquation = () => {
     return Localization.format(getLoc(fancyPlotTitle ? 'plotTitleF' :
         'plotTitle'), plotIdx + 1);
@@ -3535,38 +3529,25 @@ var getSecondaryEquation = () => {
             // @ts-expect-error
             plantData[c.id].growthRate * BigNumber.from(growthCoord), c.profit, status)}}`;
         case 2:
-            return `\\text{${Localization.format(getLoc('colony'), c.population, getLoc('plants')[c.id].name, c.stage)}}\\\\E=${c.energy},\\enspace
+            return `\\text{${getColonyTitle(c)}}\\\\E=${c.energy},\\enspace
             g=${c.growth}/${ // @ts-expect-error
             plantData[c.id].growthCost * BigNumber.from(c.sequence.length)}
             \\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}
             \\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
             \\\\`;
         case 3:
-            let result = '';
+            let result = '\\text{';
             for (let i = 0; i < colonyIdx[plotIdx]; ++i) {
                 let d = manager.colonies[plotIdx][i];
-                result += `\\text{${Localization.format(getLoc('colonyProg'), d.population, getLoc('plants')[d.id].name, d.stage, 
-                // @ts-expect-error
-                d.growth * BigNumber.HUNDRED / (plantData[d.id].growthCost *
-                    // @ts-expect-error
-                    BigNumber.from(d.sequence.length)))}}\\\\`;
+                result += `${getColonyTitle(d, true)}\\\\`;
             }
-            result += `\\underline{\\text{${Localization.format(getLoc('colonyProg'), c.population, getLoc('plants')[c.id].name, 
-            // @ts-expect-error
-            c.stage, c.growth * BigNumber.HUNDRED /
-                // @ts-expect-error
-                (plantData[c.id].growthCost *
-                    // @ts-expect-error
-                    BigNumber.from(c.sequence.length)))}}}\\\\E=${c.energy},\\enspace
-            \\pi =${c.profit}\\text{p}\\\\`;
+            result += `\\underline{${getColonyTitle(c, true)}}}\\\\
+            E=${c.energy},\\enspace\\pi =${c.profit}\\text{p}\\\\\\text{`;
             for (let i = colonyIdx[plotIdx] + 1; i < manager.colonies[plotIdx].length; ++i) {
                 let d = manager.colonies[plotIdx][i];
-                result += `\\text{${Localization.format(getLoc('colonyProg'), d.population, getLoc('plants')[d.id].name, d.stage, 
-                // @ts-expect-error
-                d.growth * BigNumber.HUNDRED / (plantData[d.id].growthCost *
-                    // @ts-expect-error
-                    BigNumber.from(d.sequence.length)))}}\\\\`;
+                result += `${getColonyTitle(d, true)}\\\\`;
             }
+            result += `}`;
             return result;
         default:
             return '';
@@ -3764,7 +3745,7 @@ let createSystemMenu = (id) => {
     });
     */
     let menu = ui.createPopup({
-        title: getLoc('plants')[id].name,
+        title: getLoc('plants')[id]?.name ?? `#${id}`,
         isPeekable: true,
         content: ui.createStackLayout({
             children: [
@@ -3773,7 +3754,8 @@ let createSystemMenu = (id) => {
                     content: ui.createStackLayout({
                         children: [
                             ui.createLatexLabel({
-                                text: getLoc('plants')[id].LsDetails,
+                                text: getLoc('plants')[id]?.LsDetails ??
+                                    getLoc('noLsDetails'),
                                 margin: new Thickness(0, 6),
                                 horizontalTextAlignment: TextAlignment.START,
                                 verticalTextAlignment: TextAlignment.CENTER
@@ -3904,11 +3886,11 @@ let createColonyViewMenu = (colony) => {
         }
         return reconstructionTask.result;
     };
-    let tmpTitle = Localization.format(getLoc('colony'), colony.population, getLoc('plants')[colony.id].name, colony.stage);
+    let tmpTitle = getColonyTitle(colony);
     let tmpStage = colony.stage;
-    let cmtStage;
+    let cmtStage = -1;
     let updateCommentary = () => {
-        let stages = getLoc('plants')[colony.id].stages;
+        let stages = getLoc('plants')[colony.id]?.stages;
         if (!stages || !stages.index || colony.stage < stages.index[0])
             return getLoc('noCommentary');
         if (stages[colony.stage])
@@ -3954,7 +3936,7 @@ let createColonyViewMenu = (colony) => {
                 Menu title and commentary are updated dynamically without
                 the player having to close and re-open.
                 */
-                tmpTitle = Localization.format(getLoc('colony'), colony.population, getLoc('plants')[colony.id].name, colony.stage);
+                tmpTitle = getColonyTitle(colony);
                 tmpCmt = updateCommentary();
                 plantStats.text = Localization.format(getLoc('plantStats'), cmtStage, tmpCmt, plantData[colony.id].maxStage ?? '∞', colony.synthRate, plantData[colony.id].growthRate, plantData[colony.id].growthCost, colony.sequence.length);
                 tmpStage = colony.stage;
@@ -4366,7 +4348,7 @@ let createConfirmationMenu = (plot, index, id) => {
         content: ui.createStackLayout({
             children: [
                 ui.createLatexLabel({
-                    text: Localization.format(getLoc('actionConfirmDialogue'), getLoc('labelActions')[id], plot + 1, index + 1, Localization.format(getLoc('colony'), c.population, getLoc('plants')[c.id].name, c.stage)),
+                    text: Localization.format(getLoc('actionConfirmDialogue'), getLoc('labelActions')[id], plot + 1, index + 1, getColonyTitle(c)),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     margin: new Thickness(0, 15)
                 }),
