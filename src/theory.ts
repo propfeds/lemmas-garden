@@ -5648,7 +5648,7 @@ let createWorldMenu = () =>
     });
     let GM3Grid = ui.createGrid
     ({
-        row: 6, column: 0,
+        row: 5, column: 0,
         columnDefinitions: ['73*', '60*', '7*'],
         children:
         [
@@ -5659,7 +5659,7 @@ let createWorldMenu = () =>
     let GM3Switch = ui.createSwitch
     ({
         isToggled: graphMode3D,
-        row: 6, column: 1,
+        row: 5, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e: TouchEvent) =>
         {
@@ -5675,12 +5675,12 @@ let createWorldMenu = () =>
     let GM2Label = ui.createLatexLabel
     ({
         text: getLoc('graphModes2D')[graphMode2D],
-        row: 5, column: 0,
+        row: 4, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM2Slider = ui.createSlider
     ({
-        row: 5, column: 1,
+        row: 4, column: 1,
         minimum: 0,
         maximum: 2,
         value: graphMode2D,
@@ -5698,12 +5698,12 @@ let createWorldMenu = () =>
     let CMLabel = ui.createLatexLabel
     ({
         text: getLoc('colonyModes')[colonyMode],
-        row: 4, column: 0,
+        row: 3, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let CMSlider = ui.createSlider
     ({
-        row: 4, column: 1,
+        row: 3, column: 1,
         minimum: 0,
         maximum: 3,
         value: colonyMode,
@@ -5721,13 +5721,13 @@ let createWorldMenu = () =>
     let APLabel = ui.createLatexLabel
     ({
         text: getLoc('actionPanelLocations')[Number(actionPanelOnTop)],
-        row: 3, column: 0,
+        row: 2, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let APSwitch = ui.createSwitch
     ({
         isToggled: actionPanelOnTop,
-        row: 3, column: 1,
+        row: 2, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e: TouchEvent) =>
         {
@@ -5831,7 +5831,8 @@ let createWorldMenu = () =>
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
-                        getSmallBtnSize(ui.screenWidth)
+                        getSmallBtnSize(ui.screenWidth),
+                        // getSmallBtnSize(ui.screenWidth)
                     ],
                     children:
                     [
@@ -5847,8 +5848,8 @@ let createWorldMenu = () =>
                         PTSwitch,
                         ACLabel,
                         ACSwitch,
-                        QBLabel,
-                        QBSwitch
+                        // QBLabel,
+                        // QBSwitch
                     ]
                 }),
                 ui.createLatexLabel
