@@ -235,9 +235,11 @@ between tau not feeling bloated and pub multipliers not too small)
 
 - **The Lindenmaker (Mutations)**: let players mutate a plant for one level
   - Adopts the new plant's ruleset
-  - Example colony: 24 of Hopleek (35) x Dog rose
-  - Cutting leaves or harvesting fruits will have the same notation:
+  - Example notation: 24 of Hopleek (35) x Dog rose
+  - Cutting leaves or harvesting fruits will have the same notation?
   - 24 of Hopleek (20, 30, 35) x Dog rose (48, 59, etc.)
+  - Example short notation: 24 of Hopleek x C34, stage 35
+  (just mutated calendula at stage 34)
 
 - Milestones:
   - Marigold (calendula) generates gold (p) passively

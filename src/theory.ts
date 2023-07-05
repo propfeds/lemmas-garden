@@ -183,12 +183,18 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
             'Plot title: Serif',
             'Plot title: Cursive'
         ],
+        quatModes:
+        [
+            'Plot listing: Profits',
+            'Plot listing: Board'
+        ],
 
         plants:
         {
             1:
             {
                 name: 'Calendula',
+                nameShort: 'C',
                 info: 'A classic flower to start the month.',
                 LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\I : flower
 stem\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest returns profit as the sum of all K.
@@ -228,6 +234,7 @@ known as the golden angle.`,
             2:
             {
                 name: 'Basil',
+                nameShort: 'B',
                 info: 'A fast growing herb that requires a bit of care.',
                 LsDetails: `A: apex (stem shoot)\\\\B: base\\\\F: internode\\\\I
 : shortened stem\\\\K: flower\\\\L: leaf\\\\S: signal (type 0 travels down,
@@ -260,6 +267,7 @@ another one back to the leaves.`,
             3:
             {
                 name: 'Rose campion',
+                nameShort: 'R',
                 info: 'A great sight for your garden. Provides daily income.',
                 LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\K: flower
 \\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns profit as the sum of all K
@@ -290,6 +298,7 @@ for you?`
             9001:
             {
                 name: '(Test) Arrow weed',
+                nameShort: 'A',
                 info: 'Not balanced for regular play.',
                 LsDetails: `The symbol A represents a rising shoot (apex), ` +
 `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
@@ -3814,6 +3823,7 @@ let colonyMode = 1;
 let fancyPlotTitle = true;
 let actionPanelOnTop = false;
 let actionConfirm = true;
+let quatBoard = false;
 
 let colonyViewConfig: {[key: number]: ColonyViewEntry} = {};
 let notebook: {[key: number]: NotebookEntry} = {};
@@ -4581,16 +4591,29 @@ var getQuaternaryEntries = () =>
 
     for(let i = 0; i < plotPerma.level; ++i)
     {
-        let sum = BigNumber.ZERO;
-        for(let j = 0; j < manager.colonies[i].length; ++j)
+        if(quatBoard)
         {
-            let c = manager.colonies[i][j];
-            // @ts-expect-error
-            sum += c.profit * BigNumber.from(c.population) *
-            // @ts-expect-error
-            theory.publicationMultiplier;
+            let column = '';
+            for(let j = 0; j < manager.colonies[i].length; ++j)
+            {
+                let c = manager.colonies[i][j];
+                column += getLoc('plants')[c.id]?.nameShort ?? '#';
+            }
+            quaternaryEntries[i].value = column;
         }
-        quaternaryEntries[i].value = sum;
+        else
+        {
+            let sum = BigNumber.ZERO;
+            for(let j = 0; j < manager.colonies[i].length; ++j)
+            {
+                let c = manager.colonies[i][j];
+                // @ts-expect-error
+                sum += c.profit * BigNumber.from(c.population) *
+                // @ts-expect-error
+                theory.publicationMultiplier;
+            }
+            quaternaryEntries[i].value = sum;
+        }
     }
     if(theory.publicationUpgrade.level && theory.canPublish)
     {
@@ -5625,7 +5648,7 @@ let createWorldMenu = () =>
     });
     let GM3Grid = ui.createGrid
     ({
-        row: 5, column: 0,
+        row: 6, column: 0,
         columnDefinitions: ['73*', '60*', '7*'],
         children:
         [
@@ -5636,7 +5659,7 @@ let createWorldMenu = () =>
     let GM3Switch = ui.createSwitch
     ({
         isToggled: graphMode3D,
-        row: 5, column: 1,
+        row: 6, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e: TouchEvent) =>
         {
@@ -5652,12 +5675,12 @@ let createWorldMenu = () =>
     let GM2Label = ui.createLatexLabel
     ({
         text: getLoc('graphModes2D')[graphMode2D],
-        row: 4, column: 0,
+        row: 5, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM2Slider = ui.createSlider
     ({
-        row: 4, column: 1,
+        row: 5, column: 1,
         minimum: 0,
         maximum: 2,
         value: graphMode2D,
@@ -5675,12 +5698,12 @@ let createWorldMenu = () =>
     let CMLabel = ui.createLatexLabel
     ({
         text: getLoc('colonyModes')[colonyMode],
-        row: 3, column: 0,
+        row: 4, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let CMSlider = ui.createSlider
     ({
-        row: 3, column: 1,
+        row: 4, column: 1,
         minimum: 0,
         maximum: 3,
         value: colonyMode,
@@ -5698,13 +5721,13 @@ let createWorldMenu = () =>
     let APLabel = ui.createLatexLabel
     ({
         text: getLoc('actionPanelLocations')[Number(actionPanelOnTop)],
-        row: 2, column: 0,
+        row: 3, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let APSwitch = ui.createSwitch
     ({
         isToggled: actionPanelOnTop,
-        row: 2, column: 1,
+        row: 3, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e: TouchEvent) =>
         {
@@ -5716,20 +5739,19 @@ let createWorldMenu = () =>
                 APSwitch.isToggled = actionPanelOnTop;
                 APLabel.text = getLoc('actionPanelLocations')[
                 Number(actionPanelOnTop)];
-                theory.invalidatePrimaryEquation();
             }
         }
     });
     let PTLabel = ui.createLatexLabel
     ({
         text: getLoc('plotTitleModes')[Number(fancyPlotTitle)],
-        row: 0, column: 0,
+        row: 1, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let PTSwitch = ui.createSwitch
     ({
         isToggled: fancyPlotTitle,
-        row: 0, column: 1,
+        row: 1, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e: TouchEvent) =>
         {
@@ -5747,13 +5769,13 @@ let createWorldMenu = () =>
     let ACLabel = ui.createLatexLabel
     ({
         text: getLoc('labelActionConfirm'),
-        row: 1, column: 0,
+        row: 0, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let ACSwitch = ui.createSwitch
     ({
         isToggled: actionConfirm,
-        row: 1, column: 1,
+        row: 0, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e: TouchEvent) =>
         {
@@ -5763,6 +5785,30 @@ let createWorldMenu = () =>
                 Sound.playClick();
                 actionConfirm = !actionConfirm;
                 ACSwitch.isToggled = actionConfirm;
+            }
+        }
+    });
+    let QBLabel = ui.createLatexLabel
+    ({
+        text: getLoc('quatModes')[Number(quatBoard)],
+        row: 2, column: 0,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let QBSwitch = ui.createSwitch
+    ({
+        isToggled: quatBoard,
+        row: 2, column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        onTouched: (e: TouchEvent) =>
+        {
+            if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            e.type == TouchType.LONGPRESS_RELEASED)
+            {
+                Sound.playClick();
+                quatBoard = !quatBoard;
+                QBSwitch.isToggled = quatBoard;
+                QBLabel.text = getLoc('quatModes')[Number(quatBoard)];
+                theory.invalidateQuaternaryValues();
             }
         }
     });
@@ -5800,7 +5846,9 @@ let createWorldMenu = () =>
                         PTLabel,
                         PTSwitch,
                         ACLabel,
-                        ACSwitch
+                        ACSwitch,
+                        QBLabel,
+                        QBSwitch
                     ]
                 }),
                 ui.createLatexLabel
@@ -5967,7 +6015,8 @@ var getInternalState = () =>
             colonyMode: colonyMode,
             fancyPlotTitle: fancyPlotTitle,
             actionPanelOnTop: actionPanelOnTop,
-            actionConfirm: actionConfirm
+            actionConfirm: actionConfirm,
+            quatBoard: quatBoard
         },
         colonyViewConfig: colonyViewConfig,
         notebook: notebook
@@ -6035,6 +6084,8 @@ var setInternalState = (stateStr: string) =>
                 actionPanelOnTop = state.actionPanelOnTop ?? actionPanelOnTop;
             if('actionConfirm' in state)
                 actionConfirm = state.actionConfirm ?? actionConfirm;
+            if('quatBoard' in state)
+                quatBoard = state.quatBoard ?? quatBoard;
         }
         else if('settings' in state)
         {
@@ -6045,6 +6096,7 @@ var setInternalState = (stateStr: string) =>
             actionPanelOnTop = state.settings.actionPanelOnTop ??
             actionPanelOnTop;
             actionConfirm = state.settings.actionConfirm ?? actionConfirm;
+            quatBoard = state.settings.quatBoard ?? quatBoard;
         }
 
         if('colonyViewConfig' in state)
