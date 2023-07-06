@@ -91,7 +91,7 @@ const LOC_STRINGS =
 
         menuConfirm: 'Confirmation',
         actionConfirmDialogue: `You are about to perform a {0} on\\\\
-{3} (plot {1}-{2}).\\\\\n\n\\\\Do you want to continue?`,
+{3} (plot {1}, {2}).\\\\\n\n\\\\Do you want to continue?`,
 
         labelSave: 'Last save: {0}s',
         labelActions: ['Harvest', 'Prune'],
@@ -117,6 +117,9 @@ const LOC_STRINGS =
         forestTitle: `\\text{{Lemma }}{{{0}}}`,
         forestTitleF: `\\mathcal{{L}} \\mkern -0.5mu e \\mkern 0.5mu mm
 \\mkern 0.5mu a \\enspace #{{\\mkern 2mu}}{{{0}}}`,
+        plainTitle: `\\text{{Floodplain }}{{{0}}}`,
+        plainTitleF: `\\mathcal{{F}} \\mkern -1mu loodp \\mkern 0.5mu lain
+\\enspace #{{\\mkern 2mu}}{{{0}}}`,
 
         unlockPlot: `\\text{{plot }}{{{0}}}`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
@@ -552,7 +555,7 @@ Can't even bear to look at this soil...`
 `Sorry for letting you wait this long.
 I have a friend who... supplies me with seeds.
 For my old students, not you.
-It's a bit exorbitant, but consistent.
+It's a bit exorbitant, but reliable.
 
 ...She didn't return until today. Apologies.
 Wee bit sick of that calendula?`
@@ -567,6 +570,18 @@ going, you decide to buy yourself a notebook.
 This will help you keep track of your plantations.
 
 (Notebook is accessible at the bookshelf.)`
+            },
+            flood:
+            {
+                title: `A flood?`,
+                contents:
+`I hear ya.
+The floodplains hadn't been doing very well.
+It's very likely to get logged this season...
+
+Don't worry.
+Try not to spread your plants out too much.
+Because, this is not a regular flood.`
             }
         }
     }
@@ -4068,24 +4083,6 @@ var init = () =>
         };
         switchPlant.isAvailable = false;
     }
-    /* View colony
-    Essential in learning the game.
-    */
-    {
-        viewColony = theory.createSingularUpgrade(1, currency, new FreeCost);
-        viewColony.description = getLoc('viewColony');
-        viewColony.info = getLoc('viewColonyInfo');
-        viewColony.bought = (_) =>
-        {
-            viewColony.level = 0;
-            selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-            if(!selectedColony)
-                return;
-            let seqMenu = createColonyViewMenu(selectedColony);
-            seqMenu.show();
-        };
-        viewColony.isAvailable = false;
-    }
     /* Switch colony
     Modulow
     */
@@ -4107,6 +4104,24 @@ var init = () =>
             renderer.colony = selectedColony;
         };
         switchColony.isAvailable = false;
+    }
+    /* View colony
+    Essential in learning the game.
+    */
+    {
+        viewColony = theory.createSingularUpgrade(1, currency, new FreeCost);
+        viewColony.description = getLoc('viewColony');
+        viewColony.info = getLoc('viewColonyInfo');
+        viewColony.bought = (_) =>
+        {
+            viewColony.level = 0;
+            selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+            if(!selectedColony)
+                return;
+            let seqMenu = createColonyViewMenu(selectedColony);
+            seqMenu.show();
+        };
+        viewColony.isAvailable = false;
     }
 
     /* Plants & switch plants
@@ -4303,12 +4318,14 @@ var init = () =>
     // To do: challenge plot (-1)
     // Next: milestones
     let chapters = getLoc('chapters');
-    theory.createStoryChapter(0, chapters.intro.title, chapters.intro.contents,
-    () => true);
-    theory.createStoryChapter(1, chapters.basil.title, chapters.basil.contents,
-    () => plantPerma.level > 0);
-    theory.createStoryChapter(2, chapters.notebook.title,
-    chapters.notebook.contents, () => theory.buyAllUpgrade.level > 0);
+    theory.createStoryChapter(0, chapters?.intro?.title,
+    chapters?.intro?.contents, () => true);
+    theory.createStoryChapter(1, chapters?.basil?.title,
+    chapters?.basil?.contents, () => plantPerma.level > 0);
+    theory.createStoryChapter(2, chapters?.notebook?.title,
+    chapters?.notebook?.contents, () => theory.buyAllUpgrade.level > 0);
+    theory.createStoryChapter(3, chapters?.flood?.title,
+    chapters?.flood?.contents, () => theory.tau > BigNumber.ZERO && time < 10);
 
     theory.primaryEquationHeight = 30;
     theory.primaryEquationScale = 0.96;
@@ -4488,9 +4505,9 @@ var getEquationOverlay = () =>
 /**
  * Returns the colony title for representation.
  */
-let getColonyTitle = (colony: Colony, prog = false) =>
-Localization.format(getLoc(prog ? 'colonyProg' : 'colony'),
-colony.population, getLoc('plants')[colony.id]?.name ?? `#${colony.id}`,
+let getColonyTitle = (colony: Colony, prog = false, escapeHash = false) =>
+Localization.format(getLoc(prog ? 'colonyProg' : 'colony'), colony.population,
+getLoc('plants')[colony.id]?.name ?? `${escapeHash ? '\\' : ''}#${colony.id}`,
 // @ts-expect-error
 colony.stage, prog ? colony.growth * BigNumber.HUNDRED /
 // @ts-expect-error
@@ -5585,7 +5602,7 @@ let createConfirmationMenu = (plot: number, index: number, id: number) =>
                 ({
                     text: Localization.format(getLoc('actionConfirmDialogue'),
                     getLoc('labelActions')[id], plot + 1, index + 1,
-                    getColonyTitle(c)),
+                    getColonyTitle(c, false, true)),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     margin: new Thickness(0, 15)
                 }),
