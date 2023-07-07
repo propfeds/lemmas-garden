@@ -582,6 +582,22 @@ It's very likely to get logged this season...
 Don't worry.
 Try not to spread your plants out too much.
 Because, this is not a regular flood.`
+            },
+            nepo:
+            {
+                title: `Dear Ellen of Tau Publishing,`,
+                contents:
+`You are going easy on my student.
+What were you thinking? Super-exponential revenues?
+Either you get accused of nepotism, or I of bribery.
+And suddenly the next fortnight, she'd be cornering
+the market.
+
+I do not condone you letting her abuse the economy.
+Not without giving something back for the community.
+
+Take this to heart.
+- Lena`
             }
         }
     }
@@ -4325,7 +4341,10 @@ var init = () =>
     theory.createStoryChapter(2, chapters?.notebook?.title,
     chapters?.notebook?.contents, () => theory.buyAllUpgrade.level > 0);
     theory.createStoryChapter(3, chapters?.flood?.title,
-    chapters?.flood?.contents, () => theory.tau > BigNumber.ZERO && time < 10);
+    chapters?.flood?.contents, () => theory.tau >= BigNumber.ZERO && time < 10);
+    let twelve = BigNumber.from(1e12);
+    theory.createStoryChapter(4, chapters?.nepo?.title,
+    chapters?.nepo?.contents, () => theory.tau >= twelve);
 
     theory.primaryEquationHeight = 30;
     theory.primaryEquationScale = 0.96;
