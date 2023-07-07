@@ -554,8 +554,8 @@ Can't even bear to look at this soil...`
                 contents:
 `Sorry for letting you wait this long.
 I have a friend who... supplies me with seeds.
-For my old students, not you.
-It's a bit exorbitant, but reliable.
+Not for you, but for my old students.
+It's a bit exorbitant, but reliable, I hope.
 
 ...She didn't return until today. Apologies.
 Wee bit sick of that calendula?`
