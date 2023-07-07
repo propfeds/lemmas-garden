@@ -2180,6 +2180,10 @@ class ColonyManager {
         // Processed before regular gangsta
         this.actionQueue = new Queue(object.actionQueue);
         this.actionGangsta = object.actionGangsta;
+        this.actionAncestreeTask = object.actionAncestreeTask ??
+            {
+                start: 0
+            };
         this.actionDeriveTask = object.actionDeriveTask ??
             {
                 start: 0
@@ -2199,6 +2203,7 @@ class ColonyManager {
             calcTask: this.calcTask,
             actionQueue: this.actionQueue.object,
             actionGangsta: this.actionGangsta,
+            actionAncestreeTask: this.actionAncestreeTask,
             actionDeriveTask: this.actionDeriveTask,
             actionCalcTask: this.actionCalcTask,
         };
@@ -2397,17 +2402,28 @@ class ColonyManager {
             theory.invalidateQuaternaryValues();
             return;
         }
-        // derive and calc stats (possibly ancestree if future actions require
-        // checking adjacency)
+        // ancestree, derive and calc stats
+        if (!('ancestors' in this.actionAncestreeTask) ||
+            ('ancestors' in this.actionAncestreeTask &&
+                this.actionAncestreeTask.start)) {
+            let customAncestreeSystem = plantData[c.id].actions[id].system ??
+                plantData[c.id].system;
+            this.actionAncestreeTask = customAncestreeSystem.getAncestree(c.sequence, this.actionAncestreeTask);
+            return;
+        }
         if (!('derivation' in this.actionDeriveTask) ||
             ('derivation' in this.actionDeriveTask && this.actionDeriveTask.start)) {
-            this.actionDeriveTask = plantData[c.id].actions[id].system.derive(c.sequence, c.params, [], [], this.actionDeriveTask);
+            this.actionDeriveTask = plantData[c.id].actions[id].system.derive(c.sequence, c.params, this.actionAncestreeTask.ancestors, this.actionAncestreeTask.children, this.actionDeriveTask);
             return;
         }
         if (!this.actionDeriveTask.derivation.length) {
             if (id == 0)
                 this.reap(c);
             this.killColony(...this.actionGangsta);
+            this.actionAncestreeTask =
+                {
+                    start: 0
+                };
             this.actionDeriveTask =
                 {
                     start: 0
@@ -2428,6 +2444,10 @@ class ColonyManager {
         c.profit = this.actionCalcTask.profit;
         c.sequence = this.actionDeriveTask.derivation;
         c.params = this.actionDeriveTask.parameters;
+        this.actionAncestreeTask =
+            {
+                start: 0
+            };
         this.actionDeriveTask =
             {
                 start: 0
@@ -2707,13 +2727,13 @@ const plantData = {
     2: // Basil
     {
         system: new LSystem('/(90)BA(0.18, 0)', [
-            'A(r, t): r>=flowerThreshold = S(0)K(0.02, 8)',
+            'A(r, t): r>=flowerThreshold = S(0)F(0.12, 0.84)K(0.02, 8)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
             'A(r, t) = F(0.12, 1.44)[&[I(0)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[&L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.06, 0)',
             'I(t) > S(type): type<=0 = S(type)I(t)',
             'I(t): t<5 = I(t+1)',
             'I(t) = /(90)F(0.12, 0.72)T[&L(0.03, maxLeafSize/2, 0)]/(180)[&L(0.03, maxLeafSize/2, 0)]I(-6)',
-            'K(s, t): t>0 = F(0.12, 0.72)K(s+0.02, 0)/(90)K(0.02, t-1)',
+            'K(s, t): t>0 = K(s+0.02, 0)/(90)F(0.12, 0.84)K(0.02, t-1)',
             'K(s, t): s<1 = K(s+0.02, t)',
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
             'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
@@ -2724,8 +2744,8 @@ const plantData = {
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)',
             '~> #= Model specification',
-            '~> K(t) = {[k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//]}',
-            '~> k(size): size<0.75 = [++F(size/2).[-F(size/2).].]',
+            '~> K(t) = {[k(min(0.8, t*5))//k(min(0.8, t*5))//k(min(0.8, t*5))//k(min(0.8, t*5))//k(min(0.8, t*5))//k(min(0.8, t*5))//]}',
+            '~> k(size): size<0.7 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
             '~> L(p, lim, s): s<1 = {T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
             '~> L(p, lim, s) = {T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
@@ -2744,7 +2764,7 @@ const plantData = {
                 killColony: true
             },
             {
-                system: new LSystem('', ['K=', 'F>K=', '/>K=', 'A=']),
+                system: new LSystem('', ['F>K=', 'K</=', 'K=', 'A='], 30, 0, '', ''),
                 killColony: false
             }
         ],
@@ -2762,7 +2782,7 @@ const plantData = {
             return {
                 scale: 8,
                 x: 0,
-                y: saturate(stage / 4, 5, 9),
+                y: saturate(stage / 4, 5, 7),
                 Z: 0,
                 upright: true
             };
@@ -3154,6 +3174,7 @@ var shelfPerma;
 var plotPerma;
 var plantPerma;
 var freePenny;
+var pauseGame;
 var warpTick;
 var warpDay;
 var warpYear;
@@ -3311,6 +3332,23 @@ var init = () => {
     theory.publicationUpgrade.bought = (_) => theory.invalidateQuaternaryValues();
     theory.createBuyAllUpgrade(2, currency, permaCosts[1]);
     // theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
+    /* Pause
+    For testing purposes
+    */
+    {
+        pauseGame = theory.createPermanentUpgrade(9006, currency, new FreeCost);
+        let descs = ['Pause theory', 'Resume theory'];
+        pauseGame.getDescription = () => descs[pauseGame.level];
+        pauseGame.info = 'Pauses/resumes the game (renderer still works)';
+        pauseGame.bought = (_) => {
+            pauseGame.level &= 1;
+            if (pauseGame.level)
+                theory.pause();
+            else
+                theory.resume();
+        };
+        pauseGame.isAvailable = haxEnabled;
+    }
     /* Free penny
     For testing purposes
     */
@@ -4760,6 +4798,9 @@ var setInternalState = (stateStr) => {
         if ('haxEnabled' in state) {
             haxEnabled = state.haxEnabled ?? haxEnabled;
             freePenny.isAvailable = haxEnabled;
+            pauseGame.isAvailable = haxEnabled;
+            if (pauseGame.level)
+                theory.pause();
             warpTick.isAvailable = haxEnabled;
             warpDay.isAvailable = haxEnabled;
             warpYear.isAvailable = haxEnabled;
