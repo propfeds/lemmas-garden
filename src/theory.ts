@@ -242,8 +242,8 @@ known as the golden angle.`,
                 LsDetails: `A: apex (stem shoot)\\\\B: base\\\\F: internode\\\\I
 : shortened stem\\\\K: flower\\\\L: leaf\\\\S: signal (type 0 travels down,
 type 1 travels up)\\\\—\\\\Harvest returns profit as the sum of all L and K
-(first parameter).\\\\Prune cuts off all A and K.\\\\—\\\\The Model
-specification section may be ignored.`,
+(first parameters).\\\\Prune cuts off all A and K (also cuts geometry near K).
+\\\\—\\\\The Model specification section may be ignored.`,
                 stages:
                 {
                     index:
@@ -580,8 +580,8 @@ The floodplains hadn't been doing very well.
 It's very likely to get logged this season...
 
 Don't worry.
-Try not to spread your plants out too much.
-Because, this is not a regular flood.`
+Try not to spread your plants out too much,
+because, this is not your regular flood.`
             },
             nepo:
             {
@@ -596,7 +596,7 @@ the market.
 I do not condone you letting her abuse the economy.
 Not without giving something back for the community.
 
-Take this to heart.
+Take it to heart.
 - Lena`
             }
         }
@@ -3572,7 +3572,7 @@ const plantData: {[key: number]: Plant} =
             'I(t) > S(type): type<=0 = S(type)I(t)',
             'I(t): t<5 = I(t+1)',
             'I(t) = /(90)F(0.12, 0.72)T[&L(0.03, maxLeafSize/2, 0)]/(180)[&L(0.03, maxLeafSize/2, 0)]I(-6)',
-            'K(s, t): t>0 = K(s+0.02, 0)K(0.02, t-1)',
+            'K(s, t): t>0 = F(0.12, 0.72)K(s+0.02, 0)/(90)K(0.02, t-1)',
             'K(s, t): s<1 = K(s+0.02, t)',
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
             'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
@@ -3583,7 +3583,7 @@ const plantData: {[key: number]: Plant} =
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)',
             '~> #= Model specification',
-            '~> K(t) = /(90)F(min(1.25, sqrt(t*2))){[k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//]}',
+            '~> K(t) = {[k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//k(min(1, t*5))//]}',
             '~> k(size): size<0.75 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
             '~> L(p, lim, s): s<1 = {T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
@@ -3604,7 +3604,7 @@ const plantData: {[key: number]: Plant} =
                 killColony: true
             },
             {   // Always a prune
-                system: new LSystem('', ['K=', 'A=']),
+                system: new LSystem('', ['K=', 'F>K=', '/>K=', 'A=']),
                 killColony: false
             }
         ],
@@ -4341,10 +4341,10 @@ var init = () =>
     theory.createStoryChapter(2, chapters?.notebook?.title,
     chapters?.notebook?.contents, () => theory.buyAllUpgrade.level > 0);
     theory.createStoryChapter(3, chapters?.flood?.title,
-    chapters?.flood?.contents, () => theory.tau >= BigNumber.ZERO && time < 10);
-    let twelve = BigNumber.from(1e12);
+    chapters?.flood?.contents, () => theory.tau >= BigNumber.TEN && time < 10);
+    let fifteen = BigNumber.from(1e15).pow(tauRate);
     theory.createStoryChapter(4, chapters?.nepo?.title,
-    chapters?.nepo?.contents, () => theory.tau >= twelve);
+    chapters?.nepo?.contents, () => theory.tau >= fifteen);
 
     theory.primaryEquationHeight = 30;
     theory.primaryEquationScale = 0.96;
@@ -4565,9 +4565,9 @@ var getSecondaryEquation = () =>
             manager.actionGangsta[1] == colonyIdx[plotIdx]) ?
             getLoc('status').actions[manager.actionGangsta[2]] : '';
             return `\\text{${Localization.format(getLoc('colonyStats'),
-            c.population, getLoc('plants')[c.id].name, c.stage, c.energy,
+            c.population, getLoc('plants')[c.id]?.name ?? `#${c.id}`, c.stage,
             // @ts-expect-error
-            c.synthRate * BigNumber.from(insolationCoord), c.growth,
+            c.energy, c.synthRate * BigNumber.from(insolationCoord), c.growth,
             // @ts-expect-error
             plantData[c.id].growthCost * BigNumber.from(c.sequence.length),
             // @ts-expect-error
