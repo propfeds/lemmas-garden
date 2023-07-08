@@ -333,7 +333,15 @@ export class Theory {
     /**
      * Completely resets the theory. Only available within its own custom theory.
      */
-    reset(): any;
+    reset(): void;
+    /**
+     * Pauses the theory.
+     */
+    pause(): void;
+    /**
+     * Resumes the theory from a paused state.
+     */
+    resume(): void;
 }
 /**
  * Instance of the current custom theory. Only available within a custom theory.
