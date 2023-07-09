@@ -3485,7 +3485,7 @@ interface NotebookEntry
 
 const nofPlots = 6;
 const maxColoniesPerPlot = 4;
-const plotCosts = new FirstFreeCost(new ExponentialCost(1000, Math.log2(100)));
+const plotCosts = new FirstFreeCost(new ExponentialCost(500, Math.log2(200)));
 const plantUnlocks = [1, 2, 3];
 const plantUnlockCosts = new CompositeCost(1,
 new ConstantCost(2200),
