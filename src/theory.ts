@@ -100,7 +100,8 @@ const LOC_STRINGS =
         labelParams: 'Parameters: ',
         labelAxiom: 'Axiom: ',
         labelAngle: 'Turning angle (°): ',
-        labelRules: 'Production rules: {0}',
+        labelRules: `Production rules: {0}\\\\Rules are applied each stage to
+every symbol in the plant's sequence, simultaneously.`,
         labelIgnored: 'Turtle-ignored: ',
         labelCtxIgnored: 'Context-ignored: ',
         labelTropism: 'Tropism (gravity): ',
@@ -320,7 +321,7 @@ friend of all mathematicians.`
         },
         plantStats: `({0}) {1}\\\\—\\\\Max. stage: {2}\\\\Synthesis rate: ` +
 `{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} * {6} ` +
-`chars\\\\—\\\\Sequence:`,
+`symbols\\\\—\\\\Sequence:`,
         noCommentary: 'No commentary.',
         noLsDetails: 'No explanations.',
 
@@ -546,7 +547,9 @@ let alone urge me to let them plant on my ground.
 Well then, welcome to class.
 
 Hum.
-Can't even bear to look at this soil...`
+Can't even bear to look at this soil...
+Go till it, we'll start in the morning.
+And, you can peek at my bookshelf if you ever get lost.`
             },
             basil:
             {
@@ -4827,8 +4830,8 @@ let createSystemMenu = (id: number) =>
     ({
         text: Localization.format(getLoc('labelRules'), ruleEntries.length),
         verticalTextAlignment: TextAlignment.CENTER,
-        // margin: new Thickness(0, 12),
-        heightRequest: getSmallBtnSize(ui.screenWidth)
+        margin: new Thickness(0, 6),
+        // heightRequest: getSmallBtnSize(ui.screenWidth)
     });
     let ruleStack = ui.createGrid
     ({
@@ -4934,14 +4937,7 @@ let createSystemMenu = (id: number) =>
                                     varButton
                                 ]
                             }),
-                            ui.createGrid
-                            ({
-                                columnDefinitions: ['70*', '30*'],
-                                children:
-                                [
-                                    rulesLabel
-                                ]
-                            }),
+                            rulesLabel,
                             ruleStack,
                             ui.createGrid
                             ({

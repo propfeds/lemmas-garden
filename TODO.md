@@ -94,7 +94,7 @@ do nothing. Do you feel like it could be more interesting?
   - [ ] Death? Propagation?
   - [ ] Shrub form?
   - [x] Income per evolution instead of night
-  - [x] Double growth cost
+  - [ ] Double growth cost
   - [ ] Flower turns into fruit faster
   - [ ] Fruit falls off
   - [ ] Loading SLOW
