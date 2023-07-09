@@ -3589,7 +3589,7 @@ const plantData: {[key: number]: Plant} =
     {
         system: new LSystem('/(90)BA(0.18, 0)',
         [
-            'A(r, t): r>=flowerThreshold = S(0)F(0.12, 0.72)K(0.02, 8)',
+            'A(r, t): r>=flowerThreshold = S(0)F(0.12, 0.96)K(0.02, 8)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
             'A(r, t) = F(0.12, 1.44)[&[I(0)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[&L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.06, 0)',
             'S(type) < I(t): type>=1 = S(type)',
@@ -3606,8 +3606,8 @@ const plantData: {[key: number]: Plant} =
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)',
             '~> #= Model specification',
-            '~> K(t) = {[k(min(0.8, t*5))//k(min(0.8, t*5))//k(min(0.8, t*5))//k(min(0.8, t*5))//k(min(0.8, t*5))//k(min(0.8, t*5))//]}',
-            '~> k(size): size<0.7 = [++F(size/2).[-F(size/2).].]',
+            '~> K(t) = {[k(min(0.75, t*5))//k(min(0.75, t*5))//k(min(0.75, t*5))//k(min(0.75, t*5))//k(min(0.75, t*5))//k(min(0.75, t*5))//]}',
+            '~> k(size): size<0.6 = [++F(size/2).[-F(size/2).].]',
             '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
             '~> L(p, lim, s): s<1 = {T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
             '~> L(p, lim, s) = {T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
