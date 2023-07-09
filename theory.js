@@ -3929,7 +3929,7 @@ let createColonyViewMenu = (colony) => {
         colonyViewConfig[colony.id] =
             {
                 filter: '',
-                params: true
+                params: false
             };
     }
     let reconstructionTask = {
