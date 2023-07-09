@@ -77,7 +77,7 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Align the vibes of basil & campion to make it feel smoother
 
 - [x] Basil
-  - [ ] Signal type 1 kills I?
+  - [x] Signal type 1 kills I?
   - [x] Adjust starting cost: 1 → 1.25
   - [ ] Double starting cost but 2, 10 stepwise?
   - [x] More delay before flowering (maybe stg 24 flowers)
