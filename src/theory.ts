@@ -3589,7 +3589,7 @@ const plantData: {[key: number]: Plant} =
     {
         system: new LSystem('/(90)BA(0.18, 0)',
         [
-            'A(r, t): r>=flowerThreshold = S(0)F(0.12, 0.96)K(0.02, 8)',
+            'A(r, t): r>=flowerThreshold = S(0)F(0.24, 0.96)K(0.02, 8)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
             'A(r, t) = F(0.12, 1.44)[&[I(0)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[&L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.06, 0)',
             'S(type) < I(t): type>=1 = S(type)',
