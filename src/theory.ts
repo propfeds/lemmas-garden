@@ -2844,6 +2844,7 @@ interface Colony
 {
     id: number;
     population: number;
+    propagated: boolean;
     sequence: string;
     params: LSystemParams;
     stage: number;
@@ -2948,9 +2949,9 @@ class ColonyManager
         multiplier * theory.publicationMultiplier;
     }
 
-    addColony(plot: number, id: number, population: number, forceSplit = false)
+    addColony(plot: number, id: number, population: number, spread = false)
     {
-        for(let i = 0; !forceSplit && i < this.colonies[plot].length; ++i)
+        for(let i = 0; !spread && i < this.colonies[plot].length; ++i)
         {
             if(this.colonies[plot][i].id == id && !this.colonies[plot][i].stage)
             {
@@ -2962,13 +2963,15 @@ class ColonyManager
         // Max 5, unless invading
         if(this.colonies[plot].length >= this.width)
         {
-            plants[plot][id]?.refund?.(population);
+            if(!spread)
+                plants[plot][id]?.refund?.(population);
             return;
         }
         let c: Colony =
         {
             id: id,
             population: population,
+            propagated: spread,
             sequence: plantData[id].system.axiom,
             params: plantData[id].system.axiomParams,
             stage: 0,
@@ -2996,7 +2999,7 @@ class ColonyManager
         if(!c)
             return;
 
-        if(plantUnlocks.includes(c.id))
+        if(!c.propagated && plantUnlocks.includes(c.id))
             plants[plot][c.id].level -= Math.min(plants[plot][c.id].level,
             c.population);
         if(index == this.colonies[plot].length - 1)
@@ -5472,7 +5475,7 @@ let createNotebookMenu = () =>
                     for(let k = 0; k < manager.colonies[j].length; ++k)
                     {
                         let c = manager.colonies[j][k];
-                        if(c.id == plantUnlocks[i])
+                        if(c.id == plantUnlocks[i] && !c.propagated)
                         {
                             count += c.population;
                             tmpML = Math.max(tmpML, count);
@@ -6007,7 +6010,8 @@ var postPublish = () =>
             let c = manager.colonies[i][j];
             if(!tmpLevels[i][c.id])
                 tmpLevels[i][c.id] = 0;
-            tmpLevels[i][c.id] += c.population;
+            if(!c.propagated)
+                tmpLevels[i][c.id] += c.population;
         }
         for(let j = 0; j < plantUnlocks.length; ++j)
             plants[i][plantUnlocks[j]].level = tmpLevels[i][plantUnlocks[j]];
@@ -6203,7 +6207,8 @@ var setInternalState = (stateStr: string) =>
             }
             if(!tmpLevels[i][c.id])
                 tmpLevels[i][c.id] = 0;
-            tmpLevels[i][c.id] += c.population;
+            if(!c.propagated)
+                tmpLevels[i][c.id] += c.population;
         }
         for(let j = 0; j < plantUnlocks.length; ++j)
         {

@@ -34,9 +34,7 @@ do nothing. Do you feel like it could be more interesting?
 
 ## Compost bin
 
-- [x] Chapter about floods
-  - Happens when maximum statements
-  - Condition: tau > 0, time < 10
+- [ ] Tag various stuffs with readonly
 
 - [ ] Simple solitary flower
   - Tulip?
@@ -62,9 +60,19 @@ do nothing. Do you feel like it could be more interesting?
 
 ## v0.2: Rabbits update
 
+- [ ] Ask Uni of Calgary about how to make Ls easier to understand
+  - Provide context: making a game about the logical aspects of Ls
+
+- [ ] Explain plant mechanics in Lemma's book: energy, growth
+
+- [x] Chapter about floods
+  - Happens when maximum statements
+  - Condition: tau > 0, time < 10
+
+- [ ] Spreaded colonies syntax: +1 of Rose campion
+
 - [x] Colony view params are initially off
 - [ ] Notebook shows next cost
-- [ ] Tag various stuffs with readonly
 
 - [ ] Hopleek
   - Biting is on evolution queue instead of action?
@@ -72,6 +80,7 @@ do nothing. Do you feel like it could be more interesting?
     - [ ] 400-year cycle wrapping
   - [ ] Hopleek schedule
   - [ ] Repelled by rose campions and sunflowers
+
 - [ ] Sunflower
 
 - [ ] Align the vibes of basil & campion to make it feel smoother
@@ -93,6 +102,7 @@ do nothing. Do you feel like it could be more interesting?
   - [ ] Maximum statements
   - [ ] Death? Propagation?
   - [ ] Shrub form?
+  - [ ] Halve leaf synth
   - [x] Income per evolution instead of night
   - [ ] Double growth cost
   - [ ] Flower turns into fruit faster
