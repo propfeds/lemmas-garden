@@ -35,6 +35,7 @@ do nothing. Do you feel like it could be more interesting?
 ## Compost bin
 
 - [ ] Tag various stuffs with readonly
+- [ ] Enums
 
 - [ ] Simple solitary flower
   - Tulip?

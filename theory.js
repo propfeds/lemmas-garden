@@ -2640,7 +2640,7 @@ const LsManual = new Book(getLoc('manualTitle'), [
 // Balance parameters
 const nofPlots = 6;
 const maxColoniesPerPlot = 4;
-const plotCosts = new FirstFreeCost(new ExponentialCost(500, Math.log2(200)));
+const plotCosts = new FirstFreeCost(new ExponentialCost(900, Math.log2(120)));
 const plantUnlocks = [1, 2, 3];
 const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2200), new ConstantCost(145000));
 const permaCosts = [
@@ -4770,25 +4770,25 @@ var getInternalState = () => {
     //     return '';
     lastSave = time;
     return JSON.stringify({
-        version: version,
-        haxEnabled: haxEnabled,
-        time: time,
-        plotIdx: plotIdx,
-        colonyIdx: colonyIdx,
-        plantIdx: plantIdx,
-        finishedTutorial: finishedTutorial,
+        version,
+        haxEnabled,
+        time,
+        plotIdx,
+        colonyIdx,
+        plantIdx,
+        finishedTutorial,
         manager: manager.object,
         settings: {
-            graphMode2D: graphMode2D,
-            graphMode3D: graphMode3D,
-            colonyMode: colonyMode,
-            fancyPlotTitle: fancyPlotTitle,
-            actionPanelOnTop: actionPanelOnTop,
-            actionConfirm: actionConfirm,
-            quatBoard: quatBoard
+            graphMode2D,
+            graphMode3D,
+            colonyMode,
+            fancyPlotTitle,
+            actionPanelOnTop,
+            actionConfirm,
+            quatBoard
         },
-        colonyViewConfig: colonyViewConfig,
-        notebook: notebook
+        colonyViewConfig,
+        notebook
     }, bigStringify);
 };
 var setInternalState = (stateStr) => {
@@ -4820,31 +4820,20 @@ var setInternalState = (stateStr) => {
                 Math.PI;
             lastSave = time;
         }
-        if ('plotIdx' in state)
-            plotIdx = state.plotIdx ?? plotIdx;
-        if ('colonyIdx' in state)
-            colonyIdx = state.colonyIdx ?? colonyIdx;
-        if ('plantIdx' in state)
-            plantIdx = state.plantIdx ?? plantIdx;
-        if ('finishedTutorial' in state)
-            finishedTutorial = state.finishedTutorial ?? finishedTutorial;
-        if ('manager' in state)
-            manager = new ColonyManager(state.manager, nofPlots, maxColoniesPerPlot) ?? manager;
+        plotIdx = state.plotIdx ?? plotIdx;
+        colonyIdx = state.colonyIdx ?? colonyIdx;
+        plantIdx = state.plantIdx ?? plantIdx;
+        finishedTutorial = state.finishedTutorial ?? finishedTutorial;
+        manager = new ColonyManager(state.manager, nofPlots, maxColoniesPerPlot)
+            ?? manager;
         if (v < 0.04) {
-            if ('graphMode2D' in state)
-                graphMode2D = state.graphMode2D ?? graphMode2D;
-            if ('graphMode3D' in state)
-                graphMode3D = state.graphMode3D ?? graphMode3D;
-            if ('colonyMode' in state)
-                colonyMode = state.colonyMode ?? colonyMode;
-            if ('fancyPlotTitle' in state)
-                fancyPlotTitle = state.fancyPlotTitle ?? fancyPlotTitle;
-            if ('actionPanelOnTop' in state)
-                actionPanelOnTop = state.actionPanelOnTop ?? actionPanelOnTop;
-            if ('actionConfirm' in state)
-                actionConfirm = state.actionConfirm ?? actionConfirm;
-            if ('quatBoard' in state)
-                quatBoard = state.quatBoard ?? quatBoard;
+            graphMode2D = state.graphMode2D ?? graphMode2D;
+            graphMode3D = state.graphMode3D ?? graphMode3D;
+            colonyMode = state.colonyMode ?? colonyMode;
+            fancyPlotTitle = state.fancyPlotTitle ?? fancyPlotTitle;
+            actionPanelOnTop = state.actionPanelOnTop ?? actionPanelOnTop;
+            actionConfirm = state.actionConfirm ?? actionConfirm;
+            quatBoard = state.quatBoard ?? quatBoard;
         }
         else if ('settings' in state) {
             graphMode2D = state.settings.graphMode2D ?? graphMode2D;
@@ -4856,10 +4845,8 @@ var setInternalState = (stateStr) => {
             actionConfirm = state.settings.actionConfirm ?? actionConfirm;
             quatBoard = state.settings.quatBoard ?? quatBoard;
         }
-        if ('colonyViewConfig' in state)
-            colonyViewConfig = state.colonyViewConfig ?? colonyViewConfig;
-        if ('notebook' in state)
-            notebook = state.notebook ?? notebook;
+        colonyViewConfig = state.colonyViewConfig ?? colonyViewConfig;
+        notebook = state.notebook ?? notebook;
     }
     actuallyPlanting = false;
     tmpLevels = Array.from({ length: nofPlots }, (_) => { return {}; });
