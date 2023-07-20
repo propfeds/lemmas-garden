@@ -36,6 +36,8 @@ do nothing. Do you feel like it could be more interesting?
 
 - [ ] Tag various stuffs with readonly
 - [ ] Enums
+- [ ] Use toJSON() for classes
+- [ ] Change getLoc() to just assign loc folder at start and access a property
 
 - [ ] Simple solitary flower
   - Tulip?

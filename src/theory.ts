@@ -503,7 +503,7 @@ A(x) < B(y) > C(z) : x+y+z>10 = E((x+y)/2)F((y+z)/2)
                 contents:
 `A: apex (stem shoot). Can photo-synthesise.
 B: base. Is often used to receive and send signals.
-I: alternate stem. May transform into a flower, or something else.
+I: alternate stem. May transform into a new branch, or a flower.
 K: flower. Looks pretty.
 L: leaf. Can photo-synthesise.
 S: signal. Is used to communicate between organs.`
@@ -583,8 +583,8 @@ The floodplains hadn't been doing very well.
 It's very likely to get logged this season...
 
 Don't worry.
-Try not to spread your plants out too much,
-because, this is not your regular flood.`
+Try not to let your plants spread too much,
+because, this is unlike any regular flood.`
             },
             nepo:
             {
@@ -6052,7 +6052,7 @@ var goToNextStage = () =>
 };
 
 // Copied from the ol Oiler's Formula
-let bigStringify = (_, val) =>
+let bigStringify = (_: string | number, val: unknown) =>
 {
     try
     {
@@ -6063,7 +6063,7 @@ let bigStringify = (_, val) =>
     return val;
 }
 
-let unBigStringify = (_, val) =>
+let unBigStringify = (_: string | number, val: unknown) =>
 {
     if (val && typeof val === 'string')
     {
