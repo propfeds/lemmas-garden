@@ -3037,9 +3037,10 @@ let createFramedButton = (params, margin, callback, image) => {
         margin: new Thickness(margin),
         padding: new Thickness(1),
         hasShadow: true,
-        heightRequest: getImageSize(ui.screenWidth),
-        widthRequest: getImageSize(ui.screenWidth),
-        content: ui.createImage({
+        heightRequest: getImageSize(360),
+        widthRequest: getImageSize(360),
+        content: ui.createImage
+        ({
             source: image,
             aspect: Aspect.ASPECT_FIT,
             useTint: false
@@ -3496,8 +3497,8 @@ let managerLoadingInd = ui.createActivityIndicator({
     margin: new Thickness(4),
     horizontalOptions: LayoutOptions.END,
     verticalOptions: LayoutOptions.END,
-    heightRequest: getImageSize(ui.screenWidth),
-    widthRequest: getImageSize(ui.screenWidth),
+    heightRequest: getImageSize(360),
+    widthRequest: getImageSize(360),
     isRunning: manager.busy
 });
 var getEquationOverlay = () => {
@@ -3710,7 +3711,7 @@ let createVariableMenu = (variables) => {
         text: Localization.format(getLoc('labelVars'), variables.length),
         verticalTextAlignment: TextAlignment.CENTER,
         // margin: new Thickness(0, 12)
-        heightRequest: getSmallBtnSize(ui.screenWidth)
+        heightRequest: getSmallBtnSize(360)
     });
     let varStack = ui.createGrid({
         columnDefinitions: ['50*', '20*', '30*'],
@@ -3758,8 +3759,9 @@ let createSystemMenu = (id) => {
         text: getLoc('btnVar'),
         row: 0,
         column: 2,
-        heightRequest: getSmallBtnSize(ui.screenWidth),
-        onClicked: () => {
+        heightRequest: getSmallBtnSize(360),
+        onClicked: () =>
+        {
             Sound.playClick();
             let varMenu = createVariableMenu(tmpVars);
             varMenu.show();
@@ -3779,7 +3781,6 @@ let createSystemMenu = (id) => {
         text: Localization.format(getLoc('labelRules'), ruleEntries.length),
         verticalTextAlignment: TextAlignment.CENTER,
         margin: new Thickness(0, 6),
-        // heightRequest: getSmallBtnSize(ui.screenWidth)
     });
     let ruleStack = ui.createGrid({
         children: ruleEntries
@@ -3844,7 +3845,6 @@ let createSystemMenu = (id) => {
         content: ui.createStackLayout({
             children: [
                 ui.createScrollView({
-                    // heightRequest: ui.screenHeight * 0.32,
                     content: ui.createStackLayout({
                         children: [
                             ui.createLatexLabel({
@@ -4042,10 +4042,13 @@ let createColonyViewMenu = (colony) => {
                 plantStats,
                 ui.createFrame({
                     padding: new Thickness(8, 6),
-                    heightRequest: ui.screenHeight * 0.16,
-                    content: ui.createScrollView({
-                        content: ui.createStackLayout({
-                            children: [
+                    heightRequest: 540 * 0.16,
+                    content: ui.createScrollView
+                    ({
+                        content: ui.createStackLayout
+                        ({
+                            children:
+                            [
                                 pageContents
                             ]
                         })
@@ -4055,8 +4058,9 @@ let createColonyViewMenu = (colony) => {
                     heightRequest: 0,
                     margin: new Thickness(0)
                 }),
-                ui.createGrid({
-                    minimumHeightRequest: getSmallBtnSize(ui.screenWidth),
+                ui.createGrid
+                ({
+                    minimumHeightRequest: getSmallBtnSize(360),
                     columnDefinitions: ['20*', '30*', '35*', '15*'],
                     children: [
                         ui.createLatexLabel({
@@ -4078,8 +4082,9 @@ let createColonyViewMenu = (colony) => {
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
                 }),
-                ui.createGrid({
-                    minimumHeightRequest: getBtnSize(ui.screenWidth),
+                ui.createGrid
+                ({
+                    minimumHeightRequest: getBtnSize(360),
                     columnDefinitions: ['50*', '50*'],
                     children: [
                         viewButton,
@@ -4099,7 +4104,7 @@ let createBookMenu = (book) => {
     let pageTitle = ui.createLatexLabel({
         text: pages[page].title,
         margin: new Thickness(0, 4),
-        heightRequest: getProgBarSize(ui.screenWidth),
+        heightRequest: getProgBarSize(360),
         horizontalTextAlignment: TextAlignment.CENTER,
         verticalTextAlignment: TextAlignment.CENTER
     });
@@ -4203,7 +4208,7 @@ let createBookMenu = (book) => {
                 text: Localization.format(getLoc('btnPage'), tableofContents[i] + 1),
                 row: i,
                 column: 1,
-                heightRequest: getSmallBtnSize(ui.screenWidth),
+                heightRequest: getSmallBtnSize(360),
                 onClicked: () => {
                     Sound.playClick();
                     setPage(tableofContents[i]);
@@ -4216,7 +4221,6 @@ let createBookMenu = (book) => {
     let TOCMenu = ui.createPopup({
         title: getLoc('menuToC'),
         content: ui.createScrollView({
-            // heightRequest: ui.screenHeight * 0.36,
             content: ui.createGrid({
                 columnDefinitions: ['80*', '20*'],
                 children: getContentsTable()
@@ -4231,7 +4235,7 @@ let createBookMenu = (book) => {
                 pageTitle,
                 ui.createFrame({
                     padding: new Thickness(8, 6),
-                    heightRequest: ui.screenHeight * 0.28,
+                    heightRequest: 540 * 0.28,
                     content: ui.createScrollView({
                         content: ui.createStackLayout({
                             children: [
@@ -4347,8 +4351,8 @@ let createNotebookMenu = () => {
             children: [
                 ui.createGrid({
                     heightRequest: theory.isAutoBuyerAvailable ?
-                        getSmallBtnSize(ui.screenWidth) :
-                        getImageSize(ui.screenWidth),
+                        getSmallBtnSize(360) :
+                        getImageSize(360),
                     columnDefinitions: theory.isAutoBuyerAvailable ?
                         ['40*', '30*', '30*'] : ['70*', '30*'],
                     children: [
@@ -4630,14 +4634,14 @@ let createWorldMenu = () => {
             children: [
                 ui.createGrid({
                     columnDefinitions: ['70*', '30*'],
-                    rowDefinitions: [
-                        getSmallBtnSize(ui.screenWidth),
-                        getSmallBtnSize(ui.screenWidth),
-                        getSmallBtnSize(ui.screenWidth),
-                        getSmallBtnSize(ui.screenWidth),
-                        getSmallBtnSize(ui.screenWidth),
-                        getSmallBtnSize(ui.screenWidth),
-                        // getSmallBtnSize(ui.screenWidth)
+                    rowDefinitions:
+                    [
+                        getSmallBtnSize(360),
+                        getSmallBtnSize(360),
+                        getSmallBtnSize(360),
+                        getSmallBtnSize(360),
+                        getSmallBtnSize(360),
+                        getSmallBtnSize(360)
                     ],
                     children: [
                         GM3Grid,
@@ -4668,7 +4672,7 @@ let createWorldMenu = () => {
                     margin: new Thickness(0, 6)
                 }),
                 ui.createGrid({
-                    minimumHeightRequest: getBtnSize(ui.screenWidth),
+                    minimumHeightRequest: getBtnSize(360),
                     columnDefinitions: ['50*', '50*'],
                     children: [
                         ui.createButton({
