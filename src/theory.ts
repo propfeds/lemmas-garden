@@ -192,7 +192,8 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
         [
             'Quaternary: Profits',
             'Quaternary: Board',
-            'Quaternary: Performance'
+            'Quaternary: Perf (instant/avg)',
+            'Quaternary: Perf (min/max)'
         ],
 
         plants:
@@ -3926,6 +3927,7 @@ enum QuaternaryModes
     PROFITS,
     BOARD,
     PERFORMANCE,
+    PERFORMANCE_MINMAX,
     _SIZE
 }
 let quatMode = QuaternaryModes.PROFITS;
@@ -4550,8 +4552,13 @@ var tick = (elapsedTime: number, multiplier: number) =>
         let timeCos = Math.cos(time * Math.PI / 72);
         insolationCoord = Math.max(0, -timeCos);
         growthCoord = (timeCos + 1) / 2;
-        if(quatMode == QuaternaryModes.PERFORMANCE)
-            theory.invalidateQuaternaryValues();
+        switch(quatMode)
+        {
+            case QuaternaryModes.PERFORMANCE:
+            case QuaternaryModes.PERFORMANCE_MINMAX:
+                theory.invalidateQuaternaryValues();
+                break;
+        }
         // floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
         // 180, Easing.LINEAR);
         managerLoadingInd.isRunning = manager.busy;
@@ -4767,15 +4774,24 @@ let getTimeString = () =>
 
 var getQuaternaryEntries = () =>
 {
-    if(quatMode == QuaternaryModes.PERFORMANCE)
+    switch(quatMode)
     {
-        for(let i = 0; i < perfs.length; ++i)
-        {
-            let latest = getCoordString(perfs[i].latest * 1000);
-            let mean = getCoordString(perfs[i].mean * 1000);
-            perfQuaternaryEntries[i].value = `${latest} (${mean})`;
-        }
-        return perfQuaternaryEntries;
+        case QuaternaryModes.PERFORMANCE:
+            for(let i = 0; i < perfs.length; ++i)
+            {
+                let m1 = getCoordString(perfs[i].latest * 1000);
+                let m2 = getCoordString(perfs[i].mean * 1000);
+                perfQuaternaryEntries[i].value = `${m1}/${m2}`;
+            }
+            return perfQuaternaryEntries;
+        case QuaternaryModes.PERFORMANCE_MINMAX:
+            for(let i = 0; i < perfs.length; ++i)
+            {
+                let m1 = getCoordString(perfs[i].min * 1000);
+                let m2 = getCoordString(perfs[i].max * 1000);
+                perfQuaternaryEntries[i].value = `${m1}/${m2}`;
+            }
+            return perfQuaternaryEntries;
     }
 
     if(!plotPerma.level)
@@ -6307,8 +6323,8 @@ var setInternalState = (stateStr: string) =>
             actionPanelOnTop = state.settings.actionPanelOnTop ??
             actionPanelOnTop;
             actionConfirm = state.settings.actionConfirm ?? actionConfirm;
-            quatMode = Number(state.settings.quatBoard ?? quatMode) ??
-            state.settings.quatMode ?? quatMode;
+            quatMode = state.settings.quatMode ??
+            Number(state.settings.quatBoard ?? quatMode);
         }
 
         colonyViewConfig = state.colonyViewConfig ?? colonyViewConfig;
