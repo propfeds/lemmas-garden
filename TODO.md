@@ -79,7 +79,10 @@ do nothing. Do you feel like it could be more interesting?
   - Happens when maximum statements
   - Condition: tau > 0, time < 10
 
-- [ ] Spreaded colonies syntax: +1 of Rose campion
+- [x] Propagation
+  - Rate = sum of seeds or fixed rate at fixed time?
+  - Has priority array `['r', 'l', 'c']` 
+  - Spreaded colonies syntax: +1 of Rose campion
 
 - [x] Colony view params are initially off
 - [ ] Notebook shows next cost

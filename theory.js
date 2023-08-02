@@ -2234,6 +2234,8 @@ class ColonyManager {
             multiplier * theory.publicationMultiplier;
     }
     addColony(plot, id, population, spread = false) {
+        if (population <= 0)
+            return;
         for (let i = 0; !spread && i < this.colonies[plot].length; ++i) {
             if (this.colonies[plot][i].id == id && !this.colonies[plot][i].stage) {
                 this.colonies[plot][i].population += population;
@@ -2566,6 +2568,31 @@ class ColonyManager {
             this.reap(c, plantData[c.id].stagelyIncome);
         c.profit = this.calcTask.profit;
         ++c.stage;
+        let prop = plantData[c.id].propagation;
+        if (prop && c.stage >= (plantData[c.id].maxStage ?? MAX_INT)) {
+            let pop = Math.round(c.population * prop.rate);
+            let target = null;
+            for (let i = 0; i < prop.priority.length; ++i) {
+                switch (prop.priority[i]) {
+                    case 'c':
+                        if (this.colonies[this.gangsta[0]].length < this.width)
+                            target = this.gangsta[0];
+                        break;
+                    case 'l':
+                        if (this.gangsta[0] > 0 &&
+                            this.colonies[this.gangsta[0] - 1].length < this.width)
+                            target = this.gangsta[0] - 1;
+                        break;
+                    case 'r':
+                        if (this.gangsta[0] < this.length - 1 &&
+                            this.colonies[this.gangsta[0] + 1].length < this.width)
+                            target = this.gangsta[0] + 1;
+                        break;
+                }
+                if (target !== null)
+                    this.addColony(target, c.id, pop, true);
+            }
+        }
         this.ancestreeTask =
             {
                 start: 0
@@ -2836,6 +2863,10 @@ const plantData = {
         growthRate: BigNumber.FIVE,
         growthCost: BigNumber.FIVE,
         stagelyIncome: BigNumber.ONE,
+        propagation: {
+            rate: 0.5,
+            priority: ['c']
+        },
         actions: [
             {
                 symbols: new Set('K'),
@@ -3646,7 +3677,7 @@ var getEquationOverlay = () => {
 /**
  * Returns the colony title for representation.
  */
-let getColonyTitle = (colony, prog = false, escapeHash = false) => Localization.format(getLoc(prog ? 'colonyProg' : 'colony'), colony.population, getLoc('plants')[colony.id]?.name ?? `${escapeHash ? '\\' : ''}#${colony.id}`, 
+let getColonyTitleString = (colony, prog = false, escapeHash = false) => Localization.format(getLoc(prog ? 'colonyProg' : 'colony'), colony.propagated ? `+${colony.population}` : colony.population, getLoc('plants')[colony.id]?.name ?? `${escapeHash ? '\\' : ''}#${colony.id}`, 
 // @ts-expect-error
 colony.stage, prog ? colony.growth * BigNumber.HUNDRED /
     // @ts-expect-error
@@ -3688,7 +3719,7 @@ var getSecondaryEquation = () => {
                 plantData[c.id].growthRate * BigNumber.from(growthCoord), c.profit, status)}}`;
                 break;
             case ColonyModes.SIMPLE:
-                result = `\\text{${getColonyTitle(c)}}\\\\E=${c.energy},
+                result = `\\text{${getColonyTitleString(c)}}\\\\E=${c.energy},
                 \\enspace g=${c.growth}/${ // @ts-expect-error
                 plantData[c.id].growthCost * BigNumber.from(c.sequence.length)}
                 \\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}
@@ -3698,13 +3729,13 @@ var getSecondaryEquation = () => {
                 result = '\\text{';
                 for (let i = 0; i < colonyIdx[plotIdx]; ++i) {
                     let d = manager.colonies[plotIdx][i];
-                    result += `${getColonyTitle(d, true)}\\\\`;
+                    result += `${getColonyTitleString(d, true)}\\\\`;
                 }
-                result += `\\underline{${getColonyTitle(c, true)}}}\\\\
+                result += `\\underline{${getColonyTitleString(c, true)}}}\\\\
                 E=${c.energy},\\enspace\\pi =${c.profit}\\text{p}\\\\\\text{`;
                 for (let i = colonyIdx[plotIdx] + 1; i < manager.colonies[plotIdx].length; ++i) {
                     let d = manager.colonies[plotIdx][i];
-                    result += `${getColonyTitle(d, true)}\\\\`;
+                    result += `${getColonyTitleString(d, true)}\\\\`;
                 }
                 result += `}`;
                 break;
@@ -4074,7 +4105,7 @@ let createColonyViewMenu = (colony) => {
         }
         return reconstructionTask.result;
     };
-    let tmpTitle = getColonyTitle(colony);
+    let tmpTitle = getColonyTitleString(colony);
     let tmpStage = colony.stage;
     let cmtStage = -1;
     let updateCommentary = () => {
@@ -4124,7 +4155,7 @@ let createColonyViewMenu = (colony) => {
                 Menu title and commentary are updated dynamically without
                 the player having to close and re-open.
                 */
-                tmpTitle = getColonyTitle(colony);
+                tmpTitle = getColonyTitleString(colony);
                 tmpCmt = updateCommentary();
                 plantStats.text = Localization.format(getLoc('plantStats'), cmtStage, tmpCmt, plantData[colony.id].maxStage ?? '∞', colony.synthRate, plantData[colony.id].growthRate, plantData[colony.id].growthCost, colony.sequence.length);
                 tmpStage = colony.stage;
@@ -4536,7 +4567,7 @@ let createConfirmationMenu = (plot, index, id) => {
         content: ui.createStackLayout({
             children: [
                 ui.createLatexLabel({
-                    text: Localization.format(getLoc('actionConfirmDialogue'), getLoc('labelActions')[id], plot + 1, index + 1, getColonyTitle(c, false, true)),
+                    text: Localization.format(getLoc('actionConfirmDialogue'), getLoc('labelActions')[id], plot + 1, index + 1, getColonyTitleString(c, false, true)),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     margin: new Thickness(0, 15)
                 }),
