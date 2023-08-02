@@ -64,7 +64,7 @@ const LS_CONTEXT =
 const BACKTRACK_LIST = new Set('+-&^\\/|[$T');
 // Leaves and apices
 const SYNTHABLE_SYMBOLS = new Set('AL');
-const MAX_CHARS_PER_TICK = 500;
+const MAX_CHARS_PER_TICK = 300;
 const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS =
@@ -101,8 +101,8 @@ const LOC_STRINGS =
         labelParams: 'Parameters: ',
         labelAxiom: 'Axiom: ',
         labelAngle: 'Turning angle (°): ',
-        labelRules: `Production rules: {0}\\\\Rules are applied each stage to
-every symbol in the plant's sequence, simultaneously.`,
+        labelRules: `Production rules: {0}\\\\Rules are applied every stage
+simultaneously to all symbols in the plant's sequence.`,
         labelIgnored: 'Turtle-ignored: ',
         labelCtxIgnored: 'Context-ignored: ',
         labelTropism: 'Tropism (gravity): ',
@@ -430,7 +430,8 @@ Every time it grows, pollinators will pay you a few pennies for having ` +
             {
                 title: 'Title Cover',
                 contents:
-`User's Guide to the L-systems Renderer
+`Lindenmayer Systems Renderer
+A User's Guide
 Second Edition
 
 🐢💨
@@ -1601,7 +1602,7 @@ class LSystem
      * @param {string} sequence the sequence.
      * @returns {object}
      */
-    getAncestree(sequence, task: Task = {})
+    getAncestree(sequence: string, task: Task = {}): Task
     {
         // Scanning behaviour should be very similar to renderer drawing.
         let tmpStack = task.stack ?? [];
@@ -1611,7 +1612,7 @@ class LSystem
         let i = task.start ?? 0;
         for(; i < sequence.length; ++i)
         {
-            if(i - task.start > MAX_CHARS_PER_TICK)
+            if(i - task.start > MAX_CHARS_PER_TICK * 2)
             {
                 return {
                     start: i,
@@ -1713,8 +1714,8 @@ class LSystem
                 else
                     continue;
             }
-            else if(sequence[i] == '~')
-                continue;
+            // else if(sequence[i] == '~')
+            //     continue;
             else if(this.rules.has(sequence[i]))
             {
                 let tmpRules = this.rules.get(sequence[i]);
@@ -2007,7 +2008,7 @@ class LSystem
                     let paramStrings: string[] = [];
                     for(let j = 0; j < params[i].length; ++j)
                         paramStrings[j] = params[i][j].toString(charDT[j] ?? 2);
-                    result += `(${paramStrings.join(', ')})`;
+                    result += `(${paramStrings.join(', ')})\n`;
                 }
                 // result += '\n';
             }
@@ -3041,19 +3042,15 @@ class ColonyManager
     }
     growAll(di: BigNumber, dg: BigNumber, dd: BigNumber)
     {
-        perfs[Profilers.MANAGER_CRITICAL].exec(() =>
+        if(this.actionGangsta)
+            this.continueAction();
+        else if(this.actionQueue.length)
         {
-            if(this.actionGangsta)
-                this.continueAction();
-            else if(this.actionQueue.length)
-            {
-                let action = <[number, number, number]>
-                this.actionQueue.dequeue();
-                this.performAction(...action);
-            }
-            else if(this.gangsta)
-                this.evolve();
-        });
+            let action = <[number, number, number]>this.actionQueue.dequeue();
+            this.performAction(...action);
+        }
+        else if(this.gangsta)
+            this.evolve();
 
         perfs[Profilers.MANAGER].exec(() =>
         {
@@ -3139,7 +3136,7 @@ class ColonyManager
         let i = task.start ?? 0;
         for(; i < sequence.length; ++i)
         {
-            if(i - task.start > MAX_CHARS_PER_TICK)
+            if(i - task.start > MAX_CHARS_PER_TICK * 2)
             {
                 return {
                     start: i,
@@ -3160,14 +3157,6 @@ class ColonyManager
     }
     continueAction()
     {
-        // if(this.restTick)
-        // {
-        //     --this.restTick;
-        //     return;
-        // }
-
-        // Future idea: maybe instead of using an LS to prune/harvest, develop
-        // efficient pruner/harvester, like a naked L-system rule???
         let c = this.colonies[this.actionGangsta[0]][this.actionGangsta[1]];
         let id = this.actionGangsta[2];
         if(!c)
@@ -3192,16 +3181,22 @@ class ColonyManager
         {
             let customAncestreeSystem = plantData[c.id].actions[id].system ??
             plantData[c.id].system;
-            this.actionAncestreeTask = customAncestreeSystem.getAncestree(
-            c.sequence, this.actionAncestreeTask);
+            perfs[Profilers.LS_ANCESTREE].exec(() =>
+            {
+                this.actionAncestreeTask = customAncestreeSystem.getAncestree(
+                c.sequence, this.actionAncestreeTask);
+            });
             return;
         }
         if(!('derivation' in this.actionDeriveTask) ||
         ('derivation' in this.actionDeriveTask && this.actionDeriveTask.start))
         {
-            this.actionDeriveTask = plantData[c.id].actions[id].system.derive(
-            c.sequence, c.params, this.actionAncestreeTask.ancestors,
-            this.actionAncestreeTask.children, this.actionDeriveTask);
+            perfs[Profilers.LS_DERIVE].exec(() =>
+            {
+                this.actionDeriveTask = plantData[c.id].actions[id].system.
+                derive(c.sequence, c.params, this.actionAncestreeTask.ancestors,
+                this.actionAncestreeTask.children, this.actionDeriveTask);
+            });
             return;
         }
         if(!this.actionDeriveTask.derivation.length)
@@ -3225,8 +3220,11 @@ class ColonyManager
         if(!('synthRate' in this.actionCalcTask) ||
         ('synthRate' in this.actionCalcTask && this.actionCalcTask.start))
         {
-            this.actionCalcTask = this.calculateStats(c, this.actionCalcTask,
-            this.actionDeriveTask);
+            perfs[Profilers.LS_CALC_STATS].exec(() =>
+            {
+                this.actionCalcTask = this.calculateStats(c,
+                this.actionCalcTask, this.actionDeriveTask);
+            });
             return;
         }
 
@@ -3272,8 +3270,6 @@ class ColonyManager
         this.actionGangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
-
-        // this.restTick = 5;
     }
     performAction(plot: number, index: number, id: number)
     {
@@ -3291,12 +3287,6 @@ class ColonyManager
     }
     evolve()
     {
-        // if(this.restTick)
-        // {
-        //     --this.restTick;
-        //     return;
-        // }
-
         let c = this.colonies[this.gangsta[0]][this.gangsta[1]];
         if(!c)
         {
@@ -3307,16 +3297,22 @@ class ColonyManager
         if(!('ancestors' in this.ancestreeTask) ||
         ('ancestors' in this.ancestreeTask && this.ancestreeTask.start))
         {
-            this.ancestreeTask = plantData[c.id].system.getAncestree(
-            c.sequence, this.ancestreeTask);
+            perfs[Profilers.LS_ANCESTREE].exec(() =>
+            {
+                this.ancestreeTask = plantData[c.id].system.getAncestree(
+                c.sequence, this.ancestreeTask);
+            });
             return;
         }
         if(!('derivation' in this.deriveTask) ||
         ('derivation' in this.deriveTask && this.deriveTask.start))
         {
-            this.deriveTask = plantData[c.id].system.derive(c.sequence,
-            c.params, this.ancestreeTask.ancestors, this.ancestreeTask.children,
-            this.deriveTask);
+            perfs[Profilers.LS_DERIVE].exec(() =>
+            {
+                this.deriveTask = plantData[c.id].system.derive(c.sequence,
+                c.params, this.ancestreeTask.ancestors,
+                this.ancestreeTask.children, this.deriveTask);
+            });
             return;
         }
         if(!this.deriveTask.derivation.length)
@@ -3338,8 +3334,11 @@ class ColonyManager
         if(!('synthRate' in this.calcTask) ||
         ('synthRate' in this.calcTask && this.calcTask.start))
         {
-            this.calcTask = this.calculateStats(c, this.calcTask,
-            this.deriveTask);
+            perfs[Profilers.LS_CALC_STATS].exec(() =>
+            {
+                this.calcTask = this.calculateStats(c, this.calcTask,
+                this.deriveTask);
+            });
             return;
         }
 
@@ -3724,9 +3723,9 @@ const plantData: {[key: string]: Plant} =
         {
             'A': [2, 0],
             'F': [1, 0],
-            'K': [3],
+            'K': [3, 0],
             'L': [3],
-            'O': [2],
+            'O': [3],
             '&': [0],
             '/': [0]
         },
@@ -3963,32 +3962,29 @@ let taxQuaternaryEntry =
 
 let perfNames =
 [
-    'tick',
-    'manager',
-    'managerCritical',
-    'availability',
-    'renderer',
-    'eq2'
+    ['tick', 't'],
+    ['manager', 'm'],
+    ['lsAncestree', 'L_a'],
+    ['lsDerive', 'L_d'],
+    ['lsCalcStats', 'L_c'],
+    ['availability', 'av'],
+    ['renderer', 'r'],
+    ['eq2', 'e_2']
 ];
 enum Profilers
 {
     TICK,
     MANAGER,
-    MANAGER_CRITICAL,
+    LS_ANCESTREE,
+    LS_DERIVE,
+    LS_CALC_STATS,
     AVAILABILITY,
     RENDERER,
     EQ_2
 }
-let perfs: Profiler[] = perfNames.map(element => profilers.get(element));
-let perfQuaternaryEntries = 
-[
-    new QuaternaryEntry('t', null),
-    new QuaternaryEntry('m', null),
-    new QuaternaryEntry('m_c', null),
-    new QuaternaryEntry('a_v', null),
-    new QuaternaryEntry('r', null),
-    new QuaternaryEntry('e_2', null)
-];
+let perfs = perfNames.map(element => profilers.get(element[0]));
+let perfQuaternaryEntries = perfNames.map(element =>
+new QuaternaryEntry(element[1], null));
 
 let createFramedButton = (params: {[x: string]: any}, margin: number,
 callback: {(): void}, image: ImageSource) =>
@@ -5741,21 +5737,21 @@ let createShelfMenu = () =>
             [
                 ui.createButton
                 ({
-                    text: almanac.title,
-                    onClicked: () =>
-                    {
-                        Sound.playClick();
-                        let menu = createBookMenu(almanac);
-                        menu.show();
-                    }
-                }),
-                ui.createButton
-                ({
                     text: LsManual.title,
                     onClicked: () =>
                     {
                         Sound.playClick();
                         let menu = createBookMenu(LsManual);
+                        menu.show();
+                    }
+                }),
+                ui.createButton
+                ({
+                    text: almanac.title,
+                    onClicked: () =>
+                    {
+                        Sound.playClick();
+                        let menu = createBookMenu(almanac);
                         menu.show();
                     }
                 }),

@@ -51,6 +51,13 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
 
+- [ ] Watering
+  - Absurd cooldown like 10 minutes (6 days)
+    - Per species?
+  - Adds a fixed amount of energy
+  - Auto-watering
+    - Unlocks with classmates
+
 - [ ] Autobuy upgrade unlocks harvest automation config
   - Only unlocks in a future update (classmates!)
   - Hard to implement since there's more to LG than when to harvest

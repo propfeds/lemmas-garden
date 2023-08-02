@@ -48,7 +48,7 @@ const LS_CONTEXT = /((.)(\(([^\)]+)\))?<)?((.)(\(([^\)]+)\))?)(>(.)(\(([^\)]+)\)
 const BACKTRACK_LIST = new Set('+-&^\\/|[$T');
 // Leaves and apices
 const SYNTHABLE_SYMBOLS = new Set('AL');
-const MAX_CHARS_PER_TICK = 500;
+const MAX_CHARS_PER_TICK = 300;
 const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS = {
@@ -79,8 +79,8 @@ const LOC_STRINGS = {
         labelParams: 'Parameters: ',
         labelAxiom: 'Axiom: ',
         labelAngle: 'Turning angle (°): ',
-        labelRules: `Production rules: {0}\\\\Rules are applied each stage to
-every symbol in the plant's sequence, simultaneously.`,
+        labelRules: `Production rules: {0}\\\\Rules are applied every stage
+simultaneously to all symbols in the plant's sequence.`,
         labelIgnored: 'Turtle-ignored: ',
         labelCtxIgnored: 'Context-ignored: ',
         labelTropism: 'Tropism (gravity): ',
@@ -364,7 +364,8 @@ Every time it grows, pollinators will pay you a few pennies for having ` +
             },
             cover: {
                 title: 'Title Cover',
-                contents: `User's Guide to the L-systems Renderer
+                contents: `Lindenmayer Systems Renderer
+A User's Guide
 Second Edition
 
 🐢💨
@@ -1253,7 +1254,7 @@ class LSystem {
         let tmpChildren = task.children ?? [];
         let i = task.start ?? 0;
         for (; i < sequence.length; ++i) {
-            if (i - task.start > MAX_CHARS_PER_TICK) {
+            if (i - task.start > MAX_CHARS_PER_TICK * 2) {
                 return {
                     start: i,
                     stack: tmpStack,
@@ -1340,8 +1341,8 @@ class LSystem {
                 else
                     continue;
             }
-            else if (sequence[i] == '~')
-                continue;
+            // else if(sequence[i] == '~')
+            //     continue;
             else if (this.rules.has(sequence[i])) {
                 let tmpRules = this.rules.get(sequence[i]);
                 let ruleChoice = -1;
@@ -1574,7 +1575,7 @@ class LSystem {
                     let paramStrings = [];
                     for (let j = 0; j < params[i].length; ++j)
                         paramStrings[j] = params[i][j].toString(charDT[j] ?? 2);
-                    result += `(${paramStrings.join(', ')})`;
+                    result += `(${paramStrings.join(', ')})\n`;
                 }
                 // result += '\n';
             }
@@ -2302,16 +2303,14 @@ class ColonyManager {
         updateAvailability();
     }
     growAll(di, dg, dd) {
-        perfs[Profilers.MANAGER_CRITICAL].exec(() => {
-            if (this.actionGangsta)
-                this.continueAction();
-            else if (this.actionQueue.length) {
-                let action = this.actionQueue.dequeue();
-                this.performAction(...action);
-            }
-            else if (this.gangsta)
-                this.evolve();
-        });
+        if (this.actionGangsta)
+            this.continueAction();
+        else if (this.actionQueue.length) {
+            let action = this.actionQueue.dequeue();
+            this.performAction(...action);
+        }
+        else if (this.gangsta)
+            this.evolve();
         perfs[Profilers.MANAGER].exec(() => {
             for (let i = 0; i < this.colonies.length; ++i) {
                 for (let j = 0; j < this.colonies[i].length; ++j) {
@@ -2379,7 +2378,7 @@ class ColonyManager {
         let params = dTask.parameters ?? colony.params;
         let i = task.start ?? 0;
         for (; i < sequence.length; ++i) {
-            if (i - task.start > MAX_CHARS_PER_TICK) {
+            if (i - task.start > MAX_CHARS_PER_TICK * 2) {
                 return {
                     start: i,
                     synthRate: synthRate,
@@ -2398,13 +2397,6 @@ class ColonyManager {
         };
     }
     continueAction() {
-        // if(this.restTick)
-        // {
-        //     --this.restTick;
-        //     return;
-        // }
-        // Future idea: maybe instead of using an LS to prune/harvest, develop
-        // efficient pruner/harvester, like a naked L-system rule???
         let c = this.colonies[this.actionGangsta[0]][this.actionGangsta[1]];
         let id = this.actionGangsta[2];
         if (!c) {
@@ -2426,12 +2418,17 @@ class ColonyManager {
                 this.actionAncestreeTask.start)) {
             let customAncestreeSystem = plantData[c.id].actions[id].system ??
                 plantData[c.id].system;
-            this.actionAncestreeTask = customAncestreeSystem.getAncestree(c.sequence, this.actionAncestreeTask);
+            perfs[Profilers.LS_ANCESTREE].exec(() => {
+                this.actionAncestreeTask = customAncestreeSystem.getAncestree(c.sequence, this.actionAncestreeTask);
+            });
             return;
         }
         if (!('derivation' in this.actionDeriveTask) ||
             ('derivation' in this.actionDeriveTask && this.actionDeriveTask.start)) {
-            this.actionDeriveTask = plantData[c.id].actions[id].system.derive(c.sequence, c.params, this.actionAncestreeTask.ancestors, this.actionAncestreeTask.children, this.actionDeriveTask);
+            perfs[Profilers.LS_DERIVE].exec(() => {
+                this.actionDeriveTask = plantData[c.id].actions[id].system.
+                    derive(c.sequence, c.params, this.actionAncestreeTask.ancestors, this.actionAncestreeTask.children, this.actionDeriveTask);
+            });
             return;
         }
         if (!this.actionDeriveTask.derivation.length) {
@@ -2453,7 +2450,9 @@ class ColonyManager {
         }
         if (!('synthRate' in this.actionCalcTask) ||
             ('synthRate' in this.actionCalcTask && this.actionCalcTask.start)) {
-            this.actionCalcTask = this.calculateStats(c, this.actionCalcTask, this.actionDeriveTask);
+            perfs[Profilers.LS_CALC_STATS].exec(() => {
+                this.actionCalcTask = this.calculateStats(c, this.actionCalcTask, this.actionDeriveTask);
+            });
             return;
         }
         if (id == 0)
@@ -2496,7 +2495,6 @@ class ColonyManager {
         this.actionGangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
-        // this.restTick = 5;
     }
     performAction(plot, index, id) {
         let c = this.colonies[plot][index];
@@ -2510,11 +2508,6 @@ class ColonyManager {
         this.actionGangsta = action;
     }
     evolve() {
-        // if(this.restTick)
-        // {
-        //     --this.restTick;
-        //     return;
-        // }
         let c = this.colonies[this.gangsta[0]][this.gangsta[1]];
         if (!c) {
             this.gangsta = null;
@@ -2523,12 +2516,16 @@ class ColonyManager {
         // Ancestree, derive and calc stats
         if (!('ancestors' in this.ancestreeTask) ||
             ('ancestors' in this.ancestreeTask && this.ancestreeTask.start)) {
-            this.ancestreeTask = plantData[c.id].system.getAncestree(c.sequence, this.ancestreeTask);
+            perfs[Profilers.LS_ANCESTREE].exec(() => {
+                this.ancestreeTask = plantData[c.id].system.getAncestree(c.sequence, this.ancestreeTask);
+            });
             return;
         }
         if (!('derivation' in this.deriveTask) ||
             ('derivation' in this.deriveTask && this.deriveTask.start)) {
-            this.deriveTask = plantData[c.id].system.derive(c.sequence, c.params, this.ancestreeTask.ancestors, this.ancestreeTask.children, this.deriveTask);
+            perfs[Profilers.LS_DERIVE].exec(() => {
+                this.deriveTask = plantData[c.id].system.derive(c.sequence, c.params, this.ancestreeTask.ancestors, this.ancestreeTask.children, this.deriveTask);
+            });
             return;
         }
         if (!this.deriveTask.derivation.length) {
@@ -2548,7 +2545,9 @@ class ColonyManager {
         }
         if (!('synthRate' in this.calcTask) ||
             ('synthRate' in this.calcTask && this.calcTask.start)) {
-            this.calcTask = this.calculateStats(c, this.calcTask, this.deriveTask);
+            perfs[Profilers.LS_CALC_STATS].exec(() => {
+                this.calcTask = this.calculateStats(c, this.calcTask, this.deriveTask);
+            });
             return;
         }
         // @ts-expect-error
@@ -2847,9 +2846,9 @@ const plantData = {
         decimals: {
             'A': [2, 0],
             'F': [1, 0],
-            'K': [3],
+            'K': [3, 0],
             'L': [3],
-            'O': [2],
+            'O': [3],
             '&': [0],
             '/': [0]
         },
@@ -3069,31 +3068,28 @@ let taxQuaternaryEntry = [
     new QuaternaryEntry('T_{\\text{p}}', null)
 ];
 let perfNames = [
-    'tick',
-    'manager',
-    'managerCritical',
-    'availability',
-    'renderer',
-    'eq2'
+    ['tick', 't'],
+    ['manager', 'm'],
+    ['lsAncestree', 'L_a'],
+    ['lsDerive', 'L_d'],
+    ['lsCalcStats', 'L_c'],
+    ['availability', 'av'],
+    ['renderer', 'r'],
+    ['eq2', 'e_2']
 ];
 var Profilers;
 (function (Profilers) {
     Profilers[Profilers["TICK"] = 0] = "TICK";
     Profilers[Profilers["MANAGER"] = 1] = "MANAGER";
-    Profilers[Profilers["MANAGER_CRITICAL"] = 2] = "MANAGER_CRITICAL";
-    Profilers[Profilers["AVAILABILITY"] = 3] = "AVAILABILITY";
-    Profilers[Profilers["RENDERER"] = 4] = "RENDERER";
-    Profilers[Profilers["EQ_2"] = 5] = "EQ_2";
+    Profilers[Profilers["LS_ANCESTREE"] = 2] = "LS_ANCESTREE";
+    Profilers[Profilers["LS_DERIVE"] = 3] = "LS_DERIVE";
+    Profilers[Profilers["LS_CALC_STATS"] = 4] = "LS_CALC_STATS";
+    Profilers[Profilers["AVAILABILITY"] = 5] = "AVAILABILITY";
+    Profilers[Profilers["RENDERER"] = 6] = "RENDERER";
+    Profilers[Profilers["EQ_2"] = 7] = "EQ_2";
 })(Profilers || (Profilers = {}));
-let perfs = perfNames.map(element => profilers.get(element));
-let perfQuaternaryEntries = [
-    new QuaternaryEntry('t', null),
-    new QuaternaryEntry('m', null),
-    new QuaternaryEntry('m_c', null),
-    new QuaternaryEntry('a_v', null),
-    new QuaternaryEntry('r', null),
-    new QuaternaryEntry('e_2', null)
-];
+let perfs = perfNames.map(element => profilers.get(element[0]));
+let perfQuaternaryEntries = perfNames.map(element => new QuaternaryEntry(element[1], null));
 let createFramedButton = (params, margin, callback, image) => {
     let frame = ui.createFrame({
         cornerRadius: 1,
@@ -4503,18 +4499,18 @@ let createShelfMenu = () => {
         content: ui.createStackLayout({
             children: [
                 ui.createButton({
-                    text: almanac.title,
-                    onClicked: () => {
-                        Sound.playClick();
-                        let menu = createBookMenu(almanac);
-                        menu.show();
-                    }
-                }),
-                ui.createButton({
                     text: LsManual.title,
                     onClicked: () => {
                         Sound.playClick();
                         let menu = createBookMenu(LsManual);
+                        menu.show();
+                    }
+                }),
+                ui.createButton({
+                    text: almanac.title,
+                    onClicked: () => {
+                        Sound.playClick();
+                        let menu = createBookMenu(almanac);
                         menu.show();
                     }
                 }),
