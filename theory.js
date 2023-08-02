@@ -2509,6 +2509,26 @@ class ColonyManager {
         }
         this.actionGangsta = action;
     }
+    findTarget(plot, priority) {
+        for (let i = 0; i < priority.length; ++i) {
+            switch (priority[i]) {
+                case 'c':
+                    if (this.colonies[plot].length < this.width)
+                        return plot;
+                    break;
+                case 'l':
+                    if (plot > 0 && this.colonies[plot - 1].length < this.width)
+                        return plot - 1;
+                    break;
+                case 'r':
+                    if (plot < this.length - 1 &&
+                        this.colonies[plot + 1].length < this.width)
+                        return plot + 1;
+                    break;
+            }
+        }
+        return null;
+    }
     evolve() {
         let c = this.colonies[this.gangsta[0]][this.gangsta[1]];
         if (!c) {
@@ -2571,27 +2591,9 @@ class ColonyManager {
         let prop = plantData[c.id].propagation;
         if (prop && c.stage >= (plantData[c.id].maxStage ?? MAX_INT)) {
             let pop = Math.round(c.population * prop.rate);
-            let target = null;
-            for (let i = 0; i < prop.priority.length; ++i) {
-                switch (prop.priority[i]) {
-                    case 'c':
-                        if (this.colonies[this.gangsta[0]].length < this.width)
-                            target = this.gangsta[0];
-                        break;
-                    case 'l':
-                        if (this.gangsta[0] > 0 &&
-                            this.colonies[this.gangsta[0] - 1].length < this.width)
-                            target = this.gangsta[0] - 1;
-                        break;
-                    case 'r':
-                        if (this.gangsta[0] < this.length - 1 &&
-                            this.colonies[this.gangsta[0] + 1].length < this.width)
-                            target = this.gangsta[0] + 1;
-                        break;
-                }
-                if (target !== null)
-                    this.addColony(target, c.id, pop, true);
-            }
+            let target = this.findTarget(this.gangsta[0], prop.priority);
+            if (target !== null)
+                this.addColony(target, c.id, pop, true);
         }
         this.ancestreeTask =
             {
