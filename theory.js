@@ -168,7 +168,9 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
                 info: 'A classic flower to start the month.',
                 LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\I : flower
 stem\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest returns profit as the sum of all K.
-\\\\—\\\\The Model specification section may be ignored.`,
+\\\\At the end of its life cycle, propagates a new population (1/4 of the
+current population) on the same plot.\\\\—\\\\The Model specification section
+may be ignored.`,
                 stages: {
                     index: [
                         0,
@@ -236,7 +238,9 @@ another one back to the leaves.`,
                 LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\K: flower
 \\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns profit as the sum of all K
 (first parameter).\\\\Passively provides income per stage equal to total profit.
-\\\\—\\\\The Model specification section may be ignored.`,
+\\\\At the end of its life cycle, propagates a new population (1/2 of the
+current population) on the same plot.\\\\—\\\\The Model specification section
+may be ignored.`,
                 stages: {
                     index: [
                         0, 4, 6,
@@ -349,7 +353,8 @@ Rose campion is also used as a sedative, or for wound treatments, or wicks ` +
 Time to maturity: 'I haven't timed it yet'
 
 Every time it grows, pollinators will pay you a few pennies for having ` +
-                    `provided them much hearty meals.`
+                    `provided them much hearty meals. But, try to keep track of the population, ` +
+                    `as campion spreads very easily.`
             }
         },
         manualTitle: 'Lindenmayer Systems',
@@ -2737,6 +2742,10 @@ const plantData = {
         cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
         growthRate: BigNumber.THREE,
         growthCost: BigNumber.from(2.5),
+        propagation: {
+            rate: 0.25,
+            priority: ['c']
+        },
         actions: [
             {
                 symbols: new Set('K'),
