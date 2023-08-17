@@ -20,6 +20,7 @@ import { MathExpression } from './api/MathExpression';
 import { Theme } from './api/Settings';
 import { Sound } from './api/Sound';
 import { game } from './api/Game';
+import { profilers } from './api/Profiler';
 var id = 'lemmas_garden';
 var getName = (language) => {
     const names = {
@@ -47,7 +48,7 @@ const LS_CONTEXT = /((.)(\(([^\)]+)\))?<)?((.)(\(([^\)]+)\))?)(>(.)(\(([^\)]+)\)
 const BACKTRACK_LIST = new Set('+-&^\\/|[$T');
 // Leaves and apices
 const SYNTHABLE_SYMBOLS = new Set('AL');
-const MAX_CHARS_PER_TICK = 500;
+const MAX_CHARS_PER_TICK = 300;
 const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS = {
@@ -78,8 +79,8 @@ const LOC_STRINGS = {
         labelParams: 'Parameters: ',
         labelAxiom: 'Axiom: ',
         labelAngle: 'Turning angle (°): ',
-        labelRules: `Production rules: {0}\\\\Rules are applied each stage to
-every symbol in the plant's sequence, simultaneously.`,
+        labelRules: `Production rules: {0}\\\\Rules are applied every stage
+simultaneously to all symbols in the plant's sequence.`,
         labelIgnored: 'Turtle-ignored: ',
         labelCtxIgnored: 'Context-ignored: ',
         labelTropism: 'Tropism (gravity): ',
@@ -155,17 +156,21 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
             'Plot title: Cursive'
         ],
         quatModes: [
-            'Plot listing: Profits',
-            'Plot listing: Board'
+            'Quaternary: Profits',
+            'Quaternary: Board',
+            'Quaternary: Perf (instant/avg)',
+            'Quaternary: Perf (min/max)'
         ],
         plants: {
-            1: {
+            calendula: {
                 name: 'Calendula',
                 nameShort: 'C',
                 info: 'A classic flower to start the month.',
                 LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\I : flower
 stem\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest returns profit as the sum of all K.
-\\\\—\\\\The Model specification section may be ignored.`,
+\\\\At the end of its life cycle, propagates a new population (1/4 of the
+current population) on the same plot.\\\\—\\\\The Model specification section
+may be ignored.`,
                 stages: {
                     index: [
                         0,
@@ -196,7 +201,7 @@ known as the golden angle.`,
                     38: 'All flowers have reached maturity.',
                 }
             },
-            2: {
+            basil: {
                 name: 'Basil',
                 nameShort: 'B',
                 info: 'A fast growing herb that requires a bit of care.',
@@ -226,14 +231,16 @@ from top to bottom, all the way to basil base. Then, basil base will send
 another one back to the leaves.`,
                 }
             },
-            3: {
+            campion: {
                 name: 'Rose campion',
                 nameShort: 'R',
                 info: 'A great sight for your garden. Provides daily income.',
                 LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\K: flower
 \\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns profit as the sum of all K
 (first parameter).\\\\Passively provides income per stage equal to total profit.
-\\\\—\\\\The Model specification section may be ignored.`,
+\\\\At the end of its life cycle, propagates a new population (1/2 of the
+current population) on the same plot.\\\\—\\\\The Model specification section
+may be ignored.`,
                 stages: {
                     index: [
                         0, 4, 6,
@@ -254,7 +261,7 @@ munch.`,
 for you?`
                 }
             },
-            9001: {
+            arrow: {
                 name: '(Test) Arrow weed',
                 nameShort: 'A',
                 info: 'Not balanced for regular play.',
@@ -310,7 +317,7 @@ For the seeds, I recommend purchasing from Corollary's. The seeds here are ` +
 
 Ready to sow?`
             },
-            1: {
+            calendula: {
                 title: 'Calendula',
                 contents: `Commonly called pot marigold (not to be confused with marigolds of the ` +
                     `genus Tagetes), calendulas are easy-going flowers known for numerous ` +
@@ -322,7 +329,7 @@ Time to maturity: ~7 weeks
 
 Here's a recipe to make some delicious calendula bread:`
             },
-            2: {
+            basil: {
                 title: 'Basil',
                 contents: `Hailed as the 'king/queen of herbs' all throughout the world, basil is used ` +
                     `as a spice in a vast number of recipes with its fragrance and a sweet, ` +
@@ -335,7 +342,7 @@ If you intend to harvest, snip off the stem before it flowers. Otherwise, ` +
                     `the plant will go into the end of its life cycle, and the leaves will lose ` +
                     `flavour.`
             },
-            3: {
+            campion: {
                 title: 'Rose campion',
                 contents: `Pest repellent, drought tolerant, and a great pollinator attractor. ` +
                     `Occasionally, visitors and artists, generous donors, they might come and ` +
@@ -346,13 +353,14 @@ Rose campion is also used as a sedative, or for wound treatments, or wicks ` +
 Time to maturity: 'I haven't timed it yet'
 
 Every time it grows, pollinators will pay you a few pennies for having ` +
-                    `provided them much hearty meals.`
+                    `provided them much hearty meals. But, try to keep track of the population, ` +
+                    `as campion spreads very easily.`
             }
         },
         manualTitle: 'Lindenmayer Systems',
         manual: {
-            foreword: {
-                title: `Foreword`,
+            footnote: {
+                title: `Footnote`,
                 contents: `This manuscript was found scattered around a corner of the forest. Seems ` +
                     `like someone knows a way to turn plants into alphabets. Perhaps even from ` +
                     `the future. Thrilling!
@@ -361,7 +369,8 @@ Every time it grows, pollinators will pay you a few pennies for having ` +
             },
             cover: {
                 title: 'Title Cover',
-                contents: `User's Guide to the L-systems Renderer
+                contents: `Lindenmayer Systems Renderer
+A User's Guide
 Second Edition
 
 🐢💨
@@ -1250,7 +1259,7 @@ class LSystem {
         let tmpChildren = task.children ?? [];
         let i = task.start ?? 0;
         for (; i < sequence.length; ++i) {
-            if (i - task.start > MAX_CHARS_PER_TICK) {
+            if (i - task.start > MAX_CHARS_PER_TICK * 2) {
                 return {
                     start: i,
                     stack: tmpStack,
@@ -1337,8 +1346,8 @@ class LSystem {
                 else
                     continue;
             }
-            else if (sequence[i] == '~')
-                continue;
+            // else if(sequence[i] == '~')
+            //     continue;
             else if (this.rules.has(sequence[i])) {
                 let tmpRules = this.rules.get(sequence[i]);
                 let ruleChoice = -1;
@@ -1571,7 +1580,7 @@ class LSystem {
                     let paramStrings = [];
                     for (let j = 0; j < params[i].length; ++j)
                         paramStrings[j] = params[i][j].toString(charDT[j] ?? 2);
-                    result += `(${paramStrings.join(', ')})`;
+                    result += `(${paramStrings.join(', ')})\n`;
                 }
                 // result += '\n';
             }
@@ -2225,6 +2234,8 @@ class ColonyManager {
             multiplier * theory.publicationMultiplier;
     }
     addColony(plot, id, population, spread = false) {
+        if (population <= 0)
+            return;
         for (let i = 0; !spread && i < this.colonies[plot].length; ++i) {
             if (this.colonies[plot][i].id == id && !this.colonies[plot][i].stage) {
                 this.colonies[plot][i].population += population;
@@ -2302,71 +2313,74 @@ class ColonyManager {
         }
         else if (this.gangsta)
             this.evolve();
-        for (let i = 0; i < this.colonies.length; ++i) {
-            for (let j = 0; j < this.colonies[i].length; ++j) {
-                let c = this.colonies[i][j];
-                let notMature = c.stage < (plantData[c.id].maxStage ?? MAX_INT);
-                // @ts-expect-error
-                if (notMature && c.growth >= plantData[c.id].growthCost *
+        perfs[1 /* Profilers.MANAGER */].exec(() => {
+            for (let i = 0; i < this.colonies.length; ++i) {
+                for (let j = 0; j < this.colonies[i].length; ++j) {
+                    let c = this.colonies[i][j];
+                    let notMature = c.stage < (plantData[c.id].maxStage ??
+                        MAX_INT);
                     // @ts-expect-error
-                    BigNumber.from(c.sequence.length)) {
-                    if (!this.gangsta)
-                        this.gangsta = [i, j];
-                    // @ts-expect-error
-                    c.diReserve += di;
-                    // @ts-expect-error
-                    c.dgReserve += dg;
-                    if (plantData[c.id].dailyIncome) {
+                    if (notMature && c.growth >= plantData[c.id].growthCost *
                         // @ts-expect-error
-                        c.ddReserve += dd;
-                    }
-                }
-                else if (this.actionGangsta && this.actionGangsta[0] == i &&
-                    this.actionGangsta[1] == j) {
-                    // @ts-expect-error
-                    c.diReserve += di;
-                    // @ts-expect-error
-                    c.dgReserve += dg;
-                    if (plantData[c.id].dailyIncome) {
+                        BigNumber.from(c.sequence.length)) {
+                        if (!this.gangsta)
+                            this.gangsta = [i, j];
                         // @ts-expect-error
-                        c.ddReserve += dd;
-                    }
-                }
-                else // Normal growth
-                 {
-                    // @ts-expect-error
-                    c.energy += (di + c.diReserve) * c.synthRate;
-                    if (notMature) {
+                        c.diReserve += di;
                         // @ts-expect-error
-                        let maxdg = c.energy.min((dg + c.dgReserve) *
+                        c.dgReserve += dg;
+                        if (plantData[c.id].dailyIncome) {
                             // @ts-expect-error
-                            plantData[c.id].growthRate);
-                        // @ts-expect-error
-                        c.growth += maxdg;
-                        // @ts-expect-error
-                        c.energy -= maxdg;
+                            c.ddReserve += dd;
+                        }
                     }
-                    c.diReserve = BigNumber.ZERO;
-                    c.dgReserve = BigNumber.ZERO;
-                    if (plantData[c.id].dailyIncome) {
+                    else if (this.actionGangsta && this.actionGangsta[0] == i &&
+                        this.actionGangsta[1] == j) {
                         // @ts-expect-error
-                        this.reap(c, dd + c.ddReserve);
-                        c.ddReserve = BigNumber.ZERO;
+                        c.diReserve += di;
+                        // @ts-expect-error
+                        c.dgReserve += dg;
+                        if (plantData[c.id].dailyIncome) {
+                            // @ts-expect-error
+                            c.ddReserve += dd;
+                        }
+                    }
+                    else // Normal growth
+                     {
+                        // @ts-expect-error
+                        c.energy += (di + c.diReserve) * c.synthRate;
+                        if (notMature) {
+                            // @ts-expect-error
+                            let maxdg = c.energy.min((dg + c.dgReserve) *
+                                // @ts-expect-error
+                                plantData[c.id].growthRate);
+                            // @ts-expect-error
+                            c.growth += maxdg;
+                            // @ts-expect-error
+                            c.energy -= maxdg;
+                        }
+                        c.diReserve = BigNumber.ZERO;
+                        c.dgReserve = BigNumber.ZERO;
+                        if (plantData[c.id].dailyIncome) {
+                            // @ts-expect-error
+                            this.reap(c, dd + c.ddReserve);
+                            c.ddReserve = BigNumber.ZERO;
+                        }
                     }
                 }
             }
-        }
+        });
     }
     calculateStats(colony, task = {}, dTask = {}) {
         // This is the only case where the colony needed
-        let harvestable = plantData[colony.id].actions[0].symbols;
+        let harvestable = plantData[colony.id].actions[0 /* Actions.HARVEST */].symbols;
         let synthRate = task.synthRate ?? BigNumber.ZERO;
         let profit = task.profit ?? BigNumber.ZERO;
         let sequence = dTask.derivation ?? colony.sequence;
         let params = dTask.parameters ?? colony.params;
         let i = task.start ?? 0;
         for (; i < sequence.length; ++i) {
-            if (i - task.start > MAX_CHARS_PER_TICK) {
+            if (i - task.start > MAX_CHARS_PER_TICK * 2) {
                 return {
                     start: i,
                     synthRate: synthRate,
@@ -2385,13 +2399,6 @@ class ColonyManager {
         };
     }
     continueAction() {
-        // if(this.restTick)
-        // {
-        //     --this.restTick;
-        //     return;
-        // }
-        // Future idea: maybe instead of using an LS to prune/harvest, develop
-        // efficient pruner/harvester, like a naked L-system rule???
         let c = this.colonies[this.actionGangsta[0]][this.actionGangsta[1]];
         let id = this.actionGangsta[2];
         if (!c) {
@@ -2413,12 +2420,17 @@ class ColonyManager {
                 this.actionAncestreeTask.start)) {
             let customAncestreeSystem = plantData[c.id].actions[id].system ??
                 plantData[c.id].system;
-            this.actionAncestreeTask = customAncestreeSystem.getAncestree(c.sequence, this.actionAncestreeTask);
+            perfs[2 /* Profilers.LS_ANCESTREE */].exec(() => {
+                this.actionAncestreeTask = customAncestreeSystem.getAncestree(c.sequence, this.actionAncestreeTask);
+            });
             return;
         }
         if (!('derivation' in this.actionDeriveTask) ||
             ('derivation' in this.actionDeriveTask && this.actionDeriveTask.start)) {
-            this.actionDeriveTask = plantData[c.id].actions[id].system.derive(c.sequence, c.params, this.actionAncestreeTask.ancestors, this.actionAncestreeTask.children, this.actionDeriveTask);
+            perfs[3 /* Profilers.LS_DERIVE */].exec(() => {
+                this.actionDeriveTask = plantData[c.id].actions[id].system.
+                    derive(c.sequence, c.params, this.actionAncestreeTask.ancestors, this.actionAncestreeTask.children, this.actionDeriveTask);
+            });
             return;
         }
         if (!this.actionDeriveTask.derivation.length) {
@@ -2440,7 +2452,9 @@ class ColonyManager {
         }
         if (!('synthRate' in this.actionCalcTask) ||
             ('synthRate' in this.actionCalcTask && this.actionCalcTask.start)) {
-            this.actionCalcTask = this.calculateStats(c, this.actionCalcTask, this.actionDeriveTask);
+            perfs[4 /* Profilers.LS_CALC_STATS */].exec(() => {
+                this.actionCalcTask = this.calculateStats(c, this.actionCalcTask, this.actionDeriveTask);
+            });
             return;
         }
         if (id == 0)
@@ -2483,7 +2497,6 @@ class ColonyManager {
         this.actionGangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
-        // this.restTick = 5;
     }
     performAction(plot, index, id) {
         let c = this.colonies[plot][index];
@@ -2496,12 +2509,27 @@ class ColonyManager {
         }
         this.actionGangsta = action;
     }
+    findTarget(plot, priority) {
+        for (let i = 0; i < priority.length; ++i) {
+            switch (priority[i]) {
+                case 'c':
+                    if (this.colonies[plot].length < this.width)
+                        return plot;
+                    break;
+                case 'l':
+                    if (plot > 0 && this.colonies[plot - 1].length < this.width)
+                        return plot - 1;
+                    break;
+                case 'r':
+                    if (plot < this.length - 1 &&
+                        this.colonies[plot + 1].length < this.width)
+                        return plot + 1;
+                    break;
+            }
+        }
+        return null;
+    }
     evolve() {
-        // if(this.restTick)
-        // {
-        //     --this.restTick;
-        //     return;
-        // }
         let c = this.colonies[this.gangsta[0]][this.gangsta[1]];
         if (!c) {
             this.gangsta = null;
@@ -2510,12 +2538,16 @@ class ColonyManager {
         // Ancestree, derive and calc stats
         if (!('ancestors' in this.ancestreeTask) ||
             ('ancestors' in this.ancestreeTask && this.ancestreeTask.start)) {
-            this.ancestreeTask = plantData[c.id].system.getAncestree(c.sequence, this.ancestreeTask);
+            perfs[2 /* Profilers.LS_ANCESTREE */].exec(() => {
+                this.ancestreeTask = plantData[c.id].system.getAncestree(c.sequence, this.ancestreeTask);
+            });
             return;
         }
         if (!('derivation' in this.deriveTask) ||
             ('derivation' in this.deriveTask && this.deriveTask.start)) {
-            this.deriveTask = plantData[c.id].system.derive(c.sequence, c.params, this.ancestreeTask.ancestors, this.ancestreeTask.children, this.deriveTask);
+            perfs[3 /* Profilers.LS_DERIVE */].exec(() => {
+                this.deriveTask = plantData[c.id].system.derive(c.sequence, c.params, this.ancestreeTask.ancestors, this.ancestreeTask.children, this.deriveTask);
+            });
             return;
         }
         if (!this.deriveTask.derivation.length) {
@@ -2535,7 +2567,9 @@ class ColonyManager {
         }
         if (!('synthRate' in this.calcTask) ||
             ('synthRate' in this.calcTask && this.calcTask.start)) {
-            this.calcTask = this.calculateStats(c, this.calcTask, this.deriveTask);
+            perfs[4 /* Profilers.LS_CALC_STATS */].exec(() => {
+                this.calcTask = this.calculateStats(c, this.calcTask, this.deriveTask);
+            });
             return;
         }
         // @ts-expect-error
@@ -2554,6 +2588,13 @@ class ColonyManager {
             this.reap(c, plantData[c.id].stagelyIncome);
         c.profit = this.calcTask.profit;
         ++c.stage;
+        let prop = plantData[c.id].propagation;
+        if (prop && c.stage >= (plantData[c.id].maxStage ?? MAX_INT)) {
+            let pop = Math.round(c.population * prop.rate);
+            let target = this.findTarget(this.gangsta[0], prop.priority);
+            if (target !== null)
+                this.addColony(target, c.id, pop, true);
+        }
         this.ancestreeTask =
             {
                 start: 0
@@ -2594,24 +2635,23 @@ const almanac = new Book(getLoc('almanacTitle'), [
         pinned: true
     },
     {
-        ...getLoc('almanac')[1],
-        systemID: 1,
+        ...getLoc('almanac').calendula,
+        systemID: 'calendula',
         source: 'https://www.tasteofyummy.com/calendula-bread-for-bread-lovers/',
         pinned: true
     },
     {
-        ...getLoc('almanac')[2],
-        systemID: 2,
+        ...getLoc('almanac').basil,
+        systemID: 'basil',
         pinned: true
     },
     {
-        ...getLoc('almanac')[3],
-        systemID: 3,
+        ...getLoc('almanac').campion,
+        systemID: 'campion',
         pinned: true
     },
 ]);
 const LsManual = new Book(getLoc('manualTitle'), [
-    getLoc('manual').foreword,
     {
         ...getLoc('manual').cover,
         horizontalAlignment: TextAlignment.CENTER
@@ -2636,12 +2676,13 @@ const LsManual = new Book(getLoc('manualTitle'), [
         ...getLoc('manual').turtleSymbols,
         pinned: true
     },
+    getLoc('manual').footnote,
 ]);
 // Balance parameters
 const nofPlots = 6;
 const maxColoniesPerPlot = 4;
 const plotCosts = new FirstFreeCost(new ExponentialCost(900, Math.log2(120)));
-const plantUnlocks = [1, 2, 3];
+const plantUnlocks = ['calendula', 'basil', 'campion'];
 const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2200), new ConstantCost(145000));
 const permaCosts = [
     BigNumber.from(27),
@@ -2662,8 +2703,7 @@ var getPublicationMultiplier = (tau) => pubCoef *
 var getPublicationMultiplierFormula = (symbol) => `\\frac{2}{3}\\times
 {${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
 const plantData = {
-    1: // Calendula
-    {
+    calendula: {
         system: new LSystem('-(3)A(0.12, 0)', [
             'A(r, t): t>=2 && r>=flowerThreshold = F(0.78, 2.1)K(0)',
             'A(r, t): r>=flowerThreshold = [&A(r-0.15, 0)][^I(0)]',
@@ -2697,6 +2737,10 @@ const plantData = {
         cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
         growthRate: BigNumber.THREE,
         growthCost: BigNumber.from(2.5),
+        propagation: {
+            rate: 0.25,
+            priority: ['c']
+        },
         actions: [
             {
                 symbols: new Set('K'),
@@ -2729,8 +2773,7 @@ const plantData = {
             };
         }
     },
-    2: // Basil
-    {
+    basil: {
         system: new LSystem('/(90)BA(0.18, 0)', [
             'A(r, t): r>=flowerThreshold = S(0)F(0.24, 0.96)K(0.02, 8)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
@@ -2799,8 +2842,7 @@ const plantData = {
             };
         }
     },
-    3: // Rose campion
-    {
+    campion: {
         system: new LSystem('/(45)&(5)A(0.1, 3)', [
             'A(r, t): t>0 = A(r+0.05, t-1)',
             'A(r, t) = F(0.4, 20)T[&L(0.025)][/(180)&L(0.025)][F(0.4, 10)K(0.125, 0)][^$A(r-0.2, 7)][&$A(r-0.15, 3)]',
@@ -2825,8 +2867,12 @@ const plantData = {
         maxStage: 27,
         cost: new ExponentialCost(10000, Math.log2(5)),
         growthRate: BigNumber.FIVE,
-        growthCost: BigNumber.FIVE,
+        growthCost: BigNumber.TEN,
         stagelyIncome: BigNumber.ONE,
+        propagation: {
+            rate: 0.5,
+            priority: ['c']
+        },
         actions: [
             {
                 symbols: new Set('K'),
@@ -2837,9 +2883,9 @@ const plantData = {
         decimals: {
             'A': [2, 0],
             'F': [1, 0],
-            'K': [3],
+            'K': [3, 0],
             'L': [3],
-            'O': [2],
+            'O': [3],
             '&': [0],
             '/': [0]
         },
@@ -2858,7 +2904,7 @@ const plantData = {
             };
         }
     },
-    9001: // Arrow weed (test)
+    arrow: // Arrow weed (test)
     {
         system: new LSystem('A(1)', [
             'F(l)=F(l*2)',
@@ -2906,7 +2952,7 @@ const plantData = {
             };
         }
     },
-    9002: // Old basil
+    brasil: // Old basil
     {
         system: new LSystem('BA(0.18, 0)', [
             'A(r, t): r>=flowerThreshold = K(0)',
@@ -2977,14 +3023,18 @@ const plantData = {
         }
     },
 };
-// For reference only
 const plantIDLookup = {
     calendula: 1,
+    1: 'calendula',
     basil: 2,
+    2: 'basil',
     campion: 3,
+    3: 'campion',
     rose: 3,
     arrow: 9001,
-    brasil: 9002
+    9001: 'arrow',
+    brasil: 9002,
+    9002: 'brasil'
 };
 let haxEnabled = false;
 let time = 0;
@@ -3001,13 +3051,13 @@ let plantIdx = new Array(nofPlots).fill(0);
 let selectedColony = null;
 let finishedTutorial = false;
 let actuallyPlanting = true;
-let graphMode2D = 1;
+let graphMode2D = 1 /* GraphModes2D.INSOLATION */;
 let graphMode3D = true;
-let colonyMode = 1;
+let colonyMode = 1 /* ColonyModes.VERBOSE */;
 let fancyPlotTitle = true;
 let actionPanelOnTop = false;
 let actionConfirm = true;
-let quatBoard = false;
+let quatMode = 0 /* QuaternaryModes.PROFITS */;
 let colonyViewConfig = {};
 let notebook = {};
 let tmpCurrency;
@@ -3031,6 +3081,18 @@ let quaternaryEntries = [
 let taxQuaternaryEntry = [
     new QuaternaryEntry('T_{\\text{p}}', null)
 ];
+let perfNames = [
+    ['tick', 't'],
+    ['manager', 'm'],
+    ['lsAncestree', 'L_a'],
+    ['lsDerive', 'L_d'],
+    ['lsCalcStats', 'L_c'],
+    ['availability', 'av'],
+    ['renderer', 'r'],
+    ['eq2', 'e_2']
+];
+let perfs = perfNames.map(element => profilers.get(element[0]));
+let perfQuaternaryEntries = perfNames.map(element => new QuaternaryEntry(element[1], null));
 let createFramedButton = (params, margin, callback, image) => {
     let frame = ui.createFrame({
         cornerRadius: 1,
@@ -3086,11 +3148,11 @@ const harvestFrame = createFramedButton({
     row: 0, column: 0,
 }, 2, () => {
     if (actionConfirm) {
-        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 0);
+        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 0 /* Actions.HARVEST */);
         menu.show();
     }
     else
-        manager.performAction(plotIdx, colonyIdx[plotIdx], 0);
+        manager.performAction(plotIdx, colonyIdx[plotIdx], 0 /* Actions.HARVEST */);
 }, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle-dark.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle.png'));
@@ -3100,30 +3162,32 @@ const harvestLabel = ui.createLatexLabel({
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9, 1, 9),
-    text: getLoc('labelActions')[0],
+    text: getLoc('labelActions')[0 /* Actions.HARVEST */],
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
 const pruneFrame = createFramedButton({
     isVisible: () => {
-        if (!selectedColony || !plantData[selectedColony.id].actions[1])
+        if (!selectedColony ||
+            !plantData[selectedColony.id].actions[1 /* Actions.PRUNE */])
             return false;
         return true;
     },
     row: 0, column: 2,
 }, 2, () => {
     if (actionConfirm) {
-        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 1);
+        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 1 /* Actions.PRUNE */);
         menu.show();
     }
     else
-        manager.performAction(plotIdx, colonyIdx[plotIdx], 1);
+        manager.performAction(plotIdx, colonyIdx[plotIdx], 1 /* Actions.PRUNE */);
 }, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/hair-strands-dark.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/hair-strands.png'));
 const pruneLabel = ui.createLatexLabel({
     isVisible: () => {
-        if (!selectedColony || !plantData[selectedColony.id].actions[1])
+        if (!selectedColony ||
+            !plantData[selectedColony.id].actions[1 /* Actions.PRUNE */])
             return false;
         return true;
     },
@@ -3249,7 +3313,7 @@ var init = () => {
     */
     for (let i = 0; i < nofPlots; ++i) {
         for (let j = 0; j < plantUnlocks.length; ++j) {
-            plants[i][plantUnlocks[j]] = theory.createUpgrade(i * 100 + j, currency, plantData[plantUnlocks[j]].cost);
+            plants[i][plantUnlocks[j]] = theory.createUpgrade(i * 100 + plantIDLookup[plantUnlocks[j]], currency, plantData[plantUnlocks[j]].cost);
             plants[i][plantUnlocks[j]].description = Localization.format(getLoc('plotPlant'), i + 1, getLoc('plants')[plantUnlocks[j]].name);
             plants[i][plantUnlocks[j]].info = getLoc('plants')[plantUnlocks[j]].
                 info;
@@ -3429,21 +3493,22 @@ var init = () => {
     theory.secondaryEquationHeight = 105;
 };
 var updateAvailability = () => {
-    if (!finishedTutorial) {
-        finishedTutorial = plotPerma.level > 0;
-    }
-    else {
-        shelfPerma.isAvailable = finishedTutorial;
-        switchPlant.isAvailable = !manager.colonies[plotIdx].length;
-        viewColony.isAvailable = manager.colonies[plotIdx].length >= 1;
-        switchColony.isAvailable = manager.colonies[plotIdx].length > 1;
-    }
-    for (let i = 0; i < plotPerma.level; ++i) {
-        for (let j = 0; j < plantUnlocks.length; ++j)
-            plants[i][plantUnlocks[j]].isAvailable =
-                plants[i][plantUnlocks[j]].level > 0 ||
-                    (j == plantIdx[i] && j <= plantPerma.level);
-    }
+    perfs[5 /* Profilers.AVAILABILITY */].exec(() => {
+        if (!finishedTutorial)
+            finishedTutorial = plotPerma.level > 0;
+        else {
+            shelfPerma.isAvailable = finishedTutorial;
+            switchPlant.isAvailable = !manager.colonies[plotIdx].length;
+            viewColony.isAvailable = manager.colonies[plotIdx].length >= 1;
+            switchColony.isAvailable = manager.colonies[plotIdx].length > 1;
+        }
+        for (let i = 0; i < plotPerma.level; ++i) {
+            for (let j = 0; j < plantUnlocks.length; ++j)
+                plants[i][plantUnlocks[j]].isAvailable =
+                    plants[i][plantUnlocks[j]].level > 0 ||
+                        (j == plantIdx[i] && j <= plantPerma.level);
+        }
+    });
 };
 // let floatingWipLabel = ui.createLatexLabel
 // ({
@@ -3458,33 +3523,42 @@ var updateAvailability = () => {
 //     textColor: Color.TEXT_MEDIUM
 // });
 var tick = (elapsedTime, multiplier) => {
-    // Without the multiplier, one year is 14.6 hours (14:36)
-    // With the multiplier, one year is 9.7(3) hours (9:44)
-    let dt = elapsedTime * multiplier;
-    time += dt;
-    // https://www.desmos.com/calculator/pfku4nopgy
-    // insolation = max(0, -cos(x*pi/72))
-    // Help me check my integral maths
-    let cycles = time / 144;
-    let newDays = Math.floor(cycles);
-    let dd = newDays - days;
-    days = newDays;
-    while (days >= yearStartLookup[years + 1])
-        ++years;
-    let phase = saturate(cycles - days - 0.25, 0, 0.5);
-    let newII = days * 144 / Math.PI - 72 *
-        (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
-    let di = newII - insolationIntegral;
-    insolationIntegral = newII;
-    // universal growth factor = cos(x*pi/72)/2 + 1/2
-    let newGI = time / 2 + 36 * Math.sin(time * Math.PI / 72) / Math.PI;
-    let dg = newGI - growthIntegral;
-    growthIntegral = newGI;
+    let dd, di, dg;
+    perfs[0 /* Profilers.TICK */].exec(() => {
+        // Without the multiplier, one year is 14.6 hours (14:36)
+        // With the multiplier, one year is 9.7(3) hours (9:44)
+        let dt = elapsedTime * multiplier;
+        time += dt;
+        // https://www.desmos.com/calculator/pfku4nopgy
+        // insolation = max(0, -cos(x*pi/72))
+        // Help me check my integral maths
+        let cycles = time / 144;
+        let newDays = Math.floor(cycles);
+        dd = newDays - days;
+        days = newDays;
+        while (days >= yearStartLookup[years + 1])
+            ++years;
+        let phase = saturate(cycles - days - 0.25, 0, 0.5);
+        let newII = days * 144 / Math.PI - 72 *
+            (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
+        di = newII - insolationIntegral;
+        insolationIntegral = newII;
+        // universal growth factor = cos(x*pi/72)/2 + 1/2
+        let newGI = time / 2 + 36 * Math.sin(time * Math.PI / 72) / Math.PI;
+        dg = newGI - growthIntegral;
+        growthIntegral = newGI;
+    });
     manager.growAll(BigNumber.from(di), BigNumber.from(dg), BigNumber.from(dd));
     if (!game.isCalculatingOfflineProgress) {
         let timeCos = Math.cos(time * Math.PI / 72);
         insolationCoord = Math.max(0, -timeCos);
         growthCoord = (timeCos + 1) / 2;
+        switch (quatMode) {
+            case 2 /* QuaternaryModes.PERFORMANCE */:
+            case 3 /* QuaternaryModes.PERFORMANCE_MINMAX */:
+                theory.invalidateQuaternaryValues();
+                break;
+        }
         // floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
         // 180, Easing.LINEAR);
         managerLoadingInd.isRunning = manager.busy;
@@ -3575,7 +3649,7 @@ var getEquationOverlay = () => {
 /**
  * Returns the colony title for representation.
  */
-let getColonyTitle = (colony, prog = false, escapeHash = false) => Localization.format(getLoc(prog ? 'colonyProg' : 'colony'), colony.population, getLoc('plants')[colony.id]?.name ?? `${escapeHash ? '\\' : ''}#${colony.id}`, 
+let getColonyTitleString = (colony, prog = false, escapeHash = false) => Localization.format(getLoc(prog ? 'colonyProg' : 'colony'), colony.propagated ? `+${colony.population}` : colony.population, getLoc('plants')[colony.id]?.name ?? `${escapeHash ? '\\' : ''}#${colony.id}`, 
 // @ts-expect-error
 colony.stage, prog ? colony.growth * BigNumber.HUNDRED /
     // @ts-expect-error
@@ -3597,45 +3671,51 @@ var getSecondaryEquation = () => {
         ${tauRate.toString(0)}`;
         return `\\begin{array}{c}${tauInfo}\\\\\\\\${taxInfo}\\end{array}`;
     }
-    switch (colonyMode) {
-        case 1:
-            let status = (manager.gangsta && manager.gangsta[0] == plotIdx &&
-                manager.gangsta[1] == colonyIdx[plotIdx]) ?
-                getLoc('status').evolve : (manager.actionGangsta &&
-                manager.actionGangsta[0] == plotIdx &&
-                manager.actionGangsta[1] == colonyIdx[plotIdx]) ?
-                getLoc('status').actions[manager.actionGangsta[2]] : '';
-            return `\\text{${Localization.format(getLoc('colonyStats'), c.population, getLoc('plants')[c.id]?.name ?? `#${c.id}`, c.stage, 
-            // @ts-expect-error
-            c.energy, c.synthRate * BigNumber.from(insolationCoord), c.growth, 
-            // @ts-expect-error
-            plantData[c.id].growthCost * BigNumber.from(c.sequence.length), 
-            // @ts-expect-error
-            plantData[c.id].growthRate * BigNumber.from(growthCoord), c.profit, status)}}`;
-        case 2:
-            return `\\text{${getColonyTitle(c)}}\\\\E=${c.energy},\\enspace
-            g=${c.growth}/${ // @ts-expect-error
-            plantData[c.id].growthCost * BigNumber.from(c.sequence.length)}
-            \\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}\\text{p}
-            \\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})
-            \\\\`;
-        case 3:
-            let result = '\\text{';
-            for (let i = 0; i < colonyIdx[plotIdx]; ++i) {
-                let d = manager.colonies[plotIdx][i];
-                result += `${getColonyTitle(d, true)}\\\\`;
-            }
-            result += `\\underline{${getColonyTitle(c, true)}}}\\\\
-            E=${c.energy},\\enspace\\pi =${c.profit}\\text{p}\\\\\\text{`;
-            for (let i = colonyIdx[plotIdx] + 1; i < manager.colonies[plotIdx].length; ++i) {
-                let d = manager.colonies[plotIdx][i];
-                result += `${getColonyTitle(d, true)}\\\\`;
-            }
-            result += `}`;
-            return result;
-        default:
-            return '';
-    }
+    let result;
+    perfs[7 /* Profilers.EQ_2 */].exec(() => {
+        switch (colonyMode) {
+            case 1 /* ColonyModes.VERBOSE */:
+                let status = (manager.gangsta &&
+                    manager.gangsta[0] == plotIdx &&
+                    manager.gangsta[1] == colonyIdx[plotIdx]) ?
+                    getLoc('status').evolve : (manager.actionGangsta &&
+                    manager.actionGangsta[0] == plotIdx &&
+                    manager.actionGangsta[1] == colonyIdx[plotIdx]) ?
+                    getLoc('status').actions[manager.actionGangsta[2]] : '';
+                result = `\\text{${Localization.format(getLoc('colonyStats'), c.population, getLoc('plants')[c.id]?.name ?? `#${c.id}`, c.stage, 
+                // @ts-expect-error
+                c.energy, c.synthRate * BigNumber.from(insolationCoord), c.growth, 
+                // @ts-expect-error
+                plantData[c.id].growthCost * BigNumber.from(c.sequence.length), 
+                // @ts-expect-error
+                plantData[c.id].growthRate * BigNumber.from(growthCoord), c.profit, status)}}`;
+                break;
+            case 2 /* ColonyModes.SIMPLE */:
+                result = `\\text{${getColonyTitleString(c)}}\\\\E=${c.energy},
+                \\enspace g=${c.growth}/${ // @ts-expect-error
+                plantData[c.id].growthCost * BigNumber.from(c.sequence.length)}
+                \\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}
+                \\text{p}\\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})\\\\`;
+                break;
+            case 3 /* ColonyModes.LIST */:
+                result = '\\text{';
+                for (let i = 0; i < colonyIdx[plotIdx]; ++i) {
+                    let d = manager.colonies[plotIdx][i];
+                    result += `${getColonyTitleString(d, true)}\\\\`;
+                }
+                result += `\\underline{${getColonyTitleString(c, true)}}}\\\\
+                E=${c.energy},\\enspace\\pi =${c.profit}\\text{p}\\\\\\text{`;
+                for (let i = colonyIdx[plotIdx] + 1; i < manager.colonies[plotIdx].length; ++i) {
+                    let d = manager.colonies[plotIdx][i];
+                    result += `${getColonyTitleString(d, true)}\\\\`;
+                }
+                result += `}`;
+                break;
+            default:
+                result = '';
+        }
+    });
+    return result;
 };
 let getTimeString = () => {
     let dayofYear = days - yearStartLookup[years];
@@ -3651,27 +3731,49 @@ let getTimeString = () => {
         'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1, hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'), haxEnabled ? getLoc('hacks') : '');
 };
 var getQuaternaryEntries = () => {
+    switch (quatMode) {
+        case 2 /* QuaternaryModes.PERFORMANCE */:
+            for (let i = 0; i < perfs.length; ++i) {
+                let m1 = getCoordString(perfs[i].latest * 1000);
+                let m2 = getCoordString(perfs[i].mean * 1000);
+                perfQuaternaryEntries[i].value = `${m1}/${m2}`;
+            }
+            return perfQuaternaryEntries;
+        case 3 /* QuaternaryModes.PERFORMANCE_MINMAX */:
+            for (let i = 0; i < perfs.length; ++i) {
+                let m1 = getCoordString(perfs[i].min * 1000);
+                let m2 = getCoordString(perfs[i].max * 1000);
+                perfQuaternaryEntries[i].value = `${m1}/${m2}`;
+            }
+            return perfQuaternaryEntries;
+    }
     if (!plotPerma.level)
         return quaternaryEntries.slice(0, 1);
-    for (let i = 0; i < plotPerma.level; ++i) {
-        if (quatBoard) {
-            let column = '';
-            for (let j = 0; j < manager.colonies[i].length; ++j) {
-                let c = manager.colonies[i][j];
-                column += getLoc('plants')[c.id]?.nameShort ?? '#';
-            }
-            quaternaryEntries[i].value = column;
-        }
-        else {
-            let sum = BigNumber.ZERO;
-            for (let j = 0; j < manager.colonies[i].length; ++j) {
-                let c = manager.colonies[i][j];
-                // @ts-expect-error
-                sum += c.profit * BigNumber.from(c.population) *
+    let i;
+    for (i = 0; i < plotPerma.level; ++i) {
+        switch (quatMode) {
+            case 0 /* QuaternaryModes.PROFITS */:
+                let sum = BigNumber.ZERO;
+                for (let j = 0; j < manager.colonies[i].length; ++j) {
+                    let c = manager.colonies[i][j];
                     // @ts-expect-error
-                    theory.publicationMultiplier;
-            }
-            quaternaryEntries[i].value = sum;
+                    sum += c.profit * BigNumber.from(c.population) *
+                        // @ts-expect-error
+                        theory.publicationMultiplier;
+                }
+                quaternaryEntries[i].value = sum;
+                break;
+            case 1 /* QuaternaryModes.BOARD */:
+                let column = '';
+                for (let j = 0; j < manager.colonies[i].length; ++j) {
+                    let c = manager.colonies[i][j];
+                    column += getLoc('plants')[c.id]?.nameShort ?? '#';
+                }
+                quaternaryEntries[i].value = column;
+                break;
+            default:
+                // PERFORMANCE
+                break;
         }
     }
     if (theory.publicationUpgrade.level && theory.canPublish) {
@@ -3975,7 +4077,7 @@ let createColonyViewMenu = (colony) => {
         }
         return reconstructionTask.result;
     };
-    let tmpTitle = getColonyTitle(colony);
+    let tmpTitle = getColonyTitleString(colony);
     let tmpStage = colony.stage;
     let cmtStage = -1;
     let updateCommentary = () => {
@@ -4025,7 +4127,7 @@ let createColonyViewMenu = (colony) => {
                 Menu title and commentary are updated dynamically without
                 the player having to close and re-open.
                 */
-                tmpTitle = getColonyTitle(colony);
+                tmpTitle = getColonyTitleString(colony);
                 tmpCmt = updateCommentary();
                 plantStats.text = Localization.format(getLoc('plantStats'), cmtStage, tmpCmt, plantData[colony.id].maxStage ?? '∞', colony.synthRate, plantData[colony.id].growthRate, plantData[colony.id].growthCost, colony.sequence.length);
                 tmpStage = colony.stage;
@@ -4400,18 +4502,18 @@ let createShelfMenu = () => {
         content: ui.createStackLayout({
             children: [
                 ui.createButton({
-                    text: almanac.title,
-                    onClicked: () => {
-                        Sound.playClick();
-                        let menu = createBookMenu(almanac);
-                        menu.show();
-                    }
-                }),
-                ui.createButton({
                     text: LsManual.title,
                     onClicked: () => {
                         Sound.playClick();
                         let menu = createBookMenu(LsManual);
+                        menu.show();
+                    }
+                }),
+                ui.createButton({
+                    text: almanac.title,
+                    onClicked: () => {
+                        Sound.playClick();
+                        let menu = createBookMenu(almanac);
                         menu.show();
                     }
                 }),
@@ -4437,7 +4539,7 @@ let createConfirmationMenu = (plot, index, id) => {
         content: ui.createStackLayout({
             children: [
                 ui.createLatexLabel({
-                    text: Localization.format(getLoc('actionConfirmDialogue'), getLoc('labelActions')[id], plot + 1, index + 1, getColonyTitle(c, false, true)),
+                    text: Localization.format(getLoc('actionConfirmDialogue'), getLoc('labelActions')[id], plot + 1, index + 1, getColonyTitleString(c, false, true)),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     margin: new Thickness(0, 15)
                 }),
@@ -4488,7 +4590,7 @@ let createWorldMenu = () => {
         }
     });
     let GM3Grid = ui.createGrid({
-        row: 5, column: 0,
+        row: 6, column: 0,
         columnDefinitions: ['73*', '60*', '7*'],
         children: [
             GM3Label,
@@ -4497,7 +4599,7 @@ let createWorldMenu = () => {
     });
     let GM3Switch = ui.createSwitch({
         isToggled: graphMode3D,
-        row: 5, column: 1,
+        row: 6, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e) => {
             if (e.type == TouchType.SHORTPRESS_RELEASED ||
@@ -4510,13 +4612,13 @@ let createWorldMenu = () => {
     });
     let GM2Label = ui.createLatexLabel({
         text: getLoc('graphModes2D')[graphMode2D],
-        row: 4, column: 0,
+        row: 5, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM2Slider = ui.createSlider({
-        row: 4, column: 1,
+        row: 5, column: 1,
         minimum: 0,
-        maximum: 2,
+        maximum: 3 /* GraphModes2D._SIZE */ - 1,
         value: graphMode2D,
         onValueChanged: () => {
             graphMode2D = Math.round(GM2Slider.value);
@@ -4535,7 +4637,7 @@ let createWorldMenu = () => {
     let CMSlider = ui.createSlider({
         row: 3, column: 1,
         minimum: 0,
-        maximum: 3,
+        maximum: 4 /* ColonyModes._SIZE */ - 1,
         value: colonyMode,
         onValueChanged: () => {
             colonyMode = Math.round(CMSlider.value);
@@ -4604,25 +4706,43 @@ let createWorldMenu = () => {
         }
     });
     let QBLabel = ui.createLatexLabel({
-        text: getLoc('quatModes')[Number(quatBoard)],
-        row: 2, column: 0,
+        text: getLoc('quatModes')[quatMode],
+        row: 4, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let QBSwitch = ui.createSwitch({
-        isToggled: quatBoard,
-        row: 2, column: 1,
-        horizontalOptions: LayoutOptions.CENTER,
-        onTouched: (e) => {
-            if (e.type == TouchType.SHORTPRESS_RELEASED ||
-                e.type == TouchType.LONGPRESS_RELEASED) {
-                Sound.playClick();
-                quatBoard = !quatBoard;
-                QBSwitch.isToggled = quatBoard;
-                QBLabel.text = getLoc('quatModes')[Number(quatBoard)];
-                theory.invalidateQuaternaryValues();
-            }
+    let QBSlider = ui.createSlider({
+        row: 4, column: 1,
+        minimum: 0,
+        maximum: 4 /* QuaternaryModes._SIZE */ - 1,
+        value: quatMode,
+        onValueChanged: () => {
+            quatMode = Math.round(QBSlider.value);
+            QBLabel.text = getLoc('quatModes')[quatMode];
+        },
+        onDragCompleted: () => {
+            Sound.playClick();
+            QBSlider.value = quatMode;
+            theory.invalidateQuaternaryValues();
         }
     });
+    // let QBSwitch = ui.createSwitch
+    // ({
+    //     isToggled: quatBoard,
+    //     row: 2, column: 1,
+    //     horizontalOptions: LayoutOptions.CENTER,
+    //     onTouched: (e: TouchEvent) =>
+    //     {
+    //         if(e.type == TouchType.SHORTPRESS_RELEASED ||
+    //         e.type == TouchType.LONGPRESS_RELEASED)
+    //         {
+    //             Sound.playClick();
+    //             quatBoard = !quatBoard;
+    //             QBSwitch.isToggled = quatBoard;
+    //             QBLabel.text = getLoc('quatModes')[Number(quatBoard)];
+    //             theory.invalidateQuaternaryValues();
+    //         }
+    //     }
+    // });
     let menu = ui.createPopup({
         isPeekable: true,
         title: getLoc('menuSettings'),
@@ -4652,8 +4772,8 @@ let createWorldMenu = () => {
                         PTSwitch,
                         ACLabel,
                         ACSwitch,
-                        // QBLabel,
-                        // QBSwitch
+                        QBLabel,
+                        QBSlider
                     ]
                 }),
                 ui.createLatexLabel({
@@ -4702,6 +4822,8 @@ var getCurrencyFromTau = (tau) => [
     currency.symbol
 ];
 var prePublish = () => {
+    // @ts-expect-error
+    taxCurrency.value = getCurrencyFromTau(theory.tau)[0] * taxRate;
     // @ts-expect-error
     tmpCurrency = currency.value + taxCurrency.value;
     tmpLevels = Array.from({ length: nofPlots }, (_) => []);
@@ -4785,7 +4907,7 @@ var getInternalState = () => {
             fancyPlotTitle,
             actionPanelOnTop,
             actionConfirm,
-            quatBoard
+            quatMode
         },
         colonyViewConfig,
         notebook
@@ -4826,6 +4948,13 @@ var setInternalState = (stateStr) => {
         finishedTutorial = state.finishedTutorial ?? finishedTutorial;
         manager = new ColonyManager(state.manager, nofPlots, maxColoniesPerPlot)
             ?? manager;
+        if (v < 0.105) {
+            for (let i = 0; i < manager.length; ++i)
+                for (let j = 0; j < manager.colonies[i].length; ++j)
+                    if (typeof manager.colonies[i][j].id === 'number')
+                        manager.colonies[i][j].id =
+                            plantIDLookup[manager.colonies[i][j].id];
+        }
         if (v < 0.04) {
             graphMode2D = state.graphMode2D ?? graphMode2D;
             graphMode3D = state.graphMode3D ?? graphMode3D;
@@ -4833,7 +4962,7 @@ var setInternalState = (stateStr) => {
             fancyPlotTitle = state.fancyPlotTitle ?? fancyPlotTitle;
             actionPanelOnTop = state.actionPanelOnTop ?? actionPanelOnTop;
             actionConfirm = state.actionConfirm ?? actionConfirm;
-            quatBoard = state.quatBoard ?? quatBoard;
+            quatMode = state.quatMode ?? quatMode;
         }
         else if ('settings' in state) {
             graphMode2D = state.settings.graphMode2D ?? graphMode2D;
@@ -4843,7 +4972,8 @@ var setInternalState = (stateStr) => {
             actionPanelOnTop = state.settings.actionPanelOnTop ??
                 actionPanelOnTop;
             actionConfirm = state.settings.actionConfirm ?? actionConfirm;
-            quatBoard = state.settings.quatBoard ?? quatBoard;
+            quatMode = state.settings.quatMode ??
+                Number(state.settings.quatBoard ?? quatMode);
         }
         colonyViewConfig = state.colonyViewConfig ?? colonyViewConfig;
         notebook = state.notebook ?? notebook;
@@ -4885,17 +5015,20 @@ var setInternalState = (stateStr) => {
 };
 var get2DGraphValue = () => {
     switch (graphMode2D) {
-        case 0:
+        case 0 /* GraphModes2D.OFF */:
             return 0;
-        case 1: // Insolation
+        case 1 /* GraphModes2D.INSOLATION */: // Insolation
             return insolationCoord;
-        case 2: // Growth
+        case 2 /* GraphModes2D.GROWTH */: // Growth
             return growthCoord;
     }
 };
 var get3DGraphPoint = () => {
-    if (graphMode3D && !manager.busy)
-        renderer.draw();
+    if (graphMode3D && !manager.busy) {
+        perfs[6 /* Profilers.RENDERER */].exec(() => {
+            renderer.draw();
+        });
+    }
     return renderer.cursor;
 };
 var get3DGraphTranslation = () => renderer.camera;

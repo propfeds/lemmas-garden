@@ -51,6 +51,13 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
 
+- [ ] Watering
+  - Absurd cooldown like 10 minutes (6 days)
+    - Per species?
+  - Adds a fixed amount of energy
+  - Auto-watering
+    - Unlocks with classmates
+
 - [ ] Autobuy upgrade unlocks harvest automation config
   - Only unlocks in a future update (classmates!)
   - Hard to implement since there's more to LG than when to harvest
@@ -72,7 +79,10 @@ do nothing. Do you feel like it could be more interesting?
   - Happens when maximum statements
   - Condition: tau > 0, time < 10
 
-- [ ] Spreaded colonies syntax: +1 of Rose campion
+- [x] Propagation
+  - Rate = sum of seeds or fixed rate at fixed time?
+  - Has priority array `['r', 'l', 'c']` 
+  - Spreaded colonies syntax: +1 of Rose campion
 
 - [x] Colony view params are initially off
 - [ ] Notebook shows next cost
