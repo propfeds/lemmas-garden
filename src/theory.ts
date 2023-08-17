@@ -421,9 +421,9 @@ Every time it grows, pollinators will pay you a few pennies for having ` +
         manualTitle: 'Lindenmayer Systems',
         manual:
         {
-            foreword:
+            footnote:
             {
-                title: `Foreword`,
+                title: `Footnote`,
                 contents:
 `This manuscript was found scattered around a corner of the forest. Seems ` +
 `like someone knows a way to turn plants into alphabets. Perhaps even from ` +
@@ -2867,7 +2867,7 @@ interface Colony
     ddReserve?: BigNumber;
 }
 
-enum Actions
+const enum Actions
 {
     HARVEST,
     PRUNE
@@ -3481,7 +3481,6 @@ const almanac = new Book(getLoc('almanacTitle'),
 
 const LsManual = new Book(getLoc('manualTitle'),
 [
-    getLoc('manual').foreword,
     {
         ...getLoc('manual').cover,
         horizontalAlignment: TextAlignment.CENTER
@@ -3506,6 +3505,7 @@ const LsManual = new Book(getLoc('manualTitle'),
         ...getLoc('manual').turtleSymbols,
         pinned: true
     },
+    getLoc('manual').footnote,
 ]);
 
 interface Action
@@ -3758,7 +3758,7 @@ const plantData: {[key: string]: Plant} =
         maxStage: 27,
         cost: new ExponentialCost(10000, Math.log2(5)),
         growthRate: BigNumber.FIVE,
-        growthCost: BigNumber.FIVE,//BigNumber.from(2.5),
+        growthCost: BigNumber.TEN,//BigNumber.from(2.5),
         stagelyIncome: BigNumber.ONE,
         propagation:
         {
@@ -3954,7 +3954,7 @@ let plantIdx = new Array(nofPlots).fill(0);
 let selectedColony = null;
 let finishedTutorial = false;
 let actuallyPlanting = true;
-enum GraphModes2D
+const enum GraphModes2D
 {
     OFF,
     INSOLATION,
@@ -3963,7 +3963,7 @@ enum GraphModes2D
 }
 let graphMode2D = GraphModes2D.INSOLATION;
 let graphMode3D = true;
-enum ColonyModes
+const enum ColonyModes
 {
     OFF,
     VERBOSE,
@@ -3975,7 +3975,7 @@ let colonyMode = ColonyModes.VERBOSE;
 let fancyPlotTitle = true;
 let actionPanelOnTop = false;
 let actionConfirm = true;
-enum QuaternaryModes
+const enum QuaternaryModes
 {
     PROFITS,
     BOARD,
@@ -4025,7 +4025,7 @@ let perfNames =
     ['renderer', 'r'],
     ['eq2', 'e_2']
 ];
-enum Profilers
+const enum Profilers
 {
     TICK,
     MANAGER,
@@ -5703,7 +5703,7 @@ let createNotebookMenu = () =>
                 tmpMinusBtn,
                 tmpPlusBtn
             ]
-        })
+        });
         maxLevelEntries.push(tmpGrid);
         // TODO: Create harvest entry
     }

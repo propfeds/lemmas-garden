@@ -359,8 +359,8 @@ Every time it grows, pollinators will pay you a few pennies for having ` +
         },
         manualTitle: 'Lindenmayer Systems',
         manual: {
-            foreword: {
-                title: `Foreword`,
+            footnote: {
+                title: `Footnote`,
                 contents: `This manuscript was found scattered around a corner of the forest. Seems ` +
                     `like someone knows a way to turn plants into alphabets. Perhaps even from ` +
                     `the future. Thrilling!
@@ -2166,11 +2166,6 @@ class Renderer {
         }
     }
 }
-var Actions;
-(function (Actions) {
-    Actions[Actions["HARVEST"] = 0] = "HARVEST";
-    Actions[Actions["PRUNE"] = 1] = "PRUNE";
-})(Actions || (Actions = {}));
 /**
  * This is not ECS, I'm not good enough to understand ECS.
 */
@@ -2318,7 +2313,7 @@ class ColonyManager {
         }
         else if (this.gangsta)
             this.evolve();
-        perfs[Profilers.MANAGER].exec(() => {
+        perfs[1 /* Profilers.MANAGER */].exec(() => {
             for (let i = 0; i < this.colonies.length; ++i) {
                 for (let j = 0; j < this.colonies[i].length; ++j) {
                     let c = this.colonies[i][j];
@@ -2378,7 +2373,7 @@ class ColonyManager {
     }
     calculateStats(colony, task = {}, dTask = {}) {
         // This is the only case where the colony needed
-        let harvestable = plantData[colony.id].actions[Actions.HARVEST].symbols;
+        let harvestable = plantData[colony.id].actions[0 /* Actions.HARVEST */].symbols;
         let synthRate = task.synthRate ?? BigNumber.ZERO;
         let profit = task.profit ?? BigNumber.ZERO;
         let sequence = dTask.derivation ?? colony.sequence;
@@ -2425,14 +2420,14 @@ class ColonyManager {
                 this.actionAncestreeTask.start)) {
             let customAncestreeSystem = plantData[c.id].actions[id].system ??
                 plantData[c.id].system;
-            perfs[Profilers.LS_ANCESTREE].exec(() => {
+            perfs[2 /* Profilers.LS_ANCESTREE */].exec(() => {
                 this.actionAncestreeTask = customAncestreeSystem.getAncestree(c.sequence, this.actionAncestreeTask);
             });
             return;
         }
         if (!('derivation' in this.actionDeriveTask) ||
             ('derivation' in this.actionDeriveTask && this.actionDeriveTask.start)) {
-            perfs[Profilers.LS_DERIVE].exec(() => {
+            perfs[3 /* Profilers.LS_DERIVE */].exec(() => {
                 this.actionDeriveTask = plantData[c.id].actions[id].system.
                     derive(c.sequence, c.params, this.actionAncestreeTask.ancestors, this.actionAncestreeTask.children, this.actionDeriveTask);
             });
@@ -2457,7 +2452,7 @@ class ColonyManager {
         }
         if (!('synthRate' in this.actionCalcTask) ||
             ('synthRate' in this.actionCalcTask && this.actionCalcTask.start)) {
-            perfs[Profilers.LS_CALC_STATS].exec(() => {
+            perfs[4 /* Profilers.LS_CALC_STATS */].exec(() => {
                 this.actionCalcTask = this.calculateStats(c, this.actionCalcTask, this.actionDeriveTask);
             });
             return;
@@ -2543,14 +2538,14 @@ class ColonyManager {
         // Ancestree, derive and calc stats
         if (!('ancestors' in this.ancestreeTask) ||
             ('ancestors' in this.ancestreeTask && this.ancestreeTask.start)) {
-            perfs[Profilers.LS_ANCESTREE].exec(() => {
+            perfs[2 /* Profilers.LS_ANCESTREE */].exec(() => {
                 this.ancestreeTask = plantData[c.id].system.getAncestree(c.sequence, this.ancestreeTask);
             });
             return;
         }
         if (!('derivation' in this.deriveTask) ||
             ('derivation' in this.deriveTask && this.deriveTask.start)) {
-            perfs[Profilers.LS_DERIVE].exec(() => {
+            perfs[3 /* Profilers.LS_DERIVE */].exec(() => {
                 this.deriveTask = plantData[c.id].system.derive(c.sequence, c.params, this.ancestreeTask.ancestors, this.ancestreeTask.children, this.deriveTask);
             });
             return;
@@ -2572,7 +2567,7 @@ class ColonyManager {
         }
         if (!('synthRate' in this.calcTask) ||
             ('synthRate' in this.calcTask && this.calcTask.start)) {
-            perfs[Profilers.LS_CALC_STATS].exec(() => {
+            perfs[4 /* Profilers.LS_CALC_STATS */].exec(() => {
                 this.calcTask = this.calculateStats(c, this.calcTask, this.deriveTask);
             });
             return;
@@ -2657,7 +2652,6 @@ const almanac = new Book(getLoc('almanacTitle'), [
     },
 ]);
 const LsManual = new Book(getLoc('manualTitle'), [
-    getLoc('manual').foreword,
     {
         ...getLoc('manual').cover,
         horizontalAlignment: TextAlignment.CENTER
@@ -2682,6 +2676,7 @@ const LsManual = new Book(getLoc('manualTitle'), [
         ...getLoc('manual').turtleSymbols,
         pinned: true
     },
+    getLoc('manual').footnote,
 ]);
 // Balance parameters
 const nofPlots = 6;
@@ -2872,7 +2867,7 @@ const plantData = {
         maxStage: 27,
         cost: new ExponentialCost(10000, Math.log2(5)),
         growthRate: BigNumber.FIVE,
-        growthCost: BigNumber.FIVE,
+        growthCost: BigNumber.TEN,
         stagelyIncome: BigNumber.ONE,
         propagation: {
             rate: 0.5,
@@ -3056,36 +3051,13 @@ let plantIdx = new Array(nofPlots).fill(0);
 let selectedColony = null;
 let finishedTutorial = false;
 let actuallyPlanting = true;
-var GraphModes2D;
-(function (GraphModes2D) {
-    GraphModes2D[GraphModes2D["OFF"] = 0] = "OFF";
-    GraphModes2D[GraphModes2D["INSOLATION"] = 1] = "INSOLATION";
-    GraphModes2D[GraphModes2D["GROWTH"] = 2] = "GROWTH";
-    GraphModes2D[GraphModes2D["_SIZE"] = 3] = "_SIZE";
-})(GraphModes2D || (GraphModes2D = {}));
-let graphMode2D = GraphModes2D.INSOLATION;
+let graphMode2D = 1 /* GraphModes2D.INSOLATION */;
 let graphMode3D = true;
-var ColonyModes;
-(function (ColonyModes) {
-    ColonyModes[ColonyModes["OFF"] = 0] = "OFF";
-    ColonyModes[ColonyModes["VERBOSE"] = 1] = "VERBOSE";
-    ColonyModes[ColonyModes["SIMPLE"] = 2] = "SIMPLE";
-    ColonyModes[ColonyModes["LIST"] = 3] = "LIST";
-    ColonyModes[ColonyModes["_SIZE"] = 4] = "_SIZE";
-})(ColonyModes || (ColonyModes = {}));
-let colonyMode = ColonyModes.VERBOSE;
+let colonyMode = 1 /* ColonyModes.VERBOSE */;
 let fancyPlotTitle = true;
 let actionPanelOnTop = false;
 let actionConfirm = true;
-var QuaternaryModes;
-(function (QuaternaryModes) {
-    QuaternaryModes[QuaternaryModes["PROFITS"] = 0] = "PROFITS";
-    QuaternaryModes[QuaternaryModes["BOARD"] = 1] = "BOARD";
-    QuaternaryModes[QuaternaryModes["PERFORMANCE"] = 2] = "PERFORMANCE";
-    QuaternaryModes[QuaternaryModes["PERFORMANCE_MINMAX"] = 3] = "PERFORMANCE_MINMAX";
-    QuaternaryModes[QuaternaryModes["_SIZE"] = 4] = "_SIZE";
-})(QuaternaryModes || (QuaternaryModes = {}));
-let quatMode = QuaternaryModes.PROFITS;
+let quatMode = 0 /* QuaternaryModes.PROFITS */;
 let colonyViewConfig = {};
 let notebook = {};
 let tmpCurrency;
@@ -3119,17 +3091,6 @@ let perfNames = [
     ['renderer', 'r'],
     ['eq2', 'e_2']
 ];
-var Profilers;
-(function (Profilers) {
-    Profilers[Profilers["TICK"] = 0] = "TICK";
-    Profilers[Profilers["MANAGER"] = 1] = "MANAGER";
-    Profilers[Profilers["LS_ANCESTREE"] = 2] = "LS_ANCESTREE";
-    Profilers[Profilers["LS_DERIVE"] = 3] = "LS_DERIVE";
-    Profilers[Profilers["LS_CALC_STATS"] = 4] = "LS_CALC_STATS";
-    Profilers[Profilers["AVAILABILITY"] = 5] = "AVAILABILITY";
-    Profilers[Profilers["RENDERER"] = 6] = "RENDERER";
-    Profilers[Profilers["EQ_2"] = 7] = "EQ_2";
-})(Profilers || (Profilers = {}));
 let perfs = perfNames.map(element => profilers.get(element[0]));
 let perfQuaternaryEntries = perfNames.map(element => new QuaternaryEntry(element[1], null));
 let createFramedButton = (params, margin, callback, image) => {
@@ -3187,11 +3148,11 @@ const harvestFrame = createFramedButton({
     row: 0, column: 0,
 }, 2, () => {
     if (actionConfirm) {
-        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], Actions.HARVEST);
+        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 0 /* Actions.HARVEST */);
         menu.show();
     }
     else
-        manager.performAction(plotIdx, colonyIdx[plotIdx], Actions.HARVEST);
+        manager.performAction(plotIdx, colonyIdx[plotIdx], 0 /* Actions.HARVEST */);
 }, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle-dark.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle.png'));
@@ -3201,32 +3162,32 @@ const harvestLabel = ui.createLatexLabel({
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9, 1, 9),
-    text: getLoc('labelActions')[Actions.HARVEST],
+    text: getLoc('labelActions')[0 /* Actions.HARVEST */],
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
 const pruneFrame = createFramedButton({
     isVisible: () => {
         if (!selectedColony ||
-            !plantData[selectedColony.id].actions[Actions.PRUNE])
+            !plantData[selectedColony.id].actions[1 /* Actions.PRUNE */])
             return false;
         return true;
     },
     row: 0, column: 2,
 }, 2, () => {
     if (actionConfirm) {
-        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], Actions.PRUNE);
+        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 1 /* Actions.PRUNE */);
         menu.show();
     }
     else
-        manager.performAction(plotIdx, colonyIdx[plotIdx], Actions.PRUNE);
+        manager.performAction(plotIdx, colonyIdx[plotIdx], 1 /* Actions.PRUNE */);
 }, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/hair-strands-dark.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/hair-strands.png'));
 const pruneLabel = ui.createLatexLabel({
     isVisible: () => {
         if (!selectedColony ||
-            !plantData[selectedColony.id].actions[Actions.PRUNE])
+            !plantData[selectedColony.id].actions[1 /* Actions.PRUNE */])
             return false;
         return true;
     },
@@ -3532,7 +3493,7 @@ var init = () => {
     theory.secondaryEquationHeight = 105;
 };
 var updateAvailability = () => {
-    perfs[Profilers.AVAILABILITY].exec(() => {
+    perfs[5 /* Profilers.AVAILABILITY */].exec(() => {
         if (!finishedTutorial)
             finishedTutorial = plotPerma.level > 0;
         else {
@@ -3563,7 +3524,7 @@ var updateAvailability = () => {
 // });
 var tick = (elapsedTime, multiplier) => {
     let dd, di, dg;
-    perfs[Profilers.TICK].exec(() => {
+    perfs[0 /* Profilers.TICK */].exec(() => {
         // Without the multiplier, one year is 14.6 hours (14:36)
         // With the multiplier, one year is 9.7(3) hours (9:44)
         let dt = elapsedTime * multiplier;
@@ -3593,8 +3554,8 @@ var tick = (elapsedTime, multiplier) => {
         insolationCoord = Math.max(0, -timeCos);
         growthCoord = (timeCos + 1) / 2;
         switch (quatMode) {
-            case QuaternaryModes.PERFORMANCE:
-            case QuaternaryModes.PERFORMANCE_MINMAX:
+            case 2 /* QuaternaryModes.PERFORMANCE */:
+            case 3 /* QuaternaryModes.PERFORMANCE_MINMAX */:
                 theory.invalidateQuaternaryValues();
                 break;
         }
@@ -3711,9 +3672,9 @@ var getSecondaryEquation = () => {
         return `\\begin{array}{c}${tauInfo}\\\\\\\\${taxInfo}\\end{array}`;
     }
     let result;
-    perfs[Profilers.EQ_2].exec(() => {
+    perfs[7 /* Profilers.EQ_2 */].exec(() => {
         switch (colonyMode) {
-            case ColonyModes.VERBOSE:
+            case 1 /* ColonyModes.VERBOSE */:
                 let status = (manager.gangsta &&
                     manager.gangsta[0] == plotIdx &&
                     manager.gangsta[1] == colonyIdx[plotIdx]) ?
@@ -3729,14 +3690,14 @@ var getSecondaryEquation = () => {
                 // @ts-expect-error
                 plantData[c.id].growthRate * BigNumber.from(growthCoord), c.profit, status)}}`;
                 break;
-            case ColonyModes.SIMPLE:
+            case 2 /* ColonyModes.SIMPLE */:
                 result = `\\text{${getColonyTitleString(c)}}\\\\E=${c.energy},
                 \\enspace g=${c.growth}/${ // @ts-expect-error
                 plantData[c.id].growthCost * BigNumber.from(c.sequence.length)}
                 \\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}
                 \\text{p}\\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})\\\\`;
                 break;
-            case ColonyModes.LIST:
+            case 3 /* ColonyModes.LIST */:
                 result = '\\text{';
                 for (let i = 0; i < colonyIdx[plotIdx]; ++i) {
                     let d = manager.colonies[plotIdx][i];
@@ -3771,14 +3732,14 @@ let getTimeString = () => {
 };
 var getQuaternaryEntries = () => {
     switch (quatMode) {
-        case QuaternaryModes.PERFORMANCE:
+        case 2 /* QuaternaryModes.PERFORMANCE */:
             for (let i = 0; i < perfs.length; ++i) {
                 let m1 = getCoordString(perfs[i].latest * 1000);
                 let m2 = getCoordString(perfs[i].mean * 1000);
                 perfQuaternaryEntries[i].value = `${m1}/${m2}`;
             }
             return perfQuaternaryEntries;
-        case QuaternaryModes.PERFORMANCE_MINMAX:
+        case 3 /* QuaternaryModes.PERFORMANCE_MINMAX */:
             for (let i = 0; i < perfs.length; ++i) {
                 let m1 = getCoordString(perfs[i].min * 1000);
                 let m2 = getCoordString(perfs[i].max * 1000);
@@ -3791,7 +3752,7 @@ var getQuaternaryEntries = () => {
     let i;
     for (i = 0; i < plotPerma.level; ++i) {
         switch (quatMode) {
-            case QuaternaryModes.PROFITS:
+            case 0 /* QuaternaryModes.PROFITS */:
                 let sum = BigNumber.ZERO;
                 for (let j = 0; j < manager.colonies[i].length; ++j) {
                     let c = manager.colonies[i][j];
@@ -3802,7 +3763,7 @@ var getQuaternaryEntries = () => {
                 }
                 quaternaryEntries[i].value = sum;
                 break;
-            case QuaternaryModes.BOARD:
+            case 1 /* QuaternaryModes.BOARD */:
                 let column = '';
                 for (let j = 0; j < manager.colonies[i].length; ++j) {
                     let c = manager.colonies[i][j];
@@ -4657,7 +4618,7 @@ let createWorldMenu = () => {
     let GM2Slider = ui.createSlider({
         row: 5, column: 1,
         minimum: 0,
-        maximum: GraphModes2D._SIZE - 1,
+        maximum: 3 /* GraphModes2D._SIZE */ - 1,
         value: graphMode2D,
         onValueChanged: () => {
             graphMode2D = Math.round(GM2Slider.value);
@@ -4676,7 +4637,7 @@ let createWorldMenu = () => {
     let CMSlider = ui.createSlider({
         row: 3, column: 1,
         minimum: 0,
-        maximum: ColonyModes._SIZE - 1,
+        maximum: 4 /* ColonyModes._SIZE */ - 1,
         value: colonyMode,
         onValueChanged: () => {
             colonyMode = Math.round(CMSlider.value);
@@ -4752,7 +4713,7 @@ let createWorldMenu = () => {
     let QBSlider = ui.createSlider({
         row: 4, column: 1,
         minimum: 0,
-        maximum: QuaternaryModes._SIZE - 1,
+        maximum: 4 /* QuaternaryModes._SIZE */ - 1,
         value: quatMode,
         onValueChanged: () => {
             quatMode = Math.round(QBSlider.value);
@@ -5054,17 +5015,17 @@ var setInternalState = (stateStr) => {
 };
 var get2DGraphValue = () => {
     switch (graphMode2D) {
-        case GraphModes2D.OFF:
+        case 0 /* GraphModes2D.OFF */:
             return 0;
-        case GraphModes2D.INSOLATION: // Insolation
+        case 1 /* GraphModes2D.INSOLATION */: // Insolation
             return insolationCoord;
-        case GraphModes2D.GROWTH: // Growth
+        case 2 /* GraphModes2D.GROWTH */: // Growth
             return growthCoord;
     }
 };
 var get3DGraphPoint = () => {
     if (graphMode3D && !manager.busy) {
-        perfs[Profilers.RENDERER].exec(() => {
+        perfs[6 /* Profilers.RENDERER */].exec(() => {
             renderer.draw();
         });
     }
