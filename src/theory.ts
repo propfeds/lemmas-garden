@@ -421,13 +421,26 @@ Every time it grows, pollinators will pay you a few pennies for having ` +
         manualTitle: 'Lindenmayer Systems',
         manual:
         {
-            footnote:
+            note:
             {
-                title: `Footnote`,
+                title: `End Note`,
                 contents:
-`This manuscript was found scattered around a corner of the forest. Seems ` +
-`like someone knows a way to turn plants into alphabets. Perhaps even from ` +
-`the future. Thrilling!
+`This manuscript was found lying beneath a burrow, inside the forest. No ` +
+`written indication of whether it would ever be arranged for publish. It ` +
+`does not look to be written in our time, either. There is nothing natural ` +
+`about this, as if one had willingly put the manuscript down, waiting for ` +
+`someone else to pick up.
+
+I shall leave this thread to resolve in a future date. Regardless, it is ` +
+`certainly intriguing that the structure of a plant can be laid down into ` +
+`a single line of letters. And the rules seem to represent not the guidance ` +
+`from mother nature to the plants on how they would grow, but a person's ` +
+`abstractions of such. And as such, they would rather serve as the guidance ` +
+`from teacher to student, on how a wrinkled seed can sprout and flourish.
+On a side note, I am delighted of the fact he does not think the wrinkled ` +
+`seed would look identical in form to a grown up tree. Once I finish ` +
+`dissecting the manuscript, I shall contemplate handing it to Ellen, ` +
+`although, frankly speaking, it is unlikely anyone would believe me.
 
 - Lena`
             },
@@ -442,7 +455,7 @@ Second Edition
 🐢💨
 
 
-'propfeds'
+T.
 
 Draft, not for sale`
             },
@@ -3505,7 +3518,7 @@ const LsManual = new Book(getLoc('manualTitle'),
         ...getLoc('manual').turtleSymbols,
         pinned: true
     },
-    getLoc('manual').footnote,
+    getLoc('manual').note,
 ]);
 
 interface Action
