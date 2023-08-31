@@ -51,7 +51,7 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
 
-- [ ] Watering
+- [x] Watering
   - Absurd cooldown like 10 minutes (6 days)
     - Per species?
   - Adds a fixed amount of energy

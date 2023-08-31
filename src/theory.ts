@@ -33,7 +33,7 @@ var getName = (language: string): string =>
 {
     const names =
     {
-        en: `Lemma's Garden`,
+        en: `Lemma's garden`,
     };
 
     return names[language] ?? names.en;
@@ -46,7 +46,7 @@ var getDescription = (language: string): string =>
 `Last night, Lemma didn't sweep away the rubbles on her old garden.
 You did. You are her first student in a long while.
 
-Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
+Welcome to Lemma's garden, an idle botanical theory built on the grammar of ` +
 `Lindenmayer systems.`,
     };
 
@@ -55,7 +55,9 @@ Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
 var version = 0.104;
 
-const MAX_INT = 0x7fffffff;
+// Numbers are often converted into 32-bit signed integers in JINT.
+const INT_MAX = 0x7fffffff;
+const INT_MIN = -0x80000000;
 const TRIM_SP = /\s+/g;
 const LS_RULE = /([^:]+)(:(.+))?=(.*)/;
 // Context doesn't need to check for nested brackets!
@@ -95,6 +97,7 @@ const LOC_STRINGS =
 {3} (plot {1}, {2}).\\\\\n\n\\\\Do you want to continue?`,
 
         labelSave: 'Last save: {0}s',
+        labelWater: 'Water',
         labelActions: ['Harvest', 'Prune'],
         labelSettings: 'Settings',
         labelFilter: 'Filter: ',
@@ -2871,6 +2874,7 @@ interface Colony
     params: LSystemParams;
     stage: number;
 
+    nextWater: number;
     energy: BigNumber;
     growth: BigNumber;
     synthRate?: BigNumber;
@@ -2967,6 +2971,15 @@ class ColonyManager
         return false;
     }
 
+    water(colony: Colony)
+    {
+        if((colony.nextWater ?? 0) <= time)
+        {
+            // @ts-expect-error
+            colony.energy += plantData[colony.id].growthCost * waterAmount;
+            colony.nextWater = time + plantData[colony.id].waterCD;
+        }
+    }
     reap(colony: Colony, multiplier: BigNumber = BigNumber.ONE)
     {
         if(multiplier.isZero)
@@ -3007,6 +3020,7 @@ class ColonyManager
             params: plantData[id].system.axiomParams,
             stage: 0,
 
+            nextWater: 0,
             energy: BigNumber.ZERO,
             growth: BigNumber.ZERO,
 
@@ -3081,7 +3095,7 @@ class ColonyManager
                 {
                     let c = this.colonies[i][j];
                     let notMature = c.stage < (plantData[c.id].maxStage ??
-                    MAX_INT);
+                    INT_MAX);
                     // @ts-expect-error
                     if(notMature && c.growth >= plantData[c.id].growthCost *
                     // @ts-expect-error
@@ -3407,7 +3421,7 @@ class ColonyManager
 
         ++c.stage;
         let prop = plantData[c.id].propagation;
-        if(prop && c.stage >= (plantData[c.id].maxStage ?? MAX_INT))
+        if(prop && c.stage >= (plantData[c.id].maxStage ?? INT_MAX))
         {
             let pop = Math.round(c.population * prop.rate);
             let target = this.findTarget(this.gangsta[0], prop.priority);
@@ -3535,6 +3549,7 @@ interface Plant
     cost: any;
     growthRate: BigNumber;
     growthCost: BigNumber;
+    waterCD: number;
     dailyIncome?: boolean;
     stagelyIncome?: BigNumber;
     propagation?:
@@ -3575,6 +3590,8 @@ const permaCosts =
     BigNumber.from(4800),
     BigNumber.from(1e45)
 ];
+
+const waterAmount = BigNumber.THREE;
 
 const taxRate = BigNumber.from(-.12);
 const tauRate = BigNumber.TWO;
@@ -3628,6 +3645,7 @@ const plantData: {[key: string]: Plant} =
         cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
         growthRate: BigNumber.THREE,
         growthCost: BigNumber.from(2.5),
+        waterCD: 9 * 60,
         propagation:
         {
             rate: 0.25,
@@ -3704,6 +3722,7 @@ const plantData: {[key: string]: Plant} =
         cost: new ExponentialCost(5, 1),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.TWO,
+        waterCD: 9 * 60,
         actions:
         [
             {   // Always a harvest
@@ -3772,6 +3791,7 @@ const plantData: {[key: string]: Plant} =
         cost: new ExponentialCost(10000, Math.log2(5)),
         growthRate: BigNumber.FIVE,
         growthCost: BigNumber.TEN,//BigNumber.from(2.5),
+        waterCD: 18 * 60,
         stagelyIncome: BigNumber.ONE,
         propagation:
         {
@@ -3822,6 +3842,7 @@ const plantData: {[key: string]: Plant} =
         cost: new FirstFreeCost(new ExponentialCost(1, 1)),
         growthRate: BigNumber.TWO,
         growthCost: BigNumber.from(45),
+        waterCD: 1 * 60,
         actions:
         [
             {   // Always a harvest
@@ -3900,6 +3921,7 @@ const plantData: {[key: string]: Plant} =
         cost: new ExponentialCost(1, 1),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.THREE,
+        waterCD: 9 * 60,
         actions: [
             {
                 symbols: new Set('L'),
@@ -3964,7 +3986,7 @@ let growthIntegral = 0;
 let plotIdx = 0;
 let colonyIdx = new Array(nofPlots).fill(0);
 let plantIdx = new Array(nofPlots).fill(0);
-let selectedColony = null;
+let selectedColony: Colony = null;
 let finishedTutorial = false;
 let actuallyPlanting = true;
 const enum GraphModes2D
@@ -4114,10 +4136,59 @@ callback: {(): void}, image: ImageSource) =>
 //     fontSize: 10,
 //     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
 // });
-const harvestFrame = createFramedButton
+
+const waterFrame = createFramedButton
 ({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 0,
+}, 2, () =>
+{
+    manager.water(selectedColony);
+},
+game.settings.theme == Theme.LIGHT ?
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/plant-watering-dark.png') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/plant-watering.png'));
+const waterLabel = ui.createLatexLabel
+({
+    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
+    row: 0, column: 1,
+    // horizontalOptions: LayoutOptions.END,
+    verticalTextAlignment: TextAlignment.START,
+    margin: new Thickness(0, 9, 1, 9),
+    text: () =>
+    {
+        let remainingCD = (selectedColony?.nextWater ?? 0) - time;
+        if(remainingCD <= 0)
+            return getLoc('labelWater');
+
+        if(game.isRewardActive)
+            remainingCD /= 1.5;
+        let minutes = Math.floor(remainingCD / 60);
+        let seconds = remainingCD - minutes*60;
+        let timeString: string;
+        if(minutes >= 60)
+        {
+            let hours = Math.floor(minutes / 60);
+            minutes -= hours*60;
+            timeString = `${hours}:${
+            minutes.toString().padStart(2, '0')}:${
+            seconds.toFixed(0).padStart(2, '0')}`;
+        }
+        else
+        {
+            timeString = `${minutes.toString()}:${
+            seconds.toFixed(0).padStart(2, '0')}`;
+        }
+        return timeString;
+    },
+    fontSize: 10,
+    textColor: Color.TEXT_MEDIUM
+});
+
+const harvestFrame = createFramedButton
+({
+    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
+    row: 0, column: 2,
 }, 2, () =>
 {
     if(actionConfirm)
@@ -4135,7 +4206,7 @@ ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/tr
 const harvestLabel = ui.createLatexLabel
 ({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
-    row: 0, column: 1,
+    row: 0, column: 3,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9, 1, 9),
@@ -4143,6 +4214,7 @@ const harvestLabel = ui.createLatexLabel
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
+
 const pruneFrame = createFramedButton
 ({
     isVisible: () =>
@@ -4152,7 +4224,7 @@ const pruneFrame = createFramedButton
             return false;
         return true;
     },
-    row: 0, column: 2,
+    row: 0, column: 4,
 }, 2, () =>
 {
     if(actionConfirm)
@@ -4176,7 +4248,7 @@ const pruneLabel = ui.createLatexLabel
             return false;
         return true;
     },
-    row: 0, column: 3,
+    row: 0, column: 5,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9, 1, 9),
@@ -4184,6 +4256,7 @@ const pruneLabel = ui.createLatexLabel
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
+
 // const mutateFrame = createFramedButton
 // ({
 //     row: 0, column: 4,
@@ -4709,6 +4782,8 @@ var getEquationOverlay = () =>
                         cascadeInputTransparent: false,
                         children:
                         [
+                            waterFrame,
+                            waterLabel,
                             harvestFrame,
                             harvestLabel,
                             pruneFrame,
@@ -5640,8 +5715,8 @@ let createNotebookMenu = () =>
         {
             notebook[plantUnlocks[i]] =
             {
-                maxLevel: MAX_INT,
-                harvestStage: MAX_INT
+                maxLevel: INT_MAX,
+                harvestStage: INT_MAX
             };
         }
         plantLabels.push(ui.createLatexLabel
@@ -5653,13 +5728,13 @@ let createNotebookMenu = () =>
         let tmpEntry = ui.createEntry
         ({
             column: 0,
-            text: notebook[plantUnlocks[i]].maxLevel == MAX_INT ? '' :
+            text: notebook[plantUnlocks[i]].maxLevel == INT_MAX ? '' :
             notebook[plantUnlocks[i]].maxLevel.toString(),
             keyboard: Keyboard.NUMERIC,
             horizontalTextAlignment: TextAlignment.END,
             onTextChanged: (ot: string, nt: string) =>
             {
-                let tmpML = Number(nt) ?? MAX_INT;
+                let tmpML = Number(nt) ?? INT_MAX;
                 for(let j = 0; j < nofPlots; ++j)
                 {
                     let count = 0;
@@ -5700,7 +5775,7 @@ let createNotebookMenu = () =>
             {
                 Sound.playClick();
                 let l = notebook[plantUnlocks[i]].maxLevel;
-                if(l < MAX_INT)
+                if(l < INT_MAX)
                     tmpEntry.text = (l + 1).toString();
                 else
                     tmpEntry.text = '0';
