@@ -3179,8 +3179,8 @@ const waterFrame = createFramedButton({
 }, 2, () => {
     manager.water(selectedColony);
 }, game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/plant-watering-dark.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/plant-watering.png'));
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/water-drop-dark.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/water-drop.png'));
 const waterLabel = ui.createLatexLabel({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 1,
@@ -3194,7 +3194,7 @@ const waterLabel = ui.createLatexLabel({
         if (game.isRewardActive)
             remainingCD /= 1.5;
         let minutes = Math.floor(remainingCD / 60);
-        let seconds = remainingCD - minutes * 60;
+        let seconds = Math.floor(remainingCD - minutes * 60);
         let timeString;
         if (minutes >= 60) {
             let hours = Math.floor(minutes / 60);
@@ -3220,8 +3220,8 @@ const harvestFrame = createFramedButton({
     else
         manager.performAction(plotIdx, colonyIdx[plotIdx], 0 /* Actions.HARVEST */);
 }, game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle-dark.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle.png'));
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/grain-bundle-dark.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/grain-bundle.png'));
 const harvestLabel = ui.createLatexLabel({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 3,
@@ -3300,8 +3300,8 @@ const settingsFrame = createFramedButton({
     column: 0,
     horizontalOptions: LayoutOptions.START
 }, 2, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/cog-dark.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/cog.png'));
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/sunflower-dark.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/sunflower.png'));
 var switchPlant;
 var viewColony;
 var switchColony;

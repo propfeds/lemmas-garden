@@ -4146,8 +4146,8 @@ const waterFrame = createFramedButton
     manager.water(selectedColony);
 },
 game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/plant-watering-dark.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/plant-watering.png'));
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/water-drop-dark.png') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/water-drop.png'));
 const waterLabel = ui.createLatexLabel
 ({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
@@ -4164,7 +4164,7 @@ const waterLabel = ui.createLatexLabel
         if(game.isRewardActive)
             remainingCD /= 1.5;
         let minutes = Math.floor(remainingCD / 60);
-        let seconds = remainingCD - minutes*60;
+        let seconds = Math.floor(remainingCD - minutes*60);
         let timeString: string;
         if(minutes >= 60)
         {
@@ -4201,8 +4201,8 @@ const harvestFrame = createFramedButton
         manager.performAction(plotIdx, colonyIdx[plotIdx], Actions.HARVEST);
 },
 game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle-dark.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/herbs-bundle.png'));
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/grain-bundle-dark.png') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/grain-bundle.png'));
 const harvestLabel = ui.createLatexLabel
 ({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
@@ -4296,8 +4296,8 @@ const settingsFrame = createFramedButton
     column: 0,
     horizontalOptions: LayoutOptions.START
 }, 2, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/cog-dark.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/cog.png'));
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/sunflower-dark.png') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/sunflower.png'));
 
 var switchPlant: Upgrade;
 var viewColony: Upgrade;
