@@ -3179,8 +3179,8 @@ const waterFrame = createFramedButton({
 }, 2, () => {
     manager.water(selectedColony);
 }, game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/water-drop-dark.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/water-drop.png'));
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/watering-can.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/watering-can.png'));
 const waterLabel = ui.createLatexLabel({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 1,
@@ -3220,8 +3220,8 @@ const harvestFrame = createFramedButton({
     else
         manager.performAction(plotIdx, colonyIdx[plotIdx], 0 /* Actions.HARVEST */);
 }, game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/grain-bundle-dark.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/grain-bundle.png'));
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/herbs-bundle.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/herbs-bundle.png'));
 const harvestLabel = ui.createLatexLabel({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 3,
@@ -3248,8 +3248,8 @@ const pruneFrame = createFramedButton({
     else
         manager.performAction(plotIdx, colonyIdx[plotIdx], 1 /* Actions.PRUNE */);
 }, game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/hair-strands-dark.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/hair-strands.png'));
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png'));
 const pruneLabel = ui.createLatexLabel({
     isVisible: () => {
         if (!selectedColony ||
@@ -3300,8 +3300,8 @@ const settingsFrame = createFramedButton({
     column: 0,
     horizontalOptions: LayoutOptions.START
 }, 2, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/sunflower-dark.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/sunflower.png'));
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/spoted-flower.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/spoted-flower.png'));
 var switchPlant;
 var viewColony;
 var switchColony;
