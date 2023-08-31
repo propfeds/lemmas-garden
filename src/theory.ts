@@ -4201,8 +4201,8 @@ const harvestFrame = createFramedButton
         manager.performAction(plotIdx, colonyIdx[plotIdx], Actions.HARVEST);
 },
 game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/herbs-bundle.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/herbs-bundle.png'));
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png'));
 const harvestLabel = ui.createLatexLabel
 ({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
