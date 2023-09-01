@@ -177,31 +177,31 @@ may be ignored.`,
                 stages: {
                     index: [
                         0,
-                        3, 8,
-                        13, 17,
-                        19,
-                        21, 24, 25, 26, 28, 29, 33, 37, 38
+                        5, 10,
+                        15, 19,
+                        21,
+                        23, 26, 27, 28, 30, 31, 35, 39, 40
                     ],
                     0: 'A seedling in its warm slumber.',
-                    3: 'A little stem has just risen.',
-                    8: `The second pair of leaves appears. See that for this
+                    5: 'A little stem has just risen.',
+                    10: `The second pair of leaves appears. See that for this
 cultivar, each pair of leaves is rotated to 90° against the previous. Others
 might generate leaves in a spiral around the stem.`,
-                    13: 'The third pair of leaves appears.',
-                    17: `The stem has split in two. It will start to flower
+                    15: 'The third pair of leaves appears.',
+                    19: `The stem has split in two. It will start to flower
 soon.`,
-                    19: `On the flower stem, little leaves will start to
+                    21: `On the flower stem, little leaves will start to
 spawn in spiral around it. The spinning angle is approximately 137.508°,
 known as the golden angle.`,
-                    21: 'Our first flower bud has risen.',
-                    24: 'Wait for it...',
-                    25: 'A second flower bud appears!',
-                    26: 'The third and final flower appears.',
-                    28: 'My wife used to munch on these flowers, raw.',
-                    29: `Try it!\\\\No, haha, I'm jesting. We sell them.`,
-                    33: 'The first flower matures.',
-                    37: 'The second flower matures.',
-                    38: 'All flowers have reached maturity.',
+                    23: 'Our first flower bud has risen.',
+                    26: 'Wait for it...',
+                    27: 'A second flower bud appears!',
+                    28: 'The third and final flower appears.',
+                    30: 'My wife used to munch on these flowers, raw.',
+                    31: `Try it!\\\\No, haha, I'm jesting. We sell them.`,
+                    35: 'The first flower matures.',
+                    39: 'The second flower matures.',
+                    40: 'All flowers have reached maturity.',
                 }
             },
             basil: {
@@ -215,21 +215,21 @@ type 1 travels up)\\\\—\\\\Harvest returns profit as the sum of all L and K
 \\\\—\\\\The Model specification section may be ignored.`,
                 stages: {
                     index: [
-                        0, 4, 8, 10, 12, 14, 15, 18, 20,
-                        23, 24
+                        0, 6, 10, 12, 14, 16, 17, 20, 22,
+                        25, 26
                     ],
                     0: 'A seedling in its sweet slumber.',
-                    4: 'The first pair of leaves pops up. A stem, as well.',
-                    8: 'The second pair of leaves appears.',
-                    10: 'Little leaves start to grow over the first node.',
-                    12: 'The third pair of leaves appears.',
-                    14: 'Little leaves now grow over the second node.',
-                    15: 'This rhythm will repeat for a while.',
-                    18: `I'll show you what to do when it flowers, soon.`,
-                    20: `It's about to flower. You can nip the stem now if you
+                    6: 'The first pair of leaves pops up. A stem, as well.',
+                    10: 'The second pair of leaves appears.',
+                    12: 'Little leaves start to grow over the first node.',
+                    14: 'The third pair of leaves appears.',
+                    16: 'Little leaves now grow over the second node.',
+                    17: 'This rhythm will repeat for a while.',
+                    20: `I'll show you what to do when it flowers, soon.`,
+                    22: `It's about to flower. You can nip the stem now if you
 don't feel confident.`,
-                    23: `The first flower will appear soon.`,
-                    24: `If the flower's there, imagine it's sending a signal
+                    25: `The first flower will appear soon.`,
+                    26: `If the flower's there, imagine it's sending a signal
 from top to bottom, all the way to basil base. Then, basil base will send
 another one back to the leaves.`,
                 }
@@ -246,22 +246,21 @@ current population) on the same plot.\\\\—\\\\The Model specification section
 may be ignored.`,
                 stages: {
                     index: [
-                        0, 4, 6,
-                        8, 12,
-                        17,
-                        20
+                        0, 6, 8,
+                        10, 14,
+                        19,
+                        22
                     ],
                     0: 'A seedling basking in its own dazing lullaby.',
-                    4: 'A flower bud already?',
-                    6: `Most gardeners are early birds. Now, why are you still
+                    6: 'A flower bud already?',
+                    8: `Most gardeners are early birds. Now, why are you still
 counting pennies in the middle of the night?`,
-                    8: 'Anyway, new stem rises from a side shoot.',
-                    12: `New stems have risen. This pattern will repeat
+                    10: 'Anyway, new stem rises from a side shoot.',
+                    14: `New stems have risen. This pattern will repeat
 periodically.`,
-                    17: `You see the first fruit on that stem?\\\\Too late for
+                    19: `You see the first fruit on that stem?\\\\Too late for
 munch.`,
-                    20: `Go to sleep. Is the campion sedative not good enough
-for you?`
+                    22: `Go to sleep. Was my campion sedative not good enough?`
                 }
             },
             arrow: {
@@ -2600,10 +2599,12 @@ class ColonyManager {
         c.growth -= plantData[c.id].growthCost *
             // @ts-expect-error
             BigNumber.from(c.sequence.length);
-        // @ts-expect-error
-        c.diReserve += c.growth / c.synthRate;
-        // @ts-expect-error
-        c.dgReserve += c.growth / plantData[c.id].growthRate;
+        if (!c.synthRate.isZero)
+            // @ts-expect-error
+            c.diReserve += c.growth / c.synthRate;
+        if (!plantData[c.id].growthRate.isZero)
+            // @ts-expect-error
+            c.dgReserve += c.growth / plantData[c.id].growthRate;
         c.growth = BigNumber.ZERO;
         c.sequence = this.deriveTask.derivation;
         c.params = this.deriveTask.parameters;
@@ -2729,11 +2730,11 @@ var getPublicationMultiplierFormula = (symbol) => `\\frac{2}{3}\\times
 {${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
 const plantData = {
     calendula: {
-        system: new LSystem('-(3)A(0.12, 0)', [
-            'A(r, t): t>=2 && r>=flowerThreshold = F(0.78, 2.1)K(0)',
-            'A(r, t): r>=flowerThreshold = [&A(r-0.15, 0)][^I(0)]',
-            'A(r, t): t<2 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.12, 0.6)T[-L(0.06, maxLeafSize-r/4)]/(180)[-L(0.06, maxLeafSize-r/4)]/(90)A(r, -2)',
+        system: new LSystem('-(3)A(0, 0)', [
+            'A(r, t): t>=4 && r>=flowerThreshold = F(0.78, 2.1)K(0)',
+            'A(r, t): r>=flowerThreshold = [&A(r-0.15, 2)][^I(0)]',
+            'A(r, t): t<4 = A(r+0.06, t+1)',
+            'A(r, t) = F(0.12, 0.6)T[-L(0.06, maxLeafSize-r/4)]/(180)[-L(0.06, maxLeafSize-r/4)]/(90)A(r, 0)',
             'I(t): t<3 = F(0.24, 0.84)T[-L(0.06, maxLeafSize/3)]/(137.508)I(t+1)',
             'I(t) = F(0.48, 1.44)K(0)',
             'K(p): p<maxFlowerSize = K(p+0.25)',
@@ -2758,7 +2759,7 @@ const plantData = {
             'maxFlowerSize': '3',
             'maxLeafSize': '0.72'
         }),
-        maxStage: 38,
+        maxStage: 40,
         cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
         growthRate: BigNumber.THREE,
         growthCost: BigNumber.from(2.5),
@@ -2800,7 +2801,7 @@ const plantData = {
         }
     },
     basil: {
-        system: new LSystem('/(90)BA(0.18, 0)', [
+        system: new LSystem('/(90)BA(0.06, -2)', [
             'A(r, t): r>=flowerThreshold = S(0)F(0.24, 0.96)K(0.02, 8)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
             'A(r, t) = F(0.12, 1.44)[&[I(0)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[&L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.06, 0)',
@@ -2828,7 +2829,7 @@ const plantData = {
             'flowerThreshold': '0.96',
             'maxLeafSize': '0.6'
         }),
-        maxStage: 46,
+        maxStage: 48,
         cost: new ExponentialCost(5, 1),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.TWO,
@@ -2870,9 +2871,9 @@ const plantData = {
         }
     },
     campion: {
-        system: new LSystem('/(45)&(5)A(0.1, 3)', [
-            'A(r, t): t>0 = A(r+0.05, t-1)',
-            'A(r, t) = F(0.4, 20)T[&L(0.025)][/(180)&L(0.025)][F(0.4, 10)K(0.125, 0)][^$A(r-0.2, 7)][&$A(r-0.15, 3)]',
+        system: new LSystem('/(45)&(5)A(0, -2)', [
+            'A(r, t): t<3 = A(r+0.05, t+1)',
+            'A(r, t) = F(0.4, 20)T[&L(0.025)][/(180)&L(0.025)][F(0.4, 10)K(0.125, 0)][^$A(r-0.25, -4)][&$A(r-0.15, 0)]',
             'K(p, t): t<2 = K(p*1.1, t+1)',
             'K(p, t): t<3 = K(0.1875, t+1)',
             'K(p, t): t<12 = K(1.35*p-0.8*p^2, t+1)',
@@ -2891,7 +2892,7 @@ const plantData = {
         ], 31, 0, 'A', '', -0.6, {
             'maxLeafSize': '0.625'
         }),
-        maxStage: 27,
+        maxStage: 28,
         cost: new ExponentialCost(10000, Math.log2(5)),
         growthRate: BigNumber.FIVE,
         growthCost: BigNumber.TEN,
@@ -4100,7 +4101,7 @@ let createColonyViewMenu = (colony) => {
         colonyViewConfig[colony.id] =
             {
                 filter: '',
-                params: false
+                params: true
             };
     }
     let reconstructionTask = {

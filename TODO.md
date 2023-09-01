@@ -55,7 +55,9 @@ do nothing. Do you feel like it could be more interesting?
   - Absurd cooldown like 10 minutes (6 days)
     - Per species?
   - Adds a fixed amount of energy
-  - Auto-watering
+  - [x] Extend each species to accomodate for watering change
+    - [x] Opportunity to standardise countdown params (+ from 0 a la calendula?)
+  - [ ] Auto-watering
     - Unlocks with classmates
 
 - [ ] Autobuy upgrade unlocks harvest automation config
