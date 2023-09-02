@@ -83,7 +83,7 @@ const LOC_STRINGS = {
         labelParams: 'Parameters: ',
         labelAxiom: 'Axiom: ',
         labelAngle: 'Turning angle (°): ',
-        labelRules: `Production rules: {0}\\\\Rules are applied every stage
+        labelRules: `Production rules: {0}\\\\Rules are applied each stage,
 simultaneously to all symbols in the plant's sequence.`,
         labelIgnored: 'Turtle-ignored: ',
         labelCtxIgnored: 'Context-ignored: ',
@@ -183,7 +183,8 @@ same plot.\\\\—\\\\The Model specification section may be ignored.`,
                         5, 10,
                         15, 19,
                         21,
-                        23, 26, 27, 28, 30, 31, 35, 39, 40
+                        23, 26, 27, 28, 30, 31,
+                        35, 39, 40
                     ],
                     0: 'A seedling in its warm slumber.',
                     5: 'A little stem has just risen.',
@@ -201,7 +202,8 @@ known as the golden angle.`,
                     27: 'A second flower bud appears!',
                     28: 'The third and final flower appears.',
                     30: 'My wife used to munch on these flowers, raw.',
-                    31: `Try it!\\\\No, haha, I'm jesting. We sell them.`,
+                    31: `Try it!\\\\No, :) I'm jesting. We sell them, as a
+little profit.`,
                     35: 'The first flower matures.',
                     39: 'The second flower matures.',
                     40: 'All flowers have reached maturity.',
@@ -221,7 +223,7 @@ off all A and K (also cuts geometry near K).\\\\—\\\\The Model specification
 section may be ignored.`,
                 stages: {
                     index: [
-                        0, 6, 10, 12, 14, 16, 17, 20, 22,
+                        0, 6, 10, 12, 14, 16, 18, 20, 22,
                         25, 26
                     ],
                     0: 'A seedling in its sweet slumber.',
@@ -230,14 +232,14 @@ section may be ignored.`,
                     12: 'Little leaves start to grow over the first node.',
                     14: 'The third pair of leaves appears.',
                     16: 'Little leaves now grow over the second node.',
-                    17: 'This rhythm will repeat for a while.',
+                    18: 'This rhythm will repeat for a while.',
                     20: `I'll show you what to do when it flowers, soon.`,
                     22: `It's about to flower. You can nip the stem now if you
 don't feel confident.`,
                     25: `The first flower will appear soon.`,
                     26: `If the flower's there, imagine it's sending a signal
 from top to bottom, all the way to basil base. Then, basil base will send
-another one back to the leaves.`,
+another one back to the leaves, telling them to go so very bitter.`,
                 }
             },
             campion: {
@@ -254,14 +256,14 @@ current population) on the same plot.\\\\—\\\\The Model specification section
 may be ignored.`,
                 stages: {
                     index: [
-                        0, 6, 8,
+                        0, 6, 9,
                         10, 14,
                         19,
                         22
                     ],
                     0: 'A seedling basking in its own dazing lullaby.',
                     6: 'A flower bud already?',
-                    8: `Most gardeners are early birds. Now, why are you still
+                    9: `Most gardeners are early birds. Now, why are you still
 counting pennies in the middle of the night?`,
                     10: 'Anyway, new stem rises from a side shoot.',
                     14: `New stems have risen. This pattern will repeat
@@ -2253,7 +2255,7 @@ class ColonyManager {
             // @ts-expect-error
             colony.energy += plantData[colony.id].growthCost *
                 // @ts-expect-error
-                BigNumber.from(colony.sequence.length) / waterFraction;
+                BigNumber.from(colony.stage).max(waterAmount);
             colony.nextWater = time + plantData[colony.id].waterCD;
         }
     }
@@ -2724,7 +2726,7 @@ const permaCosts = [
     BigNumber.from(4800),
     BigNumber.from(1e45)
 ];
-const waterFraction = BigNumber.TWO;
+const waterAmount = BigNumber.TWO;
 const taxRate = BigNumber.from(-.12);
 const tauRate = BigNumber.TWO;
 const pubCoef = BigNumber.from(2 / 3);
@@ -2773,7 +2775,7 @@ const plantData = {
         cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
         growthRate: BigNumber.THREE,
         growthCost: BigNumber.from(2.5),
-        waterCD: 6 * 60,
+        waterCD: 9 * 60,
         propagation: {
             rate: 0.25,
             priority: 'c'
@@ -2844,7 +2846,7 @@ const plantData = {
         cost: new ExponentialCost(5, 1),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.TWO,
-        waterCD: 6 * 60,
+        waterCD: 9 * 60,
         actions: [
             {
                 symbols: new Set('KL'),
@@ -2884,7 +2886,7 @@ const plantData = {
     campion: {
         system: new LSystem('/(45)&(5)A(0.1, 5)', [
             'A(r, t): t>0 = A(r+0.05, t-1)',
-            'A(r, t) = F(0.4, 20)T[&L(0.025)][/(180)&L(0.025)][F(0.4, 10)K(0.125, 0)][^$A(r-0.3, 7)][&$A(r-0.15, 3)]',
+            'A(r, t) = F(0.4, 20)T[&L(0.025)][/(180)&L(0.025)][F(0.4, 10)K(0.125, 0)][^$A(r-0.2, 7)][&$A(r-0.1, 3)]',
             'K(p, t): t<2 = K(p*1.1, t+1)',
             'K(p, t): t<3 = K(0.1875, t+1)',
             'K(p, t): t<12 = K(1.35*p-0.8*p^2, t+1)',
@@ -2906,8 +2908,8 @@ const plantData = {
         maxStage: 28,
         cost: new ExponentialCost(2000, Math.log2(5)),
         growthRate: BigNumber.FIVE,
-        growthCost: BigNumber.TEN,
-        waterCD: 12 * 60,
+        growthCost: BigNumber.EIGHT,
+        waterCD: 15 * 60,
         stagelyIncome: BigNumber.ONE,
         propagation: {
             rate: 0.5,
