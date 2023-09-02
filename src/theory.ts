@@ -206,11 +206,13 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
                 name: 'Calendula',
                 nameShort: 'C',
                 info: 'A classic flower to start the month.',
-                LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\I : flower
-stem\\\\K: flower\\\\L: leaf\\\\—\\\\Harvest returns profit as the sum of all K.
-\\\\At the end of its life cycle, propagates a new population (1/4 of the
-current population) on the same plot.\\\\—\\\\The Model specification section
-may be ignored.`,
+                LsDetails: `A(r, t): apex (stem shoot) providing r energy/sec.
+t stages left until it splits.\\\\F(l, lim): internode of length l (grows up to
+lim).\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0.\\\\K(p):
+flower of size p.\\\\L(r, lim): leaf providing r energy/s (grows up to lim).
+\\\\—\\\\Harvest returns profit as the sum of all K sizes.\\\\At the end of its
+life cycle, propagates a new population (1/4 of the current population) on the
+same plot.\\\\—\\\\The Model specification section may be ignored.`,
                 stages:
                 {
                     index:
@@ -248,11 +250,14 @@ known as the golden angle.`,
                 name: 'Basil',
                 nameShort: 'B',
                 info: 'A fast growing herb that requires a bit of care.',
-                LsDetails: `A: apex (stem shoot)\\\\B: base\\\\F: internode\\\\I
-: shortened stem\\\\K: flower\\\\L: leaf\\\\S: signal (type 0 travels down,
-type 1 travels up)\\\\—\\\\Harvest returns profit as the sum of all L and K
-(first parameters).\\\\Prune cuts off all A and K (also cuts geometry near K).
-\\\\—\\\\The Model specification section may be ignored.`,
+                LsDetails: `A(r, t): apex (stem shoot).\\\\B: base, used for
+communications.\\\\F(l, lim): internode.\\\\I(t): shortened stem. t stages left
+until it splits.\\\\K(s, t): flower of size s. Grows another flower until t
+reaches 0.\\\\L(p, lim, s): leaf. s denotes whether a signal has been received.
+\\\\S(type): signal (type 0 travels down, type 1 travels up).\\\\—\\\\Harvest
+returns profit as the sum of all L and K sizes (first parameter).\\\\Prune cuts
+off all A and K (also cuts geometry near K).\\\\—\\\\The Model specification
+section may be ignored.`,
                 stages:
                 {
                     index:
@@ -281,8 +286,10 @@ another one back to the leaves.`,
                 name: 'Rose campion',
                 nameShort: 'R',
                 info: 'A great sight for your garden. Provides daily income.',
-                LsDetails: `A: apex (stem shoot)\\\\F: internode\\\\K: flower
-\\\\L: leaf\\\\O: fruit\\\\—\\\\Harvest returns profit as the sum of all K
+                LsDetails: `A(r, t): apex (stem shoot).\\\\F(l, t): internode of
+length l. t stages until it stops growing.\\\\K(p, t): flower of size p. t
+stages left until it disappears.\\\\L(s): leaf.\\\\O(s): fruit of size s.
+Decorative.\\\\—\\\\Harvest returns profit as the sum of all K sizes
 (first parameter).\\\\Passively provides income per stage equal to total profit.
 \\\\At the end of its life cycle, propagates a new population (1/2 of the
 current population) on the same plot.\\\\—\\\\The Model specification section
@@ -1692,7 +1699,8 @@ class LSystem
      * Derive a sequence from the input string. Returns the work completed for
      * the current tick. `start` denotes the next tick's starting position.
      */
-    derive(sequence: string, seqParams: LSystemParams, ancestors: (string | number)[], children: number[][], task: Task = {}): Task
+    derive(sequence: string, seqParams: LSystemParams, ancestors: number[],
+    children: number[][], task: Task = {}): Task
     {
         let result = task.derivation ?? '';
         let resultParams = task.parameters ?? [];
@@ -2975,7 +2983,9 @@ class ColonyManager
         if((colony.nextWater ?? 0) <= time)
         {
             // @ts-expect-error
-            colony.energy += plantData[colony.id].growthCost * waterAmount;
+            colony.energy += plantData[colony.id].growthCost *
+            // @ts-expect-error
+            BigNumber.from(colony.sequence.length) / waterFraction;
             colony.nextWater = time + plantData[colony.id].waterCD;
         }
     }
@@ -3319,7 +3329,7 @@ class ColonyManager
         }
         this.actionGangsta = action;
     }
-    findTarget(plot: number, priority: string[])
+    findTarget(plot: number, priority: string)
     {
         for(let i = 0; i < priority.length; ++i)
         {
@@ -3556,7 +3566,7 @@ interface Plant
     propagation?:
     {
         rate: number;
-        priority: string[]
+        priority: string
     };
     actions: Action[];
     decimals: {[key: string]: number[]};
@@ -3592,7 +3602,7 @@ const permaCosts =
     BigNumber.from(1e45)
 ];
 
-const waterAmount = BigNumber.THREE;
+const waterFraction = BigNumber.TWO;
 
 const taxRate = BigNumber.from(-.12);
 const tauRate = BigNumber.TWO;
@@ -3612,13 +3622,13 @@ const plantData: {[key: string]: Plant} =
 {
     calendula:
     {
-        system: new LSystem('-(3)A(0, 0)',
+        system: new LSystem('-(3)A(0.06, 4)',
         [
-            'A(r, t): t>=4 && r>=flowerThreshold = F(0.78, 2.1)K(0)',
-            'A(r, t): r>=flowerThreshold = [&A(r-0.15, 2)][^I(0)]',
-            'A(r, t): t<4 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.12, 0.6)T[-L(0.06, maxLeafSize-r/4)]/(180)[-L(0.06, maxLeafSize-r/4)]/(90)A(r, 0)',
-            'I(t): t<3 = F(0.24, 0.84)T[-L(0.06, maxLeafSize/3)]/(137.508)I(t+1)',
+            'A(r, t): t<=0 && r>=flowerThreshold = F(0.78, 2.1)K(0)',
+            'A(r, t): r>=flowerThreshold = [&A(r-0.15, 2)][^I(3)]',
+            'A(r, t): t>0 = A(r+0.06, t-1)',
+            'A(r, t) = F(0.12, 0.6)T[-L(0.06, maxLeafSize-r/4)]/(180)[-L(0.06, maxLeafSize-r/4)]/(90)A(r, 4)',
+            'I(t): t>0 = F(0.24, 0.84)T[-L(0.06, maxLeafSize/3)]/(137.508)I(t-1)',
             'I(t) = F(0.48, 1.44)K(0)',
             'K(p): p<maxFlowerSize = K(p+0.25)',
             'L(r, lim): r<lim = L(r+0.02, lim)',
@@ -3638,7 +3648,7 @@ const plantData: {[key: string]: Plant} =
             '~> L(p, lim): p<=maxLeafSize/3 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
             '~> L(p, lim) = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
         ], 15, 0, 'AI', '', -0.2, {
-            'flowerThreshold': '0.9',
+            'flowerThreshold': '0.96',
             'maxFlowerSize': '3',
             'maxLeafSize': '0.72'
         }),
@@ -3646,11 +3656,11 @@ const plantData: {[key: string]: Plant} =
         cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
         growthRate: BigNumber.THREE,
         growthCost: BigNumber.from(2.5),
-        waterCD: 9 * 60,
+        waterCD: 6 * 60,
         propagation:
         {
             rate: 0.25,
-            priority: ['c']
+            priority: 'c'
         },
         actions:
         [
@@ -3690,16 +3700,16 @@ const plantData: {[key: string]: Plant} =
     },
     basil:
     {
-        system: new LSystem('/(90)BA(0.06, -2)',
+        system: new LSystem('/(90)BA(0.06, 5)',
         [
             'A(r, t): r>=flowerThreshold = S(0)F(0.24, 0.96)K(0.02, 8)',
-            'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.12, 1.44)[&[I(0)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[&L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.06, 0)',
+            'A(r, t): t>0 = A(r+0.06, t-1)',
+            'A(r, t) = F(0.12, 1.44)[&[I(5)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[&L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.06, 3)',
             'S(type) < I(t): type>=1 = S(type)',
-            'I(t): t<5 = I(t+1)',
-            'I(t) = /(90)F(0.12, 0.72)T[&L(0.03, maxLeafSize/2, 0)]/(180)[&L(0.03, maxLeafSize/2, 0)]I(-6)',
+            'I(t): t>0 = I(t-1)',
+            'I(t) = /(90)F(0.12, 0.72)T[&L(0.03, maxLeafSize/2, 0)]/(180)[&L(0.03, maxLeafSize/2, 0)]I(11)',
             'K(s, t): t>0 = K(s+0.02, 0)/(90)F(0.12, 0.72)K(0.02, t-1)',
-            'K(s, t): s<1 = K(s+0.02, t)',
+            'K(s, t): s<maxFlowerSize = K(s+0.02, t)',
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
             'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
             'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
@@ -3717,13 +3727,14 @@ const plantData: {[key: string]: Plant} =
             '~> L(p, lim, s) = {T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
         ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
             'flowerThreshold': '0.96',
-            'maxLeafSize': '0.6'
+            'maxLeafSize': '0.6',
+            'maxFlowerSize': '0.3'
         }),
         maxStage: 48,
         cost: new ExponentialCost(5, 1),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.TWO,
-        waterCD: 9 * 60,
+        waterCD: 6 * 60,
         actions:
         [
             {   // Always a harvest
@@ -3767,9 +3778,9 @@ const plantData: {[key: string]: Plant} =
     },
     campion:
     {
-        system: new LSystem('/(45)&(5)A(0, -2)', [
-            'A(r, t): t<3 = A(r+0.05, t+1)',
-            'A(r, t) = F(0.4, 20)T[&L(0.025)][/(180)&L(0.025)][F(0.4, 10)K(0.125, 0)][^$A(r-0.25, -4)][&$A(r-0.15, 0)]',
+        system: new LSystem('/(45)&(5)A(0.1, 5)', [
+            'A(r, t): t>0 = A(r+0.05, t-1)',
+            'A(r, t) = F(0.4, 20)T[&L(0.025)][/(180)&L(0.025)][F(0.4, 10)K(0.125, 0)][^$A(r-0.3, 7)][&$A(r-0.15, 3)]',
             'K(p, t): t<2 = K(p*1.1, t+1)',
             'K(p, t): t<3 = K(0.1875, t+1)',
             'K(p, t): t<12 = K(1.35*p-0.8*p^2, t+1)',
@@ -3789,15 +3800,15 @@ const plantData: {[key: string]: Plant} =
             'maxLeafSize': '0.625'
         }),
         maxStage: 28,
-        cost: new ExponentialCost(10000, Math.log2(5)),
+        cost: new ExponentialCost(2000, Math.log2(5)),
         growthRate: BigNumber.FIVE,
         growthCost: BigNumber.TEN,//BigNumber.from(2.5),
-        waterCD: 18 * 60,
+        waterCD: 12 * 60,
         stagelyIncome: BigNumber.ONE,
         propagation:
         {
             rate: 0.5,
-            priority: ['c']
+            priority: 'c'
         },
         actions:
         [
@@ -4641,18 +4652,18 @@ var updateAvailability = () =>
     });
 }
 
-// let floatingWipLabel = ui.createLatexLabel
-// ({
-//     row: 0, column: 0,
-//     rotation: -24,
-//     horizontalOptions: LayoutOptions.CENTER,
-//     verticalOptions: LayoutOptions.END,
-//     // verticalTextAlignment: TextAlignment.CENTER,
-//     margin: new Thickness(8, 40),
-//     text: getLoc('wip'),
-//     fontSize: 9,
-//     textColor: Color.TEXT_MEDIUM
-// });
+let floatingWipLabel = ui.createLatexLabel
+({
+    row: 0, column: 0,
+    rotation: -24,
+    horizontalOptions: LayoutOptions.CENTER,
+    verticalOptions: LayoutOptions.END,
+    // verticalTextAlignment: TextAlignment.CENTER,
+    margin: new Thickness(8, 40),
+    text: getLoc('wip'),
+    fontSize: 9,
+    textColor: Color.TEXT_MEDIUM
+});
 
 var tick = (elapsedTime: number, multiplier: number) =>
 {
@@ -4696,8 +4707,8 @@ var tick = (elapsedTime: number, multiplier: number) =>
                 theory.invalidateQuaternaryValues();
                 break;
         }
-        // floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
-        // 180, Easing.LINEAR);
+        floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
+        180, Easing.LINEAR);
         managerLoadingInd.isRunning = manager.busy;
     }
     theory.invalidateSecondaryEquation();
@@ -4724,7 +4735,7 @@ var getEquationOverlay = () =>
         cascadeInputTransparent: false,
         children:
         [
-            // floatingWipLabel,
+            floatingWipLabel,
             managerLoadingInd,
             ui.createLatexLabel
             ({

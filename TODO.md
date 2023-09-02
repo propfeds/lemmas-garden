@@ -56,7 +56,7 @@ do nothing. Do you feel like it could be more interesting?
     - Per species?
   - Adds a fixed amount of energy
   - [x] Extend each species to accomodate for watering change
-    - [x] Opportunity to standardise countdown params (+ from 0 a la calendula?)
+    - [x] Opportunity to standardise countdown params
   - [ ] Auto-watering
     - Unlocks with classmates
 
