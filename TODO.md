@@ -54,9 +54,11 @@ do nothing. Do you feel like it could be more interesting?
 - [x] Watering
   - Absurd cooldown like 10 minutes (6 days)
     - Per species?
-  - Adds a fixed amount of energy
+  - Adds a fixed amount of energy?
+    - Scales lightly with stage, hmm.
   - [x] Extend each species to accomodate for watering change
     - [x] Opportunity to standardise countdown params
+  - [ ] Lemma book entry
   - [ ] Auto-watering
     - Unlocks with classmates
 

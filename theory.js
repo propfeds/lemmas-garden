@@ -147,8 +147,8 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
         ],
         colonyModes: [
             'Colony view: Off',
-            'Colony view: Single',
-            'Colony view: Single 2',
+            'Colony view: Verbose',
+            'Colony view: Simple',
             'Colony view: List'
         ],
         actionPanelLocations: [
@@ -525,14 +525,19 @@ This will help you keep track of your plantations.
 (Notebook is accessible at the bookshelf.)`
             },
             flood: {
-                title: `A flood?`,
+                title: `Maximum statements?`,
                 contents: `I hear ya.
 The floodplains hadn't been doing very well.
 It's very likely to get logged this season...
 
 Don't worry.
 Try not to let your plants spread too much,
-because, this is unlike any regular flood.`
+because, this is unlike any regular flood.
+
+Note: Your plots and settings have been wiped.
+I'm sorry. I can't find a way around this.
+Just deal with it as a 'gameplay mechanic'.
+- propfeds`
             },
             nepo: {
                 title: `Dear Ellen of Tau Publishing,`,
@@ -544,8 +549,7 @@ the market.
 
 I do not condone you letting her abuse the economy.
 Not without giving something back for the community.
-
-Take it to heart.
+I need to do something.
 - Lena`
             }
         }
@@ -2846,7 +2850,7 @@ const plantData = {
         cost: new ExponentialCost(5, 1),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.TWO,
-        waterCD: 9 * 60,
+        waterCD: 7.5 * 60,
         actions: [
             {
                 symbols: new Set('KL'),
@@ -2908,8 +2912,8 @@ const plantData = {
         maxStage: 28,
         cost: new ExponentialCost(2000, Math.log2(5)),
         growthRate: BigNumber.FIVE,
-        growthCost: BigNumber.EIGHT,
-        waterCD: 15 * 60,
+        growthCost: BigNumber.TEN,
+        waterCD: 18 * 60,
         stagelyIncome: BigNumber.ONE,
         propagation: {
             rate: 0.5,
