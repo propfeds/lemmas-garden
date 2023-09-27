@@ -51,17 +51,6 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
 
-- [x] Watering
-  - Absurd cooldown like 10 minutes (6 days)
-    - Per species?
-  - Adds a fixed amount of energy?
-    - Scales lightly with stage, hmm.
-  - [x] Extend each species to accomodate for watering change
-    - [x] Opportunity to standardise countdown params
-  - [ ] Lemma book entry
-  - [ ] Auto-watering
-    - Unlocks with classmates
-
 - [ ] Autobuy upgrade unlocks harvest automation config
   - Only unlocks in a future update (classmates!)
   - Hard to implement since there's more to LG than when to harvest
@@ -85,8 +74,24 @@ do nothing. Do you feel like it could be more interesting?
 
 - [x] Propagation
   - Rate = sum of seeds or fixed rate at fixed time?
-  - Has priority array `['r', 'l', 'c']` 
+  - [ ] Has a specified stage instead of max stage?
+    - Calendula still keeps max stage to develop patience
+  - Has priority array `rlc`
+    - [x] Add dynamic directions (`m` for min, `M` for max)
   - Spreaded colonies syntax: +1 of Rose campion
+  - [ ] Hey, can you imagine an ash tree propagating a MISTLETOE?
+    - Mistletoe also eats nutrients like hopleek
+
+- [x] Watering
+  - Absurd cooldown like 10 minutes (6 days)
+    - Per species?
+  - Adds a fixed amount of energy?
+    - Scales lightly with stage, hmm.
+  - [x] Extend each species to accomodate for watering change
+    - [x] Opportunity to standardise countdown params
+  - [ ] Lemma book entry
+  - [ ] Auto-watering
+    - Unlocks with classmates
 
 - [x] Colony view params are initially off
 - [ ] Notebook shows next cost

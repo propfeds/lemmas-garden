@@ -175,7 +175,7 @@ t stages left until it splits.\\\\F(l, lim): internode of length l (grows up to
 lim).\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0.\\\\K(p):
 flower of size p.\\\\L(r, lim): leaf providing r energy/s (grows up to lim).
 \\\\—\\\\Harvest returns profit as the sum of all K sizes.\\\\At the end of its
-life cycle, propagates a new population (1/4 of the current population) on the
+life cycle, propagates a new population (40% of the current population) on the
 same plot.\\\\—\\\\The Model specification section may be ignored.`,
                 stages: {
                     index: [
@@ -251,7 +251,7 @@ length l. t stages until it stops growing.\\\\K(p, t): flower of size p. t
 stages left until it disappears.\\\\L(s): leaf.\\\\O(s): fruit of size s.
 Decorative.\\\\—\\\\Harvest returns profit as the sum of all K sizes
 (first parameter).\\\\Passively provides income per stage equal to total profit.
-\\\\At the end of its life cycle, propagates a new population (1/2 of the
+\\\\At the end of its life cycle, propagates a new population (60% of the
 current population) on the same plot.\\\\—\\\\The Model specification section
 may be ignored.`,
                 stages: {
@@ -2387,10 +2387,10 @@ class ColonyManager {
                     else // Normal growth
                      {
                         // @ts-expect-error
-                        c.energy += (di + c.diReserve) * c.synthRate;
+                        c.energy += di * c.synthRate;
                         if (notMature) {
                             // @ts-expect-error
-                            let maxdg = c.energy.min((dg + c.dgReserve) *
+                            let maxdg = c.energy.min(dg *
                                 // @ts-expect-error
                                 plantData[c.id].growthRate);
                             // @ts-expect-error
@@ -2398,8 +2398,6 @@ class ColonyManager {
                             // @ts-expect-error
                             c.energy -= maxdg;
                         }
-                        c.diReserve = BigNumber.ZERO;
-                        c.dgReserve = BigNumber.ZERO;
                         if (plantData[c.id].dailyIncome) {
                             // @ts-expect-error
                             this.reap(c, dd + c.ddReserve);
@@ -2455,8 +2453,7 @@ class ColonyManager {
         }
         // ancestree, derive and calc stats
         if (!('ancestors' in this.actionAncestreeTask) ||
-            ('ancestors' in this.actionAncestreeTask &&
-                this.actionAncestreeTask.start)) {
+            this.actionAncestreeTask.start) {
             let customAncestreeSystem = plantData[c.id].actions[id].system ??
                 plantData[c.id].system;
             perfs[2 /* Profilers.LS_ANCESTREE */].exec(() => {
@@ -2465,7 +2462,7 @@ class ColonyManager {
             return;
         }
         if (!('derivation' in this.actionDeriveTask) ||
-            ('derivation' in this.actionDeriveTask && this.actionDeriveTask.start)) {
+            this.actionDeriveTask.start) {
             perfs[3 /* Profilers.LS_DERIVE */].exec(() => {
                 this.actionDeriveTask = plantData[c.id].actions[id].system.
                     derive(c.sequence, c.params, this.actionAncestreeTask.ancestors, this.actionAncestreeTask.children, this.actionDeriveTask);
@@ -2489,19 +2486,33 @@ class ColonyManager {
             theory.invalidateQuaternaryValues();
             return;
         }
-        if (!('synthRate' in this.actionCalcTask) ||
-            ('synthRate' in this.actionCalcTask && this.actionCalcTask.start)) {
+        if (!('synthRate' in this.actionCalcTask) || this.actionCalcTask.start) {
             perfs[4 /* Profilers.LS_CALC_STATS */].exec(() => {
                 this.actionCalcTask = this.calculateStats(c, this.actionCalcTask, this.actionDeriveTask);
             });
             return;
         }
-        if (id == 0)
+        if (id == 0) // Harvest specific
             this.reap(c);
+        // Assign new stats
         c.synthRate = this.actionCalcTask.synthRate;
         c.profit = this.actionCalcTask.profit;
         c.sequence = this.actionDeriveTask.derivation;
         c.params = this.actionDeriveTask.parameters;
+        let notMature = c.stage < (plantData[c.id].maxStage ?? INT_MAX);
+        // Empty reserves
+        // @ts-expect-error
+        c.energy += c.diReserve * c.synthRate;
+        if (notMature) {
+            // @ts-expect-error
+            let maxdg = c.energy.min(c.dgReserve * plantData[c.id].growthRate);
+            // @ts-expect-error
+            c.growth += maxdg;
+            // @ts-expect-error
+            c.energy -= maxdg;
+        }
+        c.diReserve = BigNumber.ZERO;
+        c.dgReserve = BigNumber.ZERO;
         this.actionAncestreeTask =
             {
                 start: 0
@@ -2548,7 +2559,9 @@ class ColonyManager {
         }
         this.actionGangsta = action;
     }
-    findTarget(plot, priority) {
+    findVacantPlot(plot, priority) {
+        let start = Math.max(0, plot - 1);
+        let end = Math.min(plot + 1, this.length - 1);
         for (let i = 0; i < priority.length; ++i) {
             switch (priority[i]) {
                 case 'c':
@@ -2564,6 +2577,27 @@ class ColonyManager {
                         this.colonies[plot + 1].length < this.width)
                         return plot + 1;
                     break;
+                case 'm':
+                    let minSize = this.width;
+                    let minPlot = null;
+                    for (let i = start; i <= end; ++i) {
+                        if (this.colonies[i].length < minSize) {
+                            minSize = this.colonies[i].length;
+                            minPlot = i;
+                        }
+                    }
+                    return minPlot;
+                case 'M':
+                    let maxSize = 0;
+                    let maxPlot = null;
+                    for (let i = start; i <= end; ++i) {
+                        let cl = this.colonies[i].length;
+                        if (cl > maxSize && cl < this.width) {
+                            maxSize = cl;
+                            maxPlot = i;
+                        }
+                    }
+                    return maxPlot;
             }
         }
         return null;
@@ -2575,15 +2609,13 @@ class ColonyManager {
             return;
         }
         // Ancestree, derive and calc stats
-        if (!('ancestors' in this.ancestreeTask) ||
-            ('ancestors' in this.ancestreeTask && this.ancestreeTask.start)) {
+        if (!('ancestors' in this.ancestreeTask) || this.ancestreeTask.start) {
             perfs[2 /* Profilers.LS_ANCESTREE */].exec(() => {
                 this.ancestreeTask = plantData[c.id].system.getAncestree(c.sequence, this.ancestreeTask);
             });
             return;
         }
-        if (!('derivation' in this.deriveTask) ||
-            ('derivation' in this.deriveTask && this.deriveTask.start)) {
+        if (!('derivation' in this.deriveTask) || this.deriveTask.start) {
             perfs[3 /* Profilers.LS_DERIVE */].exec(() => {
                 this.deriveTask = plantData[c.id].system.derive(c.sequence, c.params, this.ancestreeTask.ancestors, this.ancestreeTask.children, this.deriveTask);
             });
@@ -2604,13 +2636,13 @@ class ColonyManager {
             theory.invalidateQuaternaryValues();
             return;
         }
-        if (!('synthRate' in this.calcTask) ||
-            ('synthRate' in this.calcTask && this.calcTask.start)) {
+        if (!('synthRate' in this.calcTask) || this.calcTask.start) {
             perfs[4 /* Profilers.LS_CALC_STATS */].exec(() => {
                 this.calcTask = this.calculateStats(c, this.calcTask, this.deriveTask);
             });
             return;
         }
+        // Adjust stats according to reserves
         // @ts-expect-error
         c.growth -= plantData[c.id].growthCost *
             // @ts-expect-error
@@ -2622,6 +2654,7 @@ class ColonyManager {
             // @ts-expect-error
             c.dgReserve += c.growth / plantData[c.id].growthRate;
         c.growth = BigNumber.ZERO;
+        // Assign new stage's stats
         c.sequence = this.deriveTask.derivation;
         c.params = this.deriveTask.parameters;
         c.synthRate = this.calcTask.synthRate;
@@ -2629,10 +2662,25 @@ class ColonyManager {
             this.reap(c, plantData[c.id].stagelyIncome);
         c.profit = this.calcTask.profit;
         ++c.stage;
+        let notMature = c.stage < (plantData[c.id].maxStage ?? INT_MAX);
+        // Empty reserves
+        // @ts-expect-error
+        c.energy += c.diReserve * c.synthRate;
+        if (notMature) {
+            // @ts-expect-error
+            let maxdg = c.energy.min(c.dgReserve * plantData[c.id].growthRate);
+            // @ts-expect-error
+            c.growth += maxdg;
+            // @ts-expect-error
+            c.energy -= maxdg;
+        }
+        c.diReserve = BigNumber.ZERO;
+        c.dgReserve = BigNumber.ZERO;
+        // Propagate
         let prop = plantData[c.id].propagation;
-        if (prop && c.stage >= (plantData[c.id].maxStage ?? INT_MAX)) {
+        if (prop && !notMature) {
             let pop = Math.round(c.population * prop.rate);
-            let target = this.findTarget(this.gangsta[0], prop.priority);
+            let target = this.findVacantPlot(this.gangsta[0], prop.priority);
             if (target !== null)
                 this.addColony(target, c.id, pop, true);
         }
@@ -2720,8 +2768,12 @@ const LsManual = new Book(getLoc('manualTitle'), [
     getLoc('manual').note,
 ]);
 // Balance parameters
+const dayLength = 144;
+const halfDayLength = dayLength / 2;
+const quarterDayLength = halfDayLength / 2;
 const nofPlots = 6;
 const maxColoniesPerPlot = 4;
+const waterAmount = BigNumber.TWO;
 const plotCosts = new FirstFreeCost(new ExponentialCost(900, Math.log2(120)));
 const plantUnlocks = ['calendula', 'basil', 'campion'];
 const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2200), new ConstantCost(145000));
@@ -2730,7 +2782,6 @@ const permaCosts = [
     BigNumber.from(4800),
     BigNumber.from(1e45)
 ];
-const waterAmount = BigNumber.TWO;
 const taxRate = BigNumber.from(-.12);
 const tauRate = BigNumber.TWO;
 const pubCoef = BigNumber.from(2 / 3);
@@ -2779,9 +2830,9 @@ const plantData = {
         cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
         growthRate: BigNumber.THREE,
         growthCost: BigNumber.from(2.5),
-        waterCD: 9 * 60,
+        waterCD: 3 * dayLength,
         propagation: {
-            rate: 0.25,
+            rate: 0.4,
             priority: 'c'
         },
         actions: [
@@ -2850,7 +2901,7 @@ const plantData = {
         cost: new ExponentialCost(5, 1),
         growthRate: BigNumber.FOUR,
         growthCost: BigNumber.TWO,
-        waterCD: 7.5 * 60,
+        waterCD: 2 * dayLength,
         actions: [
             {
                 symbols: new Set('KL'),
@@ -2913,10 +2964,10 @@ const plantData = {
         cost: new ExponentialCost(2000, Math.log2(5)),
         growthRate: BigNumber.FIVE,
         growthCost: BigNumber.TEN,
-        waterCD: 18 * 60,
+        waterCD: 5 * dayLength,
         stagelyIncome: BigNumber.ONE,
         propagation: {
-            rate: 0.5,
+            rate: 0.6,
             priority: 'c'
         },
         actions: [
@@ -2959,7 +3010,7 @@ const plantData = {
         cost: new FirstFreeCost(new ExponentialCost(1, 1)),
         growthRate: BigNumber.TWO,
         growthCost: BigNumber.from(45),
-        waterCD: 1 * 60,
+        waterCD: 1 * dayLength,
         actions: [
             {
                 symbols: new Set('A'),
@@ -3530,8 +3581,8 @@ var init = () => {
     {
         warpDay = theory.createPermanentUpgrade(9003, currency, new FreeCost);
         warpDay.description = 'Warp one day';
-        warpDay.info = 'Warps forward by 144 time units';
-        warpDay.bought = (_) => tick(144, 1);
+        warpDay.info = 'Warps forward by a day';
+        warpDay.bought = (_) => tick(dayLength, 1);
         warpDay.isAvailable = haxEnabled;
     }
     /* Warp year
@@ -3541,7 +3592,7 @@ var init = () => {
         warpYear = theory.createPermanentUpgrade(9005, currency, new FreeCost);
         warpYear.description = 'Warp one year';
         warpYear.info = 'Warps forward by 365 days';
-        warpYear.bought = (_) => tick(144 * 365, 1);
+        warpYear.bought = (_) => tick(dayLength * 365, 1);
         warpYear.isAvailable = haxEnabled;
     }
     /* Warp zero
@@ -3615,25 +3666,26 @@ var tick = (elapsedTime, multiplier) => {
         // https://www.desmos.com/calculator/pfku4nopgy
         // insolation = max(0, -cos(x*pi/72))
         // Help me check my integral maths
-        let cycles = time / 144;
+        let cycles = time / dayLength;
         let newDays = Math.floor(cycles);
         dd = newDays - days;
         days = newDays;
         while (days >= yearStartLookup[years + 1])
             ++years;
         let phase = saturate(cycles - days - 0.25, 0, 0.5);
-        let newII = days * 144 / Math.PI - 72 *
+        let newII = days * dayLength / Math.PI - halfDayLength *
             (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
         di = newII - insolationIntegral;
         insolationIntegral = newII;
         // universal growth factor = cos(x*pi/72)/2 + 1/2
-        let newGI = time / 2 + 36 * Math.sin(time * Math.PI / 72) / Math.PI;
+        let newGI = time / 2 + quarterDayLength *
+            Math.sin(time * Math.PI / halfDayLength) / Math.PI;
         dg = newGI - growthIntegral;
         growthIntegral = newGI;
     });
     manager.growAll(BigNumber.from(di), BigNumber.from(dg), BigNumber.from(dd));
     if (!game.isCalculatingOfflineProgress) {
-        let timeCos = Math.cos(time * Math.PI / 72);
+        let timeCos = Math.cos(time * Math.PI / halfDayLength);
         insolationCoord = Math.max(0, -timeCos);
         growthCoord = (timeCos + 1) / 2;
         switch (quatMode) {
@@ -3804,7 +3856,7 @@ var getSecondaryEquation = () => {
 let getTimeString = () => {
     let dayofYear = days - yearStartLookup[years];
     let weeks = Math.floor(dayofYear / 7);
-    let timeofDay = time % 144;
+    let timeofDay = time % dayLength;
     let hour = Math.floor(timeofDay / 6);
     let min;
     if (game.isRewardActive)
@@ -5016,14 +5068,14 @@ var setInternalState = (stateStr) => {
         }
         if ('time' in state) {
             time = state.time ?? time;
-            let cycles = time / 144;
+            let cycles = time / dayLength;
             days = Math.floor(cycles);
             years = binarySearch(yearStartLookup, days);
             let phase = saturate(cycles - days - 0.25, 0, 0.5);
-            insolationIntegral = days * 144 / Math.PI - 72 *
+            insolationIntegral = days * dayLength / Math.PI - halfDayLength *
                 (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
-            growthIntegral = time / 2 + 36 * Math.sin(time * Math.PI / 72) /
-                Math.PI;
+            growthIntegral = time / 2 + quarterDayLength *
+                Math.sin(time * Math.PI / halfDayLength) / Math.PI;
             lastSave = time;
         }
         plotIdx = state.plotIdx ?? plotIdx;
