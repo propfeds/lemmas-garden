@@ -33,7 +33,7 @@ var getName = (language: string): string =>
 {
     const names =
     {
-        en: `Lemma's garden`,
+        en: `Lemma's Garden`,
     };
 
     return names[language] ?? names.en;
@@ -46,7 +46,7 @@ var getDescription = (language: string): string =>
 `Last night, Lemma didn't sweep away the rubbles on her old garden.
 You did. You are her first student in a long while.
 
-Welcome to Lemma's garden, an idle botanical theory built on the grammar of ` +
+Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
 `Lindenmayer systems.`,
     };
 
@@ -814,7 +814,7 @@ class Queue
         return result;
     };
 
-    get object()
+    toJSON()
     {
         return {
             oldestIndex: this.oldestIndex,
@@ -2085,7 +2085,7 @@ class LSystem
      *  variables: object
      * }}
      */
-    get object(): {
+    toJSON(): {
         axiom: string;
         rules: string[];
         turnAngle: string | number;
@@ -2113,7 +2113,7 @@ class LSystem
      */
     toString(): string
     {
-        return JSON.stringify(this.object, null, 4);
+        return JSON.stringify(this, null, 4);
     }
 }
 
@@ -2961,7 +2961,7 @@ class ColonyManager
         // this.restTick = 0;
     }
 
-    get object()
+    toJSON()
     {
         return {
             colonies: this.colonies,
@@ -2969,7 +2969,7 @@ class ColonyManager
             ancestreeTask: this.ancestreeTask,
             deriveTask: this.deriveTask,
             calcTask: this.calcTask,
-            actionQueue: this.actionQueue.object,
+            actionQueue: this.actionQueue,
             actionGangsta: this.actionGangsta,
             actionAncestreeTask: this.actionAncestreeTask,
             actionDeriveTask: this.actionDeriveTask,
@@ -5146,7 +5146,7 @@ let createVariableMenu = (variables: [string, string][]) =>
 
 let createSystemMenu = (id: string) =>
 {
-    let values = plantData[id].system.object;
+    let values = plantData[id].system.toJSON();
 
     let tmpAxiom = values.axiom;
     let axiomEntry = ui.createEntry
@@ -6460,7 +6460,7 @@ var getInternalState = () =>
         colonyIdx,
         plantIdx,
         finishedTutorial,
-        manager: manager.object,
+        manager,
         settings:
         {
             graphMode2D,

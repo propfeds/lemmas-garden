@@ -1,10 +1,10 @@
-# Lemma's garden
+# Lemma's Garden
 
 > Last night, Lemma didn't sweep away the rubbles on her old garden.
 > 
 > You did. You are her first student in a long while.
 
-Welcome to Lemma's garden, an idle gardening game built on the grammar of
+Welcome to Lemma's Garden, an idle gardening game built on the grammar of
 Lindenmayer systems.
 
 Reminisce the story of Lemma and her late partner as she rambles about how much
