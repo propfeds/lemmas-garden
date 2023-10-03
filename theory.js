@@ -175,8 +175,8 @@ t stages left until it splits.\\\\F(l, lim): internode of length l (grows up to
 lim).\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0.\\\\K(p):
 flower of size p.\\\\L(r, lim): leaf providing r energy/s (grows up to lim).
 \\\\—\\\\Harvest returns profit as the sum of all K sizes.\\\\At the end of its
-life cycle, propagates a new population (40\\% of the current population) on the
-same plot.\\\\—\\\\The Model specification section may be ignored.`,
+life cycle, propagates a new population (40\\%\\ of the current population) on
+the same plot.\\\\—\\\\The Model specification section may be ignored.`,
                 stages: {
                     index: [
                         0,
@@ -202,7 +202,7 @@ known as the golden angle.`,
                     27: 'A second flower bud appears!',
                     28: 'The third and final flower appears.',
                     30: 'My wife used to munch on these flowers, raw.',
-                    31: `Try it!\\\\No, :) I'm jesting. We sell them, as a
+                    31: `Try it!\\\\No, ;) I'm jesting. We'll sell them, for a
 little profit.`,
                     35: 'The first flower matures.',
                     39: 'The second flower matures.',
@@ -251,7 +251,7 @@ length l. t stages until it stops growing.\\\\K(p, t): flower of size p. t
 stages left until it disappears.\\\\L(s): leaf.\\\\O(s): fruit of size s.
 Decorative.\\\\—\\\\Harvest returns profit as the sum of all K sizes
 (first parameter).\\\\Passively provides income per stage equal to total profit.
-\\\\At the end of its life cycle, propagates a new population (60\\% of the
+\\\\At the end of its life cycle, propagates a new population (60\\%\\ of the
 current population) on the same plot.\\\\—\\\\The Model specification section
 may be ignored.`,
                 stages: {
@@ -1579,16 +1579,22 @@ class LSystem {
      * @param {Colony} colony the plant colony.
      * @param {string} filter the filter.
      * @param {boolean} displayParams whether to display parameters.
+     * @param {number} indentation the number of spaces to indent.
      * @param {{start: number, result: string}} task the current task.
      * @returns {{start: number, result: string}}
      */
-    reconstruct(colony, filter = '', displayParams = true, task = {}) {
+    reconstruct(colony, filter = '', displayParams = true, indentation = 4, task = {}) {
+        if (indentation < 0)
+            indentation = -indentation;
         let sequence = colony.sequence;
         let params = colony.params;
+        let level = 0;
+        let lineStart = false;
         let decimalTable = plantData[colony.id].decimals;
         if (!displayParams && !filter) {
             return {
                 start: 0,
+                level: level,
                 result: sequence
             };
         }
@@ -1599,23 +1605,47 @@ class LSystem {
             if (i - task.start > MAX_CHARS_PER_TICK) {
                 return {
                     start: i,
+                    level: level,
                     result: result
                 };
             }
-            if (!filter || filterSet.has(sequence[i])) {
+            if (displayParams && lineStart) {
+                result += `\n${' '.repeat(indentation * Math.max(0, level))}`;
+                lineStart = false;
+            }
+            let writesToResult = !filter || filterSet.has(sequence[i]);
+            if (writesToResult) {
+                switch (sequence[i]) {
+                    case '[':
+                        ++level;
+                        lineStart = true;
+                        break;
+                    case ']':
+                        lineStart = true;
+                        break;
+                }
                 result += sequence[i];
                 if (displayParams && params[i]) {
                     let charDT = decimalTable[sequence[i]] ?? [];
                     let paramStrings = [];
                     for (let j = 0; j < params[i].length; ++j)
                         paramStrings[j] = params[i][j].toString(charDT[j] ?? 2);
-                    result += `(${paramStrings.join(', ')})\n`;
+                    result += `(${paramStrings.join(', ')})`;
                 }
-                // result += '\n';
+                switch (sequence[i + 1]) {
+                    case '[':
+                        lineStart = true;
+                        break;
+                    case ']':
+                        --level;
+                        lineStart = true;
+                        break;
+                }
             }
         }
         return {
             start: 0,
+            level: level,
             result: result
         };
     }
@@ -2773,7 +2803,7 @@ const halfDayLength = dayLength / 2;
 const quarterDayLength = halfDayLength / 2;
 const nofPlots = 6;
 const maxColoniesPerPlot = 4;
-const waterAmount = BigNumber.TWO;
+const waterAmount = BigNumber.ONE;
 const plotCosts = new FirstFreeCost(new ExponentialCost(900, Math.log2(120)));
 const plantUnlocks = ['calendula', 'basil', 'campion'];
 const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2200), new ConstantCost(145000));
@@ -4207,9 +4237,8 @@ let createColonyViewMenu = (colony) => {
     let updateReconstruction = () => {
         if (manager.busy)
             return reconstructionTask.result;
-        if (!('result' in reconstructionTask) ||
-            ('result' in reconstructionTask && reconstructionTask.start)) {
-            reconstructionTask = plantData[colony.id].system.reconstruct(colony, colonyViewConfig[colony.id].filter, colonyViewConfig[colony.id].params, reconstructionTask);
+        if (!('result' in reconstructionTask) || reconstructionTask.start) {
+            reconstructionTask = plantData[colony.id].system.reconstruct(colony, colonyViewConfig[colony.id].filter, colonyViewConfig[colony.id].params, 4, reconstructionTask);
         }
         return reconstructionTask.result;
     };
@@ -4280,7 +4309,7 @@ let createColonyViewMenu = (colony) => {
                 plantStats,
                 ui.createFrame({
                     padding: new Thickness(8, 6),
-                    heightRequest: ui.screenHeight * 0.16,
+                    heightRequest: ui.screenHeight * 0.18,
                     content: ui.createScrollView({
                         content: ui.createStackLayout({
                             children: [
