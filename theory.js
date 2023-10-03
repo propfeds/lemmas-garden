@@ -175,7 +175,7 @@ t stages left until it splits.\\\\F(l, lim): internode of length l (grows up to
 lim).\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0.\\\\K(p):
 flower of size p.\\\\L(r, lim): leaf providing r energy/s (grows up to lim).
 \\\\—\\\\Harvest returns profit as the sum of all K sizes.\\\\At the end of its
-life cycle, propagates a new population (40% of the current population) on the
+life cycle, propagates a new population (40\\% of the current population) on the
 same plot.\\\\—\\\\The Model specification section may be ignored.`,
                 stages: {
                     index: [
@@ -251,7 +251,7 @@ length l. t stages until it stops growing.\\\\K(p, t): flower of size p. t
 stages left until it disappears.\\\\L(s): leaf.\\\\O(s): fruit of size s.
 Decorative.\\\\—\\\\Harvest returns profit as the sum of all K sizes
 (first parameter).\\\\Passively provides income per stage equal to total profit.
-\\\\At the end of its life cycle, propagates a new population (60% of the
+\\\\At the end of its life cycle, propagates a new population (60\\% of the
 current population) on the same plot.\\\\—\\\\The Model specification section
 may be ignored.`,
                 stages: {
