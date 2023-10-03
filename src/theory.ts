@@ -73,7 +73,7 @@ const LOC_STRINGS =
 {
     en:
     {
-        versionName: `Version: 0.2, Seeds & Weeds (alpha)`,
+        versionName: `Version: 0.2, Seeds \\&\\ Weeds\\\\ALPHA BUILD`,
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
