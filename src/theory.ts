@@ -73,7 +73,7 @@ const LOC_STRINGS =
 {
     en:
     {
-        versionName: `Version: 0.1.4, Slumber Seeds`,
+        versionName: `Version: 0.2, Seeds & Weeds (alpha)`,
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
@@ -3049,9 +3049,11 @@ class ColonyManager
 
         for(let i = 0; !spread && i < this.colonies[plot].length; ++i)
         {
-            if(this.colonies[plot][i].id == id && !this.colonies[plot][i].stage)
+            let groupCandidate = this.colonies[plot][i];
+            if(groupCandidate.id == id && !groupCandidate.propagated &&
+            !groupCandidate.stage)
             {
-                this.colonies[plot][i].population += population;
+                groupCandidate.population += population;
                 theory.invalidateQuaternaryValues();
                 return;
             }

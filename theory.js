@@ -56,7 +56,7 @@ const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS = {
     en: {
-        versionName: `Version: 0.1.4, Slumber Seeds`,
+        versionName: `Version: 0.2, Seeds & Weeds (alpha)`,
         wip: 'Work in Progress',
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish\\colon',
@@ -2305,8 +2305,10 @@ class ColonyManager {
         if (population <= 0)
             return;
         for (let i = 0; !spread && i < this.colonies[plot].length; ++i) {
-            if (this.colonies[plot][i].id == id && !this.colonies[plot][i].stage) {
-                this.colonies[plot][i].population += population;
+            let groupCandidate = this.colonies[plot][i];
+            if (groupCandidate.id == id && !groupCandidate.propagated &&
+                !groupCandidate.stage) {
+                groupCandidate.population += population;
                 theory.invalidateQuaternaryValues();
                 return;
             }
