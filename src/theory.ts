@@ -3042,26 +3042,30 @@ class ColonyManager
         multiplier * theory.publicationMultiplier;
     }
 
-    addColony(plot: number, id: string, population: number, spread = false)
+    addColony(plot: number, id: string, population: number,
+    spread: number = null)
     {
         if(population <= 0)
             return;
 
-        for(let i = 0; !spread && i < this.colonies[plot].length; ++i)
+        if(spread === null)
         {
-            let groupCandidate = this.colonies[plot][i];
-            if(groupCandidate.id == id && !groupCandidate.propagated &&
-            !groupCandidate.stage)
+            for(let i = 0; i < this.colonies[plot].length; ++i)
             {
-                groupCandidate.population += population;
-                theory.invalidateQuaternaryValues();
-                return;
+                let groupCandidate = this.colonies[plot][i];
+                if(groupCandidate.id == id && !groupCandidate.propagated &&
+                !groupCandidate.stage)
+                {
+                    groupCandidate.population += population;
+                    theory.invalidateQuaternaryValues();
+                    return;
+                }
             }
         }
-        // Max 5, unless invading
+
         if(this.colonies[plot].length >= this.width)
         {
-            if(!spread)
+            if(spread === null)
                 plants[plot][id]?.refund?.(population);
             return;
         }
@@ -3069,7 +3073,7 @@ class ColonyManager
         {
             id: id,
             population: population,
-            propagated: spread,
+            propagated: spread === null ? false : true,
             sequence: plantData[id].system.axiom,
             params: plantData[id].system.axiomParams,
             stage: 0,
@@ -3086,7 +3090,12 @@ class ColonyManager
         let stats = this.calculateStats(c);
         c.synthRate = stats.synthRate;
         c.profit = stats.profit;
-        this.colonies[plot].push(c);
+
+        if(spread === null)
+            this.colonies[plot].push(c);
+        else
+            this.colonies[plot].splice(spread, 0, c);
+
         if(plot == plotIdx && colonyIdx[plot] == this.colonies[plot].length - 1)
             renderer.colony = c;
         theory.invalidateQuaternaryValues();
@@ -3545,7 +3554,7 @@ class ColonyManager
             let pop = Math.round(c.population * prop.rate);
             let target = this.findVacantPlot(this.gangsta[0], prop.priority);
             if(target !== null)
-                this.addColony(target, c.id, pop, true);
+                this.addColony(target, c.id, pop, this.gangsta[1] + 1);
         }
 
         this.ancestreeTask =
@@ -4420,8 +4429,8 @@ const settingsFrame = createFramedButton
     column: 0,
     horizontalOptions: LayoutOptions.START
 }, 2, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/flower-emblem.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/flower-emblem.png'));
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/spoted-flower.png') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/spoted-flower.png'));
 
 var switchPlant: Upgrade;
 var viewColony: Upgrade;
