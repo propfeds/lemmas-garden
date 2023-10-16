@@ -68,6 +68,18 @@ do nothing. Do you feel like it could be more interesting?
 
 - [ ] Explain plant mechanics in Lemma's book: energy, growth
 
+- [ ] Time scale (reference is with ad boost - 1.5x speed)
+  - current scale (144)
+    1 hr -> 4 sec
+    1 day -> 96 sec
+    900 days -> 1 day
+  - new scale (180) better aligned with irl time
+    1 hr -> 5 sec
+    1 day -> 2 min
+    720 days -> 1 day
+  - [ ] Get rid of ad boost and make speed a slider
+    - 180 -> 120 -> 90?
+
 - [x] Chapter about floods
   - Happens when maximum statements
   - Condition: tau > 0, time < 10
@@ -79,6 +91,7 @@ do nothing. Do you feel like it could be more interesting?
   - Has priority array `rlc`
     - [x] Add dynamic directions (`m` for min, `M` for max)
   - Spreaded colonies syntax: +1 of Rose campion
+  - [x] Propagated colonies inherit the di and dg reserves
   - [ ] Hey, can you imagine an ash tree propagating a MISTLETOE?
     - Mistletoe also eats nutrients like hopleek
 

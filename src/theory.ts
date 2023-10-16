@@ -3069,6 +3069,7 @@ class ColonyManager
                 plants[plot][id]?.refund?.(population);
             return;
         }
+
         let c: Colony =
         {
             id: id,
@@ -3094,8 +3095,25 @@ class ColonyManager
         if(spread === null)
             this.colonies[plot].push(c);
         else
-            this.colonies[plot].splice(spread, 0, c);
+        {
+            // Inheriting parent's reserve
 
+            let parent = this.colonies[plot][spread];
+            // @ts-expect-error
+            c.energy += parent.diReserve * c.synthRate;
+            // @ts-expect-error
+            let maxdg = c.energy.min(parent.dgReserve *
+            // @ts-expect-error
+            plantData[c.id].growthRate);
+            // @ts-expect-error
+            c.growth += maxdg;
+            // @ts-expect-error
+            c.energy -= maxdg;
+            if(plantData[c.id].dailyIncome)
+                c.ddReserve = parent.ddReserve;
+
+            this.colonies[plot].splice(spread + 1, 0, c);
+        }
         if(plot == plotIdx && colonyIdx[plot] == this.colonies[plot].length - 1)
             renderer.colony = c;
         theory.invalidateQuaternaryValues();
@@ -3543,8 +3561,6 @@ class ColonyManager
             // @ts-expect-error
             c.energy -= maxdg;
         }
-        c.diReserve = BigNumber.ZERO;
-        c.dgReserve = BigNumber.ZERO;
 
         // Propagate
 
@@ -3554,8 +3570,10 @@ class ColonyManager
             let pop = Math.round(c.population * prop.rate);
             let target = this.findVacantPlot(this.gangsta[0], prop.priority);
             if(target !== null)
-                this.addColony(target, c.id, pop, this.gangsta[1] + 1);
+                this.addColony(target, c.id, pop, this.gangsta[1]);
         }
+        c.diReserve = BigNumber.ZERO;
+        c.dgReserve = BigNumber.ZERO;
 
         this.ancestreeTask =
         {
