@@ -165,7 +165,8 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
         switchColony: 'Switch colony ({0}/{1})',
         switchColonyInfo: 'Cycles through the list of colonies',
 
-        menuSettings: 'Theory Settings',
+        menuSettings: 'Settings',
+        labelSpeed: 'Game speed: {0}x',
         labelGM3D: '3D graph: ',
         labelActionConfirm: 'Action confirmations: ',
         graphModes2D:
@@ -2018,7 +2019,6 @@ class LSystem
         let params = colony.params;
         let level = 0;
         let lineStart = false;
-        let decimalTable = plantData[colony.id].decimals;
         if(!displayParams && !filter)
         {
             return {
@@ -2064,10 +2064,10 @@ class LSystem
                 result += sequence[i];
                 if(displayParams && params[i])
                 {
-                    let charDT = decimalTable[sequence[i]] ?? [];
                     let paramStrings: string[] = [];
                     for(let j = 0; j < params[i].length; ++j)
-                        paramStrings[j] = params[i][j].toString(charDT[j] ?? 2);
+                        paramStrings[j] = parseFloat(params[i][j].toString(6))
+                        .toString();
                     result += `(${paramStrings.join(', ')})`;
                 }
                 
@@ -3704,7 +3704,7 @@ interface Plant
         priority: string
     };
     actions: Action[];
-    decimals: {[key: string]: number[]};
+    decimals?: {[key: string]: number[]};
     camera: (stage: number) => RendererCamera;
     stroke: (stage: number) => RendererStroke;
 }
@@ -3723,9 +3723,10 @@ interface NotebookEntry
 
 // Balance parameters
 
-const dayLength = 144;
+const dayLength = 120;
 const halfDayLength = dayLength / 2;
 const quarterDayLength = halfDayLength / 2;
+const hourLength = dayLength / 24;
 
 const nofPlots = 6;
 const maxColoniesPerPlot = 4;
@@ -4125,6 +4126,10 @@ const plantIDLookup =
     9002: 'brasil'
 }
 
+const speeds = [1, 1.25, 5/3];
+const speedAdjDayLengths = speeds.map(x => dayLength / x);
+const clockMinDiv = [12, 15, 20];
+
 let haxEnabled = false;
 let time = 0;
 let lastSave = 0;
@@ -4140,6 +4145,8 @@ let plantIdx = new Array(nofPlots).fill(0);
 let selectedColony: Colony = null;
 let finishedTutorial = false;
 let actuallyPlanting = true;
+
+let speedIdx = 1;
 const enum GraphModes2D
 {
     OFF,
@@ -4312,25 +4319,24 @@ const waterLabel = ui.createLatexLabel
         if(remainingCD <= 0)
             return getLoc('labelWater');
 
-        if(game.isRewardActive)
-            remainingCD /= 1.5;
+        remainingCD /= speeds[speedIdx];
         let minutes = Math.floor(remainingCD / 60);
         let seconds = Math.floor(remainingCD - minutes*60);
-        let timeString: string;
+        let CDTimeString: string;
         if(minutes >= 60)
         {
             let hours = Math.floor(minutes / 60);
             minutes -= hours*60;
-            timeString = `${hours}:${
+            CDTimeString = `${hours}:${
             minutes.toString().padStart(2, '0')}:${
             seconds.toFixed(0).padStart(2, '0')}`;
         }
         else
         {
-            timeString = `${minutes.toString()}:${
+            CDTimeString = `${minutes.toString()}:${
             seconds.toFixed(0).padStart(2, '0')}`;
         }
-        return timeString;
+        return CDTimeString;
     },
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
@@ -4809,9 +4815,7 @@ var tick = (elapsedTime: number, multiplier: number) =>
     let dd: number, di: number, dg: number;
     perfs[Profilers.TICK].exec(() =>
     {
-        // Without the multiplier, one year is 14.6 hours (14:36)
-        // With the multiplier, one year is 9.7(3) hours (9:44)
-        let dt = elapsedTime * multiplier;
+        let dt = elapsedTime * speeds[speedIdx];
         time += dt;
         // https://www.desmos.com/calculator/pfku4nopgy
         // insolation = max(0, -cos(x*pi/72))
@@ -5029,14 +5033,16 @@ var getSecondaryEquation = () =>
                     result += `${getColonyTitleString(d, true)}\\\\`;
                 }
                 result += `\\underline{${getColonyTitleString(c, true)}}}\\\\
-                E=${c.energy},\\enspace\\pi =${c.profit}\\text{p}\\\\\\text{`;
+                \\text{`;
+
                 for(let i = colonyIdx[plotIdx] + 1;
                 i < manager.colonies[plotIdx].length; ++i)
                 {
                     let d = manager.colonies[plotIdx][i];
                     result += `${getColonyTitleString(d, true)}\\\\`;
                 }
-                result += `}`;
+
+                result += `}E=${c.energy},\\enspace\\pi =${c.profit}\\text{p}`;
                 break;
             default:
                 result = '';
@@ -5050,12 +5056,13 @@ let getTimeString = () =>
     let dayofYear = days - yearStartLookup[years];
     let weeks = Math.floor(dayofYear / 7);
     let timeofDay = time % dayLength;
-    let hour = Math.floor(timeofDay / 6);
-    let min: number;
-    if(game.isRewardActive)
-        min = Math.floor((timeofDay % 6) / 1.5) * 15;
-    else
-        min = Math.floor((timeofDay % 6)) * 10;
+    // timeofDay is within [0, dayLength).
+    let resolution = speedAdjDayLengths[speedIdx];
+    let quantum = dayLength / resolution;
+    let quanToD = Math.floor(timeofDay / quantum) * quantum;
+    let hour = Math.floor(quanToD / hourLength);
+    let min = Math.floor((quanToD % hourLength) / speeds[speedIdx]) *
+    clockMinDiv[speedIdx];
 
     return Localization.format(getLoc(actionPanelOnTop ? 'dateTimeBottom' :
     'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1,
@@ -6126,6 +6133,31 @@ let createConfirmationMenu = (plot: number, index: number, id: number) =>
 
 let createWorldMenu = () =>
 {
+    let speedLabel = ui.createLatexLabel
+    ({
+        text: Localization.format(getLoc('labelSpeed'),
+        parseFloat(speeds[speedIdx].toFixed(2))),
+        row: 0, column: 0,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let speedSlider = ui.createSlider
+    ({
+        row: 0, column: 1,
+        minimum: 0,
+        maximum: speeds.length - 1,
+        value: speedIdx,
+        onValueChanged: () =>
+        {
+            speedIdx = Math.round(speedSlider.value);
+            speedLabel.text = Localization.format(getLoc('labelSpeed'),
+            parseFloat(speeds[speedIdx].toFixed(2)));
+        },
+        onDragCompleted: () =>
+        {
+            Sound.playClick();
+            speedSlider.value = speedIdx;
+        }
+    });
     let GM3Label = ui.createLatexLabel
     ({
         column: 0,
@@ -6144,7 +6176,7 @@ let createWorldMenu = () =>
     });
     let GM3Grid = ui.createGrid
     ({
-        row: 6, column: 0,
+        row: 7, column: 0,
         columnDefinitions: ['73*', '60*', '7*'],
         children:
         [
@@ -6155,7 +6187,7 @@ let createWorldMenu = () =>
     let GM3Switch = ui.createSwitch
     ({
         isToggled: graphMode3D,
-        row: 6, column: 1,
+        row: 7, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e: TouchEvent) =>
         {
@@ -6171,12 +6203,12 @@ let createWorldMenu = () =>
     let GM2Label = ui.createLatexLabel
     ({
         text: getLoc('graphModes2D')[graphMode2D],
-        row: 5, column: 0,
+        row: 6, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM2Slider = ui.createSlider
     ({
-        row: 5, column: 1,
+        row: 6, column: 1,
         minimum: 0,
         maximum: GraphModes2D._SIZE - 1,
         value: graphMode2D,
@@ -6194,12 +6226,12 @@ let createWorldMenu = () =>
     let CMLabel = ui.createLatexLabel
     ({
         text: getLoc('colonyModes')[colonyMode],
-        row: 3, column: 0,
+        row: 4, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let CMSlider = ui.createSlider
     ({
-        row: 3, column: 1,
+        row: 4, column: 1,
         minimum: 0,
         maximum: ColonyModes._SIZE - 1,
         value: colonyMode,
@@ -6217,13 +6249,13 @@ let createWorldMenu = () =>
     let APLabel = ui.createLatexLabel
     ({
         text: getLoc('actionPanelLocations')[Number(actionPanelOnTop)],
-        row: 2, column: 0,
+        row: 3, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let APSwitch = ui.createSwitch
     ({
         isToggled: actionPanelOnTop,
-        row: 2, column: 1,
+        row: 3, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e: TouchEvent) =>
         {
@@ -6241,13 +6273,13 @@ let createWorldMenu = () =>
     let PTLabel = ui.createLatexLabel
     ({
         text: getLoc('plotTitleModes')[Number(fancyPlotTitle)],
-        row: 1, column: 0,
+        row: 2, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let PTSwitch = ui.createSwitch
     ({
         isToggled: fancyPlotTitle,
-        row: 1, column: 1,
+        row: 2, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e: TouchEvent) =>
         {
@@ -6265,13 +6297,13 @@ let createWorldMenu = () =>
     let ACLabel = ui.createLatexLabel
     ({
         text: getLoc('labelActionConfirm'),
-        row: 0, column: 0,
+        row: 1, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let ACSwitch = ui.createSwitch
     ({
         isToggled: actionConfirm,
-        row: 0, column: 1,
+        row: 1, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         onTouched: (e: TouchEvent) =>
         {
@@ -6287,12 +6319,12 @@ let createWorldMenu = () =>
     let QBLabel = ui.createLatexLabel
     ({
         text: getLoc('quatModes')[quatMode],
-        row: 4, column: 0,
+        row: 5, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let QBSlider = ui.createSlider
     ({
-        row: 4, column: 1,
+        row: 5, column: 1,
         minimum: 0,
         maximum: QuaternaryModes._SIZE - 1,
         value: quatMode,
@@ -6346,7 +6378,7 @@ let createWorldMenu = () =>
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
-                        // getSmallBtnSize(ui.screenWidth)
+                        getSmallBtnSize(ui.screenWidth)
                     ],
                     children:
                     [
@@ -6363,7 +6395,9 @@ let createWorldMenu = () =>
                         ACLabel,
                         ACSwitch,
                         QBLabel,
-                        QBSlider
+                        QBSlider,
+                        speedLabel,
+                        speedSlider
                     ]
                 }),
                 ui.createLatexLabel
@@ -6528,6 +6562,7 @@ var getInternalState = () =>
         manager,
         settings:
         {
+            speedIdx,
             graphMode2D,
             graphMode3D,
             colonyMode,
@@ -6606,6 +6641,7 @@ var setInternalState = (stateStr: string) =>
         }
         else if('settings' in state)
         {
+            speedIdx = state.settings.speedIdx ?? speedIdx;
             graphMode2D = state.settings.graphMode2D ?? graphMode2D;
             graphMode3D = state.settings.graphMode3D ?? graphMode3D;
             colonyMode = state.settings.colonyMode ?? colonyMode;

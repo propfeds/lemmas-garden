@@ -68,7 +68,11 @@ do nothing. Do you feel like it could be more interesting?
 
 - [ ] Explain plant mechanics in Lemma's book: energy, growth
 
-- [ ] Time scale (reference is with ad boost - 1.5x speed)
+- [ ] C-style float render (6 digits, then truncate zeroes)
+  - [x] Reconstruction
+  - [x] Settings
+
+- [x] Time scale (reference is with ad boost - 1.5x speed)
   - current scale (144)
     1 hr -> 4 sec
     1 day -> 96 sec
@@ -77,8 +81,7 @@ do nothing. Do you feel like it could be more interesting?
     1 hr -> 5 sec
     1 day -> 2 min
     720 days -> 1 day
-  - [ ] Get rid of ad boost and make speed a slider
-    - 180 -> 120 -> 90?
+  - [x] Get rid of ad boost and make speed a slider
 
 - [x] Chapter about floods
   - Happens when maximum statements
