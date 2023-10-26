@@ -89,7 +89,7 @@ do nothing. Do you feel like it could be more interesting?
 
 - [x] Propagation
   - Rate = sum of seeds or fixed rate at fixed time?
-  - [ ] Has a specified stage instead of max stage?
+  - [x] Has a specified stage instead of max stage?
     - Calendula still keeps max stage to develop patience
   - Has priority array `rlc`
     - [x] Add dynamic directions (`m` for min, `M` for max)

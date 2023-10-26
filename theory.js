@@ -2713,7 +2713,8 @@ class ColonyManager {
             this.reap(c, plantData[c.id].stagelyIncome);
         c.profit = this.calcTask.profit;
         ++c.stage;
-        let notMature = c.stage < (plantData[c.id].maxStage ?? INT_MAX);
+        let maxStage = plantData[c.id].maxStage ?? INT_MAX;
+        let notMature = c.stage < maxStage;
         // Empty reserves
         // @ts-expect-error
         c.energy += c.diReserve * c.synthRate;
@@ -2727,11 +2728,11 @@ class ColonyManager {
         }
         // Propagate
         let prop = plantData[c.id].propagation;
-        if (prop && !notMature) {
+        if (prop && c.stage === (prop.stage ?? maxStage)) {
             let pop = Math.round(c.population * prop.rate);
             let target = this.findVacantPlot(this.gangsta[0], prop.priority);
             if (target !== null)
-                this.addColony(target, c.id, pop, this.gangsta[1]);
+                this.addColony(target, prop.id ?? c.id, pop, this.gangsta[1]);
         }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
@@ -3019,6 +3020,7 @@ const plantData = {
         waterCD: 5 * dayLength,
         stagelyIncome: BigNumber.ONE,
         propagation: {
+            stage: 20,
             rate: 0.6,
             priority: 'c'
         },

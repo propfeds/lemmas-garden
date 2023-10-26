@@ -3546,7 +3546,8 @@ class ColonyManager
         c.profit = this.calcTask.profit;
         ++c.stage;
 
-        let notMature = c.stage < (plantData[c.id].maxStage ?? INT_MAX);
+        let maxStage = plantData[c.id].maxStage ?? INT_MAX;
+        let notMature = c.stage < maxStage;
 
         // Empty reserves
 
@@ -3565,12 +3566,12 @@ class ColonyManager
         // Propagate
 
         let prop = plantData[c.id].propagation;
-        if(prop && !notMature)
+        if(prop && c.stage === (prop.stage ?? maxStage))
         {
             let pop = Math.round(c.population * prop.rate);
             let target = this.findVacantPlot(this.gangsta[0], prop.priority);
             if(target !== null)
-                this.addColony(target, c.id, pop, this.gangsta[1]);
+                this.addColony(target, prop.id ?? c.id, pop, this.gangsta[1]);
         }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
@@ -3700,6 +3701,8 @@ interface Plant
     stagelyIncome?: BigNumber;
     propagation?:
     {
+        stage?: number;
+        id?: string;
         rate: number;
         priority: string
     };
@@ -3947,6 +3950,7 @@ const plantData: {[key: string]: Plant} =
         stagelyIncome: BigNumber.ONE,
         propagation:
         {
+            stage: 20,
             rate: 0.6,
             priority: 'c'
         },
