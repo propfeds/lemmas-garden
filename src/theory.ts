@@ -211,9 +211,8 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
 t stages left until it splits.\\\\F(l, lim): internode of length l (grows up to
 lim).\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0.\\\\K(p):
 flower of size p.\\\\L(r, lim): leaf providing r energy/s (grows up to lim).
-\\\\—\\\\Harvest returns profit as the sum of all K sizes.\\\\At the end of its
-life cycle, propagates a new population (40\\%\\ of the current population) on
-the same plot.\\\\—\\\\The Model specification section may be ignored.`,
+\\\\—\\\\Harvest returns profit as the sum of all K sizes.\\\\—\\\\The Model
+specification section may be ignored.`,
                 stages:
                 {
                     index:
@@ -293,10 +292,7 @@ another one back to the leaves, telling them to go so very bitter.`,
 length l. t stages until it stops growing.\\\\K(p, t): flower of size p. t
 stages left until it disappears.\\\\L(s): leaf.\\\\O(s): fruit of size s.
 Decorative.\\\\—\\\\Harvest returns profit as the sum of all K sizes
-(first parameter).\\\\Passively provides income per stage equal to total profit.
-\\\\At the end of its life cycle, propagates a new population (60\\%\\ of the
-current population) on the same plot.\\\\—\\\\The Model specification section
-may be ignored.`,
+(first parameter).\\\\—\\\\The Model specification section may be ignored.`,
                 stages:
                 {
                     index:
@@ -350,14 +346,14 @@ friend of all mathematicians.`
         labelSource: 'Reference: ',
         bookTitleFormat: '{0} ({1}/{2})',
 
-        almanacTitle: `Lemma's Catalogue of Plants`,
+        almanacTitle: `Lemma's Guide to Plants`,
         almanac:
         {
             cover:
             {
                 title: 'Title Cover',
                 contents:
-`Lemma's Catalogue of Plants, for Students
+`Lemma's Guide to Plants, for Students
 Third Edition
 
 🌾🌻🌿
@@ -371,17 +367,22 @@ Tau Publishing`
             {
                 title: 'Preparations!',
                 contents:
-`Before you begin to sow your seeds, make sure to check the plot's ` +
-`elevation, as well as the amount of sun you're going to see each day. Test ` +
-`the soil for acidity, and scatter some ash for balance. Till it, pluck the ` +
-`weeds, supply manure, all needed for a healthy plot.
+`First, let's decide on your seeds. I recommend any supplier who can provide ` +
+`consistent seeds in terms of growth time, which would be perfect for ` +
+`setting up experiments. However, such suppliers can be a bit expensive, so ` +
+`it's best to buy them in small batches in order to avoid turning a loss. ` +
+`But don't worry about it, and take your time with any required calculations.
 
-For the seeds, I recommend purchasing from Corollary's. The seeds here are ` +
-`consistent in growth time, perfect for setting up experiments. However, ` +
-`they can be a bit expensive, so it's best to buy them in small batches, in ` +
-`order to avoid turning a loss.
+As students, you are also in charge of duties that, although quite mundane, ` +
+`are more important than you think. Careful observation, a diligent plucking ` +
+`of weeds, as well as a regular supply of water, are all needed to maintain ` +
+`a healthy colony. (*)
 
-Ready to sow?`
+Ready to sow some seeds?
+
+(*) There are also important factors within the ground itself, such as its ` +
+`elevation, the amount of sun it receives, its acidity, nutrients, etc. That ` +
+`will be handled by your teacher for now, so don't feel intimidated!`
             },
             calendula:
             {
@@ -393,40 +394,45 @@ Ready to sow?`
 `stings to hair care, you're going to see it everywhere! The 'pot' in its ` +
 `name should also suggest it's uses as a cooking herb in stews and soups too.
 
-Time to maturity: ~7 weeks
+Life span: annual
+Propagation: At life cycle's end, spread 40% of the current population onto ` +
+`the same plot.
 
-Here's a recipe to make some delicious calendula bread:`
+Here's a recipe to make some delicious calendula bread for your pleasures too:`
             },
             basil:
             {
                 title: 'Basil',
                 contents:
-`Hailed as the 'king/queen of herbs' all throughout the world, basil is used ` +
-`as a spice in a vast number of recipes with its fragrance and a sweet, ` +
-`slightly intoxicating flavour.
-Even my dog loves it from time to time.
+`Hailed as both queen and king of all herbs throughout the world, basil is ` +
+`used as a spice in a vast number of recipes with its fragrance, accompanied ` +
+`by a sweet and slightly intoxicating flavour. Even my dog loves it from ` +
+`time to time.
 
-Time to maturity: 6~7 weeks
+Life span: annual
 
-If you intend to harvest, snip off the stem before it flowers. Otherwise, ` +
-`the plant will go into the end of its life cycle, and the leaves will lose ` +
-`flavour.`
+If you don't feel safe, snip off the stem before it flowers. Otherwise, let ` +
+`the plant go into the end of its life cycle. The leaves will lose flavour, ` +
+`but you will then be able to witness a fascinating chain reaction resulting ` +
+`from the communications between the plant's organs.`
             },
             campion:
             {
                 title: 'Rose campion',
                 contents:
-`Pest repellent, drought tolerant, and a great pollinator attractor. ` +
-`Occasionally, visitors and artists, generous donors, they might come and ` +
-`toss a few pennies as gratitude to keep the gardens running. But mostly, bees.
+`As a pest repellent, drought tolerant, and a great pollinator attractor, ` +
+`campion is a vibrant shrub that will surely crown your garden with its ` +
+`silvery sheen and bright pink blooms. Occasionally, visitors and artists, ` +
+`generous donors, they would come and toss a few pennies at your doorstep, ` +
+`as gratitude to keep the gardens running. Well, mostly birds and bees ` +
+`paying for hearty meals, but there is also the occasional human.
 Rose campion is also used as a sedative, or for wound treatments, or wicks ` +
-`for a lamp.
+`for a lamp, which gave it the name of 'lamp flower'.
 
-Time to maturity: 'I haven't timed it yet'
-
-Every time it grows, pollinators will pay you a few pennies for having ` +
-`provided them much hearty meals. But, try to keep track of the population, ` +
-`as campion spreads very easily.`
+Life span: biennial
+Propagation: In the middle of its life cycle, spread 60% of the current ` +
+`population onto the same plot.
+Passively provides income per stage equal to its current profit.`
             }
         },
 

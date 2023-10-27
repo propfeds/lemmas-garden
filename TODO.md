@@ -35,8 +35,8 @@ do nothing. Do you feel like it could be more interesting?
 ## Compost bin
 
 - [ ] Tag various stuffs with readonly
-- [ ] Enums
-- [ ] Use toJSON() for classes
+- [x] Enums
+- [x] Use toJSON() for classes
 - [ ] Change getLoc() to just assign loc folder at start and access a property
 
 - [ ] Simple solitary flower
@@ -61,12 +61,17 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Add a Pruned commentary track
   - 2 lazy
 
+- [ ] Compost
+  - Has STAGES?
+  - Supply energy
+
 ## v0.2: Rabbits update
 
 - [ ] Ask Uni of Calgary about how to make Ls easier to understand
   - Provide context: making a game about the logical aspects of Ls
 
 - [ ] Explain plant mechanics in Lemma's book: energy, growth
+- [ ] Unlock conditions for each page in Lemma's book
 
 - [ ] C-style float render (6 digits, then truncate zeroes)
   - [x] Reconstruction
