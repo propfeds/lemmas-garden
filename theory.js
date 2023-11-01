@@ -40,7 +40,7 @@ Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
     return descs[language] ?? descs.en;
 };
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
-var version = 0.104;
+var version = 0.105;
 // Numbers are often converted into 32-bit signed integers in JINT.
 const INT_MAX = 0x7fffffff;
 const INT_MIN = -0x80000000;
@@ -56,13 +56,12 @@ const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS = {
     en: {
-        versionName: `Version: 0.2, Seeds \\&\\ Weeds\\\\ALPHA BUILD`,
+        versionName: `Version: 0.1.5, Rampant Seeds`,
         wip: 'Work in Progress',
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish\\colon',
         btnView: 'View L-system',
         btnVar: 'Variables',
-        btnClose: 'Close',
         btnSave: 'Save',
         btnReset: 'Reset Graphs',
         btnRedraw: 'Redraw',
@@ -70,15 +69,11 @@ const LOC_STRINGS = {
         btnNext: 'Next',
         btnContents: 'Table of\nContents',
         btnPage: 'p. {0}',
-        btnYes: 'Yes',
-        btnNo: 'No',
-        menuConfirm: 'Confirmation',
         actionConfirmDialogue: `You are about to perform a {0} on\\\\
-{3} (plot {1}, {2}).\\\\\n\n\\\\Do you want to continue?`,
-        labelSave: 'Last save: {0}s',
+{3} (plot {1}, {2}).\\\\\n\n\\\\{4}`,
+        labelSave: 'Last saved: {0}s',
         labelWater: 'Water',
         labelActions: ['Harvest', 'Prune'],
-        labelSettings: 'Settings',
         labelFilter: 'Filter: ',
         labelParams: 'Parameters: ',
         labelAxiom: 'Axiom: ',
@@ -137,10 +132,9 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
         viewColonyInfo: 'Displays details about the colony',
         switchColony: 'Switch colony ({0}/{1})',
         switchColonyInfo: 'Cycles through the list of colonies',
-        menuSettings: 'Settings',
         labelSpeed: 'Game speed: {0}x',
         labelGM3D: '3D graph: ',
-        labelActionConfirm: 'Confirm dialogues: ',
+        labelActionConfirm: 'Confirmation dialogues: ',
         graphModes2D: [
             '2D graph: Off',
             '2D graph: Photo-synthesis',
@@ -289,7 +283,7 @@ friend of all mathematicians.`
             },
         },
         plantStats: `({0}) {1}\\\\—\\\\Max. stage: {2}\\\\Synthesis rate: ` +
-            `{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} * {6} ` +
+            `{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} × {6} ` +
             `symbols\\\\—\\\\Sequence:`,
         noCommentary: 'No commentary.',
         noLsDetails: 'No explanations.',
@@ -298,12 +292,13 @@ friend of all mathematicians.`
         menuToC: 'Table of Contents',
         labelSource: 'Reference: ',
         bookTitleFormat: '{0} ({1}/{2})',
-        almanacTitle: `Lemma's Catalogue of Plants`,
+        almanacTitle: `Lemma's World of Plants`,
         almanac: {
             cover: {
                 title: 'Title Cover',
-                contents: `Lemma's Catalogue of Plants, for Students
-Third Edition
+                contents: `Lemma's World of Plants
+An Introduction to Botany for Students
+3rd Edition
 
 🌾🌻🌿
 
@@ -315,11 +310,12 @@ Tau Publishing`
             },
             prep: {
                 title: 'Preparations!',
-                contents: `First, let's decide on your seeds. I recommend any supplier who can provide ` +
-                    `consistent seeds in terms of growth time, which would be perfect for ` +
-                    `setting up experiments. However, such suppliers can be a bit expensive, so ` +
-                    `it's best to buy them in small batches in order to avoid turning a loss. ` +
-                    `But don't worry about it, and take your time with any required calculations.
+                contents: `First, let's decide on your seeds.
+I recommend any supplier that can provide consistent seeds in terms of ` +
+                    `growth time, which would be perfect for setting up experiments. However, ` +
+                    `such suppliers can be a bit expensive, so it's best to buy them in small ` +
+                    `quantities in order to avoid turning a loss. ` +
+                    `Don't worry about it, just take your time with any required calculations.
 
 As students, you are also in charge of duties that, although quite mundane, ` +
                     `are more important than you think. Careful observation, a diligent plucking ` +
@@ -328,17 +324,40 @@ As students, you are also in charge of duties that, although quite mundane, ` +
 
 Ready to sow some seeds?
 
-(*) There are also important factors within the ground itself, such as its ` +
-                    `elevation, the amount of sun it receives, its acidity, nutrients, etc. That ` +
-                    `will be handled by your teacher for now, so don't feel intimidated!`
+(*) There are also important factors within the soil itself, such as its ` +
+                    `elevation, the amount of sun it receives, its nutrients (prepare some good ` +
+                    `compost for this), the moisture (make sure it has proper drainage and ` +
+                    `doesn't clump up!).
+Don't worry, I'm sure your teacher has a perfectly set up plot, though, so ` +
+                    `go Sow Some Seeds!
+
+Also, check your tool health: wash off the rust, clean them, sharpen very ` +
+                    `well. Dip them in good soap and make a splash everywhere.
+Don't forget to wash your best working dresses (also in good soap) and dry ` +
+                    `them very well. You ought to look good while gardening, and this is an ` +
+                    `imperative from me.`
+            },
+            herbaceous: {
+                title: 'Herbaceous plants',
+                contents: `Herbaceous plants are those that don't grow wood tissue on their stems, ` +
+                    `such as ferns or grasses, and well, herbs! Compared to trees and wooded ` +
+                    `shrubs, they have a relatively short life span, and are much more fragile.
+
+Instead, they grow quickly, and rely on dispersing their seeds to survive. ` +
+                    `Some of them can also grow their own underground food storage, such as ` +
+                    `bulbs (onions), or tubers (potatoes).
+
+Mind the medicinal definition of herbs, however! Not all herbaceous plants ` +
+                    `are necessarily good for your health.`
             },
             calendula: {
                 title: 'Calendula',
                 contents: `Commonly called pot marigold (not to be confused with marigolds of the ` +
                     `genus Tagetes), calendulas are easy-going flowers known for numerous ` +
                     `medicinal and culinary uses. From inflammations to sunburns, scorpion ` +
-                    `stings to hair care, you're going to see it everywhere! The 'pot' in its ` +
-                    `name should also suggest it's uses as a cooking herb in stews and soups too.
+                    `stings to hair care, you're going to see it everywhere!
+The 'pot' in its name should also suggest it's uses as a cooking herb in ` +
+                    `stews and soups too.
 
 Life span: annual
 Propagation: At life cycle's end, spread 40% of the current population onto ` +
@@ -364,12 +383,14 @@ If you don't feel safe, snip off the stem before it flowers. Otherwise, let ` +
                 title: 'Rose campion',
                 contents: `As a pest repellent, drought tolerant, and a great pollinator attractor, ` +
                     `campion is a vibrant shrub that will surely crown your garden with its ` +
-                    `silvery sheen and bright pink blooms. Occasionally, visitors and artists, ` +
-                    `generous donors, they would come and toss a few pennies at your doorstep, ` +
-                    `as gratitude to keep the gardens running. Well, mostly birds and bees ` +
-                    `paying for hearty meals, but there is also the occasional human.
-Rose campion is also used as a sedative, or for wound treatments, or wicks ` +
+                    `silvery sheen and bright pink blooms.
+Rose campion can be used as a sedative, or for wound treatments, or wicks ` +
                     `for a lamp, which gave it the name of 'lamp flower'.
+
+Occasionally, visitors and artists, generous donors, they would come and ` +
+                    `toss a few pennies at your doorstep, as gratitude to keep the gardens ` +
+                    `running. Well, mostly birds and bees paying for their hearty meals, but ` +
+                    `there is the occasional human too.
 
 Life span: biennial
 Propagation: In the middle of its life cycle, spread 60% of the current ` +
@@ -404,14 +425,12 @@ On a side note, I am delighted of the fact he does not think the wrinkled ` +
                 title: 'Title Cover',
                 contents: `Lindenmayer Systems Renderer
 A User's Guide
-Second Edition
+2nd Edition
 
-🐢💨
+🐢💨❄️
 
 
-T.
-
-Draft, not for sale`
+P.`
             },
             intro: {
                 title: 'Lindenmayer systems: A primer',
@@ -648,14 +667,6 @@ let binarySearch = (arr, target) => {
     return l;
 };
 /**
- * Returns a string of a fixed decimal number, with a fairly uniform width.
- * @param {number} x the number.
- * @returns {string}
- */
-let getCoordString = (x) => x.toFixed(x >= -0.01 ?
-    (x <= 9.999 ? 3 : (x <= 99.99 ? 2 : 1)) :
-    (x < -9.99 ? (x < -99.9 ? 0 : 1) : 2));
-/**
  * Restricts a number into the specified range.
  */
 let saturate = (x, min, max) => x > max ? max : x < min ? min : x;
@@ -665,6 +676,25 @@ for (let i = 1; i <= 400; ++i) {
     let offset = leap ? 366 : 365;
     yearStartLookup[i] = yearStartLookup[i - 1] + offset;
 }
+/**
+ * Converts a number into a Unicode compliant subscripted string.
+ */
+let getSubscript = (x) => {
+    let xStr = x.toString();
+    let result = '';
+    for (let i = 0; i < xStr.length; ++i) {
+        result += String.fromCharCode(0x2080 + parseInt(xStr[i]));
+    }
+    return result;
+};
+/**
+ * Returns a string of a fixed decimal number, with a fairly uniform width.
+ * @param {number} x the number.
+ * @returns {string}
+ */
+let getCoordString = (x) => x.toFixed(x >= -0.01 ?
+    (x <= 9.999 ? 3 : (x <= 99.99 ? 2 : 1)) :
+    (x < -9.99 ? (x < -99.9 ? 0 : 1) : 2));
 /**
  * What else do you expect?
  */
@@ -1588,8 +1618,8 @@ class LSystem {
      * @param {string} filter the filter.
      * @param {boolean} displayParams whether to display parameters.
      * @param {number} indentation the number of spaces to indent.
-     * @param {{start: number, result: string}} task the current task.
-     * @returns {{start: number, result: string}}
+     * @param {Task} task the current task.
+     * @returns {Task}
      */
     reconstruct(colony, filter = '', displayParams = true, indentation = 4, task = {}) {
         if (indentation < 0)
@@ -2783,20 +2813,21 @@ const almanac = new Book(getLoc('almanacTitle'), [
         pinned: true
     },
     {
+        ...getLoc('almanac').herbaceous,
+        pinned: true
+    },
+    {
         ...getLoc('almanac').calendula,
         systemID: 'calendula',
         source: 'https://www.tasteofyummy.com/calendula-bread-for-bread-lovers/',
-        pinned: true
     },
     {
         ...getLoc('almanac').basil,
-        systemID: 'basil',
-        pinned: true
+        systemID: 'basil'
     },
     {
         ...getLoc('almanac').campion,
-        systemID: 'campion',
-        pinned: true
+        systemID: 'campion'
     },
 ]);
 const LsManual = new Book(getLoc('manualTitle'), [
@@ -3423,7 +3454,7 @@ const settingsLabel = ui.createLatexLabel({
         let multiplier = game.isRewardActive ? 1.5 : 1;
         let dt = (time - lastSave) / multiplier;
         if (dt < 30)
-            return getLoc('labelSettings');
+            return Localization.get('SettingsPopupTitle');
         return Localization.format(getLoc('labelSave'), dt.toFixed(1));
     },
     fontSize: 10,
@@ -3693,10 +3724,12 @@ var init = () => {
 };
 var updateAvailability = () => {
     perfs[5 /* Profilers.AVAILABILITY */].exec(() => {
-        if (!finishedTutorial)
+        if (!finishedTutorial) {
             finishedTutorial = plotPerma.level > 0;
-        else {
             shelfPerma.isAvailable = finishedTutorial;
+        }
+        else {
+            shelfPerma.isAvailable = true;
             switchPlant.isAvailable = !manager.colonies[plotIdx].length;
             viewColony.isAvailable = manager.colonies[plotIdx].length >= 1;
             switchColony.isAvailable = manager.colonies[plotIdx].length > 1;
@@ -3966,7 +3999,8 @@ var getQuaternaryEntries = () => {
                 let column = '';
                 for (let j = 0; j < manager.colonies[i].length; ++j) {
                     let c = manager.colonies[i][j];
-                    column += getLoc('plants')[c.id]?.nameShort ?? '#';
+                    let plantName = getLoc('plants')[c.id]?.nameShort ?? '#';
+                    column += `${plantName}${getSubscript(c.stage)}`;
                 }
                 quaternaryEntries[i].value = column;
                 break;
@@ -4035,7 +4069,7 @@ let createVariableMenu = (variables) => {
                     margin: new Thickness(0, 6)
                 }),
                 ui.createButton({
-                    text: getLoc('btnClose'),
+                    text: Localization.get('GenPopupClose'),
                     onClicked: () => {
                         Sound.playClick();
                         menu.hide();
@@ -4215,7 +4249,7 @@ let createSystemMenu = (id) => {
                     margin: new Thickness(0, 6)
                 }),
                 ui.createButton({
-                    text: getLoc('btnClose'),
+                    text: Localization.get('GenPopupClose'),
                     onClicked: () => {
                         Sound.playClick();
                         menu.hide();
@@ -4311,7 +4345,7 @@ let createColonyViewMenu = (colony) => {
         }
     });
     let closeButton = ui.createButton({
-        text: getLoc('btnClose'),
+        text: Localization.get('GenPopupClose'),
         row: 0, column: 1,
         onClicked: () => {
             Sound.playClick();
@@ -4682,7 +4716,7 @@ let createNotebookMenu = () => {
                     margin: new Thickness(0, 6)
                 }),
                 ui.createButton({
-                    text: getLoc('btnClose'),
+                    text: Localization.get('GenPopupClose'),
                     onClicked: () => {
                         Sound.playClick();
                         menu.hide();
@@ -4700,18 +4734,18 @@ let createShelfMenu = () => {
         content: ui.createStackLayout({
             children: [
                 ui.createButton({
-                    text: LsManual.title,
-                    onClicked: () => {
-                        Sound.playClick();
-                        let menu = createBookMenu(LsManual);
-                        menu.show();
-                    }
-                }),
-                ui.createButton({
                     text: almanac.title,
                     onClicked: () => {
                         Sound.playClick();
                         let menu = createBookMenu(almanac);
+                        menu.show();
+                    }
+                }),
+                ui.createButton({
+                    text: LsManual.title,
+                    onClicked: () => {
+                        Sound.playClick();
+                        let menu = createBookMenu(LsManual);
                         menu.show();
                     }
                 }),
@@ -4733,11 +4767,11 @@ let createConfirmationMenu = (plot, index, id) => {
     let c = manager.colonies[plot][index];
     let menu = ui.createPopup({
         // isPeekable: true,
-        title: getLoc('menuConfirm'),
+        title: Localization.get('GenPopupConfirm'),
         content: ui.createStackLayout({
             children: [
                 ui.createLatexLabel({
-                    text: Localization.format(getLoc('actionConfirmDialogue'), getLoc('labelActions')[id], plot + 1, index + 1, getColonyTitleString(c, false, true)),
+                    text: Localization.format(getLoc('actionConfirmDialogue'), getLoc('labelActions')[id], plot + 1, index + 1, getColonyTitleString(c, false, true), Localization.get('GenPopupContinue')),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     margin: new Thickness(0, 15)
                 }),
@@ -4751,7 +4785,7 @@ let createConfirmationMenu = (plot, index, id) => {
                     children: [
                         ui.createButton({
                             column: 0,
-                            text: getLoc('btnYes'),
+                            text: Localization.get('GenPopupYes'),
                             onClicked: () => {
                                 Sound.playClick();
                                 manager.performAction(plot, index, id);
@@ -4760,7 +4794,7 @@ let createConfirmationMenu = (plot, index, id) => {
                         }),
                         ui.createButton({
                             column: 1,
-                            text: getLoc('btnNo'),
+                            text: Localization.get('GenPopupNo'),
                             onClicked: () => {
                                 Sound.playClick();
                                 menu.hide();
@@ -4962,7 +4996,7 @@ let createWorldMenu = () => {
     // });
     let menu = ui.createPopup({
         isPeekable: true,
-        title: getLoc('menuSettings'),
+        title: Localization.get('SettingsPopupTitle'),
         content: ui.createStackLayout({
             children: [
                 ui.createGrid({
@@ -5012,7 +5046,7 @@ let createWorldMenu = () => {
                     children: [
                         ui.createButton({
                             column: 0,
-                            text: getLoc('btnClose'),
+                            text: Localization.get('GenPopupClose'),
                             onClicked: () => {
                                 Sound.playClick();
                                 menu.hide();
