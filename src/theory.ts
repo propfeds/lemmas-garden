@@ -168,7 +168,7 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
         menuSettings: 'Settings',
         labelSpeed: 'Game speed: {0}x',
         labelGM3D: '3D graph: ',
-        labelActionConfirm: 'Action confirmations: ',
+        labelActionConfirm: 'Confirm dialogues: ',
         graphModes2D:
         [
             '2D graph: Off',
@@ -346,20 +346,21 @@ friend of all mathematicians.`
         labelSource: 'Reference: ',
         bookTitleFormat: '{0} ({1}/{2})',
 
-        almanacTitle: `Lemma's Guide to Plants`,
+        almanacTitle: `Lemma's Catalogue of Plants`,
         almanac:
         {
             cover:
             {
                 title: 'Title Cover',
                 contents:
-`Lemma's Guide to Plants, for Students
+`Lemma's Catalogue of Plants, for Students
 Third Edition
 
 🌾🌻🌿
 
 
-Lena Ruddles, Madeline H. Ruddles
+Lena Ruddles
+Illustrations by Madeline H. Ruddles
 
 Tau Publishing`
             },
