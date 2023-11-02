@@ -78,12 +78,14 @@ const LOC_STRINGS = {
         labelParams: 'Parameters: ',
         labelAxiom: 'Axiom: ',
         labelAngle: 'Turning angle (°): ',
-        labelRules: `Production rules: {0}\\\\Rules are applied each stage,
-simultaneously to all symbols in the plant's sequence.`,
+        labelRules: `Production rules: {0}\\\\Every stage, each symbol in
+the plant's sequence chooses one rule to evolve depending on its parameters.`,
         labelIgnored: 'Turtle-ignored: ',
         labelCtxIgnored: 'Context-ignored: ',
         labelTropism: 'Tropism (gravity): ',
         labelSeed: 'Random seed: ',
+        labelModels: `Model specifications: {0}\\\\Models define how each
+symbol is drawn depending on its parameters.`,
         menuVariables: 'Defined Variables',
         labelVars: 'Variables: {0}',
         plotTitle: `\\text{{Plot }}{{{0}}}`,
@@ -169,8 +171,7 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
 t stages left until it splits.\\\\F(l, lim): internode of length l (grows up to
 lim).\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0.\\\\K(p):
 flower of size p.\\\\L(r, lim): leaf providing r energy/s (grows up to lim).
-\\\\—\\\\Harvest returns profit as the sum of all K sizes.\\\\—\\\\The Model
-specification section may be ignored.`,
+\\\\—\\\\Harvest returns profit as the sum of all K sizes.`,
                 stages: {
                     index: [
                         0,
@@ -213,8 +214,7 @@ until it splits.\\\\K(s, t): flower of size s. Grows another flower until t
 reaches 0.\\\\L(p, lim, s): leaf. s denotes whether a signal has been received.
 \\\\S(type): signal (type 0 travels down, type 1 travels up).\\\\—\\\\Harvest
 returns profit as the sum of all L and K sizes (first parameter).\\\\Prune cuts
-off all A and K (also cuts geometry near K).\\\\—\\\\The Model specification
-section may be ignored.`,
+off all A and K (also cuts geometry near K).`,
                 stages: {
                     index: [
                         0, 6, 10, 12, 14, 16, 18, 20, 22,
@@ -244,7 +244,7 @@ another one back to the leaves, telling them to go so very bitter.`,
 length l. t stages until it stops growing.\\\\K(p, t): flower of size p. t
 stages left until it disappears.\\\\L(s): leaf.\\\\O(s): fruit of size s.
 Decorative.\\\\—\\\\Harvest returns profit as the sum of all K sizes
-(first parameter).\\\\—\\\\The Model specification section may be ignored.`,
+(first parameter).`,
                 stages: {
                     index: [
                         0, 6, 9,
@@ -696,6 +696,23 @@ let getCoordString = (x) => x.toFixed(x >= -0.01 ?
     (x <= 9.999 ? 3 : (x <= 99.99 ? 2 : 1)) :
     (x < -9.99 ? (x < -99.9 ? 0 : 1) : 2));
 /**
+ * Purge a string array of empty lines.
+ * @param {string[]} arr the array.
+ * @returns {string[]}
+ */
+let purgeEmpty = (arr) => {
+    let result = [];
+    let idx = 0;
+    for (let i = 0; i < arr.length; ++i) {
+        // I hope this deep-copies
+        if (arr[i]) {
+            result[idx] = arr[i];
+            ++idx;
+        }
+    }
+    return result;
+};
+/**
  * What else do you expect?
  */
 class Queue {
@@ -1044,12 +1061,13 @@ class Quaternion {
  * Represents a parametric L-system.
  */
 class LSystem {
-    constructor(axiom = '', rules = [], turnAngle = 0, seed = 0, ignoreList = '', ctxIgnoreList = '', tropism = 0, variables = {}) {
+    constructor(axiom = '', rules = [], turnAngle = 0, seed = 0, ignoreList = '', ctxIgnoreList = '', tropism = 0, variables = {}, models = []) {
         // User input
         this.userInput =
             {
                 axiom: axiom,
-                rules: this.purgeEmpty(rules),
+                rules: purgeEmpty(rules),
+                models: purgeEmpty(models),
                 turnAngle: turnAngle,
                 seed: seed,
                 ignoreList: ignoreList,
@@ -1082,8 +1100,9 @@ class LSystem {
             // Maybe leave them at BigNumber?
         }
         let ruleMatches = [];
-        for (let i = 0; i < this.userInput.rules.length; ++i) {
-            ruleMatches.push([...this.userInput.rules[i].replace(TRIM_SP, '').
+        let concatRules = this.userInput.rules.concat(this.userInput.models);
+        for (let i = 0; i < concatRules.length; ++i) {
+            ruleMatches.push([...concatRules[i].replace(TRIM_SP, '').
                     match(LS_RULE)]);
             // Indices 1, 3, 4 are context, condition, and all derivations
         }
@@ -1687,39 +1706,14 @@ class LSystem {
         };
     }
     /**
-     * Purge the rules of empty lines.
-     * @param {string[]} rules rules.
-     * @returns {string[]}
-     */
-    purgeEmpty(rules) {
-        let result = [];
-        let idx = 0;
-        for (let i = 0; i < rules.length; ++i) {
-            // I hope this deep-copies
-            if (rules[i]) {
-                result[idx] = rules[i];
-                ++idx;
-            }
-        }
-        return result;
-    }
-    /**
      * Returns a deep copy (hopefully) of the user input to prevent overwrites.
-     * @returns {{
-     *  axiom: string,
-     *  rules: string[],
-     *  turnAngle: string | number,
-     *  seed: number,
-     *  ignoreList: string,
-     *  ctxIgnoreList: string,
-     *  tropism: string | number,
-     *  variables: object
-     * }}
+     * @returns {LSystemInput}
      */
     toJSON() {
         return {
             axiom: this.userInput.axiom,
-            rules: this.purgeEmpty(this.userInput.rules),
+            rules: purgeEmpty(this.userInput.rules),
+            models: purgeEmpty(this.userInput.models),
             turnAngle: this.userInput.turnAngle,
             seed: this.userInput.seed,
             ignoreList: this.userInput.ignoreList,
@@ -2897,8 +2891,12 @@ const plantData = {
             'I(t) = F(0.48, 1.44)K(0)',
             'K(p): p<maxFlowerSize = K(p+0.25)',
             'L(r, lim): r<lim = L(r+0.02, lim)',
-            'F(l, lim): l<lim = F(l+0.12, lim)',
-            '~> #= Model specification',
+            'F(l, lim): l<lim = F(l+0.12, lim)'
+        ], 15, 0, 'AI', '', -0.2, {
+            'flowerThreshold': '0.96',
+            'maxFlowerSize': '3',
+            'maxLeafSize': '0.72'
+        }, [
             '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/10+0.1)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)]}',
             '~> K(p): p<1.5 = {[w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)]F(p/10+0.1)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.23, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-9)k(p*0.23, p*18-15)][o(p*0.22, p*17.5)]}',
             '~> K(p) = {[w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)]F(p/10+0.1)[k(1.5/4, p*18)k(1.5/4, p*18)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.23, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-9)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.24, p*18-15)][o(1.5/4, p*22.5)o(1.5*0.22, p*17.5)o(1.5*0.18, p*10)]}',
@@ -2912,11 +2910,7 @@ const plantData = {
             '~> L(p, lim): p<=maxLeafSize/4 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].].[^F(p).F(p).^-F(p).&&-F(p).&F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].]}',
             '~> L(p, lim): p<=maxLeafSize/3 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
             '~> L(p, lim) = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
-        ], 15, 0, 'AI', '', -0.2, {
-            'flowerThreshold': '0.96',
-            'maxFlowerSize': '3',
-            'maxLeafSize': '0.72'
-        }),
+        ]),
         maxStage: 40,
         cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
         growthRate: BigNumber.THREE,
@@ -2975,19 +2969,19 @@ const plantData = {
             'S(type) < F(l, lim): type>=1 = F(l, lim)S(type)',
             'S(type) =',
             'B > S(type): type<=0 = BS(1)',
-            'F(l, lim): l<lim = F(l+0.12, lim)',
-            '~> #= Model specification',
+            'F(l, lim): l<lim = F(l+0.12, lim)'
+        ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
+            'flowerThreshold': '0.96',
+            'maxLeafSize': '0.6',
+            'maxFlowerSize': '0.3'
+        }, [
             '~> K(t) = {[k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))]}',
             '~> k(size): size<0.36 = [+++&F(size/2).[^^--F(size/2).]][+++^F(size/2).]',
             '~> k(size): size<0.48 = [++F(size/3).++[&F(size/3).][--F(size/3)[+F(size/6).].].[^F(size/3).][--F(size/3)[+F(size/6).].].[--&F(size/3).^^-F(size/3).][--^F(size/3).].]',
             '~> k(size) = [++F(size/3).++[&F(size/3).&F(size/4).][--F(size/3)[-F(size/6).].]..[^F(size/3).^F(size/4).][--F(size/3)[-F(size/6).].]..[-F(size/2).]..[F(size/3).-F(size/3).].]',
             '~> L(p, lim, s): s<1 = {T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
-            '~> L(p, lim, s) = {T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
-        ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
-            'flowerThreshold': '0.96',
-            'maxLeafSize': '0.6',
-            'maxFlowerSize': '0.3'
-        }),
+            '~> L(p, lim, s) = {T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}'
+        ]),
         maxStage: 48,
         cost: new ExponentialCost(5, 1),
         growthRate: BigNumber.FOUR,
@@ -3039,8 +3033,10 @@ const plantData = {
             'K(p, t) = O(1)',
             'L(s): s<maxLeafSize = L(s+0.025)',
             'O(s): s>0.6 = O(s*0.9)',
-            'F(l, t): t>0 = F(l+0.4, t-1)',
-            '~> #= Model specification',
+            'F(l, t): t>0 = F(l+0.4, t-1)'
+        ], 31, 0, 'A', '', -0.6, {
+            'maxLeafSize': '0.625'
+        }, [
             '~> K(p, t): t<3 = {[+(90)b(p*4)b(p*4)b(p*4)b(p*4)b(p*4)]}',
             '~> b(s) = -[^-F(s).][--F(s*2)..][&-F(s).]+^(72)',
             '~> K(p, t) = {[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]}',
@@ -3048,9 +3044,7 @@ const plantData = {
             '~> k(s) = [^(40)F(s/2).&(10)F(s/2).&F(s/4).][F(s/2)-(10)F(s).][&(40)F(s/2)[^(10)F(s/2)[^F(s/4).].].].',
             '~> L(s) = {T(s*0.5)F(sqrt(s)).[-(48)F(s*2).+F(s*2).+&F(s*2).+F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].].[+(48)F(s*2).-F(s*2).-&F(s*2).-F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].]}',
             '~> O(s) = {[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].].}'
-        ], 31, 0, 'A', '', -0.6, {
-            'maxLeafSize': '0.625'
-        }),
+        ]),
         maxStage: 28,
         cost: new ExponentialCost(2000, Math.log2(5)),
         growthRate: BigNumber.FIVE,
@@ -3161,18 +3155,18 @@ const plantData = {
             'S(type) < F(l, lim): type>=1 = F(l, lim)S(type)',
             'S(type) =',
             'B > S(type): type<=0 = BS(1)',
-            'F(l, lim): l<lim = F(l+0.12, lim)',
-            '~> #= Model specification',
-            '~> K(t) = /(90)F(min(1.25, sqrt(t/4)))T(-0.2){[k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//]}',
-            '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
-            '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
-            '~> L(p, lim, s): s<1 = {\\(90)T(p*0.8)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
-            '~> L(p, lim, s) = {\\(90)T(lim)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}',
+            'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 30, 0, 'BASIL', '+-&^/\\T', 1, {
             'flowerThreshold': '1.38',
             'maxLeafSize': '0.66',
             'signalThreshold': '0'
-        }),
+        }, [
+            '~> K(t) = /(90)F(min(1.25, sqrt(t/4)))T(-0.2){[k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//]}',
+            '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
+            '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
+            '~> L(p, lim, s): s<1 = {\\(90)T(p*0.8)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
+            '~> L(p, lim, s) = {\\(90)T(lim)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}'
+        ]),
         maxStage: 54,
         cost: new ExponentialCost(1, 1),
         growthRate: BigNumber.FOUR,
@@ -3254,6 +3248,10 @@ let actionPanelOnTop = false;
 let actionConfirm = true;
 let quatMode = 0 /* QuaternaryModes.PROFITS */;
 let colonyViewConfig = {};
+let shelfPages = {
+    almanac: 0,
+    manual: 0
+};
 let notebook = {};
 let tmpCurrency;
 let tmpLevels;
@@ -4119,6 +4117,25 @@ let createSystemMenu = (id) => {
     let ruleStack = ui.createGrid({
         children: ruleEntries
     });
+    let tmpModels = [];
+    for (let i = 0; i < values.models.length; ++i)
+        tmpModels[i] = values.models[i];
+    let modelEntries = [];
+    for (let i = 0; i < tmpModels.length; ++i) {
+        modelEntries.push(ui.createEntry({
+            row: i,
+            text: tmpModels[i]
+        }));
+    }
+    let modelsLabel = ui.createLatexLabel({
+        text: Localization.format(getLoc('labelModels'), modelEntries.length),
+        verticalTextAlignment: TextAlignment.CENTER,
+        margin: new Thickness(0, 6),
+        // heightRequest: getSmallBtnSize(ui.screenWidth)
+    });
+    let modelStack = ui.createGrid({
+        children: modelEntries
+    });
     let tmpIgnore = values.ignoreList ?? '';
     let ignoreEntry = ui.createEntry({
         text: tmpIgnore,
@@ -4240,7 +4257,9 @@ let createSystemMenu = (id) => {
                                     seedEntry
                                     */
                                 ]
-                            })
+                            }),
+                            modelsLabel,
+                            modelStack
                         ]
                     })
                 }),
@@ -4425,13 +4444,12 @@ let createColonyViewMenu = (colony) => {
     });
     return menu;
 };
-let createBookMenu = (book) => {
+let createBookMenu = (book, key) => {
     let title = book.title;
     let pages = book.pages;
     let tableofContents = book.tableofContents;
-    let page = 0;
     let pageTitle = ui.createLatexLabel({
-        text: pages[page].title,
+        text: pages[shelfPages[key]].title,
         margin: new Thickness(0, 4),
         heightRequest: getProgBarSize(ui.screenWidth),
         horizontalTextAlignment: TextAlignment.CENTER,
@@ -4440,19 +4458,20 @@ let createBookMenu = (book) => {
     let pageContents = ui.createLabel({
         fontFamily: FontFamily.CMU_REGULAR,
         fontSize: 16,
-        text: pages[page].contents,
-        horizontalTextAlignment: pages[page].horizontalAlignment ??
+        text: pages[shelfPages[key]].contents,
+        horizontalTextAlignment: pages[shelfPages[key]].horizontalAlignment ??
             TextAlignment.START,
-        verticalTextAlignment: pages[page].verticalAlignment ??
+        verticalTextAlignment: pages[shelfPages[key]].verticalAlignment ??
             TextAlignment.START
     });
     let sourceEntry = ui.createEntry({
         row: 0,
         column: 1,
-        text: 'source' in pages[page] ? pages[page].source : ''
+        text: 'source' in pages[shelfPages[key]] ?
+            pages[shelfPages[key]].source : ''
     });
     let sourceGrid = ui.createGrid({
-        isVisible: 'source' in pages[page],
+        isVisible: 'source' in pages[shelfPages[key]],
         columnDefinitions: ['auto', '1*'],
         children: [
             ui.createLatexLabel({
@@ -4469,21 +4488,21 @@ let createBookMenu = (book) => {
         text: getLoc('btnPrev'),
         row: 0,
         column: 0,
-        isVisible: page > 0,
+        isVisible: shelfPages[key] > 0,
         onClicked: () => {
             Sound.playClick();
-            if (page > 0)
-                setPage(page - 1);
+            if (shelfPages[key] > 0)
+                setPage(shelfPages[key] - 1);
         }
     });
     let viewButton = ui.createButton({
         text: getLoc('btnView'),
         row: 0,
         column: 1,
-        isVisible: 'systemID' in pages[page],
+        isVisible: 'systemID' in pages[shelfPages[key]],
         onClicked: () => {
             Sound.playClick();
-            let menu = createSystemMenu(pages[page].systemID);
+            let menu = createSystemMenu(pages[shelfPages[key]].systemID);
             menu.show();
         }
     });
@@ -4491,7 +4510,7 @@ let createBookMenu = (book) => {
         text: getLoc('btnContents'),
         row: 0,
         column: 1,
-        isVisible: !('systemID' in pages[page]),
+        isVisible: !('systemID' in pages[shelfPages[key]]),
         onClicked: () => {
             Sound.playClick();
             TOCMenu.show();
@@ -4501,28 +4520,29 @@ let createBookMenu = (book) => {
         text: getLoc('btnNext'),
         row: 0,
         column: 2,
-        isVisible: page < pages.length - 1,
+        isVisible: shelfPages[key] < pages.length - 1,
         onClicked: () => {
             Sound.playClick();
-            if (page < pages.length - 1)
-                setPage(page + 1);
+            if (shelfPages[key] < pages.length - 1)
+                setPage(shelfPages[key] + 1);
         }
     });
     let setPage = (p) => {
-        page = p;
-        menu.title = Localization.format(getLoc('bookTitleFormat'), title, page + 1, pages.length);
-        pageTitle.text = pages[page].title;
-        pageContents.text = pages[page].contents;
+        shelfPages[key] = p;
+        menu.title = Localization.format(getLoc('bookTitleFormat'), title, shelfPages[key] + 1, pages.length);
+        pageTitle.text = pages[shelfPages[key]].title;
+        pageContents.text = pages[shelfPages[key]].contents;
         pageContents.horizontalTextAlignment =
-            pages[page].horizontalAlignment ?? TextAlignment.START;
-        pageContents.verticalTextAlignment = pages[page].verticalAlignment ??
-            TextAlignment.START;
-        sourceGrid.isVisible = 'source' in pages[page];
-        sourceEntry.text = 'source' in pages[page] ? pages[page].source : '';
-        prevButton.isVisible = page > 0;
-        nextButton.isVisible = page < pages.length - 1;
-        viewButton.isVisible = 'systemID' in pages[page];
-        tocButton.isVisible = !('systemID' in pages[page]);
+            pages[shelfPages[key]].horizontalAlignment ?? TextAlignment.START;
+        pageContents.verticalTextAlignment =
+            pages[shelfPages[key]].verticalAlignment ?? TextAlignment.START;
+        sourceGrid.isVisible = 'source' in pages[shelfPages[key]];
+        sourceEntry.text = 'source' in pages[shelfPages[key]] ?
+            pages[shelfPages[key]].source : '';
+        prevButton.isVisible = shelfPages[key] > 0;
+        nextButton.isVisible = shelfPages[key] < pages.length - 1;
+        viewButton.isVisible = 'systemID' in pages[shelfPages[key]];
+        tocButton.isVisible = !('systemID' in pages[shelfPages[key]]);
     };
     let getContentsTable = () => {
         let children = [];
@@ -4558,7 +4578,7 @@ let createBookMenu = (book) => {
         })
     });
     let menu = ui.createPopup({
-        title: Localization.format(getLoc('bookTitleFormat'), title, page + 1, pages.length),
+        title: Localization.format(getLoc('bookTitleFormat'), title, shelfPages[key] + 1, pages.length),
         isPeekable: true,
         content: ui.createStackLayout({
             children: [
@@ -4737,7 +4757,7 @@ let createShelfMenu = () => {
                     text: almanac.title,
                     onClicked: () => {
                         Sound.playClick();
-                        let menu = createBookMenu(almanac);
+                        let menu = createBookMenu(almanac, 'almanac');
                         menu.show();
                     }
                 }),
@@ -4745,7 +4765,7 @@ let createShelfMenu = () => {
                     text: LsManual.title,
                     onClicked: () => {
                         Sound.playClick();
-                        let menu = createBookMenu(LsManual);
+                        let menu = createBookMenu(LsManual, 'manual');
                         menu.show();
                     }
                 }),
@@ -5164,6 +5184,7 @@ var getInternalState = () => {
             quatMode
         },
         colonyViewConfig,
+        shelfPages,
         notebook
     }, bigStringify);
 };
@@ -5231,6 +5252,7 @@ var setInternalState = (stateStr) => {
                 Number(state.settings.quatBoard ?? quatMode);
         }
         colonyViewConfig = state.colonyViewConfig ?? colonyViewConfig;
+        shelfPages = state.shelfPages ?? shelfPages;
         notebook = state.notebook ?? notebook;
     }
     actuallyPlanting = false;
