@@ -71,9 +71,10 @@ do nothing. Do you feel like it could be more interesting?
   - Provide context: making a game about the logical aspects of Ls
 
 - [ ] Explain plant mechanics in Lemma's book: energy, growth
+- [x] Explain symbols without parameters in Ls book
 - [ ] Unlock conditions for each page in Lemma's book
 
-- [ ] C-style float render (6 digits, then truncate zeroes)
+- [x] C-style float render (6 digits, then truncate zeroes)
   - [x] Reconstruction
   - [x] Settings
 

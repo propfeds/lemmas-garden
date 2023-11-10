@@ -157,8 +157,8 @@ Profit\\colon\\enspace {8}p\\\\{9}`,
             'Plot title: Cursive'
         ],
         quatModes: [
-            'Quaternary: Profits',
-            'Quaternary: Board',
+            'Quaternary: Potential profit',
+            'Quaternary: Colony grid',
             'Quaternary: Perf (instant/avg)',
             'Quaternary: Perf (min/max)'
         ],
@@ -283,7 +283,7 @@ friend of all mathematicians.`
             },
         },
         plantStats: `({0}) {1}\\\\—\\\\Max. stage: {2}\\\\Synthesis rate: ` +
-            `{3}/s (noon)\\\\Growth rate: {4}/s (midnight)\\\\Growth cost: {5} × {6} ` +
+            `{3}/s (noon)\\\\Avg. growth rate: {4}/s\\\\Growth cost: {5} × {6} ` +
             `symbols\\\\—\\\\Sequence:`,
         noCommentary: 'No commentary.',
         noLsDetails: 'No explanations.',
@@ -300,7 +300,9 @@ friend of all mathematicians.`
 An Introduction to Botany for Students
 3rd Edition
 
+
 🌾🌻🌿
+
 
 
 Lena Ruddles
@@ -334,12 +336,31 @@ Don't worry, I'm sure your teacher has a perfectly set up plot, though, so ` +
 Also, check your tool health: wash off the rust, clean them, sharpen very ` +
                     `well. Dip them in good soap and make a splash everywhere.
 Don't forget to wash your best working dresses (also in good soap) and dry ` +
-                    `them very well. You ought to look good while gardening, and this is an ` +
-                    `imperative from me.`
+                    `them very well. You ought to look good while gardening. This is an ` +
+                    `imperative.`
+            },
+            dayCycle: {
+                title: 'And the day cycles...',
+                contents: `Like us, plants in this world operate on a daily cycle, but their routine ` +
+                    `is vastly different from ours. From the moment the sun comes up, they ` +
+                    `harness the energy from its rays, converting it into sugar for its energy ` +
+                    `storage. As the sun shines brightest at noon, the plant gets most of its ` +
+                    `energy around this time.
+
+By nightfall, where there is no sun to take advantage of, the plant focuses ` +
+                    `on other routines. It converts its stored energy into the growth of its ` +
+                    `cells. You can see that it would rise faster than it did during the day. ` +
+                    `Some say that when it grows in the dark, it is really yearning for the sun ` +
+                    `to come back.
+
+Then the day cycles again...`
             },
             herbaceous: {
-                title: 'Herbaceous plants',
-                contents: `Herbaceous plants are those that don't grow wood tissue on their stems, ` +
+                title: 'Chapter 1: Herbaceous plants',
+                contents: `In this book, plants will be divided into mainly two categories: herbaceous ` +
+                    `and wooded plants.
+
+Herbaceous plants are those that don't grow wood tissue on their stems, ` +
                     `such as ferns or grasses, and well, herbs! Compared to trees and wooded ` +
                     `shrubs, they have a relatively short life span, and are much more fragile.
 
@@ -393,7 +414,7 @@ Occasionally, visitors and artists, generous donors, they would come and ` +
                     `there is the occasional human too.
 
 Life span: biennial
-Propagation: In the middle of its life cycle, spread 60% of the current ` +
+Propagation: In the latter half of its life cycle, spread 60% of the current ` +
                     `population onto the same plot.
 Passively provides income per stage equal to its current profit.`
             }
@@ -427,33 +448,36 @@ On a side note, I am delighted of the fact he does not think the wrinkled ` +
 A User's Guide
 2nd Edition
 
+
 🐢💨❄️
 
 
-P.`
+
+propfeds
+Not for sale`
             },
             intro: {
                 title: 'Lindenmayer systems: A primer',
                 contents: `Developed in 1968 by biologist Aristid Lindenmayer, an L-system is a formal ` +
                     `grammar that describes the growth of a sequence (string). It is often used ` +
-                    `to model plants and draw fractal figures.
+                    `to model plants and draw fractal figures by dividing their growth into stages.
 
-Every L-system starts with a sequence, called the axiom. From the axiom, the ` +
+Every L-system starts with a sequence called the axiom. From the axiom, the ` +
                     `sequence grows according to a set of production rules that describe how ` +
-                    `each symbol (character) in the sequence would be rewritten in the next level.
+                    `each symbol (character) in the sequence would be rewritten in the next stage.
 Each rule is represented in the form of:
 {symbol} = {derivation(s)}
 
-Considering a simple system with the axiom of b and the rules:
+Considering a simple system with the axiom of 'b' and the rules:
 b = a
 a = ab,
 the sequence will grow as follows:
-Level 0: b
-Level 1: a
-Level 2: ab
-Level 3: aba
-Level 4: abaab
-Level 5: abaababa`
+Stage 0: b
+Stage 1: a
+Stage 2: ab
+Stage 3: aba
+Stage 4: abaab
+Stage 5: abaababa`
             },
             context: {
                 title: 'Context-sensitivity',
@@ -474,36 +498,41 @@ The symbol will only evolve according to this rule if its ancestor bears the ` +
                 contents: `Beyond geometric applications, parametric L-systems allow individual ` +
                     `symbols to hold additional information such as its state of growth, elapsed ` +
                     `time, etc. They can be even peeked at in context-sensitive rules!
+When there are multiple rules specified for a symbol, the first one with a ` +
+                    `matching condition will be chosen.
 
 The syntax for a parametric rule goes as follows:
 {symbol}({param_0},...) : {condition*} = {derivation_0} : {probability**} ;...
 Examples:
 I(t) : t>0 = FI(t-1)
-A(t) : t>5 = B(t+1)CD(t^0.5, t-2)
-Including context:
-A(x) < B(y) > C(z) : x+y+z>10 = E((x+y)/2)F((y+z)/2)
+I(t) = K(0) (this rule will be chosen when t<=0)
+Example with context:
+A(x) < B(y) > C(z) : x+y+z>10 = E((x+y)/2)F(z*2)
 
-* When omitted, the condition is assumed to be always true.
-** When omitted, the chance is assumed to be 100%.`
+* When omitted, the condition is assumed to always be true.
+** Ranges from 0 to 1. When omitted, the chance is assumed to be 1 (100%).`
             },
             symbols: {
                 title: 'Appendix: Common symbols',
                 contents: `A: apex (stem shoot). Can photo-synthesise.
-B: base. Is often used to receive and send signals.
+B: base. Often used to receive and send signals.
 I: alternate stem. May transform into a new branch, or a flower.
-K: flower. Looks pretty.
+K: flower. Looks good.
 L: leaf. Can photo-synthesise.
-S: signal. Is used to communicate between organs.`
+S: signal. Used to communicate between organs.`
             },
             turtleSymbols: {
                 title: 'Appendix: Geometric symbols',
                 contents: `F(l): moves forward and draw a line of length l.
+Defaults to length 1 when omitted.
 +(n), -(n): perform yaw rotation by n degrees.
+Defaults to the angle specified by the L-system when omitted.
 &(n), ^(n): perform pitch rotation by n degrees.
 \\(n), /(n): perform roll rotation by n degrees.
 
 |: reverses direction.
 T(n): applies tropism (gravity) with a weight of n.
+Defaults to the tropism specified by the L-system when omitted.
 T(n, x, y, z): applies tropism along a custom axis.
 $: aligns the up vector closest to vertical.
 
@@ -519,19 +548,24 @@ $: aligns the up vector closest to vertical.
             },
         },
         chapters: {
-            intro: {
-                title: `Lemma's garden`,
-                contents: `You're not one of my students, are you?
+            intro: [
+                {
+                    title: `Lemma's Garden`,
+                    contents: `You're not one of my students, are you?
 Surprised anybody would visit this late,
 let alone urge me to let them plant on my ground.
 
-Well then, welcome to class.
-
-Hum.
+Well then, welcome to... class.`
+                },
+                {
+                    title: `Welcome to...`,
+                    contents: `Hum.
 Can't even bear to look at this soil...
 Go till it, we'll start in the morning.
-And, you can peek at my bookshelf if you ever get lost.`
-            },
+
+And, if you ever get lost, go peek at my bookshelf.`
+                }
+            ],
             basil: {
                 title: `Corollary`,
                 contents: `Sorry for letting you wait this long.
@@ -2800,10 +2834,15 @@ class Book {
 const almanac = new Book(getLoc('almanacTitle'), [
     {
         ...getLoc('almanac').cover,
-        horizontalAlignment: TextAlignment.CENTER
+        horizontalAlignment: TextAlignment.CENTER,
+        pinned: true
     },
     {
         ...getLoc('almanac').prep,
+        pinned: true
+    },
+    {
+        ...getLoc('almanac').dayCycle,
         pinned: true
     },
     {
@@ -2913,7 +2952,7 @@ const plantData = {
         ]),
         maxStage: 40,
         cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
-        growthRate: BigNumber.THREE,
+        growthRate: BigNumber.from(1.5),
         growthCost: BigNumber.from(2.5),
         waterCD: 3 * dayLength,
         propagation: {
@@ -2984,7 +3023,7 @@ const plantData = {
         ]),
         maxStage: 48,
         cost: new ExponentialCost(5, 1),
-        growthRate: BigNumber.FOUR,
+        growthRate: BigNumber.TWO,
         growthCost: BigNumber.TWO,
         waterCD: 2 * dayLength,
         actions: [
@@ -3047,7 +3086,7 @@ const plantData = {
         ]),
         maxStage: 28,
         cost: new ExponentialCost(2000, Math.log2(5)),
-        growthRate: BigNumber.FIVE,
+        growthRate: BigNumber.from(2.75),
         growthCost: BigNumber.TEN,
         waterCD: 5 * dayLength,
         stagelyIncome: BigNumber.ONE,
@@ -3094,7 +3133,7 @@ const plantData = {
             'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t)'
         ], 30),
         cost: new FirstFreeCost(new ExponentialCost(1, 1)),
-        growthRate: BigNumber.TWO,
+        growthRate: BigNumber.ONE,
         growthCost: BigNumber.from(45),
         waterCD: 1 * dayLength,
         actions: [
@@ -3169,7 +3208,7 @@ const plantData = {
         ]),
         maxStage: 54,
         cost: new ExponentialCost(1, 1),
-        growthRate: BigNumber.FOUR,
+        growthRate: BigNumber.TWO,
         growthCost: BigNumber.THREE,
         waterCD: 9 * 60,
         actions: [
@@ -3710,7 +3749,8 @@ var init = () => {
     // To do: challenge plot (-1)
     // Next: milestones
     let chapters = getLoc('chapters');
-    theory.createStoryChapter(0, chapters?.intro?.title, chapters?.intro?.contents, () => true);
+    theory.createStoryChapter(0, chapters?.intro[0]?.title, chapters?.intro[0]?.contents, () => true);
+    theory.createStoryChapter(-1, chapters?.intro[1]?.title, chapters?.intro[1]?.contents, () => plotPerma.level > 0);
     theory.createStoryChapter(1, chapters?.basil?.title, chapters?.basil?.contents, () => plantPerma.level > 0);
     theory.createStoryChapter(2, chapters?.notebook?.title, chapters?.notebook?.contents, () => theory.buyAllUpgrade.level > 0);
     theory.createStoryChapter(3, chapters?.flood?.title, chapters?.flood?.contents, () => theory.tau >= BigNumber.TEN && time < 10);
@@ -3771,7 +3811,7 @@ var tick = (elapsedTime, multiplier) => {
         di = newII - insolationIntegral;
         insolationIntegral = newII;
         // universal growth factor = cos(x*pi/72)/2 + 1/2
-        let newGI = time / 2 + quarterDayLength *
+        let newGI = time + quarterDayLength *
             Math.sin(time * Math.PI / halfDayLength) / Math.PI;
         dg = newGI - growthIntegral;
         growthIntegral = newGI;
@@ -3780,7 +3820,7 @@ var tick = (elapsedTime, multiplier) => {
     if (!game.isCalculatingOfflineProgress) {
         let timeCos = Math.cos(time * Math.PI / halfDayLength);
         insolationCoord = Math.max(0, -timeCos);
-        growthCoord = (timeCos + 1) / 2;
+        growthCoord = timeCos / 2 + 1;
         switch (quatMode) {
             case 2 /* QuaternaryModes.PERFORMANCE */:
             case 3 /* QuaternaryModes.PERFORMANCE_MINMAX */:
@@ -4117,25 +4157,29 @@ let createSystemMenu = (id) => {
     let ruleStack = ui.createGrid({
         children: ruleEntries
     });
-    let tmpModels = [];
-    for (let i = 0; i < values.models.length; ++i)
-        tmpModels[i] = values.models[i];
-    let modelEntries = [];
-    for (let i = 0; i < tmpModels.length; ++i) {
-        modelEntries.push(ui.createEntry({
-            row: i,
-            text: tmpModels[i]
-        }));
-    }
-    let modelsLabel = ui.createLatexLabel({
-        text: Localization.format(getLoc('labelModels'), modelEntries.length),
-        verticalTextAlignment: TextAlignment.CENTER,
-        margin: new Thickness(0, 6),
-        // heightRequest: getSmallBtnSize(ui.screenWidth)
-    });
-    let modelStack = ui.createGrid({
-        children: modelEntries
-    });
+    // let tmpModels = [];
+    // for(let i = 0; i < values.models.length; ++i)
+    //     tmpModels[i] = values.models[i];
+    // let modelEntries = [];
+    // for(let i = 0; i < tmpModels.length; ++i)
+    // {
+    //     modelEntries.push(ui.createEntry
+    //     ({
+    //         row: i,
+    //         text: tmpModels[i]
+    //     }));
+    // }
+    // let modelsLabel = ui.createLatexLabel
+    // ({
+    //     text: Localization.format(getLoc('labelModels'), modelEntries.length),
+    //     verticalTextAlignment: TextAlignment.CENTER,
+    //     margin: new Thickness(0, 6),
+    //     // heightRequest: getSmallBtnSize(ui.screenWidth)
+    // });
+    // let modelStack = ui.createGrid
+    // ({
+    //     children: modelEntries
+    // });
     let tmpIgnore = values.ignoreList ?? '';
     let ignoreEntry = ui.createEntry({
         text: tmpIgnore,
@@ -4252,14 +4296,12 @@ let createSystemMenu = (id) => {
                                         verticalTextAlignment: TextAlignment.CENTER
                                     }),
                                     tropismEntry,
-                                    /*
-                                    seedLabel,
-                                    seedEntry
-                                    */
+                                    // seedLabel,
+                                    // seedEntry
                                 ]
                             }),
-                            modelsLabel,
-                            modelStack
+                            // modelsLabel,
+                            // modelStack
                         ]
                     })
                 }),
@@ -4585,7 +4627,7 @@ let createBookMenu = (book, key) => {
                 pageTitle,
                 ui.createFrame({
                     padding: new Thickness(8, 6),
-                    heightRequest: ui.screenHeight * 0.28,
+                    heightRequest: ui.screenHeight * 0.36,
                     content: ui.createScrollView({
                         content: ui.createStackLayout({
                             children: [
@@ -5213,7 +5255,7 @@ var setInternalState = (stateStr) => {
             let phase = saturate(cycles - days - 0.25, 0, 0.5);
             insolationIntegral = days * dayLength / Math.PI - halfDayLength *
                 (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
-            growthIntegral = time / 2 + quarterDayLength *
+            growthIntegral = time + quarterDayLength *
                 Math.sin(time * Math.PI / halfDayLength) / Math.PI;
             lastSave = time;
         }
@@ -5297,7 +5339,7 @@ var get2DGraphValue = () => {
         case 1 /* GraphModes2D.INSOLATION */: // Insolation
             return insolationCoord;
         case 2 /* GraphModes2D.GROWTH */: // Growth
-            return growthCoord;
+            return growthCoord / 2;
     }
 };
 var get3DGraphPoint = () => {
