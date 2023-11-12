@@ -4890,18 +4890,18 @@ var updateAvailability = () =>
     });
 }
 
-let floatingWipLabel = ui.createLatexLabel
-({
-    row: 0, column: 0,
-    rotation: -24,
-    horizontalOptions: LayoutOptions.CENTER,
-    verticalOptions: LayoutOptions.END,
-    // verticalTextAlignment: TextAlignment.CENTER,
-    margin: new Thickness(8, 40),
-    text: getLoc('wip'),
-    fontSize: 9,
-    textColor: Color.TEXT_MEDIUM
-});
+// let floatingWipLabel = ui.createLatexLabel
+// ({
+//     row: 0, column: 0,
+//     rotation: -24,
+//     horizontalOptions: LayoutOptions.CENTER,
+//     verticalOptions: LayoutOptions.END,
+//     // verticalTextAlignment: TextAlignment.CENTER,
+//     margin: new Thickness(8, 40),
+//     text: getLoc('wip'),
+//     fontSize: 9,
+//     textColor: Color.TEXT_MEDIUM
+// });
 
 var tick = (elapsedTime: number, multiplier: number) =>
 {
@@ -4944,8 +4944,8 @@ var tick = (elapsedTime: number, multiplier: number) =>
                 theory.invalidateQuaternaryValues();
                 break;
         }
-        floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
-        180, Easing.LINEAR);
+        // floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
+        // 180, Easing.LINEAR);
         managerLoadingInd.isRunning = manager.busy;
     }
     theory.invalidateSecondaryEquation();
@@ -4972,7 +4972,7 @@ var getEquationOverlay = () =>
         cascadeInputTransparent: false,
         children:
         [
-            floatingWipLabel,
+            // floatingWipLabel,
             managerLoadingInd,
             ui.createLatexLabel
             ({

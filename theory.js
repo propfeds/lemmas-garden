@@ -20,7 +20,6 @@ import { MathExpression } from './api/MathExpression';
 import { Theme } from './api/Settings';
 import { Sound } from './api/Sound';
 import { game } from './api/Game';
-import { Easing } from './api/ui/properties/Easing';
 import { profilers } from './api/Profiler';
 var id = 'lemmas_garden';
 var getName = (language) => {
@@ -3780,17 +3779,18 @@ var updateAvailability = () => {
         }
     });
 };
-let floatingWipLabel = ui.createLatexLabel({
-    row: 0, column: 0,
-    rotation: -24,
-    horizontalOptions: LayoutOptions.CENTER,
-    verticalOptions: LayoutOptions.END,
-    // verticalTextAlignment: TextAlignment.CENTER,
-    margin: new Thickness(8, 40),
-    text: getLoc('wip'),
-    fontSize: 9,
-    textColor: Color.TEXT_MEDIUM
-});
+// let floatingWipLabel = ui.createLatexLabel
+// ({
+//     row: 0, column: 0,
+//     rotation: -24,
+//     horizontalOptions: LayoutOptions.CENTER,
+//     verticalOptions: LayoutOptions.END,
+//     // verticalTextAlignment: TextAlignment.CENTER,
+//     margin: new Thickness(8, 40),
+//     text: getLoc('wip'),
+//     fontSize: 9,
+//     textColor: Color.TEXT_MEDIUM
+// });
 var tick = (elapsedTime, multiplier) => {
     let dd, di, dg;
     perfs[0 /* Profilers.TICK */].exec(() => {
@@ -3827,7 +3827,8 @@ var tick = (elapsedTime, multiplier) => {
                 theory.invalidateQuaternaryValues();
                 break;
         }
-        floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12, 180, Easing.LINEAR);
+        // floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
+        // 180, Easing.LINEAR);
         managerLoadingInd.isRunning = manager.busy;
     }
     theory.invalidateSecondaryEquation();
@@ -3848,7 +3849,7 @@ var getEquationOverlay = () => {
         inputTransparent: true,
         cascadeInputTransparent: false,
         children: [
-            floatingWipLabel,
+            // floatingWipLabel,
             managerLoadingInd,
             ui.createLatexLabel({
                 row: 0, column: 0,
