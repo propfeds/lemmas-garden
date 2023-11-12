@@ -8,7 +8,7 @@ Welcome to Lemma's Garden, an idle gardening game built on the grammar of
 Lindenmayer systems.
 
 Reminisce the story of Lemma and her late partner as she rambles about how much
-she wants to refuse supporting your study with her tight budget.
+she wants to refuse supporting your study with her tight budget. Crap.
 
 ## Installation
 

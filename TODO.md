@@ -3,7 +3,8 @@
 - [To-do List](#to-do-list)
   - [Research](#research)
   - [Compost bin](#compost-bin)
-  - [v0.2: Rabbits update](#v02-rabbits-update)
+  - [v0.3: Invasion](#v03-invasion)
+  - [v0.2: Education edition](#v02-education-edition)
   - [v0.1: Slumber Seeds](#v01-slumber-seeds)
   - [v0: Completed](#v0-completed)
 
@@ -34,9 +35,12 @@ do nothing. Do you feel like it could be more interesting?
 
 ## Compost bin
 
-- [x] Chapter about floods
-  - Happens when maximum statements
-  - Condition: tau > 0, time < 10
+- [ ] Unlock conditions for each page in Lemma's book
+
+- [ ] Tag various stuffs with readonly
+- [x] Enums
+- [x] Use toJSON() for classes
+- [ ] Change getLoc() to just assign loc folder at start and access a property
 
 - [ ] Simple solitary flower
   - Tulip?
@@ -60,10 +64,17 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Add a Pruned commentary track
   - 2 lazy
 
-## v0.2: Rabbits update
+- [ ] Compost
+  - Has STAGES?
+  - Supply energy
+    - Don't we already have so many things that give energy
 
-- [ ] Notebook shows next cost
-- [ ] Tag various stuffs with readonly
+- [ ] Ask Uni of Calgary about how to make Ls easier to understand
+  - Provide context: making a game about the logical aspects of Ls
+
+## v0.3: Invasion
+
+- [ ] Universal income upgrades
 
 - [ ] Hopleek
   - Biting is on evolution queue instead of action?
@@ -71,28 +82,22 @@ do nothing. Do you feel like it could be more interesting?
     - [ ] 400-year cycle wrapping
   - [ ] Hopleek schedule
   - [ ] Repelled by rose campions and sunflowers
+
+- [ ] Broomrape
+
+- [ ] Ginger
+
 - [ ] Sunflower
 
 - [ ] Align the vibes of basil & campion to make it feel smoother
-
-- [x] Basil
-  - [x] Adjust starting cost: 1 → 1.25
-  - [ ] Double starting cost but 2, 10 stepwise?
-  - [x] More delay before flowering (maybe stg 24 flowers)
-  - [x] Decrease max stage
-  - [x] Apex decreases synthesis when spawning leaves
-  - [x] Side shoots grow more leaves but smaller
-  - [x] Flower gives income? Can be made into tea - although should shrink
-  their power immensely
-  - [ ] Bees love flowers too?!!
-  - [ ] https://gardenbenchtop.com/what-happens-when-basil-flowers/
 
 - [x] Rose campion as first bush plant
   - [ ] Maximum statements
   - [ ] Death? Propagation?
   - [ ] Shrub form?
+  - [ ] Halve leaf synth
   - [x] Income per evolution instead of night
-  - [x] Double growth cost
+  - [ ] Double growth cost
   - [ ] Flower turns into fruit faster
   - [ ] Fruit falls off
   - [ ] Loading SLOW
@@ -103,6 +108,68 @@ do nothing. Do you feel like it could be more interesting?
   - [x] Passive income
   - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
   - [x] Extend rose campion seed period by a few stages
+
+## v0.2: Education edition
+
+- [x] Explain plant mechanics in Lemma's book: energy, growth
+- [x] Explain symbols without parameters in Ls book
+
+- [x] C-style float render (6 digits, then truncate zeroes)
+  - [x] Reconstruction
+  - [x] Settings
+
+- [x] Time scale (reference is with ad boost - 1.5x speed)
+  - current scale (144)
+    1 hr -> 4 sec
+    1 day -> 96 sec
+    900 days -> 1 day
+  - new scale (180) better aligned with irl time
+    1 hr -> 5 sec
+    1 day -> 2 min
+    720 days -> 1 day
+  - [x] Get rid of ad boost and make speed a slider
+
+- [x] Chapter about floods
+  - Happens when maximum statements
+  - Condition: tau > 0, time < 10
+
+- [x] Propagation
+  - Rate = sum of seeds or fixed rate at fixed time?
+  - [x] Has a specified stage instead of max stage?
+    - Calendula still keeps max stage to develop patience
+  - Has priority array `rlc`
+    - [x] Add dynamic directions (`m` for min, `M` for max)
+  - Spreaded colonies syntax: +1 of Rose campion
+  - [x] Propagated colonies inherit the di and dg reserves
+  - [ ] Hey, can you imagine an ash tree propagating a MISTLETOE?
+    - Mistletoe also eats nutrients like hopleek
+
+- [x] Watering
+  - Absurd cooldown like 10 minutes (6 days)
+    - Per species?
+  - Adds a fixed amount of energy?
+    - Scales lightly with stage, hmm.
+  - [x] Extend each species to accomodate for watering change
+    - [x] Opportunity to standardise countdown params
+  - [x] Lemma book entry
+  - [ ] Auto-watering
+    - Unlocks with classmates
+
+- [x] Colony view params are initially off
+- [ ] Notebook shows next cost
+
+- [x] Basil
+  - [x] Signal type 1 kills I?
+  - [x] Adjust starting cost: 1 → 1.25
+  - [ ] Double starting cost but 2, 10 stepwise?
+  - [x] More delay before flowering (maybe stg 24 flowers)
+  - [x] Decrease max stage
+  - [x] Apex decreases synthesis when spawning leaves
+  - [x] Side shoots grow more leaves but smaller
+  - [x] Flower gives income? Can be made into tea - although should shrink
+  their power immensely
+  - [ ] Bees love flowers too?!!
+  - [ ] https://gardenbenchtop.com/what-happens-when-basil-flowers/
 
 - [x] Preference table for decimal places
 - [x] Confirmation to harvest/prune
