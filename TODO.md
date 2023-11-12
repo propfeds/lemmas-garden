@@ -3,7 +3,8 @@
 - [To-do List](#to-do-list)
   - [Research](#research)
   - [Compost bin](#compost-bin)
-  - [v0.2: Rabbits update](#v02-rabbits-update)
+  - [v0.3: Invasion](#v03-invasion)
+  - [v0.2: Education edition](#v02-education-edition)
   - [v0.1: Slumber Seeds](#v01-slumber-seeds)
   - [v0: Completed](#v0-completed)
 
@@ -33,6 +34,8 @@
 do nothing. Do you feel like it could be more interesting?
 
 ## Compost bin
+
+- [ ] Unlock conditions for each page in Lemma's book
 
 - [ ] Tag various stuffs with readonly
 - [x] Enums
@@ -64,15 +67,52 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Compost
   - Has STAGES?
   - Supply energy
-
-## v0.2: Rabbits update
+    - Don't we already have so many things that give energy
 
 - [ ] Ask Uni of Calgary about how to make Ls easier to understand
   - Provide context: making a game about the logical aspects of Ls
 
-- [ ] Explain plant mechanics in Lemma's book: energy, growth
+## v0.3: Invasion
+
+- [ ] Universal income upgrades
+
+- [ ] Hopleek
+  - Biting is on evolution queue instead of action?
+  - [x] Leap years calculation
+    - [ ] 400-year cycle wrapping
+  - [ ] Hopleek schedule
+  - [ ] Repelled by rose campions and sunflowers
+
+- [ ] Broomrape
+
+- [ ] Ginger
+
+- [ ] Sunflower
+
+- [ ] Align the vibes of basil & campion to make it feel smoother
+
+- [x] Rose campion as first bush plant
+  - [ ] Maximum statements
+  - [ ] Death? Propagation?
+  - [ ] Shrub form?
+  - [ ] Halve leaf synth
+  - [x] Income per evolution instead of night
+  - [ ] Double growth cost
+  - [ ] Flower turns into fruit faster
+  - [ ] Fruit falls off
+  - [ ] Loading SLOW
+  - [ ] How long does it live? When does it spread seeds?
+  - [ ] Cost increases when it spreads, so need to shovel old ones before new
+  - [ ] Propagation ratio: 0.5, rounded up
+  - [ ] Add a parameter to adjust stagely income multiplier (1/2x for now?)
+  - [x] Passive income
+  - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
+  - [x] Extend rose campion seed period by a few stages
+
+## v0.2: Education edition
+
+- [x] Explain plant mechanics in Lemma's book: energy, growth
 - [x] Explain symbols without parameters in Ls book
-- [ ] Unlock conditions for each page in Lemma's book
 
 - [x] C-style float render (6 digits, then truncate zeroes)
   - [x] Reconstruction
@@ -111,23 +151,12 @@ do nothing. Do you feel like it could be more interesting?
     - Scales lightly with stage, hmm.
   - [x] Extend each species to accomodate for watering change
     - [x] Opportunity to standardise countdown params
-  - [ ] Lemma book entry
+  - [x] Lemma book entry
   - [ ] Auto-watering
     - Unlocks with classmates
 
 - [x] Colony view params are initially off
 - [ ] Notebook shows next cost
-
-- [ ] Hopleek
-  - Biting is on evolution queue instead of action?
-  - [x] Leap years calculation
-    - [ ] 400-year cycle wrapping
-  - [ ] Hopleek schedule
-  - [ ] Repelled by rose campions and sunflowers
-
-- [ ] Sunflower
-
-- [ ] Align the vibes of basil & campion to make it feel smoother
 
 - [x] Basil
   - [x] Signal type 1 kills I?
@@ -141,24 +170,6 @@ do nothing. Do you feel like it could be more interesting?
   their power immensely
   - [ ] Bees love flowers too?!!
   - [ ] https://gardenbenchtop.com/what-happens-when-basil-flowers/
-
-- [x] Rose campion as first bush plant
-  - [ ] Maximum statements
-  - [ ] Death? Propagation?
-  - [ ] Shrub form?
-  - [ ] Halve leaf synth
-  - [x] Income per evolution instead of night
-  - [ ] Double growth cost
-  - [ ] Flower turns into fruit faster
-  - [ ] Fruit falls off
-  - [ ] Loading SLOW
-  - [ ] How long does it live? When does it spread seeds?
-  - [ ] Cost increases when it spreads, so need to shovel old ones before new
-  - [ ] Propagation ratio: 0.5, rounded up
-  - [ ] Add a parameter to adjust stagely income multiplier (1/2x for now?)
-  - [x] Passive income
-  - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
-  - [x] Extend rose campion seed period by a few stages
 
 - [x] Preference table for decimal places
 - [x] Confirmation to harvest/prune

@@ -40,7 +40,7 @@ Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
     return descs[language] ?? descs.en;
 };
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
-var version = 0.105;
+var version = 0.2;
 // Numbers are often converted into 32-bit signed integers in JINT.
 const INT_MAX = 0x7fffffff;
 const INT_MIN = -0x80000000;
@@ -56,7 +56,7 @@ const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS = {
     en: {
-        versionName: `Version: 0.1.5, Rampant Seeds`,
+        versionName: `Version: 0.2, Less Dry`,
         wip: 'Work in Progress',
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish\\colon',
@@ -113,8 +113,8 @@ symbol is drawn depending on its parameters.`,
         labelHarvestStage: 'Harvest stage',
         colony: `{0} of {1}, stage {2}`,
         colonyStats: `{0} of {1}, stage {2}\\\\
-Energy\\colon\\enspace {3} (+{4}/s)\\\\
-Growth\\colon\\enspace {5}/{6} (+{7}/s)\\\\
+Energy\\colon\\enspace {3} +{4}/s\\\\
+Growth\\colon\\enspace {5}/{6} +{7}/s\\\\
 Profit\\colon\\enspace {8}p\\\\{9}`,
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
         dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}\\\\{5}',
@@ -4016,24 +4016,24 @@ var getQuaternaryEntries = () => {
                 perfQuaternaryEntries[i].value = `${m1}/${m2}`;
             }
             return perfQuaternaryEntries;
-    }
-    if (!plotPerma.level)
-        return quaternaryEntries.slice(0, 1);
-    let i;
-    for (i = 0; i < plotPerma.level; ++i) {
-        switch (quatMode) {
-            case 0 /* QuaternaryModes.PROFITS */:
+        case 0 /* QuaternaryModes.PROFITS */:
+            if (!plotPerma.level)
+                return quaternaryEntries.slice(0, 1);
+            for (let i = 0; i < plotPerma.level; ++i) {
                 let sum = BigNumber.ZERO;
                 for (let j = 0; j < manager.colonies[i].length; ++j) {
                     let c = manager.colonies[i][j];
                     // @ts-expect-error
-                    sum += c.profit * BigNumber.from(c.population) *
-                        // @ts-expect-error
-                        theory.publicationMultiplier;
+                    sum += c.profit * BigNumber.from(c.population);
                 }
-                quaternaryEntries[i].value = sum;
-                break;
-            case 1 /* QuaternaryModes.BOARD */:
+                // @ts-expect-error
+                quaternaryEntries[i].value = sum * theory.publicationMultiplier;
+            }
+            break;
+        case 1 /* QuaternaryModes.BOARD */:
+            if (!plotPerma.level)
+                return quaternaryEntries.slice(0, 1);
+            for (let i = 0; i < plotPerma.level; ++i) {
                 let column = '';
                 for (let j = 0; j < manager.colonies[i].length; ++j) {
                     let c = manager.colonies[i][j];
@@ -4041,11 +4041,8 @@ var getQuaternaryEntries = () => {
                     column += `${plantName}${getSubscript(c.stage)}`;
                 }
                 quaternaryEntries[i].value = column;
-                break;
-            default:
-                // PERFORMANCE
-                break;
-        }
+            }
+            break;
     }
     if (theory.publicationUpgrade.level && theory.canPublish) {
         // @ts-expect-error
