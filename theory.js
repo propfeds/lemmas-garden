@@ -111,11 +111,10 @@ symbol is drawn depending on its parameters.`,
         labelMaxLevel: 'Max. size',
         labelHarvestStage: 'Harvest stage',
         colony: `{0} of {1}, stage {2}`,
-        colonyStats: `{0} of {1}, stage {2}\\\\
-Energy\\colon\\enspace {3} +{4}/s\\\\
-Growth\\colon\\enspace {5}/{6} +{7}/s\\\\
-Profit\\colon\\enspace {8}p\\\\{9}`,
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
+        colonyStats: `Energy\\colon\\enspace {0} +{1}/s\\\\
+Growth\\colon\\enspace {2}/{3} +{4}/s\\\\
+Profit\\colon\\enspace {5}p\\\\{6}`,
         dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}\\\\{5}',
         dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\{5}',
         hacks: 'Hax',
@@ -297,7 +296,7 @@ friend of all mathematicians.`
                 title: 'Title Cover',
                 contents: `Lemma's World of Plants
 An Introduction to Botany for Students
-3rd Edition
+4th Edition (draft)
 
 
 🌾🌻🌿
@@ -3952,7 +3951,8 @@ var getSecondaryEquation = () => {
                     manager.actionGangsta[0] == plotIdx &&
                     manager.actionGangsta[1] == colonyIdx[plotIdx]) ?
                     getLoc('status').actions[manager.actionGangsta[2]] : '';
-                result = `\\text{${Localization.format(getLoc('colonyStats'), c.population, getLoc('plants')[c.id]?.name ?? `#${c.id}`, c.stage, 
+                result = `\\text{${getColonyTitleString(c)}\\\\
+                ${Localization.format(getLoc('colonyStats'), 
                 // @ts-expect-error
                 c.energy, c.synthRate * BigNumber.from(insolationCoord), c.growth, 
                 // @ts-expect-error
