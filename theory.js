@@ -78,7 +78,7 @@ const LOC_STRINGS = {
         labelAxiom: 'Axiom: ',
         labelAngle: 'Turning angle (°): ',
         labelRules: `Production rules: {0}\\\\Every stage, each symbol in
-the plant's sequence chooses one rule to evolve depending on its parameters.`,
+the plant's sequence chooses one rule to evolve depending on its conditions.`,
         labelIgnored: 'Turtle-ignored: ',
         labelCtxIgnored: 'Context-ignored: ',
         labelTropism: 'Tropism (gravity): ',
@@ -2935,7 +2935,7 @@ const plantData = {
         ], 15, 0, 'AI', '', -0.2, {
             'flowerThreshold': '0.96',
             'maxFlowerSize': '3',
-            'maxLeafSize': '0.72'
+            'maxLeafSize': '0.72 - 1e-9'
         }, [
             '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/10+0.1)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)]}',
             '~> K(p): p<1.5 = {[w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)]F(p/10+0.1)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.23, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-9)k(p*0.23, p*18-15)][o(p*0.22, p*17.5)]}',
@@ -3588,13 +3588,25 @@ var init = () => {
                 info;
             plants[i][plantUnlocks[j]].bought = (amount) => {
                 if (actuallyPlanting) {
+                    // log(plants[i][plantUnlocks[j]].level)
+                    // log(amount)
                     // Check notebook for max level
+                    let finalAmount = amount;
                     if (theory.isBuyAllAvailable && notebook[plantUnlocks[j]] &&
                         plants[i][plantUnlocks[j]].level >
-                            notebook[plantUnlocks[j]].maxLevel)
-                        plants[i][plantUnlocks[j]].refund(amount);
-                    else
-                        manager.addColony(i, plantUnlocks[j], amount);
+                            notebook[plantUnlocks[j]].maxLevel) {
+                        let prevLevel = plants[i][plantUnlocks[j]].level -
+                            amount;
+                        finalAmount = Math.max(0, notebook[plantUnlocks[j]].maxLevel - prevLevel);
+                        // log(`final ${finalAmount}`)
+                        let remainder = plants[i][plantUnlocks[j]].level -
+                            Math.max(notebook[plantUnlocks[j]].maxLevel, prevLevel);
+                        // log(`remainder ${remainder}`)
+                        if (remainder > 0)
+                            plants[i][plantUnlocks[j]].refund(remainder);
+                    }
+                    if (finalAmount > 0)
+                        manager.addColony(i, plantUnlocks[j], finalAmount);
                 }
             };
             plants[i][plantUnlocks[j]].isAvailable = false;
@@ -4685,12 +4697,14 @@ let createNotebookMenu = () => {
         }));
         let tmpEntry = ui.createEntry({
             column: 0,
-            text: notebook[plantUnlocks[i]].maxLevel == INT_MAX ? '' :
-                notebook[plantUnlocks[i]].maxLevel.toString(),
+            text: notebook[plantUnlocks[i]].maxLevel == INT_MAX ? '∞' :
+                notebook[plantUnlocks[i]].maxLevel?.toString() ?? '?',
             keyboard: Keyboard.NUMERIC,
             horizontalTextAlignment: TextAlignment.END,
             onTextChanged: (ot, nt) => {
-                let tmpML = Number(nt) ?? INT_MAX;
+                let tmpML = parseInt(nt) ?? INT_MAX;
+                if (isNaN(tmpML))
+                    tmpML = INT_MAX;
                 notebook[plantUnlocks[i]].maxLevel = tmpML;
                 // for(let j = 0; j < nofPlots; ++j)
                 //     plants[j][plantUnlocks[i]].maxLevel = tmpML;
@@ -4702,10 +4716,10 @@ let createNotebookMenu = () => {
             onClicked: () => {
                 Sound.playClick();
                 let l = notebook[plantUnlocks[i]].maxLevel;
-                if (l > 0)
+                if (l > 0 && l < INT_MAX)
                     tmpEntry.text = (l - 1).toString();
                 else
-                    tmpEntry.text = '';
+                    tmpEntry.text = '∞';
             }
         });
         let tmpPlusBtn = ui.createButton({
