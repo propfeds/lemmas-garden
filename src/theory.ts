@@ -53,7 +53,7 @@ Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
     return descs[language] ?? descs.en;
 }
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
-var version = 0.2;
+var version = 0.21;
 
 // Numbers are often converted into 32-bit signed integers in JINT.
 const INT_MAX = 0x7fffffff;
@@ -73,7 +73,7 @@ const LOC_STRINGS =
 {
     en:
     {
-        versionName: `Version: 0.2, Less Dry`,
+        versionName: `Version: 0.2.1, 'Less Dry'`,
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
@@ -100,7 +100,7 @@ const LOC_STRINGS =
         labelAxiom: 'Axiom: ',
         labelAngle: 'Turning angle (°): ',
         labelRules: `Production rules: {0}\\\\Every stage, each symbol in
-the plant's sequence chooses one rule to evolve depending on its parameters.`,
+the plant's sequence chooses one rule to evolve depending on its conditions.`,
         labelIgnored: 'Turtle-ignored: ',
         labelCtxIgnored: 'Context-ignored: ',
         labelTropism: 'Tropism (gravity): ',
@@ -127,8 +127,9 @@ symbol is drawn depending on its parameters.`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
         lockedPlot: `\\text{Untilled soil.}`,
-        permaNote: 'Notebook',
-        permaNoteInfo: 'Manage populations and harvests',
+        permaNote: `Notebook \\&\\ 'Buy All' button`,
+        permaNoteInfo: `Allows management of colony sizes (non-propagated)`,
+        menuNote: 'Notebook',
         permaSettings: 'Theory settings',
         permaSettingsInfo: `Decorate your teacher's garden`,
         labelPlants: 'Plants',
@@ -293,7 +294,7 @@ Decorative.\\\\—\\\\Harvest returns profit as the sum of all K sizes
                         0, 6, 9,
                         10, 14,
                         19,
-                        22
+                        22, 27
                     ],
                     0: 'A seedling basking in its own dazing lullaby.',
                     6: 'A flower bud already?',
@@ -304,7 +305,9 @@ counting pennies in the middle of the night?`,
 periodically.`,
                     19: `You see the first fruit on that stem?\\\\Too late for
 munch.`,
-                    22: `Go to sleep. Was my campion sedative not good enough?`
+                    22: `Go to sleep. Was my campion sedative not good enough?`,
+                    27: `A fruit falls off. Did you know that campion is a good
+self-seeder?`
                 }
             },
             arrow:
@@ -328,7 +331,7 @@ friend of all mathematicians.`
             },
         },
         plantStats: `({0}) {1}\\\\—\\\\Max. stage: {2}\\\\Synthesis rate: ` +
-`{3}/s (noon)\\\\Avg. growth rate: {4}/s\\\\Growth cost: {5} × {6} ` +
+`{3}/s (noon)\\\\Growth rate: {4}/s\\\\Growth cost: {5} × {6} ` +
 `symbols\\\\—\\\\Sequence:`,
         noCommentary: 'No commentary.',
         noLsDetails: 'No explanations.',
@@ -439,7 +442,7 @@ The 'pot' in its name should also suggest it's uses as a cooking herb in ` +
 `stews and soups too.
 
 Life span: annual
-Propagation: At life cycle's end, spread 40% of the current population onto ` +
+Propagation: At life cycle's end, spread 1/3 of the current population onto ` +
 `the same plot.
 
 Here's a recipe to make some delicious calendula bread for your pleasures too:`
@@ -476,7 +479,7 @@ Occasionally, visitors and artists, generous donors, they would come and ` +
 `there is the occasional human too.
 
 Life span: biennial
-Propagation: In the latter half of its life cycle, spread 60% of the current ` +
+Propagation: In the latter half of its life cycle, spread 1/2 of the current ` +
 `population onto the same plot.
 Passively provides income per stage equal to its current profit.`
             }
@@ -3809,12 +3812,12 @@ const waterAmount = BigNumber.ONE;
 const plotCosts = new FirstFreeCost(new ExponentialCost(900, Math.log2(120)));
 const plantUnlocks = ['calendula', 'basil', 'campion'];
 const plantUnlockCosts = new CompositeCost(1,
-new ConstantCost(2200),
+new ConstantCost(2100),
 new ConstantCost(145000));
 const permaCosts =
 [
     BigNumber.from(27),
-    BigNumber.from(4800),
+    BigNumber.from(3600),
     BigNumber.from(1e45)
 ];
 
@@ -3850,7 +3853,7 @@ const plantData: {[key: string]: Plant} =
         ], 15, 0, 'AI', '', -0.2, {
             'flowerThreshold': '0.96',
             'maxFlowerSize': '3',
-            'maxLeafSize': '0.72'
+            'maxLeafSize': '0.72 - 1e-9'
         },
         [
             '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/10+0.1)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)]}',
@@ -3874,7 +3877,7 @@ const plantData: {[key: string]: Plant} =
         waterCD: 3 * dayLength,
         propagation:
         {
-            rate: 0.4,
+            rate: 1/3,
             priority: 'c'
         },
         actions:
@@ -4002,7 +4005,8 @@ const plantData: {[key: string]: Plant} =
             'K(p, t): t<12 = K(1.35*p-0.8*p^2, t+1)',
             'K(p, t) = O(1)',
             'L(s): s<maxLeafSize = L(s+0.025)',
-            'O(s): s>0.6 = O(s*0.9)',
+            'O(s): s>0.5 = O(s*0.9)',
+            'O(s) =',
             'F(l, t): t>0 = F(l+0.4, t-1)'
         ], 31, 0, 'A', '', -0.6, {
             'maxLeafSize': '0.625'
@@ -4016,7 +4020,7 @@ const plantData: {[key: string]: Plant} =
             '~> L(s) = {T(s*0.5)F(sqrt(s)).[-(48)F(s*2).+F(s*2).+&F(s*2).+F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].].[+(48)F(s*2).-F(s*2).-&F(s*2).-F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].]}',
             '~> O(s) = {[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].].}'
         ]),
-        maxStage: 28,
+        maxStage: 29,
         cost: new ExponentialCost(2000, Math.log2(5)),
         growthRate: BigNumber.from(2.75),
         growthCost: BigNumber.TEN,//BigNumber.from(2.5),
@@ -4024,8 +4028,8 @@ const plantData: {[key: string]: Plant} =
         stagelyIncome: BigNumber.ONE,
         propagation:
         {
-            stage: 20,
-            rate: 0.6,
+            stage: 27,
+            rate: 1/2,
             priority: 'c'
         },
         actions:
@@ -4263,7 +4267,7 @@ let shelfPages: {[key: string]: number} =
     almanac: 0,
     manual: 0
 };
-let notebook: {[key: number]: NotebookEntry} = {};
+let notebook: {[key: string]: NotebookEntry} = {};
 
 let tmpCurrency: BigNumber;
 let tmpLevels: {[key: number]: number}[];
@@ -4645,7 +4649,30 @@ var init = () =>
             plants[i][plantUnlocks[j]].bought = (amount: number) =>
             {
                 if(actuallyPlanting)
-                    manager.addColony(i, plantUnlocks[j], amount);
+                {
+                    // log(plants[i][plantUnlocks[j]].level)
+                    // log(amount)
+                    // Check notebook for max level
+                    let finalAmount = amount;
+                    if(theory.isBuyAllAvailable && notebook[plantUnlocks[j]] &&
+                    plants[i][plantUnlocks[j]].level >
+                    notebook[plantUnlocks[j]].maxLevel)
+                    {
+                        let prevLevel = plants[i][plantUnlocks[j]].level -
+                        amount;
+                        finalAmount = Math.max(0,
+                        notebook[plantUnlocks[j]].maxLevel - prevLevel);
+                        // log(`final ${finalAmount}`)
+
+                        let remainder = plants[i][plantUnlocks[j]].level -
+                        Math.max(notebook[plantUnlocks[j]].maxLevel, prevLevel);
+                        // log(`remainder ${remainder}`)
+                        if(remainder > 0)
+                            plants[i][plantUnlocks[j]].refund(remainder);
+                    }
+                    if(finalAmount > 0)
+                        manager.addColony(i, plantUnlocks[j], finalAmount);
+                }
             };
             plants[i][plantUnlocks[j]].isAvailable = false;
         }
@@ -4750,7 +4777,10 @@ var init = () =>
     theory.createPublicationUpgrade(1, currency, permaCosts[0]);
     theory.publicationUpgrade.bought = (_) =>
     theory.invalidateQuaternaryValues();
+
     theory.createBuyAllUpgrade(2, currency, permaCosts[1]);
+    theory.buyAllUpgrade.description = getLoc('permaNote');
+    theory.buyAllUpgrade.info = getLoc('permaNoteInfo');
     // theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
 
     /* Pause
@@ -4789,9 +4819,9 @@ var init = () =>
     {
         warpTick = theory.createPermanentUpgrade(9004, currency,
         new FreeCost);
-        warpTick.description = 'Warp 1.5 minutes';
-        warpTick.info = 'Warps forward by 0.15 time units';
-        warpTick.bought = (_) => tick(0.15, 1);
+        warpTick.description = 'Warp tick';
+        warpTick.info = 'Warps forward by a tick';
+        warpTick.bought = (_) => tick(0.1, 1);
         warpTick.isAvailable = haxEnabled;
     }
     /* Warp one
@@ -4800,9 +4830,9 @@ var init = () =>
     {
         warpDay = theory.createPermanentUpgrade(9003, currency,
         new FreeCost);
-        warpDay.description = 'Warp one day';
+        warpDay.description = 'Warp day';
         warpDay.info = 'Warps forward by a day';
-        warpDay.bought = (_) => tick(dayLength, 1);
+        warpDay.bought = (_) => tick(dayLength / speeds[speedIdx], 1);
         warpDay.isAvailable = haxEnabled;
     }
     /* Warp year
@@ -4811,9 +4841,9 @@ var init = () =>
     {
         warpYear = theory.createPermanentUpgrade(9005, currency,
         new FreeCost);
-        warpYear.description = 'Warp one year';
+        warpYear.description = 'Warp year';
         warpYear.info = 'Warps forward by 365 days';
-        warpYear.bought = (_) => tick(dayLength * 365, 1);
+        warpYear.bought = (_) => tick(dayLength * 365 / speeds[speedIdx], 1);
         warpYear.isAvailable = haxEnabled;
     }
     /* Warp zero
@@ -6000,29 +6030,18 @@ let createNotebookMenu = () =>
         let tmpEntry = ui.createEntry
         ({
             column: 0,
-            text: notebook[plantUnlocks[i]].maxLevel == INT_MAX ? '' :
-            notebook[plantUnlocks[i]].maxLevel.toString(),
+            text: notebook[plantUnlocks[i]].maxLevel == INT_MAX ? '∞' :
+            notebook[plantUnlocks[i]].maxLevel?.toString() ?? '?',
             keyboard: Keyboard.NUMERIC,
             horizontalTextAlignment: TextAlignment.END,
             onTextChanged: (ot: string, nt: string) =>
             {
-                let tmpML = Number(nt) ?? INT_MAX;
-                for(let j = 0; j < nofPlots; ++j)
-                {
-                    let count = 0;
-                    for(let k = 0; k < manager.colonies[j].length; ++k)
-                    {
-                        let c = manager.colonies[j][k];
-                        if(c.id == plantUnlocks[i] && !c.propagated)
-                        {
-                            count += c.population;
-                            tmpML = Math.max(tmpML, count);
-                        }
-                    }
-                }
+                let tmpML = parseInt(nt) ?? INT_MAX;
+                if(isNaN(tmpML))
+                    tmpML = INT_MAX;
                 notebook[plantUnlocks[i]].maxLevel = tmpML;
-                for(let j = 0; j < nofPlots; ++j)
-                    plants[j][plantUnlocks[i]].maxLevel = tmpML;
+                // for(let j = 0; j < nofPlots; ++j)
+                //     plants[j][plantUnlocks[i]].maxLevel = tmpML;
             }
         });
         let tmpMinusBtn = ui.createButton
@@ -6033,10 +6052,10 @@ let createNotebookMenu = () =>
             {
                 Sound.playClick();
                 let l = notebook[plantUnlocks[i]].maxLevel;
-                if(l > 0)
+                if(l > 0 && l < INT_MAX)
                     tmpEntry.text = (l - 1).toString();
                 else
-                    tmpEntry.text = '';
+                    tmpEntry.text = '∞';
             }
         });
         let tmpPlusBtn = ui.createButton
@@ -6077,7 +6096,7 @@ let createNotebookMenu = () =>
     let menu = ui.createPopup
     ({
         isPeekable: true,
-        title: getLoc('permaNote'),
+        title: getLoc('menuNote'),
         content: ui.createStackLayout
         ({
             children:
@@ -6173,7 +6192,7 @@ let createShelfMenu = () =>
                 ui.createButton
                 ({
                     isVisible: theory.isBuyAllAvailable,
-                    text: getLoc('permaNote'),
+                    text: getLoc('menuNote'),
                     onClicked: () =>
                     {
                         Sound.playClick();
@@ -6798,12 +6817,12 @@ var setInternalState = (stateStr: string) =>
         for(let j = 0; j < plantUnlocks.length; ++j)
         {
             plants[i][plantUnlocks[j]].level = tmpLevels[i][plantUnlocks[j]];
-            if(theory.isBuyAllAvailable && notebook[plantUnlocks[j]])
-            {
-                plants[i][plantUnlocks[j]].maxLevel = Math.max(
-                notebook[plantUnlocks[j]].maxLevel,
-                plants[i][plantUnlocks[j]].level);
-            }
+            // if(theory.isBuyAllAvailable && notebook[plantUnlocks[j]])
+            // {
+            //     plants[i][plantUnlocks[j]].maxLevel = Math.max(
+            //     notebook[plantUnlocks[j]].maxLevel,
+            //     plants[i][plantUnlocks[j]].level);
+            // }
         }
     }
     actuallyPlanting = true;

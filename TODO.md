@@ -92,6 +92,9 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Align the vibes of basil & campion to make it feel smoother
 
 - [x] Rose campion as first bush plant
+  - [x] Nerf spreading rate to 1/2 or sth?
+  - [ ] Make it easy to calculate profit sum
+  - [ ] Change the propagation stage since fruit only starts generating at 19?
   - [ ] Maximum statements
   - [ ] Death? Propagation?
   - [ ] Shrub form?
@@ -99,15 +102,18 @@ do nothing. Do you feel like it could be more interesting?
   - [x] Income per evolution instead of night
   - [ ] Double growth cost
   - [ ] Flower turns into fruit faster
-  - [ ] Fruit falls off
+  - [x] Fruit falls off
   - [ ] Loading SLOW
-  - [ ] How long does it live? When does it spread seeds?
-  - [ ] Cost increases when it spreads, so need to shovel old ones before new
-  - [ ] Propagation ratio: 0.5, rounded up
   - [ ] Add a parameter to adjust stagely income multiplier (1/2x for now?)
   - [x] Passive income
   - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
   - [x] Extend rose campion seed period by a few stages
+
+- Calendula
+  - [x] Nerf spread rate to 1/3? Sum equals 1.5 making the pub mult coefficient 2 instead of 1.8
+
+- [ ] Change /sec indicators to /hr (in-game) and display 5x the value
+  - Counter-argument: all parameters display /sec
 
 ## v0.2: Education edition
 
