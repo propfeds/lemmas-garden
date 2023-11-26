@@ -4565,8 +4565,8 @@ const skipFrame = createFramedButton
     plotPerma.buy(1);
     updateAvailability();
 }, game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/fast-forward-button.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/fast-forward-button.png'));
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/shiny-apple.png') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/shiny-apple.png'));
 
 var switchPlant: Upgrade;
 var viewColony: Upgrade;
