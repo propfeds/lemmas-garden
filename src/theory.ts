@@ -93,6 +93,7 @@ const LOC_STRINGS =
 {3} (plot {1}, {2}).\\\\\n\n\\\\{4}`,
 
         labelSave: 'Last saved: {0}s',
+        labelSkip: 'Skip tutorial',
         labelWater: 'Water',
         labelActions: ['Harvest', 'Prune'],
         labelFilter: 'Filter: ',
@@ -649,7 +650,7 @@ Well then, welcome to... class.`
 Can't even bear to look at this soil...
 Go till it, we'll start in the morning.
 
-And, if you ever get lost, go peek at my bookshelf.`
+And well, if you ever get lost, go peek at my bookshelf.`
                 }
             ],
             basil:
@@ -4528,8 +4529,7 @@ const settingsLabel = ui.createLatexLabel
     margin: new Thickness(0, 9),
     text: () =>
     {
-        let multiplier = game.isRewardActive ? 1.5 : 1;
-        let dt = (time - lastSave) / multiplier;
+        let dt = (time - lastSave) / speeds[speedIdx];
         if(dt < 30)
             return Localization.get('SettingsPopupTitle');
         return Localization.format(getLoc('labelSave'), dt.toFixed(1));
@@ -4539,11 +4539,34 @@ const settingsLabel = ui.createLatexLabel
 });
 const settingsFrame = createFramedButton
 ({
-    column: 0,
+    row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
 }, 2, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/spoted-flower.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/spoted-flower.png'));
+
+const skipLabel = ui.createLatexLabel
+({
+    row: 1, column: 1,
+    isVisible: !finishedTutorial,
+    verticalTextAlignment: TextAlignment.START,
+    margin: new Thickness(0, 9),
+    text: getLoc('labelSkip'),
+    fontSize: 10,
+    textColor: Color.TEXT_MEDIUM
+});
+const skipFrame = createFramedButton
+({
+    row: 1, column: 0,
+    isVisible: !finishedTutorial,
+    horizontalOptions: LayoutOptions.START
+}, 2, () =>
+{
+    plotPerma.buy(1);
+    updateAvailability();
+}, game.settings.theme == Theme.LIGHT ?
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/fast-forward-button.png') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/fast-forward-button.png'));
 
 var switchPlant: Upgrade;
 var viewColony: Upgrade;
@@ -4908,6 +4931,8 @@ var updateAvailability = () =>
             switchPlant.isAvailable = !manager.colonies[plotIdx].length;
             viewColony.isAvailable = manager.colonies[plotIdx].length >= 1;
             switchColony.isAvailable = manager.colonies[plotIdx].length > 1;
+            skipLabel.isVisible = !finishedTutorial;
+            skipFrame.isVisible = !finishedTutorial;
         }
         for(let i = 0; i < plotPerma.level; ++i)
         {
@@ -5030,7 +5055,9 @@ var getEquationOverlay = () =>
                 children:
                 [
                     settingsFrame,
-                    settingsLabel
+                    settingsLabel,
+                    skipFrame,
+                    skipLabel
                 ]
             }),
             ui.createGrid
