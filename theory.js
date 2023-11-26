@@ -3912,6 +3912,9 @@ var getEquationOverlay = () => {
                 horizontalOptions: LayoutOptions.START,
                 verticalOptions: () => actionPanelOnTop ? LayoutOptions.END :
                     LayoutOptions.START,
+                rowDefinitions: [
+                    'auto', 'auto'
+                ],
                 columnDefinitions: [
                     'auto', 'auto'
                 ],
@@ -4392,15 +4395,15 @@ let createColonyViewMenu = (colony) => {
     });
     let paramSwitch = ui.createSwitch({
         column: 3,
-        isToggled: colonyViewConfig[colony.id].params,
         horizontalOptions: LayoutOptions.CENTER,
+        isToggled: () => colonyViewConfig[colony.id].params,
         onTouched: (e) => {
             if (e.type == TouchType.SHORTPRESS_RELEASED ||
                 e.type == TouchType.LONGPRESS_RELEASED) {
                 Sound.playClick();
                 colonyViewConfig[colony.id].params =
                     !colonyViewConfig[colony.id].params;
-                paramSwitch.isToggled = colonyViewConfig[colony.id].params;
+                // paramSwitch.isToggled = colonyViewConfig[colony.id].params;
                 reconstructionTask =
                     {
                         start: 0
@@ -4949,15 +4952,15 @@ let createWorldMenu = () => {
         ]
     });
     let GM3Switch = ui.createSwitch({
-        isToggled: graphMode3D,
         row: 7, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
+        isToggled: () => graphMode3D,
         onTouched: (e) => {
             if (e.type == TouchType.SHORTPRESS_RELEASED ||
                 e.type == TouchType.LONGPRESS_RELEASED) {
                 Sound.playClick();
                 graphMode3D = !graphMode3D;
-                GM3Switch.isToggled = graphMode3D;
+                // GM3Switch.isToggled = graphMode3D;
             }
         }
     });
@@ -5005,15 +5008,15 @@ let createWorldMenu = () => {
         verticalTextAlignment: TextAlignment.CENTER
     });
     let APSwitch = ui.createSwitch({
-        isToggled: actionPanelOnTop,
         row: 3, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
+        isToggled: () => actionPanelOnTop,
         onTouched: (e) => {
             if (e.type == TouchType.SHORTPRESS_RELEASED ||
                 e.type == TouchType.LONGPRESS_RELEASED) {
                 Sound.playClick();
                 actionPanelOnTop = !actionPanelOnTop;
-                APSwitch.isToggled = actionPanelOnTop;
+                // APSwitch.isToggled = actionPanelOnTop;
                 APLabel.text = getLoc('actionPanelLocations')[Number(actionPanelOnTop)];
             }
         }
@@ -5024,15 +5027,15 @@ let createWorldMenu = () => {
         verticalTextAlignment: TextAlignment.CENTER
     });
     let PTSwitch = ui.createSwitch({
-        isToggled: fancyPlotTitle,
         row: 2, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
+        isToggled: () => fancyPlotTitle,
         onTouched: (e) => {
             if (e.type == TouchType.SHORTPRESS_RELEASED ||
                 e.type == TouchType.LONGPRESS_RELEASED) {
                 Sound.playClick();
                 fancyPlotTitle = !fancyPlotTitle;
-                PTSwitch.isToggled = fancyPlotTitle;
+                // PTSwitch.isToggled = fancyPlotTitle;
                 PTLabel.text = getLoc('plotTitleModes')[Number(fancyPlotTitle)];
                 theory.invalidatePrimaryEquation();
             }
@@ -5044,15 +5047,15 @@ let createWorldMenu = () => {
         verticalTextAlignment: TextAlignment.CENTER
     });
     let ACSwitch = ui.createSwitch({
-        isToggled: actionConfirm,
         row: 1, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
+        isToggled: () => actionConfirm,
         onTouched: (e) => {
             if (e.type == TouchType.SHORTPRESS_RELEASED ||
                 e.type == TouchType.LONGPRESS_RELEASED) {
                 Sound.playClick();
                 actionConfirm = !actionConfirm;
-                ACSwitch.isToggled = actionConfirm;
+                // ACSwitch.isToggled = actionConfirm;
             }
         }
     });
@@ -5078,9 +5081,9 @@ let createWorldMenu = () => {
     });
     // let QBSwitch = ui.createSwitch
     // ({
-    //     isToggled: quatBoard,
     //     row: 2, column: 1,
     //     horizontalOptions: LayoutOptions.CENTER,
+    //     isToggled: () => quatBoard,
     //     onTouched: (e: TouchEvent) =>
     //     {
     //         if(e.type == TouchType.SHORTPRESS_RELEASED ||
@@ -5088,7 +5091,7 @@ let createWorldMenu = () => {
     //         {
     //             Sound.playClick();
     //             quatBoard = !quatBoard;
-    //             QBSwitch.isToggled = quatBoard;
+    //             // QBSwitch.isToggled = quatBoard;
     //             QBLabel.text = getLoc('quatModes')[Number(quatBoard)];
     //             theory.invalidateQuaternaryValues();
     //         }
