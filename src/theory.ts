@@ -5648,8 +5648,9 @@ let createColonyViewMenu = (colony: Colony) =>
         isToggled: () => colonyViewConfig[colony.id].params,
         onTouched: (e: TouchEvent) =>
         {
-            if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            e.type == TouchType.LONGPRESS_RELEASED)
+            // if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            // e.type == TouchType.LONGPRESS_RELEASED)
+            if(e.type == TouchType.PRESSED)
             {
                 Sound.playClick();
                 colonyViewConfig[colony.id].params =
@@ -6320,7 +6321,7 @@ let createWorldMenu = () =>
         onDragCompleted: () =>
         {
             Sound.playClick();
-            speedSlider.value = speedIdx;
+            // speedSlider.value = speedIdx;
         }
     });
     let GM3Label = ui.createLatexLabel
@@ -6356,8 +6357,9 @@ let createWorldMenu = () =>
         isToggled: () => graphMode3D,
         onTouched: (e: TouchEvent) =>
         {
-            if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            e.type == TouchType.LONGPRESS_RELEASED)
+            // if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            // e.type == TouchType.LONGPRESS_RELEASED)
+            if(e.type == TouchType.PRESSED)
             {
                 Sound.playClick();
                 graphMode3D = !graphMode3D;
@@ -6385,7 +6387,7 @@ let createWorldMenu = () =>
         onDragCompleted: () =>
         {
             Sound.playClick();
-            GM2Slider.value = graphMode2D;
+            // GM2Slider.value = graphMode2D;
         }
     });
     let CMLabel = ui.createLatexLabel
@@ -6408,7 +6410,7 @@ let createWorldMenu = () =>
         onDragCompleted: () =>
         {
             Sound.playClick();
-            CMSlider.value = colonyMode;
+            // CMSlider.value = colonyMode;
         }
     });
     let APLabel = ui.createLatexLabel
@@ -6424,8 +6426,9 @@ let createWorldMenu = () =>
         isToggled: () => actionPanelOnTop,
         onTouched: (e: TouchEvent) =>
         {
-            if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            e.type == TouchType.LONGPRESS_RELEASED)
+            // if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            // e.type == TouchType.LONGPRESS_RELEASED)
+            if(e.type == TouchType.PRESSED)
             {
                 Sound.playClick();
                 actionPanelOnTop = !actionPanelOnTop;
@@ -6448,8 +6451,9 @@ let createWorldMenu = () =>
         isToggled: () => fancyPlotTitle,
         onTouched: (e: TouchEvent) =>
         {
-            if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            e.type == TouchType.LONGPRESS_RELEASED)
+            // if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            // e.type == TouchType.LONGPRESS_RELEASED)
+            if(e.type == TouchType.PRESSED)
             {
                 Sound.playClick();
                 fancyPlotTitle = !fancyPlotTitle;
@@ -6472,8 +6476,9 @@ let createWorldMenu = () =>
         isToggled: () => actionConfirm,
         onTouched: (e: TouchEvent) =>
         {
-            if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            e.type == TouchType.LONGPRESS_RELEASED)
+            // if(e.type == TouchType.SHORTPRESS_RELEASED ||
+            // e.type == TouchType.LONGPRESS_RELEASED)
+            if(e.type == TouchType.PRESSED)
             {
                 Sound.playClick();
                 actionConfirm = !actionConfirm;
@@ -6501,7 +6506,7 @@ let createWorldMenu = () =>
         onDragCompleted: () =>
         {
             Sound.playClick();
-            QBSlider.value = quatMode;
+            // QBSlider.value = quatMode;
             theory.invalidateQuaternaryValues();
         }
     });
@@ -6512,8 +6517,9 @@ let createWorldMenu = () =>
     //     isToggled: () => quatBoard,
     //     onTouched: (e: TouchEvent) =>
     //     {
-    //         if(e.type == TouchType.SHORTPRESS_RELEASED ||
-    //         e.type == TouchType.LONGPRESS_RELEASED)
+    //         // if(e.type == TouchType.SHORTPRESS_RELEASED ||
+    //         // e.type == TouchType.LONGPRESS_RELEASED)
+    //         if(e.type == TouchType.PRESSED)
     //         {
     //             Sound.playClick();
     //             quatBoard = !quatBoard;
