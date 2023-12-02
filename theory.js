@@ -137,7 +137,7 @@ Profit\\colon\\enspace {5}p\\\\{6}`,
         labelSpeed: 'Game speed: {0}x',
         labelGM3D: '3D graph: ',
         labelActionConfirm: 'Confirmation dialogues: ',
-        graphModes2D: [
+        lineGraphModes: [
             '2D graph: Off',
             '2D graph: Photo-synthesis',
             '2D graph: Growth'
@@ -148,7 +148,7 @@ Profit\\colon\\enspace {5}p\\\\{6}`,
             'Colony view: Simple',
             'Colony view: List'
         ],
-        actionPanelLocations: [
+        actionPanelModes: [
             'Time display: Top',
             'Time display: Bottom'
         ],
@@ -3282,7 +3282,7 @@ let selectedColony = null;
 let finishedTutorial = false;
 let actuallyPlanting = true;
 let speedIdx = 1;
-let graphMode2D = 1 /* GraphModes2D.INSOLATION */;
+let graphMode2D = 1 /* LineGraphModes.INSOLATION */;
 let graphMode3D = true;
 let colonyMode = 1 /* ColonyModes.VERBOSE */;
 let fancyPlotTitle = true;
@@ -3804,15 +3804,18 @@ var init = () => {
 };
 var updateAvailability = () => {
     perfs[5 /* Profilers.AVAILABILITY */].exec(() => {
+        let x = plotIdx;
+        let y = colonyIdx;
+        let p = plantIdx;
         if (!finishedTutorial) {
             finishedTutorial = plotPerma.level > 0;
             shelfPerma.isAvailable = finishedTutorial;
         }
         else {
             shelfPerma.isAvailable = true;
-            switchPlant.isAvailable = !manager.colonies[plotIdx].length;
-            viewColony.isAvailable = manager.colonies[plotIdx].length >= 1;
-            switchColony.isAvailable = manager.colonies[plotIdx].length > 1;
+            switchPlant.isAvailable = !plants[x][plantUnlocks[p[x]]].level;
+            viewColony.isAvailable = manager.colonies[x].length >= 1;
+            switchColony.isAvailable = manager.colonies[x].length > 1;
             skipLabel.isVisible = !finishedTutorial;
             skipFrame.isVisible = !finishedTutorial;
         }
@@ -3820,7 +3823,7 @@ var updateAvailability = () => {
             for (let j = 0; j < plantUnlocks.length; ++j)
                 plants[i][plantUnlocks[j]].isAvailable =
                     plants[i][plantUnlocks[j]].level > 0 ||
-                        (j == plantIdx[i] && j <= plantPerma.level);
+                        (j == p[i] && j <= plantPerma.level);
         }
     });
 };
@@ -4397,19 +4400,15 @@ let createColonyViewMenu = (colony) => {
         column: 3,
         horizontalOptions: LayoutOptions.CENTER,
         isToggled: () => colonyViewConfig[colony.id].params,
-        onTouched: (e) => {
-            // if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            // e.type == TouchType.LONGPRESS_RELEASED)
-            if (e.type == TouchType.PRESSED) {
-                Sound.playClick();
-                colonyViewConfig[colony.id].params =
-                    !colonyViewConfig[colony.id].params;
-                // paramSwitch.isToggled = colonyViewConfig[colony.id].params;
-                reconstructionTask =
-                    {
-                        start: 0
-                    };
-            }
+        onToggled: () => {
+            Sound.playClick();
+            colonyViewConfig[colony.id].params =
+                !colonyViewConfig[colony.id].params;
+            // paramSwitch.isToggled = colonyViewConfig[colony.id].params;
+            reconstructionTask =
+                {
+                    start: 0
+                };
         }
     });
     let updateReconstruction = () => {
@@ -4956,29 +4955,24 @@ let createWorldMenu = () => {
         row: 7, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         isToggled: () => graphMode3D,
-        onTouched: (e) => {
-            // if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            // e.type == TouchType.LONGPRESS_RELEASED)
-            if (e.type == TouchType.PRESSED) {
-                Sound.playClick();
-                graphMode3D = !graphMode3D;
-                // GM3Switch.isToggled = graphMode3D;
-            }
+        onToggled: () => {
+            Sound.playClick();
+            graphMode3D = !graphMode3D;
         }
     });
     let GM2Label = ui.createLatexLabel({
-        text: getLoc('graphModes2D')[graphMode2D],
+        text: getLoc('lineGraphModes')[graphMode2D],
         row: 6, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM2Slider = ui.createSlider({
         row: 6, column: 1,
         minimum: 0,
-        maximum: 3 /* GraphModes2D._SIZE */ - 1,
+        maximum: 3 /* LineGraphModes._SIZE */ - 1,
         value: graphMode2D,
         onValueChanged: () => {
             graphMode2D = Math.round(GM2Slider.value);
-            GM2Label.text = getLoc('graphModes2D')[graphMode2D];
+            GM2Label.text = getLoc('lineGraphModes')[graphMode2D];
         },
         onDragCompleted: () => {
             Sound.playClick();
@@ -5005,7 +4999,7 @@ let createWorldMenu = () => {
         }
     });
     let APLabel = ui.createLatexLabel({
-        text: getLoc('actionPanelLocations')[Number(actionPanelOnTop)],
+        text: getLoc('actionPanelModes')[Number(actionPanelOnTop)],
         row: 3, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
@@ -5013,15 +5007,11 @@ let createWorldMenu = () => {
         row: 3, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         isToggled: () => actionPanelOnTop,
-        onTouched: (e) => {
-            // if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            // e.type == TouchType.LONGPRESS_RELEASED)
-            if (e.type == TouchType.PRESSED) {
-                Sound.playClick();
-                actionPanelOnTop = !actionPanelOnTop;
-                // APSwitch.isToggled = actionPanelOnTop;
-                APLabel.text = getLoc('actionPanelLocations')[Number(actionPanelOnTop)];
-            }
+        onToggled: () => {
+            Sound.playClick();
+            actionPanelOnTop = !actionPanelOnTop;
+            // APSwitch.isToggled = actionPanelOnTop;
+            APLabel.text = getLoc('actionPanelModes')[Number(actionPanelOnTop)];
         }
     });
     let PTLabel = ui.createLatexLabel({
@@ -5033,16 +5023,12 @@ let createWorldMenu = () => {
         row: 2, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         isToggled: () => fancyPlotTitle,
-        onTouched: (e) => {
-            // if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            // e.type == TouchType.LONGPRESS_RELEASED)
-            if (e.type == TouchType.PRESSED) {
-                Sound.playClick();
-                fancyPlotTitle = !fancyPlotTitle;
-                // PTSwitch.isToggled = fancyPlotTitle;
-                PTLabel.text = getLoc('plotTitleModes')[Number(fancyPlotTitle)];
-                theory.invalidatePrimaryEquation();
-            }
+        onToggled: () => {
+            Sound.playClick();
+            fancyPlotTitle = !fancyPlotTitle;
+            // PTSwitch.isToggled = fancyPlotTitle;
+            PTLabel.text = getLoc('plotTitleModes')[Number(fancyPlotTitle)];
+            theory.invalidatePrimaryEquation();
         }
     });
     let ACLabel = ui.createLatexLabel({
@@ -5054,14 +5040,9 @@ let createWorldMenu = () => {
         row: 1, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         isToggled: () => actionConfirm,
-        onTouched: (e) => {
-            // if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            // e.type == TouchType.LONGPRESS_RELEASED)
-            if (e.type == TouchType.PRESSED) {
-                Sound.playClick();
-                actionConfirm = !actionConfirm;
-                // ACSwitch.isToggled = actionConfirm;
-            }
+        onToggled: () => {
+            Sound.playClick();
+            actionConfirm = !actionConfirm;
         }
     });
     let QBLabel = ui.createLatexLabel({
@@ -5084,25 +5065,6 @@ let createWorldMenu = () => {
             theory.invalidateQuaternaryValues();
         }
     });
-    // let QBSwitch = ui.createSwitch
-    // ({
-    //     row: 2, column: 1,
-    //     horizontalOptions: LayoutOptions.CENTER,
-    //     isToggled: () => quatBoard,
-    //     onTouched: (e: TouchEvent) =>
-    //     {
-    //         // if(e.type == TouchType.SHORTPRESS_RELEASED ||
-    //         // e.type == TouchType.LONGPRESS_RELEASED)
-    //         if(e.type == TouchType.PRESSED)
-    //         {
-    //             Sound.playClick();
-    //             quatBoard = !quatBoard;
-    //             // QBSwitch.isToggled = quatBoard;
-    //             QBLabel.text = getLoc('quatModes')[Number(quatBoard)];
-    //             theory.invalidateQuaternaryValues();
-    //         }
-    //     }
-    // });
     let menu = ui.createPopup({
         isPeekable: true,
         title: Localization.get('SettingsPopupTitle'),
@@ -5384,11 +5346,11 @@ var setInternalState = (stateStr) => {
 };
 var get2DGraphValue = () => {
     switch (graphMode2D) {
-        case 0 /* GraphModes2D.OFF */:
+        case 0 /* LineGraphModes.OFF */:
             return 0;
-        case 1 /* GraphModes2D.INSOLATION */: // Insolation
+        case 1 /* LineGraphModes.INSOLATION */: // Insolation
             return insolationCoord;
-        case 2 /* GraphModes2D.GROWTH */: // Growth
+        case 2 /* LineGraphModes.GROWTH */: // Growth
             return growthCoord / 2;
     }
 };

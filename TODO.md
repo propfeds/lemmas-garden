@@ -112,8 +112,9 @@ do nothing. Do you feel like it could be more interesting?
 - Calendula
   - [x] Nerf spread rate to 1/3? Sum equals 1.5 making the pub mult coefficient 2 instead of 1.8
 
-- [ ] Button that skips tutorial for iOS players
+- [x] Button that skips tutorial for iOS players
 - [ ] Dedicated save file for playtesting
+- [ ] Replace 'view L-system' button with almanac access
 
 - [ ] Change /sec indicators to /hr (in-game) and display 5x the value
   - Counter-argument: all parameters display /sec
