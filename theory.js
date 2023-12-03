@@ -3539,7 +3539,7 @@ const settingsFrame = createFramedButton({
 // ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/shiny-apple.png'));
 var controlStack = ui.createStackLayout({
     isVisible: false,
-    padding: new Thickness(6, 0, 6, 8),
+    margin: new Thickness(6, 0, 6, 6),
     orientation: StackOrientation.VERTICAL,
     children: [
         ui.createGrid({
@@ -4083,7 +4083,7 @@ var getCurrencyBarDelegate = () => {
         row: 0, column: 0,
         text: () => Utils.getMath(`${theory.tau}${theory.latexSymbol}`),
         heightRequest: getImageSize(ui.screenWidth),
-        margin: new Thickness(0, 2, 0, 0),
+        // margin: new Thickness(0, 2, 0, 0),
         fontSize: 12,
         horizontalTextAlignment: TextAlignment.CENTER,
         verticalTextAlignment: TextAlignment.CENTER
@@ -4101,7 +4101,7 @@ var getCurrencyBarDelegate = () => {
             return Utils.getMath(`${currency.value}\\text{${currency.symbol}}`);
         },
         heightRequest: getImageSize(ui.screenWidth),
-        margin: new Thickness(0, 2, 0, 0),
+        // margin: new Thickness(0, 2, 0, 0),
         fontSize: 12,
         horizontalTextAlignment: TextAlignment.CENTER,
         verticalTextAlignment: TextAlignment.CENTER
@@ -4112,7 +4112,7 @@ var getCurrencyBarDelegate = () => {
             return;
         let seqMenu = createColonyViewMenu(selectedColony);
         seqMenu.show();
-    }, getLoc('viewColony'), getSmallBtnSize(ui.screenWidth), 12);
+    }, getLoc('viewColony'), getMediumBtnSize(ui.screenWidth), 12);
     examineFrame.row = 0;
     examineFrame.column = 1;
     let switchbackBtn = createLSRButton(() => {
@@ -4120,14 +4120,14 @@ var getCurrencyBarDelegate = () => {
         colonyIdx[plotIdx] = (colonyIdx[plotIdx] - 1 + len) % len;
         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
         renderer.colony = selectedColony;
-    }, '↑', getSmallBtnSize(ui.screenWidth));
+    }, '↑', getMediumBtnSize(ui.screenWidth));
     switchbackBtn.column = 0;
     let switchBtn = createLSRButton(() => {
         let len = manager.colonies[plotIdx].length;
         colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) % len;
         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
         renderer.colony = selectedColony;
-    }, '↓', getSmallBtnSize(ui.screenWidth));
+    }, '↓', getMediumBtnSize(ui.screenWidth));
     switchBtn.column = 1;
     controlStack.children[0].children =
         [
@@ -4146,6 +4146,7 @@ var getCurrencyBarDelegate = () => {
     let currencyGrid = ui.createGrid({
         // columnDefinitions: ['auto', 'auto'],
         // horizontalOptions: LayoutOptions.CENTER,
+        margin: new Thickness(6, 3, 6, 0),
         children: [tauLabel, pennyLabel]
     });
     return ui.createStackLayout({
