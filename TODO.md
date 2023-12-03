@@ -115,6 +115,8 @@ do nothing. Do you feel like it could be more interesting?
 - [x] Button that skips tutorial for iOS players
 - [ ] Dedicated save file for playtesting
 - [ ] Replace 'view L-system' button with almanac access
+- [ ] Rework singular upgrade logic
+  - Turn switch plant into regular upgrade
 
 - [ ] Change /sec indicators to /hr (in-game) and display 5x the value
   - Counter-argument: all parameters display /sec
