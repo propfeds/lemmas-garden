@@ -70,7 +70,7 @@ const LOC_STRINGS = {
         btnContents: 'Table of\nContents',
         btnPage: 'p. {0}',
         actionConfirmDialogue: `You are about to perform a {0} on\\\\
-{3} (plot {1}:{2}).\\\\\n\n\\\\{4}`,
+{3} (plot {1}-{2}).\\\\\n\n\\\\{4}`,
         labelSave: 'Last saved: {0}s',
         labelSkip: 'Skip tutorial',
         labelWater: 'Water',
@@ -3338,10 +3338,11 @@ let perfNames = [
 ];
 let perfs = perfNames.map(element => profilers.get(element[0]));
 let perfQuaternaryEntries = perfNames.map(element => new QuaternaryEntry(element[1], null));
-let createFramedButton = (params, margin, callback, image) => {
+let createImageFrameBtn = (params, callback, image) => {
+    let triggerable = true;
     let frame = ui.createFrame({
         cornerRadius: 1,
-        margin: new Thickness(margin),
+        margin: new Thickness(2),
         padding: new Thickness(1),
         hasShadow: true,
         heightRequest: getImageSize(ui.screenWidth),
@@ -3351,31 +3352,95 @@ let createFramedButton = (params, margin, callback, image) => {
             aspect: Aspect.ASPECT_FIT,
             useTint: false
         }),
-        borderColor: Color.BORDER
+        borderColor: Color.BORDER,
+        ...params
     });
-    return ui.createStackLayout({
-        ...params,
-        children: [
-            frame
-        ],
-        onTouched: (e) => {
-            if (e.type == TouchType.PRESSED) {
-                frame.borderColor = Color.TRANSPARENT;
-                // frame.hasShadow = false;
-            }
-            else if (e.type == TouchType.SHORTPRESS_RELEASED ||
-                e.type == TouchType.LONGPRESS_RELEASED) {
+    frame.onTouched = (e) => {
+        if (e.type == TouchType.PRESSED) {
+            frame.borderColor = Color.TRANSPARENT;
+            // frame.hasShadow = false;
+        }
+        else if (e.type.isReleased()) {
+            frame.borderColor = Color.BORDER;
+            // frame.hasShadow = true;
+            if (triggerable) {
                 Sound.playClick();
-                frame.borderColor = Color.BORDER;
-                // frame.hasShadow = true;
                 callback();
             }
-            else if (e.type == TouchType.CANCELLED) {
-                frame.borderColor = Color.BORDER;
-                // frame.hasShadow = true;
-            }
+            else
+                triggerable = true;
         }
+        else if (e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
+            e.x > frame.width || e.y > frame.height)) {
+            frame.borderColor = Color.BORDER;
+            // frame.hasShadow = true;
+            triggerable = false;
+        }
+    };
+    return frame;
+};
+let createLabelFrameBtn = (params, callback, text, fontSize = 14) => {
+    let triggerable = true;
+    let frame = ui.createFrame({
+        cornerRadius: 1,
+        // padding: new Thickness(10, 2),
+        verticalOptions: LayoutOptions.CENTER,
+        content: ui.createLatexLabel({
+            text,
+            horizontalTextAlignment: TextAlignment.CENTER,
+            verticalTextAlignment: TextAlignment.CENTER,
+            textColor: Color.TEXT,
+            fontSize
+        }),
+        borderColor: Color.BORDER,
+        ...params
     });
+    frame.onTouched = (e) => {
+        if (e.type == TouchType.PRESSED) {
+            frame.borderColor = Color.TRANSPARENT;
+            frame.content.textColor = Color.TEXT_MEDIUM;
+        }
+        else if (e.type.isReleased()) {
+            frame.borderColor = Color.BORDER;
+            frame.content.textColor = Color.TEXT;
+            if (triggerable) {
+                Sound.playClick();
+                callback();
+            }
+            else
+                triggerable = true;
+        }
+        else if (e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
+            e.x > frame.width || e.y > frame.height)) {
+            frame.borderColor = Color.BORDER;
+            frame.content.textColor = Color.TEXT;
+            triggerable = false;
+        }
+    };
+    return frame;
+};
+let createHesitantSwitch = (params, callback, isToggled) => {
+    let triggerable = true;
+    let element = ui.createSwitch({
+        horizontalOptions: LayoutOptions.CENTER,
+        onColor: Color.BORDER,
+        isToggled,
+        onTouched: (e) => {
+            if (e.type.isReleased()) {
+                if (triggerable) {
+                    Sound.playClick();
+                    callback();
+                }
+                else
+                    triggerable = true;
+            }
+            else if (e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
+                e.x > element.width || e.y > element.height))
+                triggerable = false;
+        },
+        ...params
+    });
+    return element;
 };
 // const actionsLabel = ui.createLatexLabel
 // ({
@@ -3388,12 +3453,10 @@ let createFramedButton = (params, margin, callback, image) => {
 //     fontSize: 10,
 //     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
 // });
-const waterFrame = createFramedButton({
+const waterFrame = createImageFrameBtn({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 0,
-}, 2, () => {
-    manager.water(selectedColony);
-}, game.settings.theme == Theme.LIGHT ?
+}, () => manager.water(selectedColony), game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png'));
 const waterLabel = ui.createLatexLabel({
@@ -3423,10 +3486,10 @@ const waterLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const harvestFrame = createFramedButton({
+const harvestFrame = createImageFrameBtn({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 2,
-}, 2, () => {
+}, () => {
     if (actionConfirm) {
         let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 0 /* Actions.HARVEST */);
         menu.show();
@@ -3446,7 +3509,7 @@ const harvestLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const pruneFrame = createFramedButton({
+const pruneFrame = createImageFrameBtn({
     isVisible: () => {
         if (!selectedColony ||
             !plantData[selectedColony.id].actions[1 /* Actions.PRUNE */])
@@ -3454,7 +3517,7 @@ const pruneFrame = createFramedButton({
         return true;
     },
     row: 0, column: 4,
-}, 2, () => {
+}, () => {
     if (actionConfirm) {
         let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 1 /* Actions.PRUNE */);
         menu.show();
@@ -3509,10 +3572,10 @@ const settingsLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const settingsFrame = createFramedButton({
+const settingsFrame = createImageFrameBtn({
     row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
-}, 2, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
+}, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/spoted-flower.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/spoted-flower.png'));
 // const skipLabel = ui.createLatexLabel
@@ -4027,41 +4090,6 @@ var getEquationOverlay = () => {
     });
     return result;
 };
-let createLSRButton = (callback, text, height = getBtnSize(ui.screenWidth), fontSize = 14) => {
-    let frame = ui.createFrame({
-        row: 0, column: 1,
-        heightRequest: height,
-        cornerRadius: 1,
-        // padding: new Thickness(10, 2),
-        verticalOptions: LayoutOptions.CENTER,
-        content: ui.createLatexLabel({
-            text,
-            horizontalTextAlignment: TextAlignment.CENTER,
-            verticalTextAlignment: TextAlignment.CENTER,
-            textColor: Color.TEXT,
-            fontSize
-        }),
-        borderColor: Color.BORDER
-    });
-    frame.onTouched = (e) => {
-        if (e.type == TouchType.PRESSED) {
-            frame.borderColor = Color.TRANSPARENT;
-            frame.content.textColor = Color.TEXT_MEDIUM;
-        }
-        else if (e.type == TouchType.SHORTPRESS_RELEASED ||
-            e.type == TouchType.LONGPRESS_RELEASED) {
-            Sound.playClick();
-            frame.borderColor = Color.BORDER;
-            frame.content.textColor = Color.TEXT;
-            callback();
-        }
-        else if (e.type == TouchType.CANCELLED) {
-            frame.borderColor = Color.BORDER;
-            frame.content.textColor = Color.TEXT;
-        }
-    };
-    return frame;
-};
 var getCurrencyBarDelegate = () => {
     let tauLabel = ui.createLatexLabel({
         row: 0, column: 0,
@@ -4090,32 +4118,37 @@ var getCurrencyBarDelegate = () => {
         horizontalTextAlignment: TextAlignment.CENTER,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let examineFrame = createLSRButton(() => {
+    let examineBtn = createLabelFrameBtn({
+        row: 0, column: 1,
+        heightRequest: getMediumBtnSize(ui.screenWidth)
+    }, () => {
         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
         if (!selectedColony)
             return;
         let seqMenu = createColonyViewMenu(selectedColony);
         seqMenu.show();
-    }, getLoc('viewColony'), getMediumBtnSize(ui.screenWidth), 12);
-    examineFrame.row = 0;
-    examineFrame.column = 1;
-    let switchbackBtn = createLSRButton(() => {
+    }, getLoc('viewColony'), 12);
+    let switchbackBtn = createLabelFrameBtn({
+        column: 0,
+        heightRequest: getMediumBtnSize(ui.screenWidth)
+    }, () => {
         let len = manager.colonies[plotIdx].length;
         colonyIdx[plotIdx] = (colonyIdx[plotIdx] - 1 + len) % len;
         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
         renderer.colony = selectedColony;
-    }, '↑', getMediumBtnSize(ui.screenWidth));
-    switchbackBtn.column = 0;
-    let switchBtn = createLSRButton(() => {
+    }, '↑');
+    let switchBtn = createLabelFrameBtn({
+        column: 1,
+        heightRequest: getMediumBtnSize(ui.screenWidth)
+    }, () => {
         let len = manager.colonies[plotIdx].length;
         colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) % len;
         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
         renderer.colony = selectedColony;
-    }, '↓', getMediumBtnSize(ui.screenWidth));
-    switchBtn.column = 1;
+    }, '↓');
     controlStack.children[0].children =
         [
-            examineFrame,
+            examineBtn,
             ui.createGrid({
                 row: 0,
                 column: 0,
@@ -4560,27 +4593,19 @@ let createColonyViewMenu = (colony) => {
                 };
         }
     });
-    let paramSwitch = ui.createSwitch({
+    let paramSwitch = createHesitantSwitch({
         column: 3,
-        horizontalOptions: LayoutOptions.CENTER,
-        onColor: Color.BORDER,
-        isToggled: colonyViewConfig[colony.id].params,
-        onTouched: (e) => {
-            if (e.type == TouchType.SHORTPRESS_RELEASED ||
-                e.type == TouchType.LONGPRESS_RELEASED) {
-                Sound.playClick();
-                colonyViewConfig[colony.id].params =
-                    !colonyViewConfig[colony.id].params;
-                paramSwitch.isToggled = colonyViewConfig[colony.id].params;
-                // paramSwitch.isToggled = !paramSwitch.isToggled;
-                // colonyViewConfig[colony.id].params = paramSwitch.isToggled;
-                reconstructionTask =
-                    {
-                        start: 0
-                    };
-            }
-        }
-    });
+    }, () => {
+        colonyViewConfig[colony.id].params =
+            !colonyViewConfig[colony.id].params;
+        paramSwitch.isToggled = colonyViewConfig[colony.id].params;
+        // paramSwitch.isToggled = !paramSwitch.isToggled;
+        // colonyViewConfig[colony.id].params = paramSwitch.isToggled;
+        reconstructionTask =
+            {
+                start: 0
+            };
+    }, colonyViewConfig[colony.id].params);
     let updateReconstruction = () => {
         if (manager.busy)
             return reconstructionTask.result;
@@ -5121,22 +5146,14 @@ let createWorldMenu = () => {
             GM3Button
         ]
     });
-    let GM3Switch = ui.createSwitch({
-        row: 7, column: 1,
-        horizontalOptions: LayoutOptions.CENTER,
-        onColor: Color.BORDER,
-        isToggled: graphMode3D,
-        onTouched: (e) => {
-            if (e.type == TouchType.SHORTPRESS_RELEASED ||
-                e.type == TouchType.LONGPRESS_RELEASED) {
-                Sound.playClick();
-                graphMode3D = !graphMode3D;
-                GM3Switch.isToggled = graphMode3D;
-                // GM3Switch.isToggled = !GM3Switch.isToggled;
-                // graphMode3D = GM3Switch.isToggled;
-            }
-        }
-    });
+    let GM3Switch = createHesitantSwitch({
+        row: 7, column: 1
+    }, () => {
+        graphMode3D = !graphMode3D;
+        GM3Switch.isToggled = graphMode3D;
+        // GM3Switch.isToggled = !GM3Switch.isToggled;
+        // graphMode3D = GM3Switch.isToggled;
+    }, graphMode3D);
     let GM2Label = ui.createLatexLabel({
         text: getLoc('lineGraphModes')[graphMode2D],
         row: 6, column: 0,
@@ -5180,67 +5197,43 @@ let createWorldMenu = () => {
         row: 3, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let APSwitch = ui.createSwitch({
-        row: 3, column: 1,
-        horizontalOptions: LayoutOptions.CENTER,
-        onColor: Color.BORDER,
-        isToggled: actionPanelOnTop,
-        onTouched: (e) => {
-            if (e.type == TouchType.SHORTPRESS_RELEASED ||
-                e.type == TouchType.LONGPRESS_RELEASED) {
-                Sound.playClick();
-                actionPanelOnTop = !actionPanelOnTop;
-                APSwitch.isToggled = actionPanelOnTop;
-                // APSwitch.isToggled = !APSwitch.isToggled;
-                // actionPanelOnTop = APSwitch.isToggled;
-                APLabel.text = getLoc('actionPanelModes')[Number(actionPanelOnTop)];
-            }
-        }
-    });
+    let APSwitch = createHesitantSwitch({
+        row: 3, column: 1
+    }, () => {
+        actionPanelOnTop = !actionPanelOnTop;
+        APSwitch.isToggled = actionPanelOnTop;
+        // APSwitch.isToggled = !APSwitch.isToggled;
+        // actionPanelOnTop = APSwitch.isToggled;
+        APLabel.text = getLoc('actionPanelModes')[Number(actionPanelOnTop)];
+    }, actionPanelOnTop);
     let PTLabel = ui.createLatexLabel({
         text: getLoc('plotTitleModes')[Number(fancyPlotTitle)],
         row: 2, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let PTSwitch = ui.createSwitch({
-        row: 2, column: 1,
-        horizontalOptions: LayoutOptions.CENTER,
-        onColor: Color.BORDER,
-        isToggled: fancyPlotTitle,
-        onTouched: (e) => {
-            if (e.type == TouchType.SHORTPRESS_RELEASED ||
-                e.type == TouchType.LONGPRESS_RELEASED) {
-                Sound.playClick();
-                fancyPlotTitle = !fancyPlotTitle;
-                PTSwitch.isToggled = fancyPlotTitle;
-                // PTSwitch.isToggled = !PTSwitch.isToggled;
-                // fancyPlotTitle = PTSwitch.isToggled;
-                PTLabel.text = getLoc('plotTitleModes')[Number(fancyPlotTitle)];
-                theory.invalidatePrimaryEquation();
-            }
-        }
-    });
+    let PTSwitch = createHesitantSwitch({
+        row: 2, column: 1
+    }, () => {
+        fancyPlotTitle = !fancyPlotTitle;
+        PTSwitch.isToggled = fancyPlotTitle;
+        // PTSwitch.isToggled = !PTSwitch.isToggled;
+        // fancyPlotTitle = PTSwitch.isToggled;
+        PTLabel.text = getLoc('plotTitleModes')[Number(fancyPlotTitle)];
+        theory.invalidatePrimaryEquation();
+    }, fancyPlotTitle);
     let ACLabel = ui.createLatexLabel({
         text: getLoc('labelActionConfirm'),
         row: 1, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let ACSwitch = ui.createSwitch({
-        row: 1, column: 1,
-        horizontalOptions: LayoutOptions.CENTER,
-        onColor: Color.BORDER,
-        isToggled: actionConfirm,
-        onTouched: (e) => {
-            if (e.type == TouchType.SHORTPRESS_RELEASED ||
-                e.type == TouchType.LONGPRESS_RELEASED) {
-                Sound.playClick();
-                actionConfirm = !actionConfirm;
-                ACSwitch.isToggled = actionConfirm;
-                // ACSwitch.isToggled = !ACSwitch.isToggled;
-                // actionConfirm = ACSwitch.isToggled;
-            }
-        }
-    });
+    let ACSwitch = createHesitantSwitch({
+        row: 1, column: 1
+    }, () => {
+        actionConfirm = !actionConfirm;
+        ACSwitch.isToggled = actionConfirm;
+        // ACSwitch.isToggled = !ACSwitch.isToggled;
+        // actionConfirm = ACSwitch.isToggled;
+    }, actionConfirm);
     let QBLabel = ui.createLatexLabel({
         text: getLoc('quatModes')[quatMode],
         row: 5, column: 0,
