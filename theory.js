@@ -172,7 +172,7 @@ Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
                 LsDetails: `A(r, t): apex (stem shoot) providing r energy/s. Has
 t stages left until it splits.\\\\F(l, lim): internode of length l, growing up
 to lim.\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0, when
-it turns into K.\\\\K(p): flower of size p.\\\\L(r, lim): leaf providing r
+it would turn into K.\\\\K(p): flower of size p.\\\\L(r, lim): leaf providing r
 energy/s, growing up to lim. \\\\—\\\\Harvest returns profit as the sum of all K
 sizes.`,
                 stages: {
@@ -2921,7 +2921,7 @@ const permaCosts = [
     BigNumber.from(3600),
     BigNumber.from(1e45)
 ];
-const taxRate = BigNumber.from(-.12);
+const taxRate = BigNumber.from(.12);
 const tauRate = BigNumber.TWO;
 const pubCoef = BigNumber.from(2 / 3);
 // @ts-expect-error
@@ -3568,7 +3568,7 @@ var currency;
 var taxCurrency;
 var init = () => {
     currency = theory.createCurrency('p', 'p');
-    taxCurrency = theory.createCurrency(getLoc('currencyTax'));
+    taxCurrency = theory.createCurrency(`T_{\\text{p}}`);
     /* Plants
     No zombies.
     */
@@ -4063,23 +4063,6 @@ let createLSRButton = (callback, text, height = getBtnSize(ui.screenWidth), font
     return frame;
 };
 var getCurrencyBarDelegate = () => {
-    // let currencyBar = ui.createFrame
-    // ({
-    //     heightRequest: getImageSize(ui.screenWidth),
-    //     cornerRadius: 1,
-    //     // padding: new Thickness(0, 2),
-    //     content: ui.createLatexLabel
-    //     ({
-    //         text: () => Utils.getMath(`${currency.value}
-    //         \\text{${currency.symbol}}\\enspace
-    //         (${theory.latexSymbol} = ${theory.tau})`),
-    //         margin: new Thickness(0, 6),
-    //         fontSize: 11,
-    //         horizontalTextAlignment: TextAlignment.CENTER,
-    //         verticalTextAlignment: TextAlignment.CENTER
-    //     }),
-    //     borderColor: Color.BORDER
-    // });
     let tauLabel = ui.createLatexLabel({
         row: 0, column: 0,
         text: () => Utils.getMath(`${theory.tau}${theory.latexSymbol}`),
@@ -4145,9 +4128,10 @@ var getCurrencyBarDelegate = () => {
             })
         ];
     let currencyGrid = ui.createGrid({
-        // columnDefinitions: ['auto', 'auto'],
-        // horizontalOptions: LayoutOptions.CENTER,
         margin: new Thickness(6, 3, 6, 0),
+        horizontalOptions: LayoutOptions.CENTER,
+        columnDefinitions: ['auto', 'auto'],
+        columnSpacing: 48,
         children: [tauLabel, pennyLabel]
     });
     return ui.createStackLayout({
@@ -5361,7 +5345,7 @@ var prePublish = () => {
     // @ts-expect-error
     taxCurrency.value = getCurrencyFromTau(theory.tau)[0] * taxRate;
     // @ts-expect-error
-    tmpCurrency = currency.value + taxCurrency.value;
+    tmpCurrency = currency.value - taxCurrency.value;
     tmpLevels = Array.from({ length: nofPlots }, (_) => []);
 };
 // You can be in debt for this lol
