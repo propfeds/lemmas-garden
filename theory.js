@@ -3298,7 +3298,7 @@ let speedIdx = 1;
 let graphMode2D = 1 /* LineGraphModes.INSOLATION */;
 let graphMode3D = true;
 let colonyMode = 1 /* ColonyModes.VERBOSE */;
-let fancyPlotTitle = true;
+let fancyPlotTitle = false;
 let actionPanelOnTop = false;
 let actionConfirm = true;
 let quatMode = 0 /* QuaternaryModes.PROFITS */;
@@ -3871,7 +3871,8 @@ var updateAvailability = () => {
         }
         else {
             shelfPerma.isAvailable = true;
-            switchPlant.isAvailable = !plants[x][plantUnlocks[p[x]]].level;
+            switchPlant.isAvailable = !plants[x][plantUnlocks[p[x]]].level &&
+                plantPerma.level > 0;
             controlStack.isVisible = true;
             // skipLabel.isVisible = !finishedTutorial;
             // skipFrame.isVisible = !finishedTutorial;
