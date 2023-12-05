@@ -582,8 +582,11 @@ The symbol will only evolve according to this rule if its ancestor bears the ` +
 `Beyond geometric applications, parametric L-systems allow individual ` +
 `symbols to hold additional information such as its state of growth, elapsed ` +
 `time, etc. They can be even peeked at in context-sensitive rules!
-When there are multiple rules specified for a symbol, the first one with a ` +
-`matching condition will be chosen.
+When there are multiple rules specified for a symbol, the chosen one will be ` +
+`selected according to two criteria:
+- The condition evaluates to true (anything but zero).
+- The number of parameters on the symbol must match the rule. This also ` +
+`includes left and right contexts.
 
 The syntax for a parametric rule goes as follows:
 {symbol}({param_0},...) : {condition*} = {derivation_0} : {probability**} ;...
@@ -1376,6 +1379,7 @@ interface LSystemRule
 {
     left?: string;
     right?: string;
+    count: [number, number, number];
     params?: {[key: string]: [string, number]};
     paramMap?: (v: string, l: BigNumber[], m: BigNumber[], r: BigNumber[]) =>
     BigNumber;
@@ -1489,30 +1493,38 @@ class LSystem
             if(!contextMatch[6])
                 continue;
 
-            let tmpRule: LSystemRule = {};
+            let tmpRule: LSystemRule =
+            {
+                count: [0, 0, 0]
+            };
             let ruleParams = {};
+            // Middle
             if(contextMatch[8])
             {
                 let params = contextMatch[8].split(',');
+                tmpRule.count[1] = params.length;
                 for(let j = 0; j < params.length; ++j)
                     ruleParams[params[j]] = ['m', j];
             }
+            // Left
             tmpRule.left = contextMatch[2];
             if(tmpRule.left && contextMatch[4])
             {
                 let params = contextMatch[4].split(',');
+                tmpRule.count[0] = params.length;
                 for(let j = 0; j < params.length; ++j)
                     ruleParams[params[j]] = ['l', j];
             }
+            // Right
             tmpRule.right = contextMatch[10];
             if(tmpRule.right && contextMatch[12])
             {
                 let params = contextMatch[12].split(',');
+                tmpRule.count[2] = params.length;
                 for(let j = 0; j < params.length; ++j)
-                {
                     ruleParams[params[j]] = ['r', j];
-                }
             }
+
             tmpRule.params = ruleParams;
             /*  // O(1) lookup with O(n) memory, I think
             ruleParams = {
@@ -1877,11 +1889,23 @@ class LSystem
                 let ruleChoice = -1;
                 for(let j = 0; j < tmpRules.length; ++j)
                 {
-                    // Left and right first
-                    if(tmpRules[j].left && tmpRules[j].left !=
-                    sequence[ancestors[i]])
+                    // Param count check
+                    let count = seqParams[i] ? seqParams[i].length : 0;
+                    if(tmpRules[j].count[1] != count)
                         continue;
 
+                    // Left check
+                    let left = ancestors[i];
+                    
+                    if(tmpRules[j].left)
+                    {
+                        count = seqParams[left] ? seqParams[left].length : 0;
+                        if(tmpRules[j].left != sequence[left] ||
+                        tmpRules[j].count[0] != count)
+                            continue;
+                    }
+
+                    // Right check
                     let right = -1;
                     if(tmpRules[j].right)
                     {
@@ -1889,8 +1913,10 @@ class LSystem
                         {
                             for(let k = 0; k < children[i].length; ++k)
                             {
-                                if(tmpRules[j].right == sequence[children[i][
-                                k]])
+                                count = seqParams[children[i][k]] ?
+                                seqParams[children[i][k]].length : 0;
+                                if(tmpRules[j].right == sequence[children[i][k]]
+                                && tmpRules[j].count[2] == count)
                                 {
                                     right = children[i][k];
                                     break;
@@ -1902,7 +1928,7 @@ class LSystem
                     }
 
                     let tmpParamMap = (v: string) => this.varGetter(v) ??
-                    tmpRules[j].paramMap(v, seqParams[ancestors[i]],
+                    tmpRules[j].paramMap(v, seqParams[left],
                     seqParams[i], seqParams[right]);
                     // Next up is the condition
                     if(tmpRules[j].condition.evaluate(tmpParamMap)?.isZero)
@@ -3363,7 +3389,7 @@ class ColonyManager
             this.actionGangsta = null;
             return;
         }
-        if(plantData[c.id].actions[id].killColony)
+        if(!plantData[c.id].actions[id].system)
         {
             if(id == 0)
                 this.reap(c);
@@ -3779,7 +3805,6 @@ interface Action
 {
     symbols?: Set<string>;
     system?: LSystem;
-    killColony: boolean
 }
 
 interface Plant
@@ -3903,8 +3928,7 @@ const plantData: {[key: string]: Plant} =
         [
             {   // Always a harvest
                 symbols: new Set('K'),
-                // system: new LSystem('', ['K=']),
-                killColony: true
+                // No system means kill
             }
             // No prune
         ],
@@ -3977,13 +4001,16 @@ const plantData: {[key: string]: Plant} =
         [
             {   // Always a harvest
                 symbols: new Set('KL'),
-                // system: new LSystem('', ['L=']),
-                killColony: true
+                // No system means kill
             },
             {   // Always a prune
-                system: new LSystem('', ['F>K=', 'K</=', 'K=', 'A='], 30, 0,
-                '', ''),
-                killColony: false
+                system: new LSystem('',
+                [
+                    'F(l, lim) > K(s, t) =',
+                    'K(s, t) < /(a) =',
+                    'K(s, t) =',
+                    'A(r, t) ='
+                ], 30, 0, '', '')
             }
         ],
         decimals:
@@ -4054,9 +4081,7 @@ const plantData: {[key: string]: Plant} =
         actions:
         [
             {
-                symbols: new Set('K'),
-                system: new LSystem('', ['K=']),
-                killColony: true
+                symbols: new Set('K')
             }
         ],
         decimals:
@@ -4099,13 +4124,10 @@ const plantData: {[key: string]: Plant} =
         actions:
         [
             {   // Always a harvest
-                symbols: new Set('A'),
-                system: new LSystem('', ['A=']),
-                killColony: true
+                symbols: new Set('A')
             },
             {   // Always a prune
-                system: new LSystem('', ['F=']),
-                killColony: false
+                system: new LSystem('', ['F(l)='])
             }
         ],
         decimals:
@@ -4178,13 +4200,10 @@ const plantData: {[key: string]: Plant} =
         waterCD: 9 * 60,
         actions: [
             {
-                symbols: new Set('L'),
-                // system: new LSystem('', ['L=']),
-                killColony: true
+                symbols: new Set('L')
             },
             {
-                system: new LSystem('', ['K=', 'A=']),
-                killColony: false
+                system: new LSystem('', ['K(t)=', 'A(r, t)='])
             }
         ],
         decimals: {
@@ -4623,7 +4642,7 @@ const settingsLabel = ui.createLatexLabel
         let dt = (time - lastSave) / speeds[speedIdx];
         if(dt < 30)
             return Localization.get('SettingsPopupTitle');
-        return Localization.format(getLoc('labelSave'), dt.toFixed(1));
+        return Localization.format(getLoc('labelSave'), Math.floor(dt));
     },
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
@@ -5344,7 +5363,7 @@ var getCurrencyBarDelegate = () =>
         margin: new Thickness(6, 3, 6, 0),
         horizontalOptions: LayoutOptions.CENTER,
         columnDefinitions: ['auto', 'auto'],
-        columnSpacing: 48,
+        columnSpacing: getBtnSize(ui.screenWidth),
         children: [tauLabel, pennyLabel]
     })
     return ui.createStackLayout
