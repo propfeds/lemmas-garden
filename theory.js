@@ -31,10 +31,10 @@ var getName = (language) => {
 };
 var getDescription = (language) => {
     const descs = {
-        en: `Last night, Lemma didn't sweep away the rubbles on her old garden.
-You did. You are her first student in a long while.
+        en: `Last night, Lemma told you to sweep the rubbles and till her old plot.
+You are her first student in a long while.
 
-Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
+Welcome to Lemma's Garden, an idle botanical theory built on the workings of ` +
             `Lindenmayer systems.`,
     };
     return descs[language] ?? descs.en;
@@ -559,19 +559,25 @@ $: aligns the up vector closest to vertical.
             intro: [
                 {
                     title: `Lemma's Garden`,
-                    contents: `You're not one of my students, are you?
-Surprised anybody would visit this late,
-let alone urge me to let them plant on my ground.
+                    contents: `Not one of my students, are you?
+Surprised to see somebody visit this late,
+let alone *urge* me to let her plant on my ground.
 
-Well then, welcome to... class.`
+(Hum. This is not fine.)
+Hum.
+Well, then, welcome to... class.
+Go till that plot, we'll start in the morning.
+
+Tip: Tap on 'Upgrades' to access permanent upgrades.`
                 },
                 {
                     title: `Welcome to...`,
                     contents: `Hum.
 Can't even bear to look at this soil...
-Go till it, we'll start in the morning.
+You have lots of training to do, still.
 
-And well, if you ever get lost, go peek at my bookshelf.`
+Take one of my seeds, for now.
+And if you ever get lost, *go* peek at my bookshelf.`
                 }
             ],
             basil: {
