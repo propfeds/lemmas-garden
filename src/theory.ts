@@ -27,6 +27,10 @@ import { View } from './api/ui/View';
 import { Easing } from './api/ui/properties/Easing';
 import { StackOrientation } from './api/ui/properties/StackOrientation';
 import { Profiler, profilers } from './api/Profiler';
+import { LatexLabel } from './api/ui/LatexLabel';
+import { Frame } from './api/ui/Frame';
+import { StackLayout } from './api/ui/StackLayout';
+import { Grid } from './api/ui/Grid';
 
 var id = 'lemmas_garden';
 var getName = (language: string): string =>
@@ -43,17 +47,17 @@ var getDescription = (language: string): string =>
     const descs =
     {
         en:
-`Last night, Lemma didn't sweep away the rubbles on her old garden.
-You did. You are her first student in a long while.
+`Last night, Lemma told you to sweep the rubbles and till her old plot.
+You are her first student in a long while.
 
-Welcome to Lemma's Garden, an idle botanical theory built on the grammar of ` +
+Welcome to Lemma's Garden, an idle botanical theory built on the workings of ` +
 `Lindenmayer systems.`,
     };
 
     return descs[language] ?? descs.en;
 }
 var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
-var version = 0.21;
+var version = 0.22;
 
 // Numbers are often converted into 32-bit signed integers in JINT.
 const INT_MAX = 0x7fffffff;
@@ -73,7 +77,7 @@ const LOC_STRINGS =
 {
     en:
     {
-        versionName: `Version: 0.2.1, 'Less Dry'`,
+        versionName: `Version: 0.2.2, 'Less Unhinged'`,
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
@@ -90,9 +94,10 @@ const LOC_STRINGS =
         btnPage: 'p. {0}',
 
         actionConfirmDialogue: `You are about to perform a {0} on\\\\
-{3} (plot {1}, {2}).\\\\\n\n\\\\{4}`,
+{3} (plot {1}-{2}).\\\\\n\n\\\\{4}`,
 
         labelSave: 'Last saved: {0}s',
+        labelSkip: 'Skip tutorial',
         labelWater: 'Water',
         labelActions: ['Harvest', 'Prune'],
         labelFilter: 'Filter: ',
@@ -137,10 +142,11 @@ symbol is drawn depending on its parameters.`,
         labelHarvestStage: 'Harvest stage',
 
         colony: `{0} of {1}, stage {2}`,
+        colonyWMaxStg: `{0} of {1}, stage {2}/{3}`,
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
         colonyStats: `Energy\\colon\\enspace {0} +{1}/s\\\\
 Growth\\colon\\enspace {2}/{3} +{4}/s\\\\
-Profit\\colon\\enspace {5}p\\\\{6}`,
+Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
         dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}\\\\{5}',
         dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\{5}',
         hacks: 'Hax',
@@ -157,18 +163,18 @@ Profit\\colon\\enspace {5}p\\\\{6}`,
         switchPlant: 'Switch plant (plot {0})',
         switchPlantInfo: 'Cycles through the list of plants',
         plotPlant: 'Plot {0}: {1}',
-        viewColony: 'Examine colony',
+        viewColony: 'Examine',
         viewColonyInfo: 'Displays details about the colony',
         switchColony: 'Switch colony ({0}/{1})',
         switchColonyInfo: 'Cycles through the list of colonies',
 
         labelSpeed: 'Game speed: {0}x',
-        labelGM3D: '3D graph: ',
-        labelActionConfirm: 'Confirmation dialogues: ',
-        graphModes2D:
+        labelGM3D: '3D illustration: ',
+        labelActionConfirm: 'Confirmation dialogue: ',
+        lineGraphModes:
         [
             '2D graph: Off',
-            '2D graph: Photo-synthesis',
+            '2D graph: Photosynthesis',
             '2D graph: Growth'
         ],
         colonyModes:
@@ -178,10 +184,10 @@ Profit\\colon\\enspace {5}p\\\\{6}`,
             'Colony view: Simple',
             'Colony view: List'
         ],
-        actionPanelLocations:
+        actionPanelModes:
         [
-            'Time display: Top',
-            'Time display: Bottom'
+            'Action panel: Bottom',
+            'Action panel: Top'
         ],
         plotTitleModes:
         [
@@ -190,10 +196,10 @@ Profit\\colon\\enspace {5}p\\\\{6}`,
         ],
         quatModes:
         [
-            'Quaternary: Potential profit',
-            'Quaternary: Colony grid',
-            'Quaternary: Perf (instant/avg)',
-            'Quaternary: Perf (min/max)'
+            'Account: Expected revenue',
+            'Account: Colonies',
+            'Account: Performance (latest/avg)',
+            'Account: Performance (min/max)'
         ],
 
         plants:
@@ -203,11 +209,12 @@ Profit\\colon\\enspace {5}p\\\\{6}`,
                 name: 'Calendula',
                 nameShort: 'C',
                 info: 'A classic flower to start the month.',
-                LsDetails: `A(r, t): apex (stem shoot) providing r energy/sec.
-t stages left until it splits.\\\\F(l, lim): internode of length l (grows up to
-lim).\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0.\\\\K(p):
-flower of size p.\\\\L(r, lim): leaf providing r energy/s (grows up to lim).
-\\\\—\\\\Harvest returns profit as the sum of all K sizes.`,
+                LsDetails: `A(r, t): apex (stem shoot) providing r energy/s. Has
+t stages left until it splits.\\\\F(l, lim): internode of length l, growing up
+to lim.\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0, when
+it would turn into K.\\\\K(p): flower of size p.\\\\L(r, lim): leaf providing r
+energy/s, growing up to lim. \\\\—\\\\Harvest returns profit as the sum of all K
+sizes.`,
                 stages:
                 {
                     index:
@@ -235,8 +242,8 @@ known as the golden angle.`,
                     27: 'A second flower bud appears!',
                     28: 'The third and final flower appears.',
                     30: 'My wife used to munch on these flowers, raw.',
-                    31: `Try it!\\\\No, ;) I'm jesting. We'll sell them, for a
-little profit.`,
+                    31: `Try it!\\\\Naw, only teasing you ;). Sell them later
+for a little profit.`,
                     35: 'The first flower matures.',
                     39: 'The second flower matures.',
                     40: 'All flowers have reached maturity.',
@@ -330,9 +337,9 @@ friend of all mathematicians.`
                 }
             },
         },
-        plantStats: `({0}) {1}\\\\—\\\\Max. stage: {2}\\\\Synthesis rate: ` +
-`{3}/s (noon)\\\\Growth rate: {4}/s\\\\Growth cost: {5} × {6} ` +
-`symbols\\\\—\\\\Sequence:`,
+        plantStats: `({0}) {1}\\\\—\\\\Photosynthesis ` +
+`rate: {3}/s (noon)\\\\Growth rate: {4}/s\\\\Growth cost: {5} × {6} symbols` +
+`\\\\—\\\\Sequence:`,
         noCommentary: 'No commentary.',
         noLsDetails: 'No explanations.',
 
@@ -575,8 +582,11 @@ The symbol will only evolve according to this rule if its ancestor bears the ` +
 `Beyond geometric applications, parametric L-systems allow individual ` +
 `symbols to hold additional information such as its state of growth, elapsed ` +
 `time, etc. They can be even peeked at in context-sensitive rules!
-When there are multiple rules specified for a symbol, the first one with a ` +
-`matching condition will be chosen.
+When there are multiple rules specified for a symbol, the chosen one will be ` +
+`selected according to two criteria:
+- The condition evaluates to true (anything but zero).
+- The number of parameters on the symbol must match the rule. This also ` +
+`includes left and right contexts.
 
 The syntax for a parametric rule goes as follows:
 {symbol}({param_0},...) : {condition*} = {derivation_0} : {probability**} ;...
@@ -636,20 +646,26 @@ $: aligns the up vector closest to vertical.
                 {
                     title: `Lemma's Garden`,
                     contents:
-`You're not one of my students, are you?
-Surprised anybody would visit this late,
-let alone urge me to let them plant on my ground.
+`Not one of my students, are you?
+Surprised to see somebody visit this late,
+let alone *urge* me to let her plant on my ground.
 
-Well then, welcome to... class.`
+(Hum. This is not fine.)
+Hum.
+Well, then, welcome to... class.
+Go till that plot, we'll start in the morning.
+
+Tip: Tap on 'Upgrades' to access permanent upgrades.`
                 },
                 {
                     title: `Welcome to...`,
                     contents:
 `Hum.
 Can't even bear to look at this soil...
-Go till it, we'll start in the morning.
+You have lots of training to do, still.
 
-And, if you ever get lost, go peek at my bookshelf.`
+Take one of my seeds, for now.
+And if you ever get lost, *go* peek at my bookshelf.`
                 }
             ],
             basil:
@@ -822,15 +838,6 @@ let binarySearch = (arr: number[], target: number): number =>
 let saturate = (x: number | BigNumber, min: number | BigNumber,
 max: number | BigNumber) => x > max ? max : x < min ? min : x;
 
-const yearStartLookup = [0];
-
-for(let i = 1; i <= 400; ++i)
-{
-    let leap = !(i%4) && (!!(i%100) || !(i%400));
-    let offset = leap ? 366 : 365;
-    yearStartLookup[i] = yearStartLookup[i-1] + offset;
-}
-
 /**
  * Converts a number into a Unicode compliant subscripted string.
  */
@@ -856,6 +863,14 @@ let getCoordString = (x: number): string => x.toFixed(x >= -0.01 ?
 );
 
 /**
+ * Returns a C-style formatted string from a BigNumber. Note that it can only
+ * handle up to the Number limit.
+ * @param {BigNumber} x the number.
+ * @returns {string}
+ */
+let getCString = (x: BigNumber): string => parseFloat(x.toString(6)).toString();
+
+/**
  * Purge a string array of empty lines.
  * @param {string[]} arr the array.
  * @returns {string[]}
@@ -874,6 +889,15 @@ let purgeEmpty = (arr: string[]): string[] =>
         }
     }
     return result;
+}
+
+const yearStartLookup = [0];
+
+for(let i = 1; i <= 400; ++i)
+{
+    let leap = !(i%4) && (!!(i%100) || !(i%400));
+    let offset = leap ? 366 : 365;
+    yearStartLookup[i] = yearStartLookup[i-1] + offset;
 }
 
 // Classes
@@ -1361,6 +1385,7 @@ interface LSystemRule
 {
     left?: string;
     right?: string;
+    count: [number, number, number];
     params?: {[key: string]: [string, number]};
     paramMap?: (v: string, l: BigNumber[], m: BigNumber[], r: BigNumber[]) =>
     BigNumber;
@@ -1474,30 +1499,38 @@ class LSystem
             if(!contextMatch[6])
                 continue;
 
-            let tmpRule: LSystemRule = {};
+            let tmpRule: LSystemRule =
+            {
+                count: [0, 0, 0]
+            };
             let ruleParams = {};
+            // Middle
             if(contextMatch[8])
             {
                 let params = contextMatch[8].split(',');
+                tmpRule.count[1] = params.length;
                 for(let j = 0; j < params.length; ++j)
                     ruleParams[params[j]] = ['m', j];
             }
+            // Left
             tmpRule.left = contextMatch[2];
             if(tmpRule.left && contextMatch[4])
             {
                 let params = contextMatch[4].split(',');
+                tmpRule.count[0] = params.length;
                 for(let j = 0; j < params.length; ++j)
                     ruleParams[params[j]] = ['l', j];
             }
+            // Right
             tmpRule.right = contextMatch[10];
             if(tmpRule.right && contextMatch[12])
             {
                 let params = contextMatch[12].split(',');
+                tmpRule.count[2] = params.length;
                 for(let j = 0; j < params.length; ++j)
-                {
                     ruleParams[params[j]] = ['r', j];
-                }
             }
+
             tmpRule.params = ruleParams;
             /*  // O(1) lookup with O(n) memory, I think
             ruleParams = {
@@ -1862,11 +1895,23 @@ class LSystem
                 let ruleChoice = -1;
                 for(let j = 0; j < tmpRules.length; ++j)
                 {
-                    // Left and right first
-                    if(tmpRules[j].left && tmpRules[j].left !=
-                    sequence[ancestors[i]])
+                    // Param count check
+                    let count = seqParams[i] ? seqParams[i].length : 0;
+                    if(tmpRules[j].count[1] != count)
                         continue;
 
+                    // Left check
+                    let left = ancestors[i];
+                    
+                    if(tmpRules[j].left)
+                    {
+                        count = seqParams[left] ? seqParams[left].length : 0;
+                        if(tmpRules[j].left != sequence[left] ||
+                        tmpRules[j].count[0] != count)
+                            continue;
+                    }
+
+                    // Right check
                     let right = -1;
                     if(tmpRules[j].right)
                     {
@@ -1874,8 +1919,10 @@ class LSystem
                         {
                             for(let k = 0; k < children[i].length; ++k)
                             {
-                                if(tmpRules[j].right == sequence[children[i][
-                                k]])
+                                count = seqParams[children[i][k]] ?
+                                seqParams[children[i][k]].length : 0;
+                                if(tmpRules[j].right == sequence[children[i][k]]
+                                && tmpRules[j].count[2] == count)
                                 {
                                     right = children[i][k];
                                     break;
@@ -1887,7 +1934,7 @@ class LSystem
                     }
 
                     let tmpParamMap = (v: string) => this.varGetter(v) ??
-                    tmpRules[j].paramMap(v, seqParams[ancestors[i]],
+                    tmpRules[j].paramMap(v, seqParams[left],
                     seqParams[i], seqParams[right]);
                     // Next up is the condition
                     if(tmpRules[j].condition.evaluate(tmpParamMap)?.isZero)
@@ -2171,8 +2218,7 @@ class LSystem
                 {
                     let paramStrings: string[] = [];
                     for(let j = 0; j < params[i].length; ++j)
-                        paramStrings[j] = parseFloat(params[i][j].toString(6))
-                        .toString();
+                        paramStrings[j] = getCString(params[i][j]);
                     result += `(${paramStrings.join(', ')})`;
                 }
                 
@@ -3196,8 +3242,13 @@ class ColonyManager
         if(!c.propagated && plantUnlocks.includes(c.id))
             plants[plot][c.id].level -= Math.min(plants[plot][c.id].level,
             c.population);
-        if(index == this.colonies[plot].length - 1)
-            switchColony.buy(1);
+        if(index == this.colonies[plot].length - 1 && plot == plotIdx)
+        {
+            let len = this.colonies[plotIdx].length;
+            colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) % len;
+            selectedColony = this.colonies[plotIdx][colonyIdx[plotIdx]];
+            renderer.colony = selectedColony;
+        }
         if(this.gangsta && plot == this.gangsta[0])
         {
             if(this.gangsta[1] > index)
@@ -3344,7 +3395,7 @@ class ColonyManager
             this.actionGangsta = null;
             return;
         }
-        if(plantData[c.id].actions[id].killColony)
+        if(!plantData[c.id].actions[id].system)
         {
             if(id == 0)
                 this.reap(c);
@@ -3760,7 +3811,6 @@ interface Action
 {
     symbols?: Set<string>;
     system?: LSystem;
-    killColony: boolean
 }
 
 interface Plant
@@ -3809,7 +3859,7 @@ const nofPlots = 6;
 const maxColoniesPerPlot = 4;
 const waterAmount = BigNumber.ONE;
 
-const plotCosts = new FirstFreeCost(new ExponentialCost(900, Math.log2(120)));
+const plotCosts = new FirstFreeCost(new ExponentialCost(800, Math.log2(120)));
 const plantUnlocks = ['calendula', 'basil', 'campion'];
 const plantUnlockCosts = new CompositeCost(1,
 new ConstantCost(2100),
@@ -3821,7 +3871,7 @@ const permaCosts =
     BigNumber.from(1e45)
 ];
 
-const taxRate = BigNumber.from(-.12);
+const taxRate = BigNumber.from(.12);
 const tauRate = BigNumber.TWO;
 const pubCoef = BigNumber.from(2/3);
 // @ts-expect-error
@@ -3884,8 +3934,7 @@ const plantData: {[key: string]: Plant} =
         [
             {   // Always a harvest
                 symbols: new Set('K'),
-                // system: new LSystem('', ['K=']),
-                killColony: true
+                // No system means kill
             }
             // No prune
         ],
@@ -3958,13 +4007,16 @@ const plantData: {[key: string]: Plant} =
         [
             {   // Always a harvest
                 symbols: new Set('KL'),
-                // system: new LSystem('', ['L=']),
-                killColony: true
+                // No system means kill
             },
             {   // Always a prune
-                system: new LSystem('', ['F>K=', 'K</=', 'K=', 'A='], 30, 0,
-                '', ''),
-                killColony: false
+                system: new LSystem('',
+                [
+                    'F(l, lim) > K(s, t) =',
+                    'K(s, t) < /(a) =',
+                    'K(s, t) =',
+                    'A(r, t) ='
+                ], 30, 0, '', '')
             }
         ],
         decimals:
@@ -4035,9 +4087,7 @@ const plantData: {[key: string]: Plant} =
         actions:
         [
             {
-                symbols: new Set('K'),
-                system: new LSystem('', ['K=']),
-                killColony: true
+                symbols: new Set('K')
             }
         ],
         decimals:
@@ -4080,13 +4130,10 @@ const plantData: {[key: string]: Plant} =
         actions:
         [
             {   // Always a harvest
-                symbols: new Set('A'),
-                system: new LSystem('', ['A=']),
-                killColony: true
+                symbols: new Set('A')
             },
             {   // Always a prune
-                system: new LSystem('', ['F=']),
-                killColony: false
+                system: new LSystem('', ['F(l)='])
             }
         ],
         decimals:
@@ -4159,13 +4206,10 @@ const plantData: {[key: string]: Plant} =
         waterCD: 9 * 60,
         actions: [
             {
-                symbols: new Set('L'),
-                // system: new LSystem('', ['L=']),
-                killColony: true
+                symbols: new Set('L')
             },
             {
-                system: new LSystem('', ['K=', 'A=']),
-                killColony: false
+                system: new LSystem('', ['K(t)=', 'A(r, t)='])
             }
         ],
         decimals: {
@@ -4223,21 +4267,21 @@ let growthCoord = 0;
 let insolationIntegral = 0;
 let growthIntegral = 0;
 let plotIdx = 0;
-let colonyIdx = new Array(nofPlots).fill(0);
-let plantIdx = new Array(nofPlots).fill(0);
+let colonyIdx: number[] = new Array(nofPlots).fill(0);
+let plantIdx: number[] = new Array(nofPlots).fill(0);
 let selectedColony: Colony = null;
 let finishedTutorial = false;
 let actuallyPlanting = true;
 
 let speedIdx = 1;
-const enum GraphModes2D
+const enum LineGraphModes
 {
     OFF,
     INSOLATION,
     GROWTH,
     _SIZE
 }
-let graphMode2D = GraphModes2D.INSOLATION;
+let graphMode2D = LineGraphModes.INSOLATION;
 let graphMode3D = true;
 const enum ColonyModes
 {
@@ -4248,7 +4292,7 @@ const enum ColonyModes
     _SIZE
 }
 let colonyMode = ColonyModes.VERBOSE;
-let fancyPlotTitle = true;
+let fancyPlotTitle = false;
 let actionPanelOnTop = false;
 let actionConfirm = true;
 const enum QuaternaryModes
@@ -4291,10 +4335,6 @@ let quaternaryEntries =
     new QuaternaryEntry('p_5', null),
     new QuaternaryEntry('p_6', null),
 ];
-let taxQuaternaryEntry =
-[
-    new QuaternaryEntry('T_{\\text{p}}', null)
-];
 
 let perfNames =
 [
@@ -4322,13 +4362,14 @@ let perfs = perfNames.map(element => profilers.get(element[0]));
 let perfQuaternaryEntries = perfNames.map(element =>
 new QuaternaryEntry(element[1], null));
 
-let createFramedButton = (params: {[x: string]: any}, margin: number,
-callback: {(): void}, image: ImageSource) =>
+let createImageFrameBtn = (params: {[x: string]: any}, callback: {(): void},
+image: ImageSource) =>
 {
+    let triggerable = true;
     let frame = ui.createFrame
     ({
         cornerRadius: 1,
-        margin: new Thickness(margin),
+        margin: new Thickness(2),
         padding: new Thickness(1),
         hasShadow: true,
         heightRequest: getImageSize(ui.screenWidth),
@@ -4339,37 +4380,117 @@ callback: {(): void}, image: ImageSource) =>
             aspect: Aspect.ASPECT_FIT,
             useTint: false
         }),
-        borderColor: Color.BORDER
+        borderColor: Color.BORDER,
+        ...params
     });
-    return ui.createStackLayout
-    ({
-        ...params,
-        children:
-        [
-            frame
-        ],
-        onTouched: (e: TouchEvent) =>
+    frame.onTouched = (e: TouchEvent) =>
+    {
+        if(e.type == TouchType.PRESSED)
         {
-            if(e.type == TouchType.PRESSED)
-            {
-                frame.borderColor = Color.TRANSPARENT;
-                // frame.hasShadow = false;
-            }
-            else if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            e.type == TouchType.LONGPRESS_RELEASED)
+            frame.borderColor = Color.TRANSPARENT;
+            // frame.hasShadow = false;
+        }
+        else if(e.type.isReleased())
+        {
+            frame.borderColor = Color.BORDER;
+            // frame.hasShadow = true;
+            if(triggerable)
             {
                 Sound.playClick();
-                frame.borderColor = Color.BORDER;
-                // frame.hasShadow = true;
                 callback();
             }
-            else if(e.type == TouchType.CANCELLED)
-            {
-                frame.borderColor = Color.BORDER;
-                // frame.hasShadow = true;
-            }
+            else
+                triggerable = true;
         }
+        else if(e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
+        e.x > frame.width || e.y > frame.height))
+        {
+            frame.borderColor = Color.BORDER;
+            // frame.hasShadow = true;
+            triggerable = false;
+        }
+    };
+    return frame;
+}
+
+let createLabelFrameBtn = (params: {[x: string]: any}, callback: {(): void},
+text: string, fontSize: number = 14): Frame =>
+{
+    let triggerable = true;
+    let frame = ui.createFrame
+    ({
+        cornerRadius: 1,
+        // padding: new Thickness(10, 2),
+        verticalOptions: LayoutOptions.CENTER,
+        content: ui.createLatexLabel
+        ({
+            text,
+            horizontalTextAlignment: TextAlignment.CENTER,
+            verticalTextAlignment: TextAlignment.CENTER,
+            textColor: Color.TEXT,
+            fontSize
+        }),
+        borderColor: Color.BORDER,
+        ...params
     });
+    frame.onTouched = (e: TouchEvent) =>
+    {
+        if(e.type == TouchType.PRESSED)
+        {
+            frame.borderColor = Color.TRANSPARENT;
+            (<LatexLabel>frame.content).textColor = Color.TEXT_MEDIUM;
+        }
+        else if(e.type.isReleased())
+        {
+            frame.borderColor = Color.BORDER;
+            (<LatexLabel>frame.content).textColor = Color.TEXT;
+            if(triggerable)
+            {
+                Sound.playClick();
+                callback();
+            }
+            else
+                triggerable = true;
+        }
+        else if(e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
+        e.x > frame.width || e.y > frame.height))
+        {
+            frame.borderColor = Color.BORDER;
+            (<LatexLabel>frame.content).textColor = Color.TEXT;
+            triggerable = false;
+        }
+    };
+    return frame;
+}
+
+let createHesitantSwitch = (params: {[x: string]: any}, callback: {(): void},
+isToggled: boolean | {(): boolean}) =>
+{
+    let triggerable = true;
+    let element = ui.createSwitch
+    ({
+        horizontalOptions: LayoutOptions.CENTER,
+        onColor: Color.BORDER,
+        isToggled,
+        onTouched: (e: TouchEvent) =>
+        {
+            if(e.type.isReleased())
+            {
+                if(triggerable)
+                {
+                    Sound.playClick();
+                    callback();
+                }
+                else
+                    triggerable = true;
+            }
+            else if(e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
+            e.x > element.width || e.y > element.height))
+                triggerable = false;
+        },
+        ...params
+    });
+    return element;
 }
 
 // const actionsLabel = ui.createLatexLabel
@@ -4384,15 +4505,11 @@ callback: {(): void}, image: ImageSource) =>
 //     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
 // });
 
-const waterFrame = createFramedButton
+const waterFrame = createImageFrameBtn
 ({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 0,
-}, 2, () =>
-{
-    manager.water(selectedColony);
-},
-game.settings.theme == Theme.LIGHT ?
+}, () => manager.water(selectedColony), game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png'));
 const waterLabel = ui.createLatexLabel
@@ -4431,11 +4548,11 @@ const waterLabel = ui.createLatexLabel
     textColor: Color.TEXT_MEDIUM
 });
 
-const harvestFrame = createFramedButton
+const harvestFrame = createImageFrameBtn
 ({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 2,
-}, 2, () =>
+}, () =>
 {
     if(actionConfirm)
     {
@@ -4461,7 +4578,7 @@ const harvestLabel = ui.createLatexLabel
     textColor: Color.TEXT_MEDIUM
 });
 
-const pruneFrame = createFramedButton
+const pruneFrame = createImageFrameBtn
 ({
     isVisible: () =>
     {
@@ -4471,7 +4588,7 @@ const pruneFrame = createFramedButton
         return true;
     },
     row: 0, column: 4,
-}, 2, () =>
+}, () =>
 {
     if(actionConfirm)
     {
@@ -4528,26 +4645,66 @@ const settingsLabel = ui.createLatexLabel
     margin: new Thickness(0, 9),
     text: () =>
     {
-        let multiplier = game.isRewardActive ? 1.5 : 1;
-        let dt = (time - lastSave) / multiplier;
+        let dt = (time - lastSave) / speeds[speedIdx];
         if(dt < 30)
             return Localization.get('SettingsPopupTitle');
-        return Localization.format(getLoc('labelSave'), dt.toFixed(1));
+        return Localization.format(getLoc('labelSave'), Math.floor(dt));
     },
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const settingsFrame = createFramedButton
+const settingsFrame = createImageFrameBtn
 ({
-    column: 0,
+    row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
-}, 2, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
+}, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/spoted-flower.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/spoted-flower.png'));
 
+// const skipLabel = ui.createLatexLabel
+// ({
+//     row: 1, column: 1,
+//     isVisible: !finishedTutorial,
+//     verticalTextAlignment: TextAlignment.START,
+//     margin: new Thickness(0, 9),
+//     text: getLoc('labelSkip'),
+//     fontSize: 10,
+//     textColor: Color.TEXT_MEDIUM
+// });
+// const skipFrame = createFramedButton
+// ({
+//     row: 1, column: 0,
+//     isVisible: !finishedTutorial,
+//     horizontalOptions: LayoutOptions.START
+// }, 2, () =>
+// {
+//     plotPerma.buy(1);
+//     updateAvailability();
+// }, game.settings.theme == Theme.LIGHT ?
+// ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/shiny-apple.png') :
+// ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/shiny-apple.png'));
+
+var controlStack = ui.createStackLayout
+({
+    isVisible: false,
+    margin: new Thickness(6, 0, 6, 6),
+    orientation: StackOrientation.VERTICAL,
+    children:
+    [
+        ui.createGrid
+        ({
+            columnSpacing: 8,
+            rowSpacing: 6,
+            rowDefinitions: ['auto'],
+            columnDefinitions: ['50*', '50*']
+        })
+    ]
+});
+
 var switchPlant: Upgrade;
-var viewColony: Upgrade;
-var switchColony: Upgrade;
+// var viewColony: Upgrade;
+// var switchColony: Upgrade;
+// var switchbackColony: Upgrade;
 
 var plants = Array.from({length: nofPlots}, (_) => {return {};});
 
@@ -4568,72 +4725,10 @@ var taxCurrency: Currency;
 var init = () =>
 {
     currency = theory.createCurrency('p', 'p');
-    taxCurrency = theory.createCurrency(getLoc('currencyTax'));
+    taxCurrency = theory.createCurrency(`T_{\\text{p}}`);
 
-    /* Switch plant
-    Moduloose
-    */
-    {
-        switchPlant = theory.createSingularUpgrade(0, currency, new FreeCost);
-        switchPlant.getDescription = () => Localization.format(
-        getLoc('switchPlant'), plotIdx + 1);
-        switchPlant.info = getLoc('switchPlantInfo');
-        switchPlant.bought = (_) =>
-        {
-            switchPlant.level = 0;
-            if(manager.colonies[plotIdx].length)
-                return;
-            plants[plotIdx][plantUnlocks[plantIdx[plotIdx]]].isAvailable =
-            false;
-            plantIdx[plotIdx] = (plantIdx[plotIdx] + 1) %
-            (plantPerma.level + 1);
-            plants[plotIdx][plantUnlocks[plantIdx[plotIdx]]].isAvailable = true;
-            // updateAvailability();
-        };
-        switchPlant.isAvailable = false;
-    }
-    /* Switch colony
-    Modulow
-    */
-    {
-        switchColony = theory.createSingularUpgrade(2, currency, new FreeCost);
-        switchColony.getDescription = () => Localization.format(
-        getLoc('switchColony'), colonyIdx[plotIdx] + 1,
-        manager.colonies[plotIdx].length);
-        switchColony.info = getLoc('switchColonyInfo');
-        switchColony.bought = (_) =>
-        {
-            switchColony.level = 0;
-            if(manager.colonies[plotIdx].length < 2)
-                return;
-
-            colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) %
-            manager.colonies[plotIdx].length;
-            selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-            renderer.colony = selectedColony;
-        };
-        switchColony.isAvailable = false;
-    }
-    /* View colony
-    Essential in learning the game.
-    */
-    {
-        viewColony = theory.createSingularUpgrade(1, currency, new FreeCost);
-        viewColony.description = getLoc('viewColony');
-        viewColony.info = getLoc('viewColonyInfo');
-        viewColony.bought = (_) =>
-        {
-            viewColony.level = 0;
-            selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-            if(!selectedColony)
-                return;
-            let seqMenu = createColonyViewMenu(selectedColony);
-            seqMenu.show();
-        };
-        viewColony.isAvailable = false;
-    }
-
-    /* Plants & switch plants
+    /* Plants
+    No zombies.
     */
     for(let i = 0; i < nofPlots; ++i)
     {
@@ -4677,6 +4772,97 @@ var init = () =>
             plants[i][plantUnlocks[j]].isAvailable = false;
         }
     }
+
+    /* Switch plant
+    Moduloes
+    */
+    {
+        switchPlant = theory.createUpgrade(-1, currency, new FreeCost);
+        switchPlant.getDescription = () => Localization.format(
+        getLoc('switchPlant'), plotIdx + 1);
+        switchPlant.info = getLoc('switchPlantInfo');
+        switchPlant.bought = (_) =>
+        {
+            switchPlant.level = 0;
+            if(switchPlant.isAutoBuyable)
+            {
+                switchPlant.isAutoBuyable = false;
+                return;
+            }
+            if(plants[plotIdx][plantUnlocks[plantIdx[plotIdx]]].level)
+                return;
+            plants[plotIdx][plantUnlocks[plantIdx[plotIdx]]].isAvailable =
+            false;
+            plantIdx[plotIdx] = (plantIdx[plotIdx] + 1) %
+            (plantPerma.level + 1);
+            plants[plotIdx][plantUnlocks[plantIdx[plotIdx]]].isAvailable = true;
+            // updateAvailability();
+        };
+        switchPlant.isAvailable = false;
+        switchPlant.isAutoBuyable = false;
+    }
+    /* Switchback colony
+    Too late to look back.
+    */
+    // {
+    //     switchbackColony = theory.createUpgrade(-3, currency, new FreeCost);
+    //     switchbackColony.getDescription = () => Localization.format(
+    //     getLoc('switchColony'), colonyIdx[plotIdx] + 1,
+    //     manager.colonies[plotIdx].length);
+    //     switchbackColony.info = getLoc('switchColonyInfo');
+    //     switchbackColony.bought = (_) =>
+    //     {
+    //         switchbackColony.level = 0;
+    //         let len = manager.colonies[plotIdx].length;
+    //         if(len < 2)
+    //             return;
+
+    //         colonyIdx[plotIdx] = (colonyIdx[plotIdx] - 1 + len) % len;
+    //         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    //         renderer.colony = selectedColony;
+    //     };
+    //     switchbackColony.isAvailable = false;
+    // }
+    /* Switch colony
+    Modulow
+    */
+    // {
+    //     switchColony = theory.createUpgrade(-2, currency, new FreeCost);
+    //     switchColony.getDescription = () => Localization.format(
+    //     getLoc('switchColony'), colonyIdx[plotIdx] + 1,
+    //     manager.colonies[plotIdx].length);
+    //     switchColony.info = getLoc('switchColonyInfo');
+    //     switchColony.bought = (_) =>
+    //     {
+    //         switchColony.level = 0;
+    //         let len = manager.colonies[plotIdx].length;
+    //         if(len < 2)
+    //             return;
+
+    //         colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) % len;
+    //         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    //         renderer.colony = selectedColony;
+    //     };
+    //     switchColony.isAvailable = false;
+    // }
+    /* View colony
+    Essential in learning the game.
+    */
+    // {
+    //     viewColony = theory.createUpgrade(-4, currency, new FreeCost);
+    //     viewColony.description = getLoc('viewColony');
+    //     viewColony.info = getLoc('viewColonyInfo');
+    //     viewColony.bought = (_) =>
+    //     {
+    //         viewColony.level = 0;
+    //         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    //         if(!selectedColony)
+    //             return;
+    //         let seqMenu = createColonyViewMenu(selectedColony);
+    //         seqMenu.show();
+    //     };
+    //     viewColony.isAvailable = false;
+    // }
 
     /* Notebook
     Unlocks when acquiring Buy All.
@@ -4897,6 +5083,10 @@ var updateAvailability = () =>
 {
     perfs[Profilers.AVAILABILITY].exec(() =>
     {
+        let x = plotIdx;
+        let y = colonyIdx;
+        let p = plantIdx;
+
         if(!finishedTutorial)
         {
             finishedTutorial = plotPerma.level > 0;
@@ -4905,16 +5095,19 @@ var updateAvailability = () =>
         else
         {
             shelfPerma.isAvailable = true;
-            switchPlant.isAvailable = !manager.colonies[plotIdx].length;
-            viewColony.isAvailable = manager.colonies[plotIdx].length >= 1;
-            switchColony.isAvailable = manager.colonies[plotIdx].length > 1;
+            switchPlant.isAvailable = !plants[x][plantUnlocks[p[x]]].level &&
+            plantPerma.level > 0;
+            controlStack.isVisible = true;
+            // skipLabel.isVisible = !finishedTutorial;
+            // skipFrame.isVisible = !finishedTutorial;
         }
+
         for(let i = 0; i < plotPerma.level; ++i)
         {
             for(let j = 0; j < plantUnlocks.length; ++j)
                 plants[i][plantUnlocks[j]].isAvailable =
                 plants[i][plantUnlocks[j]].level > 0 ||
-                (j == plantIdx[i] && j <= plantPerma.level);
+                (j == p[i] && j <= plantPerma.level);
         }
     });
 }
@@ -5021,6 +5214,10 @@ var getEquationOverlay = () =>
                 horizontalOptions: LayoutOptions.START,
                 verticalOptions: () => actionPanelOnTop ? LayoutOptions.END :
                 LayoutOptions.START,
+                rowDefinitions:
+                [
+                    'auto', 'auto'
+                ],
                 columnDefinitions:
                 [
                     'auto', 'auto'
@@ -5030,7 +5227,9 @@ var getEquationOverlay = () =>
                 children:
                 [
                     settingsFrame,
-                    settingsLabel
+                    settingsLabel,
+                    // skipFrame,
+                    // skipLabel
                 ]
             }),
             ui.createGrid
@@ -5073,24 +5272,125 @@ var getEquationOverlay = () =>
                     // actionsLabel,
                 ]
             })
-            
         ]
     });
     return result;
 }
 
+var getCurrencyBarDelegate = () =>
+{
+    let tauLabel = ui.createLatexLabel
+    ({
+        row: 0, column: 0,
+        text: () => Utils.getMath(`${theory.tau}${theory.latexSymbol}`),
+        heightRequest: getImageSize(ui.screenWidth),
+        // margin: new Thickness(0, 2, 0, 0),
+        fontSize: 12,
+        horizontalTextAlignment: TextAlignment.CENTER,
+        verticalTextAlignment: TextAlignment.CENTER
+    })
+    let pennyLabel = ui.createLatexLabel
+    ({
+        row: 0, column: 1,
+        text: () =>
+        {
+            if(theory.publicationUpgrade.level && theory.canPublish)
+            {
+                // @ts-expect-error
+                taxCurrency.value = getCurrencyFromTau(theory.tau)[0] * taxRate;
+                return Utils.getMath(`${currency.value}
+                \\text{${currency.symbol}}\\enspace (${taxCurrency.symbol} =
+                ${taxCurrency.value}\\text{${currency.symbol}})`);
+            }
+            return Utils.getMath(`${currency.value}\\text{${currency.symbol}}`);
+        },
+        heightRequest: getImageSize(ui.screenWidth),
+        // margin: new Thickness(0, 2, 0, 0),
+        fontSize: 12,
+        horizontalTextAlignment: TextAlignment.CENTER,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+
+    let examineBtn = createLabelFrameBtn
+    ({
+        row: 0, column: 1,
+        heightRequest: getMediumBtnSize(ui.screenWidth)
+    }, () =>
+    {
+        selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+        if(!selectedColony)
+            return;
+        let seqMenu = createColonyViewMenu(selectedColony);
+        seqMenu.show();
+    }, getLoc('viewColony'), 12);
+
+    let switchbackBtn = createLabelFrameBtn
+    ({
+        column: 0,
+        heightRequest: getMediumBtnSize(ui.screenWidth)
+    }, () =>
+    {
+        let len = manager.colonies[plotIdx].length;
+        colonyIdx[plotIdx] = (colonyIdx[plotIdx] - 1 + len) % len;
+        selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+        renderer.colony = selectedColony;
+    }, '↑');
+
+    let switchBtn = createLabelFrameBtn
+    ({
+        column: 1,
+        heightRequest: getMediumBtnSize(ui.screenWidth)
+    }, () =>
+    {
+        let len = manager.colonies[plotIdx].length;
+        colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) % len;
+        selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+        renderer.colony = selectedColony;
+    }, '↓');
+
+    (<Grid>controlStack.children[0]).children =
+    [
+        examineBtn,
+        ui.createGrid
+        ({
+            row: 0,
+            column: 0,
+            columnSpacing: 7,
+            columnDefinitions: ['50*', '50*'],
+            children:
+            [
+                switchbackBtn,
+                switchBtn
+            ]
+        })
+    ];
+    let currencyGrid = ui.createGrid
+    ({
+        margin: new Thickness(6, 3, 6, 0),
+        horizontalOptions: LayoutOptions.CENTER,
+        columnDefinitions: ['auto', 'auto'],
+        columnSpacing: getBtnSize(ui.screenWidth),
+        children: [tauLabel, pennyLabel]
+    })
+    return ui.createStackLayout
+    ({
+        children: [currencyGrid, controlStack]
+    });
+}
+
 /**
  * Returns the colony title for representation.
  */
-let getColonyTitleString = (colony: Colony, prog = false, escapeHash = false) =>
-Localization.format(getLoc(prog ? 'colonyProg' : 'colony'),
-colony.propagated ? `+${colony.population}` : colony.population,
+let getColonyTitleString = (colony: Colony, prog = false, maxStage = false,
+escapeHash = false) =>
+Localization.format(getLoc(prog ? 'colonyProg' : (maxStage ? 'colonyWMaxStg':
+'colony')), colony.propagated ? `+${colony.population}` : colony.population,
 getLoc('plants')[colony.id]?.name ?? `${escapeHash ? '\\' : ''}#${colony.id}`,
 // @ts-expect-error
 colony.stage, prog ? colony.growth * BigNumber.HUNDRED /
 // @ts-expect-error
 (plantData[colony.id].growthCost * BigNumber.from(colony.sequence.length)) :
-'');
+plantData[colony.id].maxStage ?? '∞');
 
 var getPrimaryEquation = () =>
 {
@@ -5136,7 +5436,8 @@ var getSecondaryEquation = () =>
                 plantData[c.id].growthCost * BigNumber.from(c.sequence.length),
                 // @ts-expect-error
                 plantData[c.id].growthRate * BigNumber.from(growthCoord),
-                c.profit, status)}}`;
+                c.profit, colonyIdx[plotIdx] + 1,
+                manager.colonies[plotIdx].length, status)}}`;
                 break;
             case ColonyModes.SIMPLE:
                 result = `\\text{${getColonyTitleString(c)}}\\\\E=${c.energy},
@@ -5244,13 +5545,6 @@ var getQuaternaryEntries = () =>
             break;
     }
 
-    if(theory.publicationUpgrade.level && theory.canPublish)
-    {
-        // @ts-expect-error
-        taxCurrency.value = getCurrencyFromTau(theory.tau)[0] * taxRate;
-        taxQuaternaryEntry[0].value = taxCurrency.value;
-        return quaternaryEntries.concat(taxQuaternaryEntry);
-    }
     return quaternaryEntries;   //.slice(0, plotPerma.level);
 }
 
@@ -5610,27 +5904,22 @@ let createColonyViewMenu = (colony: Colony) =>
             };
         }
     });
-    let paramSwitch = ui.createSwitch
+    let paramSwitch = createHesitantSwitch
     ({
         column: 3,
-        isToggled: colonyViewConfig[colony.id].params,
-        horizontalOptions: LayoutOptions.CENTER,
-        onTouched: (e: TouchEvent) =>
+    }, () =>
+    {
+        colonyViewConfig[colony.id].params =
+        !colonyViewConfig[colony.id].params;
+        paramSwitch.isToggled = colonyViewConfig[colony.id].params;
+        // paramSwitch.isToggled = !paramSwitch.isToggled;
+        // colonyViewConfig[colony.id].params = paramSwitch.isToggled;
+        reconstructionTask =
         {
-            if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            e.type == TouchType.LONGPRESS_RELEASED)
-            {
-                Sound.playClick();
-                colonyViewConfig[colony.id].params =
-                !colonyViewConfig[colony.id].params;
-                paramSwitch.isToggled = colonyViewConfig[colony.id].params;
-                reconstructionTask =
-                {
-                    start: 0
-                };
-            }
-        }
-    });
+            start: 0
+        };
+    }, colonyViewConfig[colony.id].params);
+
     let updateReconstruction = () =>
     {
         if(manager.busy)
@@ -5645,7 +5934,7 @@ let createColonyViewMenu = (colony: Colony) =>
         return reconstructionTask.result;
     }
 
-    let tmpTitle = getColonyTitleString(colony);
+    let tmpTitle = getColonyTitleString(colony, false, true);
     let tmpStage = colony.stage;
     let cmtStage = -1;
     let updateCommentary = () =>
@@ -5711,7 +6000,7 @@ let createColonyViewMenu = (colony: Colony) =>
                 Menu title and commentary are updated dynamically without
                 the player having to close and re-open.
                 */
-                tmpTitle = getColonyTitleString(colony);
+                tmpTitle = getColonyTitleString(colony, false, true);
                 tmpCmt = updateCommentary();
                 plantStats.text = Localization.format(getLoc('plantStats'),
                 cmtStage, tmpCmt, plantData[colony.id].maxStage ?? '∞',
@@ -6221,7 +6510,7 @@ let createConfirmationMenu = (plot: number, index: number, id: number) =>
                 ({
                     text: Localization.format(getLoc('actionConfirmDialogue'),
                     getLoc('labelActions')[id], plot + 1, index + 1,
-                    getColonyTitleString(c, false, true),
+                    getColonyTitleString(c, false, false, true),
                     Localization.get('GenPopupContinue')),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     margin: new Thickness(0, 15)
@@ -6277,8 +6566,8 @@ let createWorldMenu = () =>
     let speedSlider = ui.createSlider
     ({
         row: 0, column: 1,
-        minimum: 0,
-        maximum: speeds.length - 1,
+        minimum: -0.25,
+        maximum: speeds.length - 0.75,
         value: speedIdx,
         onValueChanged: () =>
         {
@@ -6289,7 +6578,7 @@ let createWorldMenu = () =>
         onDragCompleted: () =>
         {
             Sound.playClick();
-            speedSlider.value = speedIdx;
+            // speedSlider.value = speedIdx;
         }
     });
     let GM3Label = ui.createLatexLabel
@@ -6318,43 +6607,37 @@ let createWorldMenu = () =>
             GM3Button
         ]
     });
-    let GM3Switch = ui.createSwitch
+    let GM3Switch = createHesitantSwitch
     ({
-        isToggled: graphMode3D,
-        row: 7, column: 1,
-        horizontalOptions: LayoutOptions.CENTER,
-        onTouched: (e: TouchEvent) =>
-        {
-            if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            e.type == TouchType.LONGPRESS_RELEASED)
-            {
-                Sound.playClick();
-                graphMode3D = !graphMode3D;
-                GM3Switch.isToggled = graphMode3D;
-            }
-        }
-    });
+        row: 7, column: 1
+    }, () =>
+    {
+        graphMode3D = !graphMode3D;
+        GM3Switch.isToggled = graphMode3D;
+        // GM3Switch.isToggled = !GM3Switch.isToggled;
+        // graphMode3D = GM3Switch.isToggled;
+    }, graphMode3D);
     let GM2Label = ui.createLatexLabel
     ({
-        text: getLoc('graphModes2D')[graphMode2D],
+        text: getLoc('lineGraphModes')[graphMode2D],
         row: 6, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM2Slider = ui.createSlider
     ({
         row: 6, column: 1,
-        minimum: 0,
-        maximum: GraphModes2D._SIZE - 1,
+        minimum: -0.25,
+        maximum: LineGraphModes._SIZE - 0.75,
         value: graphMode2D,
         onValueChanged: () =>
         {
             graphMode2D = Math.round(GM2Slider.value);
-            GM2Label.text = getLoc('graphModes2D')[graphMode2D];
+            GM2Label.text = getLoc('lineGraphModes')[graphMode2D];
         },
         onDragCompleted: () =>
         {
             Sound.playClick();
-            GM2Slider.value = graphMode2D;
+            // GM2Slider.value = graphMode2D;
         }
     });
     let CMLabel = ui.createLatexLabel
@@ -6366,8 +6649,8 @@ let createWorldMenu = () =>
     let CMSlider = ui.createSlider
     ({
         row: 4, column: 1,
-        minimum: 0,
-        maximum: ColonyModes._SIZE - 1,
+        minimum: -0.25,
+        maximum: ColonyModes._SIZE - 0.75,
         value: colonyMode,
         onValueChanged: () =>
         {
@@ -6377,79 +6660,60 @@ let createWorldMenu = () =>
         onDragCompleted: () =>
         {
             Sound.playClick();
-            CMSlider.value = colonyMode;
+            // CMSlider.value = colonyMode;
         }
     });
     let APLabel = ui.createLatexLabel
     ({
-        text: getLoc('actionPanelLocations')[Number(actionPanelOnTop)],
+        text: getLoc('actionPanelModes')[Number(actionPanelOnTop)],
         row: 3, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let APSwitch = ui.createSwitch
+    let APSwitch = createHesitantSwitch
     ({
-        isToggled: actionPanelOnTop,
-        row: 3, column: 1,
-        horizontalOptions: LayoutOptions.CENTER,
-        onTouched: (e: TouchEvent) =>
-        {
-            if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            e.type == TouchType.LONGPRESS_RELEASED)
-            {
-                Sound.playClick();
-                actionPanelOnTop = !actionPanelOnTop;
-                APSwitch.isToggled = actionPanelOnTop;
-                APLabel.text = getLoc('actionPanelLocations')[
-                Number(actionPanelOnTop)];
-            }
-        }
-    });
+        row: 3, column: 1
+    }, () =>
+    {
+        actionPanelOnTop = !actionPanelOnTop;
+        APSwitch.isToggled = actionPanelOnTop;
+        // APSwitch.isToggled = !APSwitch.isToggled;
+        // actionPanelOnTop = APSwitch.isToggled;
+        APLabel.text = getLoc('actionPanelModes')[Number(actionPanelOnTop)];
+    }, actionPanelOnTop);
     let PTLabel = ui.createLatexLabel
     ({
         text: getLoc('plotTitleModes')[Number(fancyPlotTitle)],
         row: 2, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let PTSwitch = ui.createSwitch
+    let PTSwitch = createHesitantSwitch
     ({
-        isToggled: fancyPlotTitle,
-        row: 2, column: 1,
-        horizontalOptions: LayoutOptions.CENTER,
-        onTouched: (e: TouchEvent) =>
-        {
-            if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            e.type == TouchType.LONGPRESS_RELEASED)
-            {
-                Sound.playClick();
-                fancyPlotTitle = !fancyPlotTitle;
-                PTSwitch.isToggled = fancyPlotTitle;
-                PTLabel.text = getLoc('plotTitleModes')[Number(fancyPlotTitle)];
-                theory.invalidatePrimaryEquation();
-            }
-        }
-    });
+        row: 2, column: 1
+    }, () =>
+    {
+        fancyPlotTitle = !fancyPlotTitle;
+        PTSwitch.isToggled = fancyPlotTitle;
+        // PTSwitch.isToggled = !PTSwitch.isToggled;
+        // fancyPlotTitle = PTSwitch.isToggled;
+        PTLabel.text = getLoc('plotTitleModes')[Number(fancyPlotTitle)];
+        theory.invalidatePrimaryEquation();
+    }, fancyPlotTitle);
     let ACLabel = ui.createLatexLabel
     ({
         text: getLoc('labelActionConfirm'),
         row: 1, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let ACSwitch = ui.createSwitch
+    let ACSwitch = createHesitantSwitch
     ({
-        isToggled: actionConfirm,
-        row: 1, column: 1,
-        horizontalOptions: LayoutOptions.CENTER,
-        onTouched: (e: TouchEvent) =>
-        {
-            if(e.type == TouchType.SHORTPRESS_RELEASED ||
-            e.type == TouchType.LONGPRESS_RELEASED)
-            {
-                Sound.playClick();
-                actionConfirm = !actionConfirm;
-                ACSwitch.isToggled = actionConfirm;
-            }
-        }
-    });
+        row: 1, column: 1
+    }, () =>
+    {           
+        actionConfirm = !actionConfirm;
+        ACSwitch.isToggled = actionConfirm;
+        // ACSwitch.isToggled = !ACSwitch.isToggled;
+        // actionConfirm = ACSwitch.isToggled;
+    }, actionConfirm);
     let QBLabel = ui.createLatexLabel
     ({
         text: getLoc('quatModes')[quatMode],
@@ -6459,8 +6723,8 @@ let createWorldMenu = () =>
     let QBSlider = ui.createSlider
     ({
         row: 5, column: 1,
-        minimum: 0,
-        maximum: QuaternaryModes._SIZE - 1,
+        minimum: -0.25,
+        maximum: QuaternaryModes._SIZE - 0.75,
         value: quatMode,
         onValueChanged: () =>
         {
@@ -6470,28 +6734,10 @@ let createWorldMenu = () =>
         onDragCompleted: () =>
         {
             Sound.playClick();
-            QBSlider.value = quatMode;
+            // QBSlider.value = quatMode;
             theory.invalidateQuaternaryValues();
         }
     });
-    // let QBSwitch = ui.createSwitch
-    // ({
-    //     isToggled: quatBoard,
-    //     row: 2, column: 1,
-    //     horizontalOptions: LayoutOptions.CENTER,
-    //     onTouched: (e: TouchEvent) =>
-    //     {
-    //         if(e.type == TouchType.SHORTPRESS_RELEASED ||
-    //         e.type == TouchType.LONGPRESS_RELEASED)
-    //         {
-    //             Sound.playClick();
-    //             quatBoard = !quatBoard;
-    //             QBSwitch.isToggled = quatBoard;
-    //             QBLabel.text = getLoc('quatModes')[Number(quatBoard)];
-    //             theory.invalidateQuaternaryValues();
-    //         }
-    //     }
-    // });
 
     let menu = ui.createPopup
     ({
@@ -6597,7 +6843,7 @@ var prePublish = () =>
     // @ts-expect-error
     taxCurrency.value = getCurrencyFromTau(theory.tau)[0] * taxRate;
     // @ts-expect-error
-    tmpCurrency = currency.value + taxCurrency.value;
+    tmpCurrency = currency.value - taxCurrency.value;
     tmpLevels = Array.from({length: nofPlots}, (_) => []);
 }
 
@@ -6841,11 +7087,11 @@ var get2DGraphValue = () =>
 {
     switch(graphMode2D)
     {
-        case GraphModes2D.OFF:
+        case LineGraphModes.OFF:
             return 0;
-        case GraphModes2D.INSOLATION:     // Insolation
+        case LineGraphModes.INSOLATION:     // Insolation
             return insolationCoord;
-        case GraphModes2D.GROWTH:     // Growth
+        case LineGraphModes.GROWTH:     // Growth
             return growthCoord / 2;
     }
 };
