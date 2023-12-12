@@ -4155,7 +4155,10 @@ var getCurrencyBarDelegate = () => {
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
         let len = manager.colonies[plotIdx].length;
-        colonyIdx[plotIdx] = (colonyIdx[plotIdx] - 1 + len) % len;
+        if (len)
+            colonyIdx[plotIdx] = (colonyIdx[plotIdx] - 1 + len) % len;
+        else
+            colonyIdx[plotIdx] = 0;
         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
         renderer.colony = selectedColony;
     }, '↑');
@@ -4164,7 +4167,10 @@ var getCurrencyBarDelegate = () => {
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
         let len = manager.colonies[plotIdx].length;
-        colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) % len;
+        if (len)
+            colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) % len;
+        else
+            colonyIdx[plotIdx] = 0;
         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
         renderer.colony = selectedColony;
     }, '↓');
