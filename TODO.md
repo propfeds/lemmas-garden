@@ -72,12 +72,9 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Ask Uni of Calgary about how to make Ls easier to understand
   - Provide context: making a game about the logical aspects of Ls
 
-- [ ] Follow canonical parametric L-system logic
-  - A production matches a module in a parametric word if the following conditions are met: [...] The number of actual parameters in the module is equal to the number of formal parameters in the production predecessor.
-
-- [x] Change how the Action class works
-  - Remove `killColony`
-  - Kill colony if `system` doesn't exist
+- [ ] Bulk watering when holding button
+  - Waters everything on 1 plot, not the entire garden
+  - NO bulk harvest or prune.
 
 ## v0.3: Invasion
 
@@ -116,9 +113,6 @@ do nothing. Do you feel like it could be more interesting?
   - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
   - [x] Extend rose campion seed period by a few stages
 
-- Calendula
-  - [x] Nerf spread rate to 1/3? Sum equals 1.5 making the pub mult coefficient 2 instead of 1.8
-
 - [x] Button that skips tutorial for iOS players
 - [ ] Dedicated save file for playtesting
 - [ ] Replace 'view L-system' button with almanac access
@@ -129,6 +123,9 @@ do nothing. Do you feel like it could be more interesting?
   - Counter-argument: all parameters display /sec
 
 ## v0.2: Education edition
+
+- Calendula
+  - [x] Nerf spread rate to 1/3? Sum equals 1.5 making the pub mult coefficient 2 instead of 1.8
 
 - [x] Explain plant mechanics in Lemma's book: energy, growth
 - [x] Explain symbols without parameters in Ls book
@@ -195,6 +192,12 @@ do nothing. Do you feel like it could be more interesting?
   - Options menu
 - [x] updateAvailability() slow
 - [x] Bookshelf unlocks after tutorial to avoid confusion with unlock plot
+
+- [x] Follow canonical parametric L-system logic
+  - A production matches a module in a parametric word if the following conditions are met: [...] The number of actual parameters in the module is equal to the number of formal parameters in the production predecessor.
+- [x] Change how the Action class works
+  - Remove `killColony`
+  - Kill colony if `system` doesn't exist
 
 ## v0.1: Slumber Seeds
 
