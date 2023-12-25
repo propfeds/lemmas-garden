@@ -673,11 +673,9 @@ Surprised to see somebody visit this late,
 let alone *urge* me to let her plant on my ground.
 
 (Hum. This is not fine.)
-Hum.
 Well, then, welcome to... class.
-
 Take one of my seeds, for now.
-Go till that plot, we'll start in the morning.
+Till that plot, then we'll start in the morning.
 
 Tip: Tap on 'Upgrades' to acquire your first plot.`
                 },
@@ -690,7 +688,7 @@ You have lots of training to do, still.
 
 Luckily, this marigold won't die,
 even if you stub your toe over it.
-Just give it a few drops and watch it grow.
+Just lend it a few drops and watch it grow.
 
 And if you ever get lost, *go* reach for my bookshelf.`
                 }
@@ -5100,7 +5098,7 @@ var init = () =>
     theory.createStoryChapter(0, chapters?.intro[0]?.title,
     chapters?.intro[0]?.contents, () => true);
     theory.createStoryChapter(-1, chapters?.intro[1]?.title,
-    chapters?.intro[1]?.contents, () => plotPerma.level > 0);
+    chapters?.intro[1]?.contents, () => manager.colonies[0].length > 0);
 
     theory.createStoryChapter(1, chapters?.basil?.title,
     chapters?.basil?.contents, () => plantPerma.level > 0);
