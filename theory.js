@@ -3333,9 +3333,9 @@ const plantIDLookup = {
     brasil: 9002,
     9002: 'brasil'
 };
-const speeds = [1, 1.25, 5 / 3];
+const speeds = [1, 5 / 4, 5 / 3, 5 / 2];
 const speedAdjDayLengths = speeds.map(x => dayLength / x);
-const clockMinDiv = [12, 15, 20];
+const clockMinDiv = [12, 15, 20, 30];
 let haxEnabled = false;
 let time = 0;
 let lastSave = 0;
@@ -3351,7 +3351,7 @@ let plantIdx = new Array(nofPlots).fill(0);
 let selectedColony = null;
 let finishedTutorial = false;
 let actuallyPlanting = true;
-let speedIdx = 1;
+let speedIdx = 2;
 let graphMode2D = 1 /* LineGraphModes.INSOLATION */;
 let graphMode3D = true;
 let colonyMode = 1 /* ColonyModes.VERBOSE */;

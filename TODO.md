@@ -132,7 +132,7 @@ If you want someone who are not familiar with Exponential Idle, you should add b
   - [ ] Flower turns into fruit faster
   - [x] Fruit falls off
   - [ ] Loading SLOW
-  - [ ] Add a parameter to adjust stagely income multiplier (1/2x for now?)
+  - [x] Add a parameter to adjust stagely income multiplier (1/2x for now?)
   - [x] Passive income
   - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
   - [x] Extend rose campion seed period by a few stages
@@ -145,6 +145,7 @@ If you want someone who are not familiar with Exponential Idle, you should add b
     - [ ] 400-year cycle wrapping
   - [ ] Hopleek schedule
   - [ ] Repelled by rose campions and sunflowers
+  - [ ] Or maybe repelled by calendula and basil?
 
 - [ ] Broomrape
 
