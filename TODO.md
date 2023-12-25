@@ -69,6 +69,14 @@ do nothing. Do you feel like it could be more interesting?
   - Supply energy
     - Don't we already have so many things that give energy
 
+- [ ] Bundle time and coordinates into the manager class
+  - [ ] Following LT's method, could also bundle the plant upgrades too
+
+- [ ] Dynamical system inaccuracies
+  - Context: basil is pruned at stg 0 (synth rate is 0), plant can only grow when watering. Watering should give multiples of 2 energy, but when evolving, some of the energy is truncated.
+  - Well, just inaccuracies in general
+  - Let's ask someone about them
+
 - [ ] Ask Uni of Calgary about how to make Ls easier to understand
   - Provide context: making a game about the logical aspects of Ls
 
@@ -85,29 +93,14 @@ If you want someone who are not familiar with Exponential Idle, you should add b
 - [ ] Address dissonance in Lemma's attitude
   - Early game should be the time when a lot of help is needed, don't neglect your student
 
-- [ ] Dynamical system inaccuracies
-  - Context: basil is pruned at stg 0 (synth rate is 0), plant can only grow when watering. Watering should give multiples of 2 energy, but when evolving, some of the energy is truncated.
-  - Well, just inaccuracies in general
-  - Let's ask someone about them
+- [ ] Popup title gets truncated on iOS if it exceeds 1 line
+
+## v0.3: Invasion
 
 - [x] Add almanac access button to view menu
-- [ ] Bundle time and coordinates into the manager class
-  - [ ] Following LT's method, could also bundle the plant upgrades too
 - [x] Move 'view Ls' button on book menu to top side near title
 - [x] Make the column spacing x1.5 if there's no tax and make it branchless
 - [x] On confirmation dialogue, have the action described (like in L-s menu)
-- [ ] Popup title gets truncated on iOS if it exceeds 1 line
-
-Change wording on flower desc: flower of size p, providing p pennies upon harvest.
-Notes on player behaviour observation in wave 2:
-- Can't spot stage number easily
-- Doesn't try to scroll down the equation when text is overlapping
-- Harvests prematurely, and doesn't remember the harvested stage
-- Fiddles with arrows
-
-Wave 1: someone created spreadsheets to play the game
-
-## v0.3: Invasion
 
 - [ ] Pre-calendula plant: Botched bean
   - First (and only) microgreen?
@@ -123,20 +116,19 @@ Wave 1: someone created spreadsheets to play the game
   - [ ] Unlock way sooner?
   - [ ] Two types of leaf: 2 params and 3 params
   - [ ] Two types of signal: 0 and 1 params
-  - [ ] Rewrite instructions to encourage blooming
+  - [x] Rewrite instructions to encourage blooming
     - Stg 24: 'It's about to bloom soon. Cutting the bud now or watching flowers later, it's up to you.'
     - Separate stg 26 and 27 description for basil, and only stg 27 has the signal explanation
 
 - [x] Rose campion
   - [x] Nerf spreading rate to 1/2 or sth?
   - [ ] Make it easy to calculate profit sum
-  - [ ] Change the propagation stage since fruit only starts generating at 19?
+  - [x] Change the propagation stage since fruit only starts generating at 19?
   - [ ] Maximum statements
-  - [ ] Death? Propagation?
   - [ ] Shrub form?
   - [ ] Halve leaf synth
   - [x] Income per evolution instead of night
-  - [ ] Double growth cost
+  - [x] Double growth cost
   - [ ] Flower turns into fruit faster
   - [x] Fruit falls off
   - [ ] Loading SLOW
@@ -144,7 +136,7 @@ Wave 1: someone created spreadsheets to play the game
   - [x] Passive income
   - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
   - [x] Extend rose campion seed period by a few stages
-  - [ ] Dialogue:
+  - [x] Dialogue:
   'Oh no. Maybe luminaries were right all along. Small campion, big campion,...'
 
 - [ ] Hopleek

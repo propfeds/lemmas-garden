@@ -174,8 +174,8 @@ Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
                 LsDetails: `A(r, t): apex (stem shoot) providing r energy/s. Has
 t stages left until it splits.\\\\F(l, lim): internode of length l, growing up
 to lim.\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0, when
-it would turn into K.\\\\K(p): flower of size p.\\\\L(r, lim): leaf providing r
-energy/s, growing up to lim.`,
+it would turn into K.\\\\K(p): flower of size p. Provides p pennies on harvest.
+\\\\L(r, lim): leaf providing r energy/s, growing up to lim.`,
                 actions: [
                     `Harvest returns profit as the sum of all K sizes.`
                 ],
@@ -220,8 +220,9 @@ away from my little profit.`,
                 LsDetails: `A(r, t): apex (stem shoot).\\\\B: base, used for
 communications.\\\\F(l, lim): internode.\\\\I(t): shortened stem. t stages left
 until it splits.\\\\K(s, t): flower of size s. Grows another flower until t
-reaches 0.\\\\L(p, lim, s): leaf. s denotes whether a signal has been received.
-\\\\S(type): signal (type 0 travels down, type 1 travels up).`,
+reaches 0. Provides s pennies on harvest.\\\\L(p, lim, s): leaf. s denotes
+whether a signal has been received. Provides p pennies on harvest.\\\\S(type):
+signal (type 0 travels down, type 1 travels up).`,
                 actions: [
                     `Harvest returns profit as the sum of all L and K sizes
 (first parameter).`,
@@ -231,7 +232,8 @@ K).`
                 stages: {
                     index: [
                         0, 6, 10, 12, 14, 16, 18, 20, 22,
-                        25, 26
+                        24,
+                        26
                     ],
                     0: 'A seedling in its sweet slumber.',
                     6: 'The first pair of leaves pops up. A stem, as well.',
@@ -243,10 +245,12 @@ K).`
                     20: `I'll show you what to do when it flowers, soon.`,
                     22: `It's about to flower. You can nip the stem now if you
 don't feel confident.`,
-                    25: `The first flower will appear soon.`,
-                    26: `If the flower's there, imagine it's sending a signal
-from top to bottom, all the way to basil base. Then, basil base will send
-another one back to the leaves, telling them to go so very bitter.`,
+                    24: `It's about to bloom. Snip the bud, or stay up at night
+watching flowers. Up to you.`,
+                    26: `If the flower's there, imagine it sending a signal
+from top to bottom, all the way to base.\\\\Later, basil base will send another
+signal back to the leaves, telling them to go so very bitter.\\\\Don't worry,
+you can still sell flowers for tea. You like tea?`,
                 }
             },
             campion: {
@@ -255,8 +259,8 @@ another one back to the leaves, telling them to go so very bitter.`,
                 info: 'A great sight for your garden. Provides daily income.',
                 LsDetails: `A(r, t): apex (stem shoot).\\\\F(l, t): internode of
 length l. t stages until it stops growing.\\\\K(p, t): flower of size p. t
-stages left until it disappears.\\\\L(s): leaf.\\\\O(s): fruit of size s.
-Decorative.`,
+stages left until it disappears. Provides p pennies on harvest.\\\\L(s): leaf.
+\\\\O(s): fruit of size s. Decorative.`,
                 actions: [
                     `Harvest returns profit as the sum of all K sizes
 (first parameter).`
@@ -265,18 +269,21 @@ Decorative.`,
                     index: [
                         0, 6, 9,
                         10, 14,
+                        18,
                         19,
                         22, 27
                     ],
                     0: 'A seedling basking in its own dazing lullaby.',
                     6: 'A flower bud already?',
                     9: `Most gardeners are early birds. Now, why are you still
-counting pennies in the middle of the night?`,
-                    10: 'Anyway, new stem rises from a side shoot.',
+up, counting pennies in the middle of the night?`,
+                    10: 'New stem rises from a side shoot.',
                     14: `New stems have risen. This pattern will repeat
-periodically.`,
-                    19: `You see the first fruit on that stem?\\\\Too late for
-munch.`,
+periodically. Like a fractal.\\\\What's a graftal, you say? I made that up.`,
+                    18: `Oh no. Maybe luminaries were right all along. Small 
+campion, big campion...`,
+                    19: `Too late to munch on thy flowers, for the first 
+fruit...\\\\cometh.`,
                     22: `Go to sleep. Was my campion sedative not good enough?`,
                     27: `A fruit just fell off. Campion is a good self-seeder,
 you know.`
@@ -573,7 +580,7 @@ $: aligns the turtle's up vector closest to vertical.
         chapters: {
             intro: [
                 {
-                    title: `Lemma's Garden`,
+                    title: `Lemma's garden`,
                     contents: `Not one of my students, are you?
 Surprised to see somebody visit this late,
 let alone *urge* me to let her plant on my ground.
@@ -581,9 +588,11 @@ let alone *urge* me to let her plant on my ground.
 (Hum. This is not fine.)
 Hum.
 Well, then, welcome to... class.
+
+Take one of my seeds, for now.
 Go till that plot, we'll start in the morning.
 
-Tip: Tap on 'Upgrades' to access permanent upgrades.`
+Tip: Tap on 'Upgrades' to acquire your first plot.`
                 },
                 {
                     title: `Welcome to...`,
@@ -591,8 +600,11 @@ Tip: Tap on 'Upgrades' to access permanent upgrades.`
 Can't even bear to look at this soil...
 You have lots of training to do, still.
 
-Take one of my seeds, for now.
-And if you ever get lost, *go* peek at my bookshelf.`
+Luckily, this marigold won't die,
+even if you stub your toe over it.
+Just give it a few drops and watch it grow.
+
+And if you ever get lost, *go* reach for my bookshelf.`
                 }
             ],
             basil: {
