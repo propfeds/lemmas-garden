@@ -3605,7 +3605,7 @@ const settingsLabel = ui.createLatexLabel({
     text: () => {
         let dt = (time - lastSave) / speeds[speedIdx];
         if (dt < 30)
-            return Localization.get('SettingsPopupTitle');
+            return getLoc('permaShelf');
         return Localization.format(getLoc('labelSave'), Math.floor(dt));
     },
     fontSize: 10,
@@ -3614,7 +3614,7 @@ const settingsLabel = ui.createLatexLabel({
 const settingsFrame = createImageFrameBtn({
     row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
-}, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
+}, () => createShelfMenu().show(), game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/spoted-flower.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/spoted-flower.png'));
 // const skipLabel = ui.createLatexLabel
@@ -3657,7 +3657,6 @@ var switchPlant;
 // var switchColony: Upgrade;
 // var switchbackColony: Upgrade;
 var plants = Array.from({ length: nofPlots }, (_) => { return {}; });
-var shelfPerma;
 var plotPerma;
 var plantPerma;
 var freePenny;
@@ -3794,17 +3793,19 @@ var init = () => {
     /* Notebook
     Unlocks when acquiring Buy All.
     */
-    {
-        shelfPerma = theory.createPermanentUpgrade(10, currency, new FreeCost);
-        shelfPerma.description = getLoc('permaShelf');
-        shelfPerma.info = getLoc('permaShelfInfo');
-        shelfPerma.bought = (_) => {
-            shelfPerma.level = 0;
-            let menu = createShelfMenu();
-            menu.show();
-        };
-        shelfPerma.isAvailable = false;
-    }
+    // {
+    //     shelfPerma = theory.createPermanentUpgrade(10, currency,
+    //     new FreeCost);
+    //     shelfPerma.description = getLoc('permaShelf');
+    //     shelfPerma.info = getLoc('permaShelfInfo');
+    //     shelfPerma.bought = (_) =>
+    //     {
+    //         shelfPerma.level = 0;
+    //         let menu = createShelfMenu();
+    //         menu.show();
+    //     }
+    //     shelfPerma.isAvailable = false;
+    // }
     /* Settings
     World menu.
     */
@@ -3971,7 +3972,7 @@ var updateAvailability = () => {
             finishedTutorial = plotPerma.level > 0;
         }
         else {
-            shelfPerma.isAvailable = true;
+            // shelfPerma.isAvailable = true;
             switchPlant.isAvailable = !plants[x][plantUnlocks[p[x]]].level &&
                 plantPerma.level > 0;
             controlStack.isVisible = true;
@@ -5109,6 +5110,18 @@ let createShelfMenu = () => {
                         menu.show();
                     }
                 }),
+                ui.createBox({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                ui.createButton({
+                    text: Localization.get('SettingsPopupTitle'),
+                    onClicked: () => {
+                        Sound.playClick();
+                        let menu = createWorldMenu();
+                        menu.show();
+                    }
+                })
             ]
         })
     });

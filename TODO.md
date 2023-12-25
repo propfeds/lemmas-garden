@@ -85,8 +85,10 @@ If you want someone who are not familiar with Exponential Idle, you should add b
 - [ ] Address dissonance in Lemma's attitude
   - Early game should be the time when a lot of help is needed, don't neglect your student
 
-- [ ] Inaccuracy when evolving
+- [ ] Dynamical system inaccuracies
   - Context: basil is pruned at stg 0 (synth rate is 0), plant can only grow when watering. Watering should give multiples of 2 energy, but when evolving, some of the energy is truncated.
+  - Well, just inaccuracies in general
+  - Let's ask someone about them
 
 - [ ] Replace 'view L-system' button with almanac access
 - [ ] Bundle time and coordinates into the manager class
@@ -94,6 +96,7 @@ If you want someone who are not familiar with Exponential Idle, you should add b
 - [x] Move 'view Ls' button on book menu to top side near title
 - [x] Make the column spacing x1.5 if there's no tax and make it branchless
 - [x] On confirmation dialogue, have the action described (like in L-s menu)
+- [ ] Popup title gets truncated on iOS if it exceeds 1 line
 
 Change wording on flower desc: flower of size p, providing p pennies upon harvest.
 Notes on player behaviour observation in wave 2:
