@@ -31,6 +31,7 @@ import { LatexLabel } from './api/ui/LatexLabel';
 import { Frame } from './api/ui/Frame';
 import { StackLayout } from './api/ui/StackLayout';
 import { Grid } from './api/ui/Grid';
+import { Layout } from './api/ui/Layout';
 
 var id = 'lemmas_garden';
 var getName = (language: string): string =>
@@ -56,7 +57,8 @@ Welcome to Lemma's Garden, an idle botanical theory built on the workings of ` +
 
     return descs[language] ?? descs.en;
 }
-var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
+var authors = 'propfeds\n\nThanks to:\nProf. Nakamura, research supervisor\n'+
+'game-icons.net, for providing the icons';
 var version = 0.22;
 
 // Numbers are often converted into 32-bit signed integers in JINT.
@@ -94,7 +96,7 @@ const LOC_STRINGS =
         btnPage: 'p. {0}',
 
         actionConfirmDialogue: `You are about to perform a {0} on\\\\
-{3} (plot {1}-{2}).\\\\\n\n\\\\{4}`,
+{3} (plot {1}-{2}).\\\\{4}\\\\\n\n\\\\{5}`,
 
         labelSave: 'Last saved: {0}s',
         labelSkip: 'Skip tutorial',
@@ -213,8 +215,11 @@ Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
 t stages left until it splits.\\\\F(l, lim): internode of length l, growing up
 to lim.\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0, when
 it would turn into K.\\\\K(p): flower of size p.\\\\L(r, lim): leaf providing r
-energy/s, growing up to lim. \\\\—\\\\Harvest returns profit as the sum of all K
-sizes.`,
+energy/s, growing up to lim.`,
+                actions:
+                [
+                    `Harvest returns profit as the sum of all K sizes.`
+                ],
                 stages:
                 {
                     index:
@@ -223,7 +228,8 @@ sizes.`,
                         5, 10,
                         15, 19,
                         21,
-                        23, 26, 27, 28, 30, 31,
+                        23, 26, 27, 28, 30,
+                        31,
                         35, 39, 40
                     ],
                     0: 'A seedling in its warm slumber.',
@@ -241,9 +247,10 @@ known as the golden angle.`,
                     26: 'Wait for it...',
                     27: 'A second flower bud appears!',
                     28: 'The third and final flower appears.',
-                    30: 'My wife used to munch on these flowers, raw.',
-                    31: `Try it!\\\\Naw, only teasing you ;). Sell them later
-for a little profit.`,
+                    30: `My w... sister-in-law, she really liked munching on
+these flowers raw. Try it.`,
+                    31: `Try it!\\\\Naw, only teasing you ;). Keep your saliva
+away from my little profit.`,
                     35: 'The first flower matures.',
                     39: 'The second flower matures.',
                     40: 'All flowers have reached maturity.',
@@ -252,15 +259,20 @@ for a little profit.`,
             basil:
             {
                 name: 'Basil',
-                nameShort: 'B',
+                nameShort: 'Ba',
                 info: 'A fast growing herb that requires a bit of care.',
                 LsDetails: `A(r, t): apex (stem shoot).\\\\B: base, used for
 communications.\\\\F(l, lim): internode.\\\\I(t): shortened stem. t stages left
 until it splits.\\\\K(s, t): flower of size s. Grows another flower until t
 reaches 0.\\\\L(p, lim, s): leaf. s denotes whether a signal has been received.
-\\\\S(type): signal (type 0 travels down, type 1 travels up).\\\\—\\\\Harvest
-returns profit as the sum of all L and K sizes (first parameter).\\\\Prune cuts
-off all A and K (also cuts geometry near K).`,
+\\\\S(type): signal (type 0 travels down, type 1 travels up).`,
+                actions:
+                [
+                    `Harvest returns profit as the sum of all L and K sizes
+(first parameter).`,
+                    `Prune cuts off all A and K (and all geometry symbols near
+K).`
+                ],
                 stages:
                 {
                     index:
@@ -292,8 +304,12 @@ another one back to the leaves, telling them to go so very bitter.`,
                 LsDetails: `A(r, t): apex (stem shoot).\\\\F(l, t): internode of
 length l. t stages until it stops growing.\\\\K(p, t): flower of size p. t
 stages left until it disappears.\\\\L(s): leaf.\\\\O(s): fruit of size s.
-Decorative.\\\\—\\\\Harvest returns profit as the sum of all K sizes
-(first parameter).`,
+Decorative.`,
+                actions:
+                [
+                    `Harvest returns profit as the sum of all K sizes
+(first parameter).`
+                ],
                 stages:
                 {
                     index:
@@ -313,8 +329,8 @@ periodically.`,
                     19: `You see the first fruit on that stem?\\\\Too late for
 munch.`,
                     22: `Go to sleep. Was my campion sedative not good enough?`,
-                    27: `A fruit falls off. Did you know that campion is a good
-self-seeder?`
+                    27: `A fruit just fell off. Campion is a good self-seeder,
+you know.`
                 }
             },
             arrow:
@@ -342,6 +358,7 @@ friend of all mathematicians.`
 `\\\\—\\\\Sequence:`,
         noCommentary: 'No commentary.',
         noLsDetails: 'No explanations.',
+        noActions: 'No actions available.',
 
         permaShelf: 'Bookshelf',
         permaShelfInfo: 'Access instructions and other tools',
@@ -601,13 +618,14 @@ A(x) < B(y) > C(z) : x+y+z>10 = E((x+y)/2)F(z*2)
             },
             symbols:
             {
-                title: 'Appendix: Common symbols',
+                title: 'Appendix: Common organ symbols',
                 contents:
-`A: apex (stem shoot). Can photo-synthesise.
+`A: apex (stem shoot). Can photosynthesise.
 B: base. Often used to receive and send signals.
 I: alternate stem. May transform into a new branch, or a flower.
 K: flower. Looks good.
-L: leaf. Can photo-synthesise.
+L: leaf. Can photosynthesise.
+O: fruit. Tastes good and may drop seed.
 S: signal. Used to communicate between organs.`
             },
             turtleSymbols:
@@ -624,8 +642,8 @@ Defaults to the angle specified by the L-system when omitted.
 |: reverses direction.
 T(n): applies tropism (gravity) with a weight of n.
 Defaults to the tropism specified by the L-system when omitted.
-T(n, x, y, z): applies tropism along a custom axis.
-$: aligns the up vector closest to vertical.
+T(n, x, y, z): applies tropism towards a custom vector.
+$: aligns the turtle's up vector closest to vertical.
 
 [: pushes turtle position & rotation onto a stack.
 ]: pops the stack's topmost element onto the turtle.
@@ -892,13 +910,17 @@ let purgeEmpty = (arr: string[]): string[] =>
 }
 
 const yearStartLookup = [0];
+const isLeap = [];
 
 for(let i = 1; i <= 400; ++i)
 {
     let leap = !(i%4) && (!!(i%100) || !(i%400));
+    isLeap.push(leap);
     let offset = leap ? 366 : 365;
     yearStartLookup[i] = yearStartLookup[i-1] + offset;
 }
+// Last year (401)
+isLeap.push(false);
 
 // Classes
 
@@ -3748,8 +3770,7 @@ const almanac = new Book(getLoc('almanacTitle'),
 [
     {
         ...getLoc('almanac').cover,
-        horizontalAlignment: TextAlignment.CENTER,
-        pinned: true
+        horizontalAlignment: TextAlignment.CENTER
     },
     {
         ...getLoc('almanac').prep,
@@ -3804,7 +3825,7 @@ const LsManual = new Book(getLoc('manualTitle'),
         ...getLoc('manual').turtleSymbols,
         pinned: true
     },
-    getLoc('manual').note,
+    // getLoc('manual').note,
 ]);
 
 interface Action
@@ -3999,7 +4020,7 @@ const plantData: {[key: string]: Plant} =
             '~> L(p, lim, s) = {T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}'
         ]),
         maxStage: 48,
-        cost: new ExponentialCost(5, 1),
+        cost: new ExponentialCost(2.5, 1),
         growthRate: BigNumber.TWO,
         growthCost: BigNumber.TWO,
         waterCD: 2 * dayLength,
@@ -5090,7 +5111,6 @@ var updateAvailability = () =>
         if(!finishedTutorial)
         {
             finishedTutorial = plotPerma.level > 0;
-            shelfPerma.isAvailable = finishedTutorial;
         }
         else
         {
@@ -5375,7 +5395,8 @@ var getCurrencyBarDelegate = () =>
         margin: new Thickness(6, 3, 6, 0),
         horizontalOptions: LayoutOptions.CENTER,
         columnDefinitions: ['auto', 'auto'],
-        columnSpacing: getBtnSize(ui.screenWidth),
+        columnSpacing: () => getBtnSize(ui.screenWidth) *
+        (3 - theory.publicationUpgrade.level * Number(theory.canPublish)) / 2,
         children: [tauLabel, pennyLabel]
     })
     return ui.createStackLayout
@@ -5768,6 +5789,9 @@ let createSystemMenu = (id: string) =>
         horizontalTextAlignment: TextAlignment.END
     });
     */
+    let LsExplanations =
+    `${getLoc('plants')[id]?.LsDetails ?? getLoc('noLsDetails')}\\\\—
+    \\\\${getLoc('plants')[id]?.actions?.join('\\\\') ?? getLoc('noActions')}`;
 
     let menu = ui.createPopup
     ({
@@ -5786,8 +5810,7 @@ let createSystemMenu = (id: string) =>
                         [
                             ui.createLatexLabel
                             ({
-                                text: getLoc('plants')[id]?.LsDetails ??
-                                getLoc('noLsDetails'),
+                                text: LsExplanations,
                                 margin: new Thickness(0, 6),
                                 horizontalTextAlignment: TextAlignment.START,
                                 verticalTextAlignment: TextAlignment.CENTER
@@ -6098,6 +6121,7 @@ let createBookMenu = (book: Book, key: string | number) =>
 
     let pageTitle = ui.createLatexLabel
     ({
+        row: 0, column: 0,
         text: pages[shelfPages[key]].title,
         margin: new Thickness(0, 4),
         heightRequest: getProgBarSize(ui.screenWidth),
@@ -6153,10 +6177,11 @@ let createBookMenu = (book: Book, key: string | number) =>
     });
     let viewButton = ui.createButton
     ({
+        row: 0, column: 1,
+        padding: new Thickness(8, 0),
+        heightRequest: getSmallBtnSize(ui.screenWidth),
         text: getLoc('btnView'),
-        row: 0,
-        column: 1,
-        isVisible: 'systemID' in pages[shelfPages[key]],
+        isVisible: () => 'systemID' in pages[shelfPages[key]],
         onClicked: () =>
         {
             Sound.playClick();
@@ -6169,7 +6194,6 @@ let createBookMenu = (book: Book, key: string | number) =>
         text: getLoc('btnContents'),
         row: 0,
         column: 1,
-        isVisible: !('systemID' in pages[shelfPages[key]]),
         onClicked: () =>
         {
             Sound.playClick();
@@ -6208,7 +6232,6 @@ let createBookMenu = (book: Book, key: string | number) =>
         prevButton.isVisible = shelfPages[key] > 0;
         nextButton.isVisible = shelfPages[key] < pages.length - 1;
         viewButton.isVisible = 'systemID' in pages[shelfPages[key]];
-        tocButton.isVisible = !('systemID' in pages[shelfPages[key]]);
     };
     let getContentsTable = () =>
     {
@@ -6262,7 +6285,17 @@ let createBookMenu = (book: Book, key: string | number) =>
         ({
             children:
             [
-                pageTitle,
+                ui.createGrid
+                ({
+                    horizontalOptions: LayoutOptions.CENTER,
+                    columnDefinitions: ['auto', 'auto'],
+                    columnSpacing: 8,
+                    children:
+                    [
+                        pageTitle,
+                        viewButton,
+                    ]
+                }),
                 ui.createFrame
                 ({
                     padding: new Thickness(8, 6),
@@ -6290,7 +6323,6 @@ let createBookMenu = (book: Book, key: string | number) =>
                     children:
                     [
                         prevButton,
-                        viewButton,
                         tocButton,
                         nextButton
                     ]
@@ -6466,21 +6498,21 @@ let createShelfMenu = () =>
             [
                 ui.createButton
                 ({
-                    text: almanac.title,
-                    onClicked: () =>
-                    {
-                        Sound.playClick();
-                        let menu = createBookMenu(almanac, 'almanac');
-                        menu.show();
-                    }
-                }),
-                ui.createButton
-                ({
                     text: LsManual.title,
                     onClicked: () =>
                     {
                         Sound.playClick();
                         let menu = createBookMenu(LsManual, 'manual');
+                        menu.show();
+                    }
+                }),
+                ui.createButton
+                ({
+                    text: almanac.title,
+                    onClicked: () =>
+                    {
+                        Sound.playClick();
+                        let menu = createBookMenu(almanac, 'almanac');
                         menu.show();
                     }
                 }),
@@ -6517,6 +6549,7 @@ let createConfirmationMenu = (plot: number, index: number, id: number) =>
                     text: Localization.format(getLoc('actionConfirmDialogue'),
                     getLoc('labelActions')[id], plot + 1, index + 1,
                     getColonyTitleString(c, false, false, true),
+                    getLoc('plants')[c.id]?.actions?.[id],
                     Localization.get('GenPopupContinue')),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     margin: new Thickness(0, 15)

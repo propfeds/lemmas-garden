@@ -4,7 +4,7 @@
   - [Research](#research)
   - [Compost bin](#compost-bin)
   - [v0.3: Invasion](#v03-invasion)
-  - [v0.2: Education edition](#v02-education-edition)
+  - [v0.2: Wet](#v02-wet)
   - [v0.1: Slumber Seeds](#v01-slumber-seeds)
   - [v0: Completed](#v0-completed)
 
@@ -76,26 +76,55 @@ do nothing. Do you feel like it could be more interesting?
   - Waters everything on 1 plot, not the entire garden
   - NO bulk harvest or prune.
 
+- [ ] Change /sec indicators to /hr (in-game) and display 5x the value
+  - Counter-argument: all parameters display /sec
+
+If you want someone who are not familiar with Exponential Idle, you should add basic information about Exponential Idle itself. For example, what is the objective of this game? Just to run and watch...?
+(Actually, because I (Nakamura) 've got no info about the game by you, I cannot understand what to do for module 1 ... I've run the game for about 20 mins, nothing happens, and I cannot understand where is the plant, how to water it, etc. If some explanations with snapshots, I'll be able to understand easily. If you intend that the target user is familar with the basic concept of the game, please don't care of this comment)
+
+- [ ] Address dissonance in Lemma's attitude
+  - Early game should be the time when a lot of help is needed, don't neglect your student
+
+- [ ] Inaccuracy when evolving
+  - Context: basil is pruned at stg 0 (synth rate is 0), plant can only grow when watering. Watering should give multiples of 2 energy, but when evolving, some of the energy is truncated.
+
+- [ ] Replace 'view L-system' button with almanac access
+- [ ] Bundle time and coordinates into the manager class
+  - [ ] Following LT's method, could also bundle the plant upgrades too
+- [x] Move 'view Ls' button on book menu to top side near title
+- [x] Make the column spacing x1.5 if there's no tax and make it branchless
+- [x] On confirmation dialogue, have the action described (like in L-s menu)
+
+Change wording on flower desc: flower of size p, providing p pennies upon harvest.
+Notes on player behaviour observation in wave 2:
+- Can't spot stage number easily
+- Doesn't try to scroll down the equation when text is overlapping
+- Harvests prematurely, and doesn't remember the harvested stage
+- Fiddles with arrows
+
+Wave 1: someone created spreadsheets to play the game
+
 ## v0.3: Invasion
 
-- [ ] Universal income upgrades
+- [ ] Pre-calendula plant: Botched bean
+  - First (and only) microgreen?
+  - https://dumbways2die.fandom.com/wiki/Botch
 
-- [ ] Hopleek
-  - Biting is on evolution queue instead of action?
-  - [x] Leap years calculation
-    - [ ] 400-year cycle wrapping
-  - [ ] Hopleek schedule
-  - [ ] Repelled by rose campions and sunflowers
+- [ ] Calendula
+  - [ ] Flower transforms into fruit with lower profit
+    - Or maybe not, it's the tutorial plant.
 
-- [ ] Broomrape
+- [ ] Basil
+  - [ ] Reversible leaf decay when pruning?
+  - [ ] Align the vibes of basil & campion to make it feel smoother
+  - [ ] Unlock way sooner?
+  - [ ] Two types of leaf: 2 params and 3 params
+  - [ ] Two types of signal: 0 and 1 params
+  - [ ] Rewrite instructions to encourage blooming
+    - Stg 24: 'It's about to bloom soon. Cutting the bud now or watching flowers later, it's up to you.'
+    - Separate stg 26 and 27 description for basil, and only stg 27 has the signal explanation
 
-- [ ] Ginger
-
-- [ ] Sunflower
-
-- [ ] Align the vibes of basil & campion to make it feel smoother
-
-- [x] Rose campion as first bush plant
+- [x] Rose campion
   - [x] Nerf spreading rate to 1/2 or sth?
   - [ ] Make it easy to calculate profit sum
   - [ ] Change the propagation stage since fruit only starts generating at 19?
@@ -112,20 +141,33 @@ do nothing. Do you feel like it could be more interesting?
   - [x] Passive income
   - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
   - [x] Extend rose campion seed period by a few stages
+  - [ ] Dialogue:
+  'Oh no. Maybe luminaries were right all along. Small campion, big campion,...'
+
+- [ ] Hopleek
+  - Biting is on evolution queue instead of action?
+  - [x] Leap years calculation
+    - [ ] 400-year cycle wrapping
+  - [ ] Hopleek schedule
+  - [ ] Repelled by rose campions and sunflowers
+
+- [ ] Broomrape
+
+- [ ] Ginger
+
+- [ ] Sunflower
+
+- [ ] Universal income upgrades
+
+- [ ] Watering
+  - Instead of putting watering on a cooldown, make it a coefficient curve or slope that either deducts or increases energy based on the last time the plant was watered. This will communicate the effects of overwatering better?
+
+## v0.2: Wet
 
 - [x] Button that skips tutorial for iOS players
-- [ ] Dedicated save file for playtesting
-- [ ] Replace 'view L-system' button with almanac access
+- [x] Dedicated save file for playtesting
 - [x] Rework singular upgrade logic
   - Turn switch plant into regular upgrade
-
-- [ ] Change /sec indicators to /hr (in-game) and display 5x the value
-  - Counter-argument: all parameters display /sec
-
-## v0.2: Education edition
-
-- Calendula
-  - [x] Nerf spread rate to 1/3? Sum equals 1.5 making the pub mult coefficient 2 instead of 1.8
 
 - [x] Explain plant mechanics in Lemma's book: energy, growth
 - [x] Explain symbols without parameters in Ls book
@@ -172,7 +214,10 @@ do nothing. Do you feel like it could be more interesting?
     - Unlocks with classmates
 
 - [x] Colony view params are initially off
-- [ ] Notebook shows next cost
+- [x] Notebook shows next cost
+
+- Calendula
+  - [x] Nerf spread rate to 1/3? Sum equals 1.5 making the pub mult coefficient 2 instead of 1.8
 
 - [x] Basil
   - [x] Signal type 1 kills I?
