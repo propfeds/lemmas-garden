@@ -1,27 +1,27 @@
 import { BigNumber } from './api/BigNumber';
 import { CompositeCost, ConstantCost, ExponentialCost, FirstFreeCost, FreeCost } from './api/Costs';
+import { game } from './api/Game';
 import { Localization } from './api/Localization';
+import { MathExpression } from './api/MathExpression';
+import { profilers } from './api/Profiler';
+import { Theme } from './api/Settings';
+import { Sound } from './api/Sound';
 import { QuaternaryEntry, theory } from './api/Theory';
-import { ImageSource } from './api/ui/properties/ImageSource';
-import { LayoutOptions } from './api/ui/properties/LayoutOptions';
-import { TextAlignment } from './api/ui/properties/TextAlignment';
-import { Thickness } from './api/ui/properties/Thickness';
-import { Vector3 } from './api/Vector3';
 import { Utils, log } from './api/Utils';
+import { Vector3 } from './api/Vector3';
 import { ui } from './api/ui/UI';
 import { Aspect } from './api/ui/properties/Aspect';
 import { ClearButtonVisibility } from './api/ui/properties/ClearButtonVisibility';
 import { Color } from './api/ui/properties/Color';
 import { FontFamily } from './api/ui/properties/FontFamily';
+import { ImageSource } from './api/ui/properties/ImageSource';
 import { Keyboard } from './api/ui/properties/Keyboard';
+import { LayoutOptions } from './api/ui/properties/LayoutOptions';
 import { LineBreakMode } from './api/ui/properties/LineBreakMode';
-import { TouchType } from './api/ui/properties/TouchType';
-import { MathExpression } from './api/MathExpression';
-import { Theme } from './api/Settings';
-import { Sound } from './api/Sound';
-import { game } from './api/Game';
 import { StackOrientation } from './api/ui/properties/StackOrientation';
-import { profilers } from './api/Profiler';
+import { TextAlignment } from './api/ui/properties/TextAlignment';
+import { Thickness } from './api/ui/properties/Thickness';
+import { TouchType } from './api/ui/properties/TouchType';
 var id = 'lemmas_garden';
 var getName = (language) => {
     const names = {
@@ -62,6 +62,7 @@ const LOC_STRINGS = {
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish\\colon',
         btnView: 'View L-system',
+        btnAlmanac: 'World of Plants',
         btnVar: 'Variables',
         btnSave: 'Save',
         btnReset: 'Reset Graphs',
@@ -2883,16 +2884,21 @@ class ColonyManager {
     }
 }
 class Book {
-    constructor(title, pages) {
+    constructor(title, key, pages) {
         this.title = title;
+        this.key = key;
         this.pages = pages;
         this.tableofContents = [];
-        for (let i = 0; i < pages.length; ++i)
+        this.pageLookup = {};
+        for (let i = 0; i < pages.length; ++i) {
             if (pages[i].pinned)
                 this.tableofContents.push(i);
+            if (pages[i].systemID)
+                this.pageLookup[pages[i].systemID] = i;
+        }
     }
 }
-const almanac = new Book(getLoc('almanacTitle'), [
+const almanac = new Book(getLoc('almanacTitle'), 'almanac', [
     {
         ...getLoc('almanac').cover,
         horizontalAlignment: TextAlignment.CENTER
@@ -2923,7 +2929,7 @@ const almanac = new Book(getLoc('almanacTitle'), [
         systemID: 'campion'
     },
 ]);
-const LsManual = new Book(getLoc('manualTitle'), [
+const LsManual = new Book(getLoc('manualTitle'), 'manual', [
     {
         ...getLoc('manual').cover,
         horizontalAlignment: TextAlignment.CENTER
@@ -4698,12 +4704,14 @@ let createColonyViewMenu = (colony) => {
             statsMenu.show();
         }
     });
-    let closeButton = ui.createButton({
-        text: Localization.get('GenPopupClose'),
+    let almanacButton = ui.createButton({
+        text: getLoc('btnAlmanac'),
         row: 0, column: 1,
         onClicked: () => {
             Sound.playClick();
-            menu.hide();
+            shelfPages.almanac = almanac.pageLookup[colony.id];
+            let menu = createBookMenu(almanac);
+            menu.show();
         }
     });
     let menu = ui.createPopup({
@@ -4771,7 +4779,7 @@ let createColonyViewMenu = (colony) => {
                     columnDefinitions: ['50*', '50*'],
                     children: [
                         viewButton,
-                        closeButton
+                        almanacButton
                     ]
                 })
             ]
@@ -4779,8 +4787,9 @@ let createColonyViewMenu = (colony) => {
     });
     return menu;
 };
-let createBookMenu = (book, key) => {
+let createBookMenu = (book) => {
     let title = book.title;
+    let key = book.key;
     let pages = book.pages;
     let tableofContents = book.tableofContents;
     let pageTitle = ui.createLatexLabel({
@@ -5091,7 +5100,7 @@ let createShelfMenu = () => {
                     text: LsManual.title,
                     onClicked: () => {
                         Sound.playClick();
-                        let menu = createBookMenu(LsManual, 'manual');
+                        let menu = createBookMenu(LsManual);
                         menu.show();
                     }
                 }),
@@ -5099,7 +5108,7 @@ let createShelfMenu = () => {
                     text: almanac.title,
                     onClicked: () => {
                         Sound.playClick();
-                        let menu = createBookMenu(almanac, 'almanac');
+                        let menu = createBookMenu(almanac);
                         menu.show();
                     }
                 }),

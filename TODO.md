@@ -90,7 +90,7 @@ If you want someone who are not familiar with Exponential Idle, you should add b
   - Well, just inaccuracies in general
   - Let's ask someone about them
 
-- [ ] Replace 'view L-system' button with almanac access
+- [x] Add almanac access button to view menu
 - [ ] Bundle time and coordinates into the manager class
   - [ ] Following LT's method, could also bundle the plant upgrades too
 - [x] Move 'view Ls' button on book menu to top side near title

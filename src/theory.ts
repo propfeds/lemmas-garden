@@ -1,37 +1,33 @@
 import { BigNumber } from './api/BigNumber';
 import { CompositeCost, ConstantCost, ExponentialCost, FirstFreeCost, FreeCost } from './api/Costs';
+import { Currency } from './api/Currency';
+import { game } from './api/Game';
 import { Localization } from './api/Localization';
+import { MathExpression } from './api/MathExpression';
+import { profilers } from './api/Profiler';
+import { Theme } from './api/Settings';
+import { Sound } from './api/Sound';
 import { QuaternaryEntry, theory } from './api/Theory';
-import { ImageSource } from './api/ui/properties/ImageSource';
-import { LayoutOptions } from './api/ui/properties/LayoutOptions';
-import { TextAlignment } from './api/ui/properties/TextAlignment';
-import { Thickness } from './api/ui/properties/Thickness';
-import { Vector3 } from './api/Vector3';
+import { Upgrade } from './api/Upgrades';
 import { Utils, log } from './api/Utils';
+import { Vector3 } from './api/Vector3';
+import { Frame } from './api/ui/Frame';
+import { Grid } from './api/ui/Grid';
+import { LatexLabel } from './api/ui/LatexLabel';
 import { ui } from './api/ui/UI';
 import { Aspect } from './api/ui/properties/Aspect';
 import { ClearButtonVisibility } from './api/ui/properties/ClearButtonVisibility';
 import { Color } from './api/ui/properties/Color';
 import { FontFamily } from './api/ui/properties/FontFamily';
+import { ImageSource } from './api/ui/properties/ImageSource';
 import { Keyboard } from './api/ui/properties/Keyboard';
+import { LayoutOptions } from './api/ui/properties/LayoutOptions';
 import { LineBreakMode } from './api/ui/properties/LineBreakMode';
+import { StackOrientation } from './api/ui/properties/StackOrientation';
+import { TextAlignment } from './api/ui/properties/TextAlignment';
+import { Thickness } from './api/ui/properties/Thickness';
 import { TouchEvent } from './api/ui/properties/TouchEvent';
 import { TouchType } from './api/ui/properties/TouchType';
-import { MathExpression } from './api/MathExpression';
-import { Theme } from './api/Settings';
-import { Sound } from './api/Sound';
-import { game } from './api/Game';
-import { Upgrade } from './api/Upgrades';
-import { Currency } from './api/Currency';
-import { View } from './api/ui/View';
-import { Easing } from './api/ui/properties/Easing';
-import { StackOrientation } from './api/ui/properties/StackOrientation';
-import { Profiler, profilers } from './api/Profiler';
-import { LatexLabel } from './api/ui/LatexLabel';
-import { Frame } from './api/ui/Frame';
-import { StackLayout } from './api/ui/StackLayout';
-import { Grid } from './api/ui/Grid';
-import { Layout } from './api/ui/Layout';
 
 var id = 'lemmas_garden';
 var getName = (language: string): string =>
@@ -86,6 +82,7 @@ const LOC_STRINGS =
         pubTax: 'Tax on publish\\colon',
 
         btnView: 'View L-system',
+        btnAlmanac: 'World of Plants',
         btnVar: 'Variables',
         btnSave: 'Save',
         btnReset: 'Reset Graphs',
@@ -3753,20 +3750,28 @@ interface Page
 class Book
 {
     title: string;
+    key: string;
     pages: Page[];
     tableofContents: number[];
-    constructor(title: string, pages: Page[])
+    pageLookup: {[key: string]: number};
+    constructor(title: string, key: string, pages: Page[])
     {
         this.title = title;
+        this.key = key;
         this.pages = pages;
         this.tableofContents = [];
+        this.pageLookup = {};
         for(let i = 0; i < pages.length; ++i)
+        {
             if(pages[i].pinned)
                 this.tableofContents.push(i);
+            if(pages[i].systemID)
+                this.pageLookup[pages[i].systemID] = i;
+        }
     }
 }
 
-const almanac = new Book(getLoc('almanacTitle'),
+const almanac = new Book(getLoc('almanacTitle'), 'almanac',
 [
     {
         ...getLoc('almanac').cover,
@@ -3799,7 +3804,7 @@ const almanac = new Book(getLoc('almanacTitle'),
     },
 ]);
 
-const LsManual = new Book(getLoc('manualTitle'),
+const LsManual = new Book(getLoc('manualTitle'), 'manual',
 [
     {
         ...getLoc('manual').cover,
@@ -6009,14 +6014,16 @@ let createColonyViewMenu = (colony: Colony) =>
             statsMenu.show();
         }
     });
-    let closeButton = ui.createButton
+    let almanacButton = ui.createButton
     ({
-        text: Localization.get('GenPopupClose'),
+        text: getLoc('btnAlmanac'),
         row: 0, column: 1,
         onClicked: () =>
         {
             Sound.playClick();
-            menu.hide();
+            shelfPages.almanac = almanac.pageLookup[colony.id];
+            let menu = createBookMenu(almanac);
+            menu.show();
         }
     });
 
@@ -6105,7 +6112,7 @@ let createColonyViewMenu = (colony: Colony) =>
                     children:
                     [
                         viewButton,
-                        closeButton
+                        almanacButton
                     ]
                 })
             ]
@@ -6114,9 +6121,10 @@ let createColonyViewMenu = (colony: Colony) =>
     return menu;
 }
 
-let createBookMenu = (book: Book, key: string | number) =>
+let createBookMenu = (book: Book) =>
 {
     let title = book.title;
+    let key = book.key;
     let pages = book.pages;
     let tableofContents = book.tableofContents;
 
@@ -6503,7 +6511,7 @@ let createShelfMenu = () =>
                     onClicked: () =>
                     {
                         Sound.playClick();
-                        let menu = createBookMenu(LsManual, 'manual');
+                        let menu = createBookMenu(LsManual);
                         menu.show();
                     }
                 }),
@@ -6513,7 +6521,7 @@ let createShelfMenu = () =>
                     onClicked: () =>
                     {
                         Sound.playClick();
-                        let menu = createBookMenu(almanac, 'almanac');
+                        let menu = createBookMenu(almanac);
                         menu.show();
                     }
                 }),
