@@ -3377,7 +3377,7 @@ let perfNames = [
 ];
 let perfs = perfNames.map(element => profilers.get(element[0]));
 let perfQuaternaryEntries = perfNames.map(element => new QuaternaryEntry(element[1], null));
-let createImageFrameBtn = (params, callback, image) => {
+let createImageBtn = (params, callback, image) => {
     let triggerable = true;
     let frame = ui.createFrame({
         cornerRadius: 1,
@@ -3418,8 +3418,10 @@ let createImageFrameBtn = (params, callback, image) => {
     };
     return frame;
 };
-let createLabelFrameBtn = (params, callback, text, fontSize = 14) => {
+let createLabelBtn = (params, callback, isAvailable, text, fontSize = 14) => {
     let triggerable = true;
+    let textColor = () => isAvailable() ? Color.TEXT : Color.TEXT_MEDIUM;
+    let borderColor = () => isAvailable() ? Color.BORDER : Color.TRANSPARENT;
     let frame = ui.createFrame({
         cornerRadius: 1,
         // padding: new Thickness(10, 2),
@@ -3428,10 +3430,10 @@ let createLabelFrameBtn = (params, callback, text, fontSize = 14) => {
             text,
             horizontalTextAlignment: TextAlignment.CENTER,
             verticalTextAlignment: TextAlignment.CENTER,
-            textColor: Color.TEXT,
+            textColor,
             fontSize
         }),
-        borderColor: Color.BORDER,
+        borderColor,
         ...params
     });
     frame.onTouched = (e) => {
@@ -3440,9 +3442,9 @@ let createLabelFrameBtn = (params, callback, text, fontSize = 14) => {
             frame.content.textColor = Color.TEXT_MEDIUM;
         }
         else if (e.type.isReleased()) {
-            frame.borderColor = Color.BORDER;
-            frame.content.textColor = Color.TEXT;
-            if (triggerable) {
+            frame.borderColor = borderColor;
+            frame.content.textColor = textColor;
+            if (triggerable && isAvailable()) {
                 Sound.playClick();
                 callback();
             }
@@ -3451,8 +3453,8 @@ let createLabelFrameBtn = (params, callback, text, fontSize = 14) => {
         }
         else if (e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
             e.x > frame.width || e.y > frame.height)) {
-            frame.borderColor = Color.BORDER;
-            frame.content.textColor = Color.TEXT;
+            frame.borderColor = borderColor;
+            frame.content.textColor = textColor;
             triggerable = false;
         }
     };
@@ -3492,7 +3494,7 @@ let createHesitantSwitch = (params, callback, isToggled) => {
 //     fontSize: 10,
 //     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
 // });
-const waterFrame = createImageFrameBtn({
+const waterFrame = createImageBtn({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 0,
 }, () => manager.water(selectedColony), game.settings.theme == Theme.LIGHT ?
@@ -3525,7 +3527,7 @@ const waterLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const harvestFrame = createImageFrameBtn({
+const harvestFrame = createImageBtn({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 2,
 }, () => {
@@ -3548,7 +3550,7 @@ const harvestLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const pruneFrame = createImageFrameBtn({
+const pruneFrame = createImageBtn({
     isVisible: () => {
         if (!selectedColony ||
             !plantData[selectedColony.id].actions[1 /* Actions.PRUNE */])
@@ -3611,7 +3613,7 @@ const settingsLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const settingsFrame = createImageFrameBtn({
+const settingsFrame = createImageBtn({
     row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
 }, () => createShelfMenu().show(), game.settings.theme == Theme.LIGHT ?
@@ -4157,7 +4159,7 @@ var getCurrencyBarDelegate = () => {
         horizontalTextAlignment: TextAlignment.CENTER,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let examineBtn = createLabelFrameBtn({
+    let examineBtn = createLabelBtn({
         row: 0, column: 1,
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
@@ -4166,8 +4168,8 @@ var getCurrencyBarDelegate = () => {
             return;
         let seqMenu = createColonyViewMenu(selectedColony);
         seqMenu.show();
-    }, getLoc('viewColony'), 12);
-    let switchbackBtn = createLabelFrameBtn({
+    }, () => manager.colonies[plotIdx].length > 0, getLoc('viewColony'), 12);
+    let switchbackBtn = createLabelBtn({
         column: 0,
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
@@ -4178,8 +4180,8 @@ var getCurrencyBarDelegate = () => {
             colonyIdx[plotIdx] = 0;
         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
         renderer.colony = selectedColony;
-    }, '↑');
-    let switchBtn = createLabelFrameBtn({
+    }, () => manager.colonies[plotIdx].length > 1, '↑');
+    let switchBtn = createLabelBtn({
         column: 1,
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
@@ -4190,7 +4192,7 @@ var getCurrencyBarDelegate = () => {
             colonyIdx[plotIdx] = 0;
         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
         renderer.colony = selectedColony;
-    }, '↓');
+    }, () => manager.colonies[plotIdx].length > 1, '↓');
     controlStack.children[0].children =
         [
             examineBtn,

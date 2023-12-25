@@ -4383,7 +4383,7 @@ let perfs = perfNames.map(element => profilers.get(element[0]));
 let perfQuaternaryEntries = perfNames.map(element =>
 new QuaternaryEntry(element[1], null));
 
-let createImageFrameBtn = (params: {[x: string]: any}, callback: {(): void},
+let createImageBtn = (params: {[x: string]: any}, callback: {(): void},
 image: ImageSource) =>
 {
     let triggerable = true;
@@ -4434,10 +4434,12 @@ image: ImageSource) =>
     return frame;
 }
 
-let createLabelFrameBtn = (params: {[x: string]: any}, callback: {(): void},
-text: string, fontSize: number = 14): Frame =>
+let createLabelBtn = (params: {[x: string]: any}, callback: {(): void},
+isAvailable: {(): boolean}, text: string, fontSize: number = 14): Frame =>
 {
     let triggerable = true;
+    let textColor = () => isAvailable() ? Color.TEXT : Color.TEXT_MEDIUM;
+    let borderColor = () => isAvailable() ? Color.BORDER : Color.TRANSPARENT;
     let frame = ui.createFrame
     ({
         cornerRadius: 1,
@@ -4448,10 +4450,10 @@ text: string, fontSize: number = 14): Frame =>
             text,
             horizontalTextAlignment: TextAlignment.CENTER,
             verticalTextAlignment: TextAlignment.CENTER,
-            textColor: Color.TEXT,
+            textColor,
             fontSize
         }),
-        borderColor: Color.BORDER,
+        borderColor,
         ...params
     });
     frame.onTouched = (e: TouchEvent) =>
@@ -4463,9 +4465,9 @@ text: string, fontSize: number = 14): Frame =>
         }
         else if(e.type.isReleased())
         {
-            frame.borderColor = Color.BORDER;
-            (<LatexLabel>frame.content).textColor = Color.TEXT;
-            if(triggerable)
+            frame.borderColor = borderColor;
+            (<LatexLabel>frame.content).textColor = textColor;
+            if(triggerable && isAvailable())
             {
                 Sound.playClick();
                 callback();
@@ -4476,8 +4478,8 @@ text: string, fontSize: number = 14): Frame =>
         else if(e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
         e.x > frame.width || e.y > frame.height))
         {
-            frame.borderColor = Color.BORDER;
-            (<LatexLabel>frame.content).textColor = Color.TEXT;
+            frame.borderColor = borderColor;
+            (<LatexLabel>frame.content).textColor = textColor;
             triggerable = false;
         }
     };
@@ -4526,7 +4528,7 @@ isToggled: boolean | {(): boolean}) =>
 //     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
 // });
 
-const waterFrame = createImageFrameBtn
+const waterFrame = createImageBtn
 ({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 0,
@@ -4569,7 +4571,7 @@ const waterLabel = ui.createLatexLabel
     textColor: Color.TEXT_MEDIUM
 });
 
-const harvestFrame = createImageFrameBtn
+const harvestFrame = createImageBtn
 ({
     // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 2,
@@ -4599,7 +4601,7 @@ const harvestLabel = ui.createLatexLabel
     textColor: Color.TEXT_MEDIUM
 });
 
-const pruneFrame = createImageFrameBtn
+const pruneFrame = createImageBtn
 ({
     isVisible: () =>
     {
@@ -4674,7 +4676,7 @@ const settingsLabel = ui.createLatexLabel
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const settingsFrame = createImageFrameBtn
+const settingsFrame = createImageBtn
 ({
     row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
@@ -5330,7 +5332,7 @@ var getCurrencyBarDelegate = () =>
         verticalTextAlignment: TextAlignment.CENTER
     });
 
-    let examineBtn = createLabelFrameBtn
+    let examineBtn = createLabelBtn
     ({
         row: 0, column: 1,
         heightRequest: getMediumBtnSize(ui.screenWidth)
@@ -5341,9 +5343,9 @@ var getCurrencyBarDelegate = () =>
             return;
         let seqMenu = createColonyViewMenu(selectedColony);
         seqMenu.show();
-    }, getLoc('viewColony'), 12);
+    }, () => manager.colonies[plotIdx].length > 0, getLoc('viewColony'), 12);
 
-    let switchbackBtn = createLabelFrameBtn
+    let switchbackBtn = createLabelBtn
     ({
         column: 0,
         heightRequest: getMediumBtnSize(ui.screenWidth)
@@ -5356,9 +5358,9 @@ var getCurrencyBarDelegate = () =>
             colonyIdx[plotIdx] = 0;
         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
         renderer.colony = selectedColony;
-    }, '↑');
+    }, () => manager.colonies[plotIdx].length > 1, '↑');
 
-    let switchBtn = createLabelFrameBtn
+    let switchBtn = createLabelBtn
     ({
         column: 1,
         heightRequest: getMediumBtnSize(ui.screenWidth)
@@ -5371,7 +5373,7 @@ var getCurrencyBarDelegate = () =>
             colonyIdx[plotIdx] = 0;
         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
         renderer.colony = selectedColony;
-    }, '↓');
+    }, () => manager.colonies[plotIdx].length > 1, '↓');
 
     (<Grid>controlStack.children[0]).children =
     [
