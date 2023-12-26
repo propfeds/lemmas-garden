@@ -13,6 +13,7 @@ import { ui } from './api/ui/UI';
 import { Aspect } from './api/ui/properties/Aspect';
 import { ClearButtonVisibility } from './api/ui/properties/ClearButtonVisibility';
 import { Color } from './api/ui/properties/Color';
+import { Easing } from './api/ui/properties/Easing';
 import { FontFamily } from './api/ui/properties/FontFamily';
 import { ImageSource } from './api/ui/properties/ImageSource';
 import { Keyboard } from './api/ui/properties/Keyboard';
@@ -57,7 +58,7 @@ const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS = {
     en: {
-        versionName: `Version: 0.2.2, 'Less Unhinged'`,
+        versionName: `Version: 0.2.3, 'Anniversary'`,
         wip: 'Work in Progress',
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish\\colon',
@@ -4005,18 +4006,17 @@ var updateAvailability = () => {
         }
     });
 };
-// let floatingWipLabel = ui.createLatexLabel
-// ({
-//     row: 0, column: 0,
-//     rotation: -24,
-//     horizontalOptions: LayoutOptions.CENTER,
-//     verticalOptions: LayoutOptions.END,
-//     // verticalTextAlignment: TextAlignment.CENTER,
-//     margin: new Thickness(8, 40),
-//     text: getLoc('wip'),
-//     fontSize: 9,
-//     textColor: Color.TEXT_MEDIUM
-// });
+let floatingWipLabel = ui.createLatexLabel({
+    row: 0, column: 0,
+    rotation: -24,
+    horizontalOptions: LayoutOptions.CENTER,
+    verticalOptions: LayoutOptions.END,
+    // verticalTextAlignment: TextAlignment.CENTER,
+    margin: new Thickness(8, 40),
+    text: getLoc('wip'),
+    fontSize: 9,
+    textColor: Color.TEXT_MEDIUM
+});
 var tick = (elapsedTime, multiplier) => {
     let dd, di, dg;
     perfs[0 /* Profilers.TICK */].exec(() => {
@@ -4053,8 +4053,7 @@ var tick = (elapsedTime, multiplier) => {
                 theory.invalidateQuaternaryValues();
                 break;
         }
-        // floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
-        // 180, Easing.LINEAR);
+        floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12, 180, Easing.LINEAR);
         managerLoadingInd.isRunning = manager.busy;
     }
     theory.invalidateSecondaryEquation();
@@ -4075,7 +4074,7 @@ var getEquationOverlay = () => {
         inputTransparent: true,
         cascadeInputTransparent: false,
         children: [
-            // floatingWipLabel,
+            floatingWipLabel,
             managerLoadingInd,
             ui.createLatexLabel({
                 row: 0, column: 0,

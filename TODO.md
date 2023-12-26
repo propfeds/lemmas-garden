@@ -3,7 +3,7 @@
 - [To-do List](#to-do-list)
   - [Research](#research)
   - [Compost bin](#compost-bin)
-  - [v0.3: Invasion](#v03-invasion)
+  - [v0.3: Invasion / 'Grass Tidings' / 'Turf Tidings?'](#v03-invasion--grass-tidings--turf-tidings)
   - [v0.2: Wet](#v02-wet)
   - [v0.1: Slumber Seeds](#v01-slumber-seeds)
   - [v0: Completed](#v0-completed)
@@ -95,7 +95,7 @@ If you want someone who are not familiar with Exponential Idle, you should add b
 
 - [ ] Popup title gets truncated on iOS if it exceeds 1 line
 
-## v0.3: Invasion
+## v0.3: Invasion / 'Grass Tidings' / 'Turf Tidings?'
 
 - [x] Add almanac access button to view menu
 - [x] Move 'view Ls' button on book menu to top side near title
