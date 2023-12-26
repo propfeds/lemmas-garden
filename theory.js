@@ -42,7 +42,7 @@ Welcome to Lemma's Garden, an idle botanical theory built on the workings of ` +
 };
 var authors = 'propfeds\n\nThanks to:\nProf. Nakamura, research supervisor\n' +
     'game-icons.net, for providing the icons';
-var version = 0.22;
+var version = 0.23;
 // Numbers are often converted into 32-bit signed integers in JINT.
 const INT_MAX = 0x7fffffff;
 const INT_MIN = -0x80000000;
@@ -2836,13 +2836,12 @@ class ColonyManager {
         c.growth -= plantData[c.id].growthCost *
             // @ts-expect-error
             BigNumber.from(c.sequence.length);
-        if (!c.synthRate.isZero)
+        if (!c.synthRate.isZero) {
             // @ts-expect-error
             c.diReserve += c.growth / c.synthRate;
-        if (!plantData[c.id].growthRate.isZero)
             // @ts-expect-error
-            c.dgReserve += c.growth / plantData[c.id].growthRate;
-        c.growth = BigNumber.ZERO;
+            c.energy -= c.growth;
+        }
         // Assign new stage's stats
         c.sequence = this.deriveTask.derivation;
         c.params = this.deriveTask.parameters;
@@ -3617,7 +3616,7 @@ const pruneLabel = ui.createLatexLabel({
 //     fontSize: 10,
 //     textColor: Color.TEXT_MEDIUM
 // });
-const settingsLabel = ui.createLatexLabel({
+const mainMenuLabel = ui.createLatexLabel({
     row: 0, column: 1,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9),
@@ -3630,7 +3629,7 @@ const settingsLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const settingsFrame = createImageBtn({
+const mainMenuFrame = createImageBtn({
     row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
 }, () => createShelfMenu().show(), game.settings.theme == Theme.LIGHT ?
@@ -4101,8 +4100,8 @@ var getEquationOverlay = () => {
                 inputTransparent: true,
                 cascadeInputTransparent: false,
                 children: [
-                    settingsFrame,
-                    settingsLabel,
+                    mainMenuFrame,
+                    mainMenuLabel,
                     // skipFrame,
                     // skipLabel
                 ]

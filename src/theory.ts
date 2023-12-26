@@ -3676,12 +3676,12 @@ class ColonyManager
         // @ts-expect-error
         BigNumber.from(c.sequence.length);
         if(!c.synthRate.isZero)
+        {
             // @ts-expect-error
             c.diReserve += c.growth / c.synthRate;
-        if(!plantData[c.id].growthRate.isZero)
             // @ts-expect-error
-            c.dgReserve += c.growth / plantData[c.id].growthRate;
-        c.growth = BigNumber.ZERO;
+            c.energy -= c.growth;
+        }
 
         // Assign new stage's stats
 
@@ -4677,7 +4677,7 @@ const pruneLabel = ui.createLatexLabel
 //     textColor: Color.TEXT_MEDIUM
 // });
 
-const settingsLabel = ui.createLatexLabel
+const mainMenuLabel = ui.createLatexLabel
 ({
     row: 0, column: 1,
     verticalTextAlignment: TextAlignment.START,
@@ -4692,7 +4692,7 @@ const settingsLabel = ui.createLatexLabel
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const settingsFrame = createImageBtn
+const mainMenuFrame = createImageBtn
 ({
     row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
@@ -5263,8 +5263,8 @@ var getEquationOverlay = () =>
                 cascadeInputTransparent: false,
                 children:
                 [
-                    settingsFrame,
-                    settingsLabel,
+                    mainMenuFrame,
+                    mainMenuLabel,
                     // skipFrame,
                     // skipLabel
                 ]

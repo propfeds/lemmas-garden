@@ -72,11 +72,6 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Bundle time and coordinates into the manager class
   - [ ] Following LT's method, could also bundle the plant upgrades too
 
-- [ ] Dynamical system inaccuracies
-  - Context: basil is pruned at stg 0 (synth rate is 0), plant can only grow when watering. Watering should give multiples of 2 energy, but when evolving, some of the energy is truncated.
-  - Well, just inaccuracies in general
-  - Let's ask someone about them
-
 - [ ] Ask Uni of Calgary about how to make Ls easier to understand
   - Provide context: making a game about the logical aspects of Ls
 
@@ -101,6 +96,10 @@ If you want someone who are not familiar with Exponential Idle, you should add b
 - [x] Move 'view Ls' button on book menu to top side near title
 - [x] Make the column spacing x1.5 if there's no tax and make it branchless
 - [x] On confirmation dialogue, have the action described (like in L-s menu)
+- [x] Dynamical system inaccuracies
+  - Context: basil is pruned at stg 0 (synth rate is 0), plant can only grow when watering. Watering should give multiples of 2 energy, but when evolving, some of the energy is truncated.
+  - Well, just inaccuracies in general
+  - Let's ask someone about them
 
 - [ ] Pre-calendula plant: Botched bean
   - First (and only) microgreen?
