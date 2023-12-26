@@ -291,7 +291,7 @@ K).`
 soon.`,
                     22: `It's about to bloom. You can stay up at night watching
 flowers later, or snip the bud, if you don't feel confident about your leaves
-decaying.`,
+sogging.`,
                     26: `Is the flower there? If it is, imagine it sending a 
 signal from top to bottom, all the way to base.\\\\Later, basil base will send
 another signal back to the leaves, telling them to go so very bitter.\\\\Don't
@@ -719,19 +719,22 @@ This will help you keep track of your plantations.
             },
             flood:
             {
-                title: `Maximum statements?`,
+                title: `Inclement`,
                 contents:
-`I hear ya.
-The floodplains hadn't been doing very well.
-It's very likely to get logged this season...
+`'Maximum statements?'
+I hear ya.
+We made too many complaint statements this season.
+The floodplains hasn't been doing very well.
+It's too likely to get logged this season...
 
 Don't worry.
-Try not to let your plants spread too much,
-because, this is unlike any regular flood.
+Try not to let your bushes spread too much,
+this is unlike any regular flood.
 
 Note: Your plots and settings have been wiped.
 I'm sorry. I can't find a way around this.
 Just deal with it as a 'gameplay mechanic'.
+Standalone Lemma's Garden, coming in Never.
 - propfeds`
             },
             nepo:

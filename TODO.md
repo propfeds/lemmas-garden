@@ -40,11 +40,6 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Tag various stuffs with readonly
 - [ ] Change getLoc() to just assign loc folder at start and access a property
 
-- [ ] Simple solitary flower
-  - Tulip?
-  - Buttercup
-  - No need, Cally is already easy to play
-
 - [ ] Colour schemes?
 - [ ] Timer function to measure growth
   - Device time measured by user is sufficient?
@@ -57,8 +52,6 @@ do nothing. Do you feel like it could be more interesting?
   - Hard to implement since there's more to LG than when to harvest
 
 - [ ] Different aspect ratios hav different graph bounds
-
-- [ ] Newspapers
 
 - [ ] Compost
   - Has STAGES?
@@ -78,13 +71,14 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Change /sec indicators to /hr (in-game) and display 5x the value
   - Counter-argument: all parameters display /sec
 
-If you want someone who are not familiar with Exponential Idle, you should add basic information about Exponential Idle itself. For example, what is the objective of this game? Just to run and watch...?
-(Actually, because I (Nakamura) 've got no info about the game by you, I cannot understand what to do for module 1 ... I've run the game for about 20 mins, nothing happens, and I cannot understand where is the plant, how to water it, etc. If some explanations with snapshots, I'll be able to understand easily. If you intend that the target user is familar with the basic concept of the game, please don't care of this comment)
-
 - [ ] Address dissonance in Lemma's attitude
   - Early game should be the time when a lot of help is needed, don't neglect your student
 
 - [ ] Popup title gets truncated on iOS if it exceeds 1 line
+
+- [ ] Watering
+  - Instead of putting watering on a cooldown, make it a coefficient curve or slope that either deducts or increases energy based on the last time the plant was watered. This will communicate the effects of overwatering better?
+  - [ ] Auto-watering: unlocks with classmates
 
 ## v0.3: Invasion / 'Grass Tidings' / 'Turf Tidings?'
 
@@ -97,9 +91,13 @@ If you want someone who are not familiar with Exponential Idle, you should add b
   - Well, just inaccuracies in general
   - Let's ask someone about them
 
-- [ ] Pre-calendula plant: Botched bean
-  - First (and only) microgreen?
-  - https://dumbways2die.fandom.com/wiki/Botch
+- [ ] Pre-calendula plant:
+  - [ ] Botched bean
+    - First (and only) microgreen?
+    - https://dumbways2die.fandom.com/wiki/Botch
+  - [ ] Simple solitary flower
+    - Tulip? But tulip is much more fancier...
+    - Buttercup
 
 - [ ] Calendula
   - [ ] Flower transforms into fruit with lower profit
@@ -153,10 +151,7 @@ If you want someone who are not familiar with Exponential Idle, you should add b
 - [ ] Sunflower
 
 - [ ] Universal income upgrades
-
-- [ ] Watering
-  - Instead of putting watering on a cooldown, make it a coefficient curve or slope that either deducts or increases energy based on the last time the plant was watered. This will communicate the effects of overwatering better?
-  - [ ] Auto-watering: unlocks with classmates
+- [ ] Newspapers
 
 ## v0.2: Wet
 
