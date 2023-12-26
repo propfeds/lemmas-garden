@@ -94,7 +94,7 @@ const LOC_STRINGS =
         btnPage: 'p. {0}',
 
         actionConfirmDialogue: `You are about to perform a {0} on\\\\
-{3} (plot {1}-{2}).\\\\{4}\\\\\n\n\\\\{5}`,
+{4} (plot {1}, {2}/{3}).\\\\{5}\\\\\n\n\\\\{6}`,
 
         labelSave: 'Last saved: {0}s',
         labelSkip: 'Skip tutorial',
@@ -276,8 +276,8 @@ K).`
                 {
                     index:
                     [
-                        0, 6, 10, 12, 14, 16, 18, 20, 22,
-                        24,
+                        0, 6, 10, 12, 14, 16, 18, 20,
+                        22,
                         26
                     ],
                     0: 'A seedling in its sweet slumber.',
@@ -287,15 +287,15 @@ K).`
                     14: 'The third pair of leaves appears.',
                     16: 'Little leaves now grow over the second node.',
                     18: 'This rhythm will repeat for a while.',
-                    20: `I'll show you what to do when it flowers, soon.`,
-                    22: `It's about to flower. You can nip the stem now if you
-don't feel confident.`,
-                    24: `It's about to bloom. Snip the bud, or stay up at night
-watching flowers. Up to you.`,
-                    26: `If the flower's there, imagine it sending a signal
-from top to bottom, all the way to base.\\\\Later, basil base will send another
-signal back to the leaves, telling them to go so very bitter.\\\\Don't worry,
-you can still sell flowers for tea. You like tea?`,
+                    20: `I'll show you what to do when it's about to bloom,
+soon.`,
+                    22: `It's about to bloom. You can stay up at night watching
+flowers later, or snip the bud, if you don't feel confident about your leaves
+decaying.`,
+                    26: `Is the flower there? If it is, imagine it sending a 
+signal from top to bottom, all the way to base.\\\\Later, basil base will send
+another signal back to the leaves, telling them to go so very bitter.\\\\Don't
+worry, you can still sell flowers for tea. You like tea?`,
                 }
             },
             campion:
@@ -6583,6 +6583,7 @@ let createConfirmationMenu = (plot: number, index: number, id: number) =>
                 ({
                     text: Localization.format(getLoc('actionConfirmDialogue'),
                     getLoc('labelActions')[id], plot + 1, index + 1,
+                    manager.colonies[plot].length,
                     getColonyTitleString(c, false, false, true),
                     getLoc('plants')[c.id]?.actions?.[id],
                     Localization.get('GenPopupContinue')),

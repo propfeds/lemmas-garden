@@ -6,7 +6,7 @@
   - [v0.3: Invasion / 'Grass Tidings' / 'Turf Tidings?'](#v03-invasion--grass-tidings--turf-tidings)
   - [v0.2: Wet](#v02-wet)
   - [v0.1: Slumber Seeds](#v01-slumber-seeds)
-  - [v0: Completed](#v0-completed)
+  - [v0: Axiom](#v0-axiom)
 
 ## Research
 
@@ -38,8 +38,6 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Unlock conditions for each page in Lemma's book
 
 - [ ] Tag various stuffs with readonly
-- [x] Enums
-- [x] Use toJSON() for classes
 - [ ] Change getLoc() to just assign loc folder at start and access a property
 
 - [ ] Simple solitary flower
@@ -61,8 +59,6 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Different aspect ratios hav different graph bounds
 
 - [ ] Newspapers
-- [ ] Add a Pruned commentary track
-  - 2 lazy
 
 - [ ] Compost
   - Has STAGES?
@@ -118,6 +114,7 @@ If you want someone who are not familiar with Exponential Idle, you should add b
   - [x] Rewrite instructions to encourage blooming
     - Stg 24: 'It's about to bloom soon. Cutting the bud now or watching flowers later, it's up to you.'
     - Separate stg 26 and 27 description for basil, and only stg 27 has the signal explanation
+  - [ ] Add a Pruned commentary track
 
 - [x] Rose campion
   - [x] Nerf spreading rate to 1/2 or sth?
@@ -147,6 +144,9 @@ If you want someone who are not familiar with Exponential Idle, you should add b
   - [ ] Or maybe repelled by calendula and basil?
 
 - [ ] Broomrape
+  - [ ] Schedule
+    - Once per 2 years? Doesn't it make broomrape faster than hopleek?
+  - [ ] Propagation method
 
 - [ ] Ginger
 
@@ -156,8 +156,12 @@ If you want someone who are not familiar with Exponential Idle, you should add b
 
 - [ ] Watering
   - Instead of putting watering on a cooldown, make it a coefficient curve or slope that either deducts or increases energy based on the last time the plant was watered. This will communicate the effects of overwatering better?
+  - [ ] Auto-watering: unlocks with classmates
 
 ## v0.2: Wet
+
+- [x] Enums
+- [x] Use toJSON() for classes
 
 - [x] Button that skips tutorial for iOS players
 - [x] Dedicated save file for playtesting
@@ -194,8 +198,6 @@ If you want someone who are not familiar with Exponential Idle, you should add b
     - [x] Add dynamic directions (`m` for min, `M` for max)
   - Spreaded colonies syntax: +1 of Rose campion
   - [x] Propagated colonies inherit the di and dg reserves
-  - [ ] Hey, can you imagine an ash tree propagating a MISTLETOE?
-    - Mistletoe also eats nutrients like hopleek
 
 - [x] Watering
   - Absurd cooldown like 10 minutes (6 days)
@@ -205,8 +207,6 @@ If you want someone who are not familiar with Exponential Idle, you should add b
   - [x] Extend each species to accomodate for watering change
     - [x] Opportunity to standardise countdown params
   - [x] Lemma book entry
-  - [ ] Auto-watering
-    - Unlocks with classmates
 
 - [x] Colony view params are initially off
 - [x] Notebook shows next cost
@@ -269,7 +269,7 @@ displayed on screen
   - [x] If stage lower than first leaf, give the usual intro (move that inside
   the stages object)
 
-## v0: Completed
+## v0: Axiom
 
 - [x] Make at least 2 plants
   - [x] Idleable plant: calendula
