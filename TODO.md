@@ -33,6 +33,15 @@
 - Let's think about it. A plant that takes 80 minutes to grow, and you have to
 do nothing. Do you feel like it could be more interesting?
 
+Since the number of questionnaires is not so large, qualitative evaluation instead of quantitative evaluation is acceptable at least at this point. The aims of the game, such as "incorporates the mechanics of L-systems in order to provide an interesting learning experience" or "provide ways to enhance players' arithmetic skills and strategic thinking" etc, are described ex. at the beginning of "2. Methods", so you will examine the degree to which they have been achieved or not, item by item.
+
+to the idea of a simple plant before calendula: that's a good idea
+the concept of l-systems is the growing sequence and such
+maybe make a first plant that features just the (a -> b, b -> ab) sequence and then add the orientation and conditions later on in its life
+
+basically it only focuses on plant growth instead of the actual l-systems , which I find a bit lacking
+you have to dig really deep to find the underlying systems behind the plants
+
 ## Compost bin
 
 - [ ] Unlock conditions for each page in Lemma's book
@@ -73,15 +82,20 @@ do nothing. Do you feel like it could be more interesting?
 
 - [ ] Address dissonance in Lemma's attitude
   - Early game should be the time when a lot of help is needed, don't neglect your student
+  - Lemma should also know about L-systems and tell students what rule is being enacted
 
 - [ ] Popup title gets truncated on iOS if it exceeds 1 line
 
 - [ ] Watering
-  - Instead of putting watering on a cooldown, make it a coefficient curve or slope that either deducts or increases energy based on the last time the plant was watered. This will communicate the effects of overwatering better?
-  - [ ] Auto-watering: unlocks with classmates
+  - [ ] Instead of putting watering on a cooldown, make it a coefficient curve or slope that either deducts or increases energy based on the last time the plant was watered. This will communicate the effects of overwatering better?
+    - Auto-watering: unlocks with classmates
+  - [ ] Make watering required for every stage, else the plant won't evolve.
+    - Auto-watering: unlocks for free (right away, or maybe after the next plant has been unlocked) with configurable stage. That means you have likely understood this plant's growth.
+    - Some plants don't need watering, such as grasses.
 
 ## v0.3: Invasion / 'Grass Tidings' / 'Turf Tidings?'
 
+- [ ] Test book icon
 - [x] Add almanac access button to view menu
 - [x] Move 'view Ls' button on book menu to top side near title
 - [x] Make the column spacing x1.5 if there's no tax and make it branchless
@@ -90,6 +104,8 @@ do nothing. Do you feel like it could be more interesting?
   - Context: basil is pruned at stg 0 (synth rate is 0), plant can only grow when watering. Watering should give multiples of 2 energy, but when evolving, some of the energy is truncated.
   - Well, just inaccuracies in general
   - Let's ask someone about them
+
+- [ ] Apex models for plants
 
 - [ ] Pre-calendula plant:
   - [ ] Botched bean

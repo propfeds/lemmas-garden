@@ -3931,19 +3931,19 @@ const plantData: {[key: string]: Plant} =
     {
         system: new LSystem('-(3)A(0.06, 4)',
         [
-            'A(r, t): t<=0 && r>=flowerThreshold = F(0.78, 2.1)K(0)',
-            'A(r, t): r>=flowerThreshold = [&A(r-0.15, 2)][^I(3)]',
+            'A(r, t): t<=0 && r>=KThreshold = F(0.78, 2.1)K(0)',
+            'A(r, t): r>=KThreshold = [&A(r-0.15, 2)][^I(3)]',
             'A(r, t): t>0 = A(r+0.06, t-1)',
-            'A(r, t) = F(0.12, 0.6)T[-L(0.06, maxLeafSize-r/4)]/(180)[-L(0.06, maxLeafSize-r/4)]/(90)A(r, 4)',
-            'I(t): t>0 = F(0.24, 0.84)T[-L(0.06, maxLeafSize/3)]/(137.508)I(t-1)',
+            'A(r, t) = F(0.12, 0.6)T[-L(0.06, maxLSize)]/(180)[-L(0.06, maxLSize)]/(90)A(r, 4)',
+            'I(t): t>0 = F(0.24, 0.84)T[-L(0.06, maxLSize/3)]/(137.508)I(t-1)',
             'I(t) = F(0.48, 1.44)K(0)',
-            'K(p): p<maxFlowerSize = K(p+0.25)',
+            'K(p): p<maxKSize = K(p+0.25)',
             'L(r, lim): r<lim = L(r+0.02, lim)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 15, 0, 'AI', '', -0.2, {
-            'flowerThreshold': '0.96',
-            'maxFlowerSize': '3',
-            'maxLeafSize': '0.72 - 1e-9'
+            'KThreshold': '0.96',
+            'maxKSize': '3',
+            'maxLSize': '0.72 - 1e-9'
         },
         [
             '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/10+0.1)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)]}',
@@ -3956,8 +3956,8 @@ const plantData: {[key: string]: Plant} =
             '~> k(p, a): p<0.3 = [---(a)F(p/2).+^F(p*2).+&F(p).][---(a)F(p/2)[+&F(p*2)[+^F(p).].].]/(137.508)',
             '~> k(p, a) = [---(a)F(p/2).+^F(p*2).&F(p).][---(a)F(p/2)[+&F(p*2)[^F(p).].].]/(137.508)',
             '~> o(p, a) = [-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]',
-            '~> L(p, lim): p<=maxLeafSize/4 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].].[^F(p).F(p).^-F(p).&&-F(p).&F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].]}',
-            '~> L(p, lim): p<=maxLeafSize/3 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
+            '~> L(p, lim): p<=maxLSize/4 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].].[^F(p).F(p).^-F(p).&&-F(p).&F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].]}',
+            '~> L(p, lim): p<=maxLSize/3 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
             '~> L(p, lim) = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
         ]),
         maxStage: 40,
@@ -4009,14 +4009,14 @@ const plantData: {[key: string]: Plant} =
     {
         system: new LSystem('/(90)BA(0.06, 5)',
         [
-            'A(r, t): r>=flowerThreshold = S(0)F(0.24, 0.96)K(0.02, 8)',
+            'A(r, t): r>=KThreshold = S(0)F(0.24, 0.96)K(0.02, 8)',
             'A(r, t): t>0 = A(r+0.06, t-1)',
-            'A(r, t) = F(0.12, 1.44)[&[I(5)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[&L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.06, 3)',
+            'A(r, t) = F(0.12, 1.44)[&[I(5)]T(0.2)L(0.06, min(r+0.12, maxLSize), 0)]/(180)[&L(0.06, min(r+0.12, maxLSize), 0)]/(90)A(r-0.06, 3)',
             'S(type) < I(t): type>=1 = S(type)',
             'I(t): t>0 = I(t-1)',
-            'I(t) = /(90)F(0.12, 0.72)T[&L(0.03, maxLeafSize/2, 0)]/(180)[&L(0.03, maxLeafSize/2, 0)]I(11)',
+            'I(t) = /(90)F(0.12, 0.72)T[&L(0.03, maxLSize/2, 0)]/(180)[&L(0.03, maxLSize/2, 0)]I(11)',
             'K(s, t): t>0 = K(s+0.02, 0)/(90)F(0.12, 0.72)K(0.02, t-1)',
-            'K(s, t): s<maxFlowerSize = K(s+0.02, t)',
+            'K(s, t): s<maxKSize = K(s+0.02, t)',
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
             'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
             'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
@@ -4026,9 +4026,9 @@ const plantData: {[key: string]: Plant} =
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
-            'flowerThreshold': '0.96',
-            'maxLeafSize': '0.6',
-            'maxFlowerSize': '0.3'
+            'KThreshold': '0.96',
+            'maxLSize': '0.6',
+            'maxKSize': '0.3'
         },
         [
             '~> K(t) = {[k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))]}',
@@ -4096,12 +4096,12 @@ const plantData: {[key: string]: Plant} =
             'K(p, t): t<3 = K(0.1875, t+1)',
             'K(p, t): t<12 = K(1.35*p-0.8*p^2, t+1)',
             'K(p, t) = O(1)',
-            'L(s): s<maxLeafSize = L(s+0.025)',
+            'L(s): s<maxLSize = L(s+0.025)',
             'O(s): s>0.5 = O(s*0.9)',
             'O(s) =',
             'F(l, t): t>0 = F(l+0.4, t-1)'
         ], 31, 0, 'A', '', -0.6, {
-            'maxLeafSize': '0.625'
+            'maxLSize': '0.625'
         },
         [
             '~> K(p, t): t<3 = {[+(90)b(p*4)b(p*4)b(p*4)b(p*4)b(p*4)]}',
@@ -5703,27 +5703,36 @@ let createSystemMenu = (id: string) =>
         }
     });
 
-    let tmpRules = [];
-    for(let i = 0; i < values.rules.length; ++i)
-        tmpRules[i] = values.rules[i];
+    let tmpRules = values.rules;
+    // for(let i = 0; i < values.rules.length; ++i)
+    //     tmpRules[i] = values.rules[i];
     let ruleEntries = [];
     for(let i = 0; i < tmpRules.length; ++i)
     {
+        ruleEntries.push(ui.createLabel
+        ({
+            row: i, column: 0,
+            horizontalOptions: LayoutOptions.END,
+            verticalOptions: LayoutOptions.CENTER,
+            text: String(i+1),
+            fontSize: 14
+        }));
         ruleEntries.push(ui.createEntry
         ({
-            row: i,
+            row: i, column: 1,
             text: tmpRules[i]
         }));
     }
     let rulesLabel = ui.createLatexLabel
     ({
-        text: Localization.format(getLoc('labelRules'), ruleEntries.length),
+        text: Localization.format(getLoc('labelRules'), tmpRules.length),
         verticalTextAlignment: TextAlignment.CENTER,
         margin: new Thickness(0, 6),
         // heightRequest: getSmallBtnSize(ui.screenWidth)
     });
     let ruleStack = ui.createGrid
     ({
+        columnDefinitions: ['auto', 'auto'],
         children: ruleEntries
     });
 
