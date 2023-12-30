@@ -4700,8 +4700,8 @@ const mainMenuFrame = createImageBtn
     row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
 }, () => createShelfMenu().show(), game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/spoted-flower.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/spoted-flower.png'));
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/white-book.png') :
+ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/white-book.png'));
 
 // const skipLabel = ui.createLatexLabel
 // ({
