@@ -3521,14 +3521,7 @@ const waterFrame = createImageBtn({
     row: 0, column: 0,
 }, () => manager.water(selectedColony), () => {
     let c = selectedColony;
-    if (!c)
-        return false;
-    // @ts-expect-error
-    let threshold = plantData[c.id].growthCost *
-        // @ts-expect-error
-        BigNumber.from(c.sequence.length);
-    // @ts-expect-error
-    if (c && !c.wet && c.growth >= threshold / BigNumber.TWO)
+    if (c && !c.wet)
         return true;
     return false;
 }, game.settings.theme == Theme.LIGHT ?

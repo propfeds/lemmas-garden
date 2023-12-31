@@ -4560,14 +4560,7 @@ const waterFrame = createImageBtn
 () =>
 {
     let c = selectedColony;
-    if(!c)
-        return false;
-    // @ts-expect-error
-    let threshold: BigNumber = plantData[c.id].growthCost *
-    // @ts-expect-error
-    BigNumber.from(c.sequence.length);
-    // @ts-expect-error
-    if(c && !c.wet && c.growth >= threshold/BigNumber.TWO)
+    if(c && !c.wet)
         return true;
     return false;
 },
