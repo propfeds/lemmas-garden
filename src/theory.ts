@@ -756,6 +756,20 @@ Not without giving something back for the community.
 I need to do something.
 - Lena`
             }
+        },
+
+        achievements:
+        {
+            debt:
+            {
+                title: 'Student',
+                desc: 'Reach negative pennies.'
+            },
+            immortal:
+            {
+                title: 'Collective Experience',
+                desc: 'Toil for 200 years.'
+            }
         }
     }
 };
@@ -2093,6 +2107,11 @@ class LSystem
             let tmpRules = this.models.get(symbol);
             for(let j = 0; j < tmpRules.length; ++j)
             {
+                // Param count check
+                let count = params ? params.length : 0;
+                if(tmpRules[j].count[2] != count)
+                    continue;
+
                 let tmpParamMap = (v: string) => this.varGetter(v) ??
                 tmpRules[j].paramMap(v, null, null, params);
                 // Next up is the condition
@@ -5128,8 +5147,10 @@ var init = () =>
         warpZero.isAvailable = haxEnabled;
     }
 
-    // To do: challenge plot (-1)
     // Next: milestones
+
+    // Story chapters
+
     let chapters = getLoc('chapters');
     theory.createStoryChapter(0, chapters?.intro[0]?.title,
     chapters?.intro[0]?.contents, () => true);
@@ -5146,6 +5167,14 @@ var init = () =>
     let fifteen = BigNumber.from(1e15).pow(tauRate);
     theory.createStoryChapter(4, chapters?.nepo?.title,
     chapters?.nepo?.contents, () => theory.tau >= fifteen);
+
+    // Achievements
+
+    let achievements = getLoc('achievements');
+    theory.createAchievement(0, null, achievements?.debt?.title,
+    achievements?.debt?.desc, () => currency.value < BigNumber.ZERO);
+    theory.createAchievement(1, null, achievements?.immortal?.title,
+    achievements?.immortal?.desc, () => years >= 200);
 
     theory.primaryEquationHeight = 30;
     theory.primaryEquationScale = 0.96;
