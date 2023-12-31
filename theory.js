@@ -172,6 +172,19 @@ Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
             'Account: Performance (min/max)'
         ],
         plants: {
+            sprout: {
+                name: 'Pea sprout',
+                nameShort: 's',
+                info: 'Tastes nice, innit?',
+                LsDetails: `To be filled`,
+                actions: [
+                    `Harvest returns profit as the sum of all F lengths.`
+                ],
+                stages: {
+                    index: [0],
+                    0: 'Seedling slumber etc.'
+                }
+            },
             calendula: {
                 name: 'Calendula',
                 nameShort: 'C',
@@ -603,8 +616,8 @@ Tip: Tap on 'Upgrades' to acquire your first plot.`
 Can't even bear to look at this soil...
 You have lots of training to do, still.
 
-Luckily, this marigold won't die,
-even if you stub your toe over it.
+Luckily, this sprout won't die, even if say...
+stub your toe, or drag one of your chairs over it.
 Just lend it a few drops and watch it grow.
 
 And if you ever get lost, *go* reach for my bookshelf.`
@@ -3012,8 +3025,8 @@ const nofPlots = 6;
 const maxColoniesPerPlot = 4;
 const waterAmount = BigNumber.from(1 / 2);
 const plotCosts = new FirstFreeCost(new ExponentialCost(800, Math.log2(120)));
-const plantUnlocks = ['calendula', 'basil', 'campion'];
-const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2100), new ConstantCost(145000));
+const plantUnlocks = ['sprout', 'calendula', 'basil', 'campion'];
+const plantUnlockCosts = new CompositeCost(1, new ConstantCost(1), new CompositeCost(1, new ConstantCost(2100), new ConstantCost(145000)));
 const permaCosts = [
     BigNumber.from(27),
     BigNumber.from(3600),
@@ -3033,6 +3046,42 @@ var getPublicationMultiplier = (tau) => pubCoef *
 var getPublicationMultiplierFormula = (symbol) => `\\frac{2}{3}\\times
 {${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
 const plantData = {
+    sprout: {
+        system: new LSystem('\\(45)A(0.02, 3)', [
+            'A(r, t): t>0 = A(r+0.02, t-1)',
+            'A(r, t) = F(0.05)[-&(45)L(0.02)][-^(45)L(0.02)]/(137.508)A(r, 3)',
+            'F(l): l<FMaxSize = F(l+0.05)',
+            'L(s): s<LMaxSize = L(s+0.02)'
+        ], 30, 0, 'A', '+-&^/\\T', 0, {
+            'FMaxSize': '0.3',
+            'LMaxSize': '0.12'
+        }, [
+            '~> L(s) = {F(s/4)T(4*s)[\\(90-480*s)&(45)F(s/6).&F(s/3).^^F(s/3).^F(s/3).^F(s/3).^F(s/6).][F(s)..].[/(90-480*s)^(45)F(s/6).^F(s/3).&&F(s/3).&F(s/3).&F(s/3).&F(s/6).][F(s)..]}',
+        ]),
+        maxStage: 12,
+        cost: new FirstFreeCost(new ExponentialCost(0.25, Math.log2(3))),
+        growthRate: BigNumber.from(0.3),
+        growthCost: BigNumber.from(0.6),
+        actions: [
+            {
+                symbols: new Set('F')
+            }
+        ],
+        camera: (stage) => {
+            return {
+                scale: 1,
+                x: 0,
+                y: 0.625,
+                z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) => {
+            return {
+                tickLength: 1,
+            };
+        }
+    },
     calendula: {
         system: new LSystem('-(3)A(0.06, 4)', [
             'A(r, t): t<=0 && r>=AThreshold = F(0.78, 2.1)K(0)',
@@ -3064,10 +3113,9 @@ const plantData = {
             '~> L(p, lim) = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
         ]),
         maxStage: 40,
-        cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
+        cost: new ExponentialCost(1, Math.log2(3)),
         growthRate: BigNumber.from(1.5),
         growthCost: BigNumber.from(2.5),
-        waterCD: 3 * dayLength,
         propagation: {
             rate: 1 / 3,
             priority: 'c'
@@ -3137,7 +3185,6 @@ const plantData = {
         cost: new ExponentialCost(2.5, 1),
         growthRate: BigNumber.TWO,
         growthCost: BigNumber.TWO,
-        waterCD: 2 * dayLength,
         actions: [
             {
                 symbols: new Set('KL'),
@@ -3204,7 +3251,6 @@ const plantData = {
         cost: new ExponentialCost(2000, Math.log2(5)),
         growthRate: BigNumber.from(2.75),
         growthCost: BigNumber.TEN,
-        waterCD: 5 * dayLength,
         stagelyIncome: BigNumber.ONE,
         propagation: {
             stage: 27,
@@ -3249,7 +3295,6 @@ const plantData = {
         cost: new FirstFreeCost(new ExponentialCost(1, 1)),
         growthRate: BigNumber.ONE,
         growthCost: BigNumber.from(45),
-        waterCD: 1 * dayLength,
         actions: [
             {
                 symbols: new Set('A')
@@ -3321,7 +3366,6 @@ const plantData = {
         cost: new ExponentialCost(1, 1),
         growthRate: BigNumber.TWO,
         growthCost: BigNumber.THREE,
-        waterCD: 9 * 60,
         actions: [
             {
                 symbols: new Set('L')
@@ -3356,6 +3400,8 @@ const plantData = {
     },
 };
 const plantIDLookup = {
+    sprout: 0,
+    0: 'sprout',
     calendula: 1,
     1: 'calendula',
     basil: 2,
