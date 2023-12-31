@@ -21,18 +21,6 @@
 - [ ] Are single-player games [that weak?](https://www.sciencedirect.com/science/article/abs/pii/S0360131522002214)
   - Hold on, collaborative and social interactions. Discord! Reddit!
 
-- [ ] Research notes
-  - Two players share progress with each other daily
-  - Some players understand the profit puzzle for calendula, some don't
-  - Players enjoy watching plants grow idly
-  - Some players can't get pruning basil
-  - Some players mistake max stage with max profit
-  - Many players are cautious about purchasing expensive items, which isn't the 
-  case usually for other theories
-
-- Let's think about it. A plant that takes 80 minutes to grow, and you have to
-do nothing. Do you feel like it could be more interesting?
-
 Since the number of questionnaires is not so large, qualitative evaluation instead of quantitative evaluation is acceptable at least at this point. The aims of the game, such as "incorporates the mechanics of L-systems in order to provide an interesting learning experience" or "provide ways to enhance players' arithmetic skills and strategic thinking" etc, are described ex. at the beginning of "2. Methods", so you will examine the degree to which they have been achieved or not, item by item.
 
 to the idea of a simple plant before calendula: that's a good idea
@@ -56,10 +44,6 @@ you have to dig really deep to find the underlying systems behind the plants
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
 
-- [ ] Autobuy upgrade unlocks harvest automation config
-  - Only unlocks in a future update (classmates!)
-  - Hard to implement since there's more to LG than when to harvest
-
 - [ ] Different aspect ratios hav different graph bounds
 
 - [ ] Compost
@@ -73,10 +57,6 @@ you have to dig really deep to find the underlying systems behind the plants
 - [ ] Ask Uni of Calgary about how to make Ls easier to understand
   - Provide context: making a game about the logical aspects of Ls
 
-- [ ] Bulk watering when holding button
-  - Waters everything on 1 plot, not the entire garden
-  - NO bulk harvest or prune.
-
 - [ ] Change /sec indicators to /hr (in-game) and display 5x the value
   - Counter-argument: all parameters display /sec
 
@@ -86,16 +66,13 @@ you have to dig really deep to find the underlying systems behind the plants
 
 - [ ] Popup title gets truncated on iOS if it exceeds 1 line
 
-- [ ] Watering
-  - [ ] Instead of putting watering on a cooldown, make it a coefficient curve or slope that either deducts or increases energy based on the last time the plant was watered. This will communicate the effects of overwatering better?
-    - Auto-watering: unlocks with classmates
-  - [ ] Make watering required for every stage, else the plant won't evolve.
-    - Auto-watering: unlocks for free (right away, or maybe after the next plant has been unlocked) with configurable stage. That means you have likely understood this plant's growth.
-    - Some plants don't need watering, such as grasses.
+- [ ] Autobuy upgrade unlocks harvest automation config
+  - Only unlocks in a future update (classmates!)
+  - Hard to implement since there's more to LG than when to harvest
 
 ## v0.3: Invasion / 'Grass Tidings' / 'Turf Tidings?'
 
-- [ ] Test book icon
+- [x] Test book icon
 - [x] Add almanac access button to view menu
 - [x] Move 'view Ls' button on book menu to top side near title
 - [x] Make the column spacing x1.5 if there's no tax and make it branchless
@@ -111,6 +88,12 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Botched bean
     - First (and only) microgreen?
     - https://dumbways2die.fandom.com/wiki/Botch
+    - Botched bean (free -> 0.25p -> x3)
+      Max profit: 0.5p
+      Optimal (3 cycles): 0->0.5, 0.25->1.25, 1->2
+      Calendula (1p to unlock) (1p -> x3)
+      1->0->9, 5->23
+      Pub (18p to unlock)
   - [ ] Simple solitary flower
     - Tulip? But tulip is much more fancier...
     - Buttercup
@@ -168,6 +151,17 @@ you have to dig really deep to find the underlying systems behind the plants
 
 - [ ] Universal income upgrades
 - [ ] Newspapers
+
+- [x] Watering
+  - [ ] Instead of putting watering on a cooldown, make it a coefficient curve or slope that either deducts or increases energy based on the last time the plant was watered. This will communicate the effects of overwatering better?
+  - [ ] Auto-watering: unlocks with classmates
+  - [ ] Bulk watering when holding button
+    - Waters everything on 1 plot, not the entire garden
+    - NO bulk harvest or prune.
+  - [x] Make watering required for every stage, else the plant won't evolve.
+    - [x] Timing: only make it available after half of the growth has been filled?
+    - [x] Auto-watering: unlocks for free (right away, or maybe after the next plant has been unlocked) with configurable stage. That means you have likely understood this plant's growth.
+    - Some plants don't need watering to evolve, such as grasses.
 
 ## v0.2: Wet
 

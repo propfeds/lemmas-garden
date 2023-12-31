@@ -76,7 +76,7 @@ const LOC_STRINGS =
 {
     en:
     {
-        versionName: `Version: 0.2.3, 'Anniversary'`,
+        versionName: `Version: 0.2.3, 'Wet'`,
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
@@ -99,6 +99,7 @@ const LOC_STRINGS =
         labelSave: 'Last saved: {0}s',
         labelSkip: 'Skip tutorial',
         labelWater: 'Water',
+        labelWaterUrgent: 'Water!',
         labelActions: ['Harvest', 'Prune'],
         labelFilter: 'Filter: ',
         labelParams: 'Parameters: ',
@@ -135,10 +136,12 @@ symbol is drawn depending on its parameters.`,
         permaNote: `Notebook \\&\\ 'Buy All' button`,
         permaNoteInfo: `Allows management of colony sizes (non-propagated)`,
         menuNote: 'Notebook',
+        menuAutoWater: 'Watering Schedule',
         permaSettings: 'Theory settings',
         permaSettingsInfo: `Decorate your teacher's garden`,
         labelPlants: 'Plants',
         labelMaxLevel: 'Max. size',
+        labelMaxStage: 'Max. stage',
         labelHarvestStage: 'Harvest stage',
 
         colony: `{0} of {1}, stage {2}`,
@@ -3071,7 +3074,7 @@ interface Colony
     params: LSystemParams;
     stage: number;
 
-    nextWater: number;
+    wet: boolean;
     energy: BigNumber;
     growth: BigNumber;
     synthRate?: BigNumber;
@@ -3170,13 +3173,13 @@ class ColonyManager
 
     water(colony: Colony)
     {
-        if((colony.nextWater ?? 0) <= time)
+        if(!colony.wet)
         {
             // @ts-expect-error
             colony.energy += plantData[colony.id].growthCost *
             // @ts-expect-error
-            BigNumber.from(colony.stage).max(waterAmount);
-            colony.nextWater = time + plantData[colony.id].waterCD;
+            BigNumber.from(colony.stage).max(BigNumber.ONE) * waterAmount;
+            colony.wet = true;
         }
     }
     reap(colony: Colony, multiplier: BigNumber = BigNumber.ONE)
@@ -3226,14 +3229,14 @@ class ColonyManager
             params: plantData[id].system.axiomParams,
             stage: 0,
 
-            nextWater: 0,
+            wet: false,
             energy: BigNumber.ZERO,
             growth: BigNumber.ZERO,
 
             diReserve: BigNumber.ZERO,
             dgReserve: BigNumber.ZERO
         };
-        if(plantData[c.id].dailyIncome)
+        if(plantData[id].dailyIncome)
             c.ddReserve = BigNumber.ZERO;
         let stats = this.calculateStats(c);
         c.synthRate = stats.synthRate;
@@ -3243,7 +3246,7 @@ class ColonyManager
             this.colonies[plot].push(c);
         else
         {
-            // Inheriting parent's reserve
+            // Inherit parent's reserve
 
             let parent = this.colonies[plot][spread];
             // @ts-expect-error
@@ -3251,16 +3254,20 @@ class ColonyManager
             // @ts-expect-error
             let maxdg = c.energy.min(parent.dgReserve *
             // @ts-expect-error
-            plantData[c.id].growthRate);
+            plantData[id].growthRate);
             // @ts-expect-error
             c.growth += maxdg;
             // @ts-expect-error
             c.energy -= maxdg;
-            if(plantData[c.id].dailyIncome)
+            if(plantData[id].dailyIncome)
                 c.ddReserve = parent.ddReserve;
 
             this.colonies[plot].splice(spread + 1, 0, c);
         }
+        // Auto water
+        if(autoWaterConfig[id]?.maxStage > c.stage)
+            this.water(c);
+
         if(plot == plotIdx && colonyIdx[plot] == this.colonies[plot].length - 1)
             renderer.colony = c;
         theory.invalidateQuaternaryValues();
@@ -3272,9 +3279,19 @@ class ColonyManager
         if(!c)
             return;
 
+        // Reset levels & unlock autowatering
         if(!c.propagated && plantUnlocks.includes(c.id))
+        {
             plants[plot][c.id].level -= Math.min(plants[plot][c.id].level,
             c.population);
+            if(!autoWaterConfig[c.id])
+            {
+                autoWaterConfig[c.id] =
+                {
+                    maxStage: 0
+                };
+            }
+        }
         if(index == this.colonies[plot].length - 1 && plot == plotIdx)
         {
             let len = this.colonies[plotIdx].length;
@@ -3332,7 +3349,7 @@ class ColonyManager
                     // @ts-expect-error
                     if(notMature && c.growth >= plantData[c.id].growthCost *
                     // @ts-expect-error
-                    BigNumber.from(c.sequence.length))
+                    BigNumber.from(c.sequence.length) && c.wet)
                     {
                         if(!this.gangsta)
                             this.gangsta = [i, j];
@@ -3517,6 +3534,8 @@ class ColonyManager
         }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
+
+        c.wet = false;
 
         this.actionAncestreeTask =
         {
@@ -3715,6 +3734,11 @@ class ColonyManager
             c.energy -= maxdg;
         }
 
+        c.wet = false;
+        // Auto water
+        if(autoWaterConfig[c.id]?.maxStage > c.stage)
+            this.water(c);
+
         // Propagate
 
         let prop = plantData[c.id].propagation;
@@ -3888,6 +3912,11 @@ interface NotebookEntry
     harvestStage: number
 }
 
+interface AutoWaterEntry
+{
+    maxStage: number
+}
+
 // Balance parameters
 
 const dayLength = 120;
@@ -3897,7 +3926,7 @@ const hourLength = dayLength / 24;
 
 const nofPlots = 6;
 const maxColoniesPerPlot = 4;
-const waterAmount = BigNumber.ONE;
+const waterAmount = BigNumber.from(1/2);
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(800, Math.log2(120)));
 const plantUnlocks = ['calendula', 'basil', 'campion'];
@@ -3931,8 +3960,8 @@ const plantData: {[key: string]: Plant} =
     {
         system: new LSystem('-(3)A(0.06, 4)',
         [
-            'A(r, t): t<=0 && r>=KThreshold = F(0.78, 2.1)K(0)',
-            'A(r, t): r>=KThreshold = [&A(r-0.15, 2)][^I(3)]',
+            'A(r, t): t<=0 && r>=AThreshold = F(0.78, 2.1)K(0)',
+            'A(r, t): r>=AThreshold = [&A(r-0.15, 2)][^I(3)]',
             'A(r, t): t>0 = A(r+0.06, t-1)',
             'A(r, t) = F(0.12, 0.6)T[-L(0.06, maxLSize)]/(180)[-L(0.06, maxLSize)]/(90)A(r, 4)',
             'I(t): t>0 = F(0.24, 0.84)T[-L(0.06, maxLSize/3)]/(137.508)I(t-1)',
@@ -3941,9 +3970,9 @@ const plantData: {[key: string]: Plant} =
             'L(r, lim): r<lim = L(r+0.02, lim)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 15, 0, 'AI', '', -0.2, {
-            'KThreshold': '0.96',
+            'AThreshold': '0.96',
             'maxKSize': '3',
-            'maxLSize': '0.72 - 1e-9'
+            'maxLSize': '0.68'
         },
         [
             '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/10+0.1)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)]}',
@@ -4009,7 +4038,7 @@ const plantData: {[key: string]: Plant} =
     {
         system: new LSystem('/(90)BA(0.06, 5)',
         [
-            'A(r, t): r>=KThreshold = S(0)F(0.24, 0.96)K(0.02, 8)',
+            'A(r, t): r>=AThreshold = S(0)F(0.24, 0.96)K(0.02, 8)',
             'A(r, t): t>0 = A(r+0.06, t-1)',
             'A(r, t) = F(0.12, 1.44)[&[I(5)]T(0.2)L(0.06, min(r+0.12, maxLSize), 0)]/(180)[&L(0.06, min(r+0.12, maxLSize), 0)]/(90)A(r-0.06, 3)',
             'S(type) < I(t): type>=1 = S(type)',
@@ -4026,7 +4055,7 @@ const plantData: {[key: string]: Plant} =
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
-            'KThreshold': '0.96',
+            'AThreshold': '0.96',
             'maxLSize': '0.6',
             'maxKSize': '0.3'
         },
@@ -4345,12 +4374,13 @@ const enum QuaternaryModes
 }
 let quatMode = QuaternaryModes.PROFITS;
 
-let colonyViewConfig: {[key: number]: ColonyViewEntry} = {};
+let colonyViewConfig: {[key: string]: ColonyViewEntry} = {};
 let shelfPages: {[key: string]: number} =
 {
     almanac: 0,
     manual: 0
 };
+let autoWaterConfig: {[key: string]: AutoWaterEntry} = {};
 let notebook: {[key: string]: NotebookEntry} = {};
 
 let tmpCurrency: BigNumber;
@@ -4403,9 +4433,10 @@ let perfQuaternaryEntries = perfNames.map(element =>
 new QuaternaryEntry(element[1], null));
 
 let createImageBtn = (params: {[x: string]: any}, callback: {(): void},
-image: ImageSource) =>
+isAvailable: {(): boolean}, image: ImageSource) =>
 {
     let triggerable = true;
+    let borderColor = () => isAvailable() ? Color.BORDER : Color.TRANSPARENT;
     let frame = ui.createFrame
     ({
         cornerRadius: 1,
@@ -4420,7 +4451,7 @@ image: ImageSource) =>
             aspect: Aspect.ASPECT_FIT,
             useTint: false
         }),
-        borderColor: Color.BORDER,
+        borderColor,
         ...params
     });
     frame.onTouched = (e: TouchEvent) =>
@@ -4432,9 +4463,9 @@ image: ImageSource) =>
         }
         else if(e.type.isReleased())
         {
-            frame.borderColor = Color.BORDER;
+            frame.borderColor = borderColor;
             // frame.hasShadow = true;
-            if(triggerable)
+            if(triggerable && isAvailable())
             {
                 Sound.playClick();
                 callback();
@@ -4445,7 +4476,7 @@ image: ImageSource) =>
         else if(e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
         e.x > frame.width || e.y > frame.height))
         {
-            frame.borderColor = Color.BORDER;
+            frame.borderColor = borderColor;
             // frame.hasShadow = true;
             triggerable = false;
         }
@@ -4549,42 +4580,43 @@ isToggled: boolean | {(): boolean}) =>
 
 const waterFrame = createImageBtn
 ({
-    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 0,
-}, () => manager.water(selectedColony), game.settings.theme == Theme.LIGHT ?
+}, () => manager.water(selectedColony),
+() =>
+{
+    let c = selectedColony;
+    if(c && !c.wet)
+        return true;
+    return false;
+},
+game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png'));
 const waterLabel = ui.createLatexLabel
 ({
-    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 1,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9, 1, 9),
     text: () =>
     {
-        let remainingCD = (selectedColony?.nextWater ?? 0) - time;
-        if(remainingCD <= 0)
-            return getLoc('labelWater');
-
-        remainingCD /= speeds[speedIdx];
-        let minutes = Math.floor(remainingCD / 60);
-        let seconds = Math.floor(remainingCD - minutes*60);
-        let CDTimeString: string;
-        if(minutes >= 60)
+        let c = selectedColony;
+        if(!c)
+            return '';
+        // @ts-expect-error
+        let threshold: BigNumber = plantData[c.id].growthCost *
+        // @ts-expect-error
+        BigNumber.from(c.sequence.length);
+        // @ts-expect-error
+        if(!c.wet && c.growth >= threshold/BigNumber.TWO)
         {
-            let hours = Math.floor(minutes / 60);
-            minutes -= hours*60;
-            CDTimeString = `${hours}:${
-            minutes.toString().padStart(2, '0')}:${
-            seconds.toFixed(0).padStart(2, '0')}`;
+            if(c.growth >= threshold)
+                return getLoc('labelWaterUrgent');
+            else
+                return getLoc('labelWater');
         }
         else
-        {
-            CDTimeString = `${minutes.toString()}:${
-            seconds.toFixed(0).padStart(2, '0')}`;
-        }
-        return CDTimeString;
+            return '';
     },
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
@@ -4592,7 +4624,6 @@ const waterLabel = ui.createLatexLabel
 
 const harvestFrame = createImageBtn
 ({
-    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 2,
 }, () =>
 {
@@ -4605,12 +4636,11 @@ const harvestFrame = createImageBtn
     else
         manager.performAction(plotIdx, colonyIdx[plotIdx], Actions.HARVEST);
 },
-game.settings.theme == Theme.LIGHT ?
+() => true, game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png'));
 const harvestLabel = ui.createLatexLabel
 ({
-    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 3,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
@@ -4641,7 +4671,7 @@ const pruneFrame = createImageBtn
     else
         manager.performAction(plotIdx, colonyIdx[plotIdx], Actions.PRUNE);
 },
-game.settings.theme == Theme.LIGHT ?
+() => true, game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png'));
 const pruneLabel = ui.createLatexLabel
@@ -4699,7 +4729,8 @@ const mainMenuFrame = createImageBtn
 ({
     row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
-}, () => createShelfMenu().show(), game.settings.theme == Theme.LIGHT ?
+},
+() => createShelfMenu().show(), () => true, game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/white-book.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/white-book.png'));
 
@@ -5416,7 +5447,7 @@ var getCurrencyBarDelegate = () =>
         horizontalOptions: LayoutOptions.CENTER,
         columnDefinitions: ['auto', 'auto'],
         columnSpacing: () => getBtnSize(ui.screenWidth) *
-        (3 - theory.publicationUpgrade.level * Number(theory.canPublish)) / 2,
+        (2 - theory.publicationUpgrade.level * Number(theory.canPublish)),
         children: [tauLabel, pennyLabel]
     })
     return ui.createStackLayout
@@ -5478,19 +5509,21 @@ var getSecondaryEquation = () =>
                 ${Localization.format(getLoc('colonyStats'),
                 // @ts-expect-error
                 c.energy, c.synthRate * BigNumber.from(insolationCoord),
-                c.growth,
+                c.growth, c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                 // @ts-expect-error
-                plantData[c.id].growthCost * BigNumber.from(c.sequence.length),
+                plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
                 // @ts-expect-error
-                plantData[c.id].growthRate * BigNumber.from(growthCoord),
+                '∞', plantData[c.id].growthRate * BigNumber.from(growthCoord),
                 c.profit, colonyIdx[plotIdx] + 1,
                 manager.colonies[plotIdx].length, status)}}`;
                 break;
             case ColonyModes.SIMPLE:
                 result = `\\text{${getColonyTitleString(c)}}\\\\E=${c.energy},
-                \\enspace g=${c.growth}/${// @ts-expect-error
-                plantData[c.id].growthCost * BigNumber.from(c.sequence.length)}
-                \\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}
+                \\enspace g=${c.growth}/${
+                c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+                // @ts-expect-error
+                plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
+                '∞'}\\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}
                 \\text{p}\\\\(${colonyIdx[plotIdx] + 1}/${
                 manager.colonies[plotIdx].length})\\\\`;
                 break;
@@ -6365,6 +6398,141 @@ let createBookMenu = (book: Book) =>
     return menu;
 }
 
+let createWaterMenu = () =>
+{
+    let plantLabels = [];
+    let maxStageEntries = [];
+    // let harvestEntries = [];
+    for(let i = 0; i <= plantPerma.level; ++i)
+    {
+        if(autoWaterConfig[plantUnlocks[i]])
+        {
+            plantLabels.push(ui.createLatexLabel
+            ({
+                text: getLoc('plants')[plantUnlocks[i]].name,
+                row: i, column: 0,
+                verticalTextAlignment: TextAlignment.CENTER
+            }));
+            let tmpEntry = ui.createEntry
+            ({
+                column: 0,
+                text: autoWaterConfig[plantUnlocks[i]].maxStage == INT_MAX ?
+                '∞' : autoWaterConfig[plantUnlocks[i]].maxStage?.toString() ??
+                '?',
+                keyboard: Keyboard.NUMERIC,
+                horizontalTextAlignment: TextAlignment.END,
+                onTextChanged: (ot: string, nt: string) =>
+                {
+                    let tmpML = parseInt(nt) ?? INT_MAX;
+                    if(isNaN(tmpML))
+                        tmpML = INT_MAX;
+                    autoWaterConfig[plantUnlocks[i]].maxStage = tmpML;
+                }
+            });
+            let tmpMinusBtn = ui.createButton
+            ({
+                column: 1,
+                text: '–',
+                onClicked: () =>
+                {
+                    Sound.playClick();
+                    let l = autoWaterConfig[plantUnlocks[i]].maxStage;
+                    if(l > 0 && l < INT_MAX)
+                        tmpEntry.text = (l - 1).toString();
+                    else
+                        tmpEntry.text = '∞';
+                }
+            });
+            let tmpPlusBtn = ui.createButton
+            ({
+                column: 2,
+                text: '+',
+                onClicked: () =>
+                {
+                    Sound.playClick();
+                    let l = autoWaterConfig[plantUnlocks[i]].maxStage;
+                    if(l < INT_MAX)
+                        tmpEntry.text = (l + 1).toString();
+                    else
+                        tmpEntry.text = '0';
+                }
+            });
+            let tmpGrid = ui.createGrid
+            ({
+                row: i, column: 1,
+                columnDefinitions: ['2*', '1*', '1*'],
+                children:
+                [
+                    tmpEntry,
+                    tmpMinusBtn,
+                    tmpPlusBtn
+                ]
+            });
+            maxStageEntries.push(tmpGrid);
+            // TODO: Create harvest entry
+        }
+    }
+    let noteGrid = ui.createGrid
+    ({
+        columnDefinitions: ['1*', '1*'],
+        children: [...plantLabels, ...maxStageEntries]
+    });
+
+    let menu = ui.createPopup
+    ({
+        isPeekable: true,
+        title: getLoc('menuAutoWater'),
+        content: ui.createStackLayout
+        ({
+            children:
+            [
+                ui.createGrid
+                ({
+                    heightRequest: getImageSize(ui.screenWidth),
+                    columnDefinitions: ['70*', '30*'],
+                    children:
+                    [
+                        ui.createLatexLabel
+                        ({
+                            text: getLoc('labelPlants'),
+                            row: 0, column: 0,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        }),
+                        ui.createLatexLabel
+                        ({
+                            text: getLoc('labelMaxStage'),
+                            row: 0, column: 1,
+                            horizontalOptions: LayoutOptions.START,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        })
+                    ]
+                }),
+                ui.createBox
+                ({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                noteGrid,
+                ui.createBox
+                ({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                ui.createButton
+                ({
+                    text: Localization.get('GenPopupClose'),
+                    onClicked: () =>
+                    {
+                        Sound.playClick();
+                        menu.hide();
+                    }
+                }),
+            ]
+        })
+    });
+    return menu;
+}
+
 let createNotebookMenu = () =>
 {
     let plantLabels = [];
@@ -6479,7 +6647,7 @@ let createNotebookMenu = () =>
                         ({
                             text: getLoc('labelMaxLevel'),
                             row: 0, column: 1,
-                            horizontalOptions: LayoutOptions.END,
+                            horizontalOptions: LayoutOptions.START,
                             verticalTextAlignment: TextAlignment.CENTER
                         }),
                         ui.createLatexLabel
@@ -6545,6 +6713,17 @@ let createShelfMenu = () =>
                     {
                         Sound.playClick();
                         let menu = createBookMenu(almanac);
+                        menu.show();
+                    }
+                }),
+                ui.createButton
+                ({
+                    isVisible: Object.keys(autoWaterConfig).length > 0,
+                    text: getLoc('menuAutoWater'),
+                    onClicked: () =>
+                    {
+                        Sound.playClick();
+                        let menu = createWaterMenu();
                         menu.show();
                     }
                 }),
@@ -7040,6 +7219,7 @@ var getInternalState = () =>
         },
         colonyViewConfig,
         shelfPages,
+        autoWaterConfig,
         notebook
     }, bigStringify);
 }
@@ -7123,6 +7303,7 @@ var setInternalState = (stateStr: string) =>
 
         colonyViewConfig = state.colonyViewConfig ?? colonyViewConfig;
         shelfPages = state.shelfPages ?? shelfPages;
+        autoWaterConfig = state.autoWaterConfig ?? autoWaterConfig;
         notebook = state.notebook ?? notebook;
     }
 
