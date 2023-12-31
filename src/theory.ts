@@ -3963,16 +3963,16 @@ const nofPlots = 6;
 const maxColoniesPerPlot = 4;
 const waterAmount = BigNumber.from(1/2);
 
-const plotCosts = new FirstFreeCost(new ExponentialCost(800, Math.log2(120)));
+const plotCosts = new FirstFreeCost(new ExponentialCost(500, Math.log2(120)));
 const plantUnlocks = ['sprout', 'calendula', 'basil', 'campion'];
 const plantUnlockCosts = new CompositeCost(1,
 new ConstantCost(1), new CompositeCost(1,
-new ConstantCost(2100),
-new ConstantCost(145000)));
+new ConstantCost(1200),
+new ConstantCost(45000)));
 const permaCosts =
 [
-    BigNumber.from(27),
-    BigNumber.from(3600),
+    BigNumber.from(18),
+    BigNumber.from(2100),
     BigNumber.from(1e45)
 ];
 
@@ -5213,7 +5213,7 @@ var init = () =>
     chapters?.intro[1]?.contents, () => manager.colonies[0].length > 0);
 
     theory.createStoryChapter(1, chapters?.basil?.title,
-    chapters?.basil?.contents, () => plantPerma.level > 0);
+    chapters?.basil?.contents, () => plantPerma.level > 1);
     theory.createStoryChapter(2, chapters?.notebook?.title,
     chapters?.notebook?.contents, () => theory.buyAllUpgrade.level > 0);
     theory.createStoryChapter(3, chapters?.flood?.title,

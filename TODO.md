@@ -56,19 +56,26 @@ you have to dig really deep to find the underlying systems behind the plants
 
 - [ ] Ask Uni of Calgary about how to make Ls easier to understand
   - Provide context: making a game about the logical aspects of Ls
+  - [x] Initial email
 
 - [ ] Change /sec indicators to /hr (in-game) and display 5x the value
   - Counter-argument: all parameters display /sec
-
-- [ ] Address dissonance in Lemma's attitude
-  - Early game should be the time when a lot of help is needed, don't neglect your student
-  - Lemma should also know about L-systems and tell students what rule is being enacted
 
 - [ ] Popup title gets truncated on iOS if it exceeds 1 line
 
 - [ ] Autobuy upgrade unlocks harvest automation config
   - Only unlocks in a future update (classmates!)
   - Hard to implement since there's more to LG than when to harvest
+
+- [ ] Apex models for plants
+  - [ ] Pea
+  - [ ] Calendula
+  - [ ] Basil
+  - [ ] Campion
+  - [ ] Hopleek
+  - [ ] Broomrape
+  - [ ] Ginger
+  - [ ] Sunflower
 
 ## v0.3: Invasion / 'Grass Tidings' / 'Turf Tidings?'
 
@@ -84,20 +91,14 @@ you have to dig really deep to find the underlying systems behind the plants
   - Well, just inaccuracies in general
   - Let's ask someone about them
 
-- [ ] Apex models for plants
+- [ ] Address Lemma's attitude
+  - Early game should be the time when a lot of help is needed, don't neglect your student
+  - [ ] Narration revamp
+    - Lemma should also know about L-systems and tell students what rule is being enacted
 
 - [ ] Pre-calendula plant:
-  - [ ] Pea or mung sprout
-    - First (and only) microgreen?
-    - If pea sprout, players can learn about stems and leaves, they won't be confused by calendula
-    - https://dumbways2die.fandom.com/wiki/Botch
-    - Mung sprout (free -> 0.25p -> x3)
-      Max profit: 0.5p
-      Optimal (3 cycles): 0->0.5, 0.25->1.25, 1->2
-      Calendula (1p to unlock) (1p -> x3)
-      1->0->9, 5->23
-      Pub (18p to unlock)
-    - Ach 'Mung Ways to Die' - harvest your first mung sprout.
+  - [x] Pea or mung sprout
+    - [ ] Narration
   - [ ] Simple solitary flower
     - Tulip? But tulip is much more fancier...
     - Buttercup

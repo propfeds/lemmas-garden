@@ -3024,12 +3024,12 @@ const hourLength = dayLength / 24;
 const nofPlots = 6;
 const maxColoniesPerPlot = 4;
 const waterAmount = BigNumber.from(1 / 2);
-const plotCosts = new FirstFreeCost(new ExponentialCost(800, Math.log2(120)));
+const plotCosts = new FirstFreeCost(new ExponentialCost(500, Math.log2(120)));
 const plantUnlocks = ['sprout', 'calendula', 'basil', 'campion'];
-const plantUnlockCosts = new CompositeCost(1, new ConstantCost(1), new CompositeCost(1, new ConstantCost(2100), new ConstantCost(145000)));
+const plantUnlockCosts = new CompositeCost(1, new ConstantCost(1), new CompositeCost(1, new ConstantCost(1200), new ConstantCost(45000)));
 const permaCosts = [
-    BigNumber.from(27),
-    BigNumber.from(3600),
+    BigNumber.from(18),
+    BigNumber.from(2100),
     BigNumber.from(1e45)
 ];
 const taxRate = BigNumber.from(.12);
@@ -4058,7 +4058,7 @@ var init = () => {
     let chapters = getLoc('chapters');
     theory.createStoryChapter(0, chapters?.intro[0]?.title, chapters?.intro[0]?.contents, () => true);
     theory.createStoryChapter(-1, chapters?.intro[1]?.title, chapters?.intro[1]?.contents, () => manager.colonies[0].length > 0);
-    theory.createStoryChapter(1, chapters?.basil?.title, chapters?.basil?.contents, () => plantPerma.level > 0);
+    theory.createStoryChapter(1, chapters?.basil?.title, chapters?.basil?.contents, () => plantPerma.level > 1);
     theory.createStoryChapter(2, chapters?.notebook?.title, chapters?.notebook?.contents, () => theory.buyAllUpgrade.level > 0);
     theory.createStoryChapter(3, chapters?.flood?.title, chapters?.flood?.contents, () => theory.tau >= BigNumber.TEN && time < 10);
     let fifteen = BigNumber.from(1e15).pow(tauRate);
@@ -4366,8 +4366,10 @@ var getSecondaryEquation = () => {
                 c.energy, c.synthRate * BigNumber.from(insolationCoord), c.growth, c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                     // @ts-expect-error
                     plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
+                    '∞', c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                     // @ts-expect-error
-                    '∞', plantData[c.id].growthRate * BigNumber.from(growthCoord), c.profit, colonyIdx[plotIdx] + 1, manager.colonies[plotIdx].length, status)}}`;
+                    plantData[c.id].growthRate * BigNumber.from(growthCoord) :
+                    BigNumber.ZERO, c.profit, colonyIdx[plotIdx] + 1, manager.colonies[plotIdx].length, status)}}`;
                 break;
             case 2 /* ColonyModes.SIMPLE */:
                 result = `\\text{${getColonyTitleString(c)}}\\\\E=${c.energy},
