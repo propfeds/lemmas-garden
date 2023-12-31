@@ -110,15 +110,16 @@ symbol is drawn depending on its parameters.`,
         unlockPlant: `\\text{{a new plant}}`,
         lockedPlot: `\\text{Untilled soil.}`,
         permaNote: `Notebook \\&\\ 'Buy All' button`,
-        permaNoteInfo: `Allows management of colony sizes (non-propagated)`,
+        permaNoteInfo: 'Allows management of colony sizes',
         menuNote: 'Notebook',
-        menuAutoWater: 'Watering Schedule',
-        permaSettings: 'Theory settings',
-        permaSettingsInfo: `Decorate your teacher's garden`,
-        labelPlants: 'Plants',
-        labelMaxLevel: 'Max. size',
-        labelMaxStage: 'Max. stage',
-        labelHarvestStage: 'Harvest stage',
+        labelSpecies: 'Species',
+        labelMaxLevel: 'Maximum level',
+        labelNoteDesc: `The species' variable levels will not go beyond this
+limit.`,
+        menuAutoWater: 'Watering schedules',
+        labelMaxStage: 'Stopping stage',
+        labelAutoWaterDesc: `Scheduling for a species is unlocked when it is
+harvested for the first time.`,
         colony: `{0} of {1}, stage {2}`,
         colonyWMaxStg: `{0} of {1}, stage {2}/{3}`,
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
@@ -174,7 +175,7 @@ Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
             calendula: {
                 name: 'Calendula',
                 nameShort: 'C',
-                info: 'A classic flower to start the month.',
+                info: 'The classic flower to start a month.',
                 LsDetails: `A(r, t): apex (stem shoot) providing r energy/s. Has
 t stages left until it splits.\\\\F(l, lim): internode of length l, growing up
 to lim.\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0, when
@@ -3078,7 +3079,7 @@ const plantData = {
                 scale: 6,
                 x: 0,
                 y: saturate(stage / 4, 3.75, 5),
-                Z: 0,
+                z: 0,
                 upright: true
             };
         },
@@ -3152,7 +3153,7 @@ const plantData = {
                 scale: 8,
                 x: 0,
                 y: saturate(stage / 4, 5, 7),
-                Z: 0,
+                z: 0,
                 upright: true
             };
         },
@@ -3215,7 +3216,7 @@ const plantData = {
                 scale: 12,
                 x: 0,
                 y: saturate(stage, 7.5, 22.5),
-                Z: 0,
+                z: 0,
                 upright: true
             };
         },
@@ -3254,7 +3255,7 @@ const plantData = {
                 // followFactor: 0.15,
                 x: 2 ** stage,
                 y: 0,
-                Z: 0,
+                z: 0,
                 upright: false
             };
         },
@@ -3329,7 +3330,7 @@ const plantData = {
                 scale: 8,
                 x: 0,
                 y: saturate(stage / 4, 5, 9),
-                Z: 0,
+                z: 0,
                 upright: true
             };
         },
@@ -4309,8 +4310,7 @@ var getSecondaryEquation = () => {
                 \\enspace g=${c.growth}/${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                     // @ts-expect-error
                     plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
-                    '∞'}
-                \\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}
+                    '∞'}\\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}
                 \\text{p}\\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})\\\\`;
                 break;
             case 3 /* ColonyModes.LIST */:
@@ -5080,17 +5080,17 @@ let createWaterMenu = () => {
             children: [
                 ui.createGrid({
                     heightRequest: getImageSize(ui.screenWidth),
-                    columnDefinitions: ['70*', '30*'],
+                    columnDefinitions: ['1*', '1*'],
                     children: [
                         ui.createLatexLabel({
-                            text: getLoc('labelPlants'),
+                            text: getLoc('labelSpecies'),
                             row: 0, column: 0,
                             verticalTextAlignment: TextAlignment.CENTER
                         }),
                         ui.createLatexLabel({
                             text: getLoc('labelMaxStage'),
                             row: 0, column: 1,
-                            horizontalOptions: LayoutOptions.START,
+                            horizontalOptions: LayoutOptions.CENTER,
                             verticalTextAlignment: TextAlignment.CENTER
                         })
                     ]
@@ -5099,10 +5099,19 @@ let createWaterMenu = () => {
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
                 }),
-                noteGrid,
+                ui.createScrollView({
+                    content: noteGrid
+                }),
                 ui.createBox({
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
+                }),
+                ui.createLatexLabel({
+                    text: getLoc('labelAutoWaterDesc'),
+                    margin: new Thickness(0, 4),
+                    // heightRequest: getProgBarSize(ui.screenWidth),
+                    horizontalTextAlignment: TextAlignment.CENTER,
+                    verticalTextAlignment: TextAlignment.CENTER
                 }),
                 ui.createButton({
                     text: Localization.get('GenPopupClose'),
@@ -5195,40 +5204,47 @@ let createNotebookMenu = () => {
         content: ui.createStackLayout({
             children: [
                 ui.createGrid({
-                    heightRequest: theory.isAutoBuyerAvailable ?
-                        getSmallBtnSize(ui.screenWidth) :
-                        getImageSize(ui.screenWidth),
-                    columnDefinitions: theory.isAutoBuyerAvailable ?
-                        ['40*', '30*', '30*'] : ['70*', '30*'],
+                    heightRequest: getImageSize(ui.screenWidth),
+                    columnDefinitions: ['1*', '1*'],
                     children: [
                         ui.createLatexLabel({
-                            text: getLoc('labelPlants'),
+                            text: getLoc('labelSpecies'),
                             row: 0, column: 0,
                             verticalTextAlignment: TextAlignment.CENTER
                         }),
                         ui.createLatexLabel({
                             text: getLoc('labelMaxLevel'),
                             row: 0, column: 1,
-                            horizontalOptions: LayoutOptions.START,
-                            verticalTextAlignment: TextAlignment.CENTER
-                        }),
-                        ui.createLatexLabel({
-                            isVisible: theory.isAutoBuyerAvailable,
-                            text: getLoc('labelHarvestStage'),
-                            row: 0, column: 2,
                             horizontalOptions: LayoutOptions.CENTER,
                             verticalTextAlignment: TextAlignment.CENTER
-                        })
+                        }),
+                        // ui.createLatexLabel
+                        // ({
+                        //     isVisible: theory.isAutoBuyerAvailable,
+                        //     text: getLoc('labelHarvestStage'),
+                        //     row: 0, column: 2,
+                        //     horizontalOptions: LayoutOptions.CENTER,
+                        //     verticalTextAlignment: TextAlignment.CENTER
+                        // })
                     ]
                 }),
                 ui.createBox({
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
                 }),
-                noteGrid,
+                ui.createScrollView({
+                    content: noteGrid
+                }),
                 ui.createBox({
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
+                }),
+                ui.createLatexLabel({
+                    text: getLoc('labelNoteDesc'),
+                    margin: new Thickness(0, 4),
+                    // heightRequest: getProgBarSize(ui.screenWidth),
+                    horizontalTextAlignment: TextAlignment.CENTER,
+                    verticalTextAlignment: TextAlignment.CENTER
                 }),
                 ui.createButton({
                     text: Localization.get('GenPopupClose'),

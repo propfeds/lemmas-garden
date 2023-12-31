@@ -72,6 +72,8 @@ you have to dig really deep to find the underlying systems behind the plants
 
 ## v0.3: Invasion / 'Grass Tidings' / 'Turf Tidings?'
 
+- [ ] Move references from loc strings to the Book class
+- [ ] Add reference to Param LSR
 - [x] Test book icon
 - [x] Add almanac access button to view menu
 - [x] Move 'view Ls' button on book menu to top side near title
@@ -87,13 +89,15 @@ you have to dig really deep to find the underlying systems behind the plants
 - [ ] Pre-calendula plant:
   - [ ] Pea or mung sprout
     - First (and only) microgreen?
+    - If pea sprout, players can learn about stems and leaves, they won't be confused by calendula
     - https://dumbways2die.fandom.com/wiki/Botch
-    - Botched bean (free -> 0.25p -> x3)
+    - Mung sprout (free -> 0.25p -> x3)
       Max profit: 0.5p
       Optimal (3 cycles): 0->0.5, 0.25->1.25, 1->2
       Calendula (1p to unlock) (1p -> x3)
       1->0->9, 5->23
       Pub (18p to unlock)
+    - Ach 'Mung Ways to Die' - harvest your first mung sprout.
   - [ ] Simple solitary flower
     - Tulip? But tulip is much more fancier...
     - Buttercup
