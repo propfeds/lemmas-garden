@@ -112,10 +112,12 @@ symbol is drawn depending on its parameters.`,
         permaNote: `Notebook \\&\\ 'Buy All' button`,
         permaNoteInfo: `Allows management of colony sizes (non-propagated)`,
         menuNote: 'Notebook',
+        menuAutoWater: 'Watering Schedule',
         permaSettings: 'Theory settings',
         permaSettingsInfo: `Decorate your teacher's garden`,
         labelPlants: 'Plants',
         labelMaxLevel: 'Max. size',
+        labelMaxStage: 'Max. stage',
         labelHarvestStage: 'Harvest stage',
         colony: `{0} of {1}, stage {2}`,
         colonyWMaxStg: `{0} of {1}, stage {2}/{3}`,
@@ -2471,7 +2473,7 @@ class ColonyManager {
             diReserve: BigNumber.ZERO,
             dgReserve: BigNumber.ZERO
         };
-        if (plantData[c.id].dailyIncome)
+        if (plantData[id].dailyIncome)
             c.ddReserve = BigNumber.ZERO;
         let stats = this.calculateStats(c);
         c.synthRate = stats.synthRate;
@@ -2479,22 +2481,25 @@ class ColonyManager {
         if (spread === null)
             this.colonies[plot].push(c);
         else {
-            // Inheriting parent's reserve
+            // Inherit parent's reserve
             let parent = this.colonies[plot][spread];
             // @ts-expect-error
             c.energy += parent.diReserve * c.synthRate;
             // @ts-expect-error
             let maxdg = c.energy.min(parent.dgReserve *
                 // @ts-expect-error
-                plantData[c.id].growthRate);
+                plantData[id].growthRate);
             // @ts-expect-error
             c.growth += maxdg;
             // @ts-expect-error
             c.energy -= maxdg;
-            if (plantData[c.id].dailyIncome)
+            if (plantData[id].dailyIncome)
                 c.ddReserve = parent.ddReserve;
             this.colonies[plot].splice(spread + 1, 0, c);
         }
+        // Auto water
+        if (autoWaterConfig[id]?.maxStage > c.stage)
+            this.water(c);
         if (plot == plotIdx && colonyIdx[plot] == this.colonies[plot].length - 1)
             renderer.colony = c;
         theory.invalidateQuaternaryValues();
@@ -2504,8 +2509,16 @@ class ColonyManager {
         let c = this.colonies[plot][index];
         if (!c)
             return;
-        if (!c.propagated && plantUnlocks.includes(c.id))
+        // Reset levels & unlock autowatering
+        if (!c.propagated && plantUnlocks.includes(c.id)) {
             plants[plot][c.id].level -= Math.min(plants[plot][c.id].level, c.population);
+            if (!autoWaterConfig[c.id]) {
+                autoWaterConfig[c.id] =
+                    {
+                        maxStage: 0
+                    };
+            }
+        }
         if (index == this.colonies[plot].length - 1 && plot == plotIdx) {
             let len = this.colonies[plotIdx].length;
             colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) % len;
@@ -2869,6 +2882,9 @@ class ColonyManager {
             c.energy -= maxdg;
         }
         c.wet = false;
+        // Auto water
+        if (autoWaterConfig[c.id]?.maxStage > c.stage)
+            this.water(c);
         // Propagate
         let prop = plantData[c.id].propagation;
         if (prop && c.stage === (prop.stage ?? maxStage)) {
@@ -3004,8 +3020,8 @@ var getPublicationMultiplierFormula = (symbol) => `\\frac{2}{3}\\times
 const plantData = {
     calendula: {
         system: new LSystem('-(3)A(0.06, 4)', [
-            'A(r, t): t<=0 && r>=KThreshold = F(0.78, 2.1)K(0)',
-            'A(r, t): r>=KThreshold = [&A(r-0.15, 2)][^I(3)]',
+            'A(r, t): t<=0 && r>=AThreshold = F(0.78, 2.1)K(0)',
+            'A(r, t): r>=AThreshold = [&A(r-0.15, 2)][^I(3)]',
             'A(r, t): t>0 = A(r+0.06, t-1)',
             'A(r, t) = F(0.12, 0.6)T[-L(0.06, maxLSize)]/(180)[-L(0.06, maxLSize)]/(90)A(r, 4)',
             'I(t): t>0 = F(0.24, 0.84)T[-L(0.06, maxLSize/3)]/(137.508)I(t-1)',
@@ -3014,9 +3030,9 @@ const plantData = {
             'L(r, lim): r<lim = L(r+0.02, lim)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 15, 0, 'AI', '', -0.2, {
-            'KThreshold': '0.96',
+            'AThreshold': '0.96',
             'maxKSize': '3',
-            'maxLSize': '0.72 - 1e-9'
+            'maxLSize': '0.68'
         }, [
             '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/10+0.1)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)]}',
             '~> K(p): p<1.5 = {[w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)]F(p/10+0.1)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.23, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-9)k(p*0.23, p*18-15)][o(p*0.22, p*17.5)]}',
@@ -3074,7 +3090,7 @@ const plantData = {
     },
     basil: {
         system: new LSystem('/(90)BA(0.06, 5)', [
-            'A(r, t): r>=KThreshold = S(0)F(0.24, 0.96)K(0.02, 8)',
+            'A(r, t): r>=AThreshold = S(0)F(0.24, 0.96)K(0.02, 8)',
             'A(r, t): t>0 = A(r+0.06, t-1)',
             'A(r, t) = F(0.12, 1.44)[&[I(5)]T(0.2)L(0.06, min(r+0.12, maxLSize), 0)]/(180)[&L(0.06, min(r+0.12, maxLSize), 0)]/(90)A(r-0.06, 3)',
             'S(type) < I(t): type>=1 = S(type)',
@@ -3091,7 +3107,7 @@ const plantData = {
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
-            'KThreshold': '0.96',
+            'AThreshold': '0.96',
             'maxLSize': '0.6',
             'maxKSize': '0.3'
         }, [
@@ -3368,6 +3384,7 @@ let shelfPages = {
     almanac: 0,
     manual: 0
 };
+let autoWaterConfig = {};
 let notebook = {};
 let tmpCurrency;
 let tmpLevels;
@@ -4988,6 +5005,115 @@ let createBookMenu = (book) => {
     });
     return menu;
 };
+let createWaterMenu = () => {
+    let plantLabels = [];
+    let maxStageEntries = [];
+    // let harvestEntries = [];
+    for (let i = 0; i <= plantPerma.level; ++i) {
+        if (autoWaterConfig[plantUnlocks[i]]) {
+            plantLabels.push(ui.createLatexLabel({
+                text: getLoc('plants')[plantUnlocks[i]].name,
+                row: i, column: 0,
+                verticalTextAlignment: TextAlignment.CENTER
+            }));
+            let tmpEntry = ui.createEntry({
+                column: 0,
+                text: autoWaterConfig[plantUnlocks[i]].maxStage == INT_MAX ?
+                    '∞' : autoWaterConfig[plantUnlocks[i]].maxStage?.toString() ??
+                    '?',
+                keyboard: Keyboard.NUMERIC,
+                horizontalTextAlignment: TextAlignment.END,
+                onTextChanged: (ot, nt) => {
+                    let tmpML = parseInt(nt) ?? INT_MAX;
+                    if (isNaN(tmpML))
+                        tmpML = INT_MAX;
+                    autoWaterConfig[plantUnlocks[i]].maxStage = tmpML;
+                }
+            });
+            let tmpMinusBtn = ui.createButton({
+                column: 1,
+                text: '–',
+                onClicked: () => {
+                    Sound.playClick();
+                    let l = autoWaterConfig[plantUnlocks[i]].maxStage;
+                    if (l > 0 && l < INT_MAX)
+                        tmpEntry.text = (l - 1).toString();
+                    else
+                        tmpEntry.text = '∞';
+                }
+            });
+            let tmpPlusBtn = ui.createButton({
+                column: 2,
+                text: '+',
+                onClicked: () => {
+                    Sound.playClick();
+                    let l = autoWaterConfig[plantUnlocks[i]].maxStage;
+                    if (l < INT_MAX)
+                        tmpEntry.text = (l + 1).toString();
+                    else
+                        tmpEntry.text = '0';
+                }
+            });
+            let tmpGrid = ui.createGrid({
+                row: i, column: 1,
+                columnDefinitions: ['2*', '1*', '1*'],
+                children: [
+                    tmpEntry,
+                    tmpMinusBtn,
+                    tmpPlusBtn
+                ]
+            });
+            maxStageEntries.push(tmpGrid);
+            // TODO: Create harvest entry
+        }
+    }
+    let noteGrid = ui.createGrid({
+        columnDefinitions: ['1*', '1*'],
+        children: [...plantLabels, ...maxStageEntries]
+    });
+    let menu = ui.createPopup({
+        isPeekable: true,
+        title: getLoc('menuAutoWater'),
+        content: ui.createStackLayout({
+            children: [
+                ui.createGrid({
+                    heightRequest: getImageSize(ui.screenWidth),
+                    columnDefinitions: ['70*', '30*'],
+                    children: [
+                        ui.createLatexLabel({
+                            text: getLoc('labelPlants'),
+                            row: 0, column: 0,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        }),
+                        ui.createLatexLabel({
+                            text: getLoc('labelMaxStage'),
+                            row: 0, column: 1,
+                            horizontalOptions: LayoutOptions.START,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        })
+                    ]
+                }),
+                ui.createBox({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                noteGrid,
+                ui.createBox({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                ui.createButton({
+                    text: Localization.get('GenPopupClose'),
+                    onClicked: () => {
+                        Sound.playClick();
+                        menu.hide();
+                    }
+                }),
+            ]
+        })
+    });
+    return menu;
+};
 let createNotebookMenu = () => {
     let plantLabels = [];
     let maxLevelEntries = [];
@@ -5081,7 +5207,7 @@ let createNotebookMenu = () => {
                         ui.createLatexLabel({
                             text: getLoc('labelMaxLevel'),
                             row: 0, column: 1,
-                            horizontalOptions: LayoutOptions.END,
+                            horizontalOptions: LayoutOptions.START,
                             verticalTextAlignment: TextAlignment.CENTER
                         }),
                         ui.createLatexLabel({
@@ -5133,6 +5259,15 @@ let createShelfMenu = () => {
                     onClicked: () => {
                         Sound.playClick();
                         let menu = createBookMenu(almanac);
+                        menu.show();
+                    }
+                }),
+                ui.createButton({
+                    isVisible: Object.keys(autoWaterConfig).length > 0,
+                    text: getLoc('menuAutoWater'),
+                    onClicked: () => {
+                        Sound.playClick();
+                        let menu = createWaterMenu();
                         menu.show();
                     }
                 }),
@@ -5526,6 +5661,7 @@ var getInternalState = () => {
         },
         colonyViewConfig,
         shelfPages,
+        autoWaterConfig,
         notebook
     }, bigStringify);
 };
@@ -5594,6 +5730,7 @@ var setInternalState = (stateStr) => {
         }
         colonyViewConfig = state.colonyViewConfig ?? colonyViewConfig;
         shelfPages = state.shelfPages ?? shelfPages;
+        autoWaterConfig = state.autoWaterConfig ?? autoWaterConfig;
         notebook = state.notebook ?? notebook;
     }
     actuallyPlanting = false;
