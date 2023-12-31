@@ -88,6 +88,12 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Botched bean
     - First (and only) microgreen?
     - https://dumbways2die.fandom.com/wiki/Botch
+    - Botched bean (free -> 0.25p -> x3)
+      Max profit: 0.5p
+      Optimal (3 cycles): 0->0.5, 0.25->1.25, 1->2
+      Calendula (1p to unlock) (1p -> x3)
+      1->0->9, 5->23
+      Pub (18p to unlock)
   - [ ] Simple solitary flower
     - Tulip? But tulip is much more fancier...
     - Buttercup

@@ -4298,16 +4298,18 @@ var getSecondaryEquation = () => {
                 result = `\\text{${getColonyTitleString(c)}\\\\
                 ${Localization.format(getLoc('colonyStats'), 
                 // @ts-expect-error
-                c.energy, c.synthRate * BigNumber.from(insolationCoord), c.growth, 
-                // @ts-expect-error
-                plantData[c.id].growthCost * BigNumber.from(c.sequence.length), 
-                // @ts-expect-error
-                plantData[c.id].growthRate * BigNumber.from(growthCoord), c.profit, colonyIdx[plotIdx] + 1, manager.colonies[plotIdx].length, status)}}`;
+                c.energy, c.synthRate * BigNumber.from(insolationCoord), c.growth, c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+                    // @ts-expect-error
+                    plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
+                    // @ts-expect-error
+                    '∞', plantData[c.id].growthRate * BigNumber.from(growthCoord), c.profit, colonyIdx[plotIdx] + 1, manager.colonies[plotIdx].length, status)}}`;
                 break;
             case 2 /* ColonyModes.SIMPLE */:
                 result = `\\text{${getColonyTitleString(c)}}\\\\E=${c.energy},
-                \\enspace g=${c.growth}/${ // @ts-expect-error
-                plantData[c.id].growthCost * BigNumber.from(c.sequence.length)}
+                \\enspace g=${c.growth}/${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+                    // @ts-expect-error
+                    plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
+                    '∞'}
                 \\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}
                 \\text{p}\\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})\\\\`;
                 break;
