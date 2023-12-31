@@ -56,10 +56,6 @@ you have to dig really deep to find the underlying systems behind the plants
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
 
-- [ ] Autobuy upgrade unlocks harvest automation config
-  - Only unlocks in a future update (classmates!)
-  - Hard to implement since there's more to LG than when to harvest
-
 - [ ] Different aspect ratios hav different graph bounds
 
 - [ ] Compost
@@ -72,10 +68,6 @@ you have to dig really deep to find the underlying systems behind the plants
 
 - [ ] Ask Uni of Calgary about how to make Ls easier to understand
   - Provide context: making a game about the logical aspects of Ls
-
-- [ ] Bulk watering when holding button
-  - Waters everything on 1 plot, not the entire garden
-  - NO bulk harvest or prune.
 
 - [ ] Change /sec indicators to /hr (in-game) and display 5x the value
   - Counter-argument: all parameters display /sec
@@ -93,9 +85,16 @@ you have to dig really deep to find the underlying systems behind the plants
     - Auto-watering: unlocks for free (right away, or maybe after the next plant has been unlocked) with configurable stage. That means you have likely understood this plant's growth.
     - Some plants don't need watering, such as grasses.
 
+- [ ] Autobuy upgrade unlocks harvest automation config
+  - Only unlocks in a future update (classmates!)
+  - Hard to implement since there's more to LG than when to harvest
+- [ ] Bulk watering when holding button
+  - Waters everything on 1 plot, not the entire garden
+  - NO bulk harvest or prune.
+
 ## v0.3: Invasion / 'Grass Tidings' / 'Turf Tidings?'
 
-- [ ] Test book icon
+- [x] Test book icon
 - [x] Add almanac access button to view menu
 - [x] Move 'view Ls' button on book menu to top side near title
 - [x] Make the column spacing x1.5 if there's no tax and make it branchless

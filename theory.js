@@ -77,6 +77,7 @@ const LOC_STRINGS = {
         labelSave: 'Last saved: {0}s',
         labelSkip: 'Skip tutorial',
         labelWater: 'Water',
+        labelWaterUrgent: 'Water!',
         labelActions: ['Harvest', 'Prune'],
         labelFilter: 'Filter: ',
         labelParams: 'Parameters: ',
@@ -2422,12 +2423,12 @@ class ColonyManager {
         return false;
     }
     water(colony) {
-        if ((colony.nextWater ?? 0) <= time) {
+        if (!colony.wet) {
             // @ts-expect-error
             colony.energy += plantData[colony.id].growthCost *
                 // @ts-expect-error
-                BigNumber.from(colony.stage).max(waterAmount);
-            colony.nextWater = time + plantData[colony.id].waterCD;
+                BigNumber.from(colony.stage).max(BigNumber.ONE) * waterAmount;
+            colony.wet = true;
         }
     }
     reap(colony, multiplier = BigNumber.ONE) {
@@ -2464,7 +2465,7 @@ class ColonyManager {
             sequence: plantData[id].system.axiom,
             params: plantData[id].system.axiomParams,
             stage: 0,
-            nextWater: 0,
+            wet: false,
             energy: BigNumber.ZERO,
             growth: BigNumber.ZERO,
             diReserve: BigNumber.ZERO,
@@ -2553,7 +2554,7 @@ class ColonyManager {
                     // @ts-expect-error
                     if (notMature && c.growth >= plantData[c.id].growthCost *
                         // @ts-expect-error
-                        BigNumber.from(c.sequence.length)) {
+                        BigNumber.from(c.sequence.length) && c.wet) {
                         if (!this.gangsta)
                             this.gangsta = [i, j];
                         // @ts-expect-error
@@ -2705,6 +2706,7 @@ class ColonyManager {
         }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
+        c.wet = false;
         this.actionAncestreeTask =
             {
                 start: 0
@@ -2866,6 +2868,7 @@ class ColonyManager {
             // @ts-expect-error
             c.energy -= maxdg;
         }
+        c.wet = false;
         // Propagate
         let prop = plantData[c.id].propagation;
         if (prop && c.stage === (prop.stage ?? maxStage)) {
@@ -2976,7 +2979,7 @@ const quarterDayLength = halfDayLength / 2;
 const hourLength = dayLength / 24;
 const nofPlots = 6;
 const maxColoniesPerPlot = 4;
-const waterAmount = BigNumber.ONE;
+const waterAmount = BigNumber.from(1 / 2);
 const plotCosts = new FirstFreeCost(new ExponentialCost(800, Math.log2(120)));
 const plantUnlocks = ['calendula', 'basil', 'campion'];
 const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2100), new ConstantCost(145000));
@@ -3396,8 +3399,9 @@ let perfNames = [
 ];
 let perfs = perfNames.map(element => profilers.get(element[0]));
 let perfQuaternaryEntries = perfNames.map(element => new QuaternaryEntry(element[1], null));
-let createImageBtn = (params, callback, image) => {
+let createImageBtn = (params, callback, isAvailable, image) => {
     let triggerable = true;
+    let borderColor = () => isAvailable() ? Color.BORDER : Color.TRANSPARENT;
     let frame = ui.createFrame({
         cornerRadius: 1,
         margin: new Thickness(2),
@@ -3410,7 +3414,7 @@ let createImageBtn = (params, callback, image) => {
             aspect: Aspect.ASPECT_FIT,
             useTint: false
         }),
-        borderColor: Color.BORDER,
+        borderColor,
         ...params
     });
     frame.onTouched = (e) => {
@@ -3419,9 +3423,9 @@ let createImageBtn = (params, callback, image) => {
             // frame.hasShadow = false;
         }
         else if (e.type.isReleased()) {
-            frame.borderColor = Color.BORDER;
+            frame.borderColor = borderColor;
             // frame.hasShadow = true;
-            if (triggerable) {
+            if (triggerable && isAvailable()) {
                 Sound.playClick();
                 callback();
             }
@@ -3430,7 +3434,7 @@ let createImageBtn = (params, callback, image) => {
         }
         else if (e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
             e.x > frame.width || e.y > frame.height)) {
-            frame.borderColor = Color.BORDER;
+            frame.borderColor = borderColor;
             // frame.hasShadow = true;
             triggerable = false;
         }
@@ -3514,40 +3518,33 @@ let createHesitantSwitch = (params, callback, isToggled) => {
 //     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
 // });
 const waterFrame = createImageBtn({
-    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 0,
-}, () => manager.water(selectedColony), game.settings.theme == Theme.LIGHT ?
+}, () => manager.water(selectedColony), () => selectedColony && !selectedColony.wet ? true : false, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png'));
 const waterLabel = ui.createLatexLabel({
-    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 1,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9, 1, 9),
     text: () => {
-        let remainingCD = (selectedColony?.nextWater ?? 0) - time;
-        if (remainingCD <= 0)
-            return getLoc('labelWater');
-        remainingCD /= speeds[speedIdx];
-        let minutes = Math.floor(remainingCD / 60);
-        let seconds = Math.floor(remainingCD - minutes * 60);
-        let CDTimeString;
-        if (minutes >= 60) {
-            let hours = Math.floor(minutes / 60);
-            minutes -= hours * 60;
-            CDTimeString = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toFixed(0).padStart(2, '0')}`;
+        let c = selectedColony;
+        if (c && !c.wet) {
+            // @ts-expect-error
+            if (c.growth >= plantData[c.id].growthCost *
+                // @ts-expect-error
+                BigNumber.from(c.sequence.length))
+                return getLoc('labelWaterUrgent');
+            else
+                return getLoc('labelWater');
         }
-        else {
-            CDTimeString = `${minutes.toString()}:${seconds.toFixed(0).padStart(2, '0')}`;
-        }
-        return CDTimeString;
+        else
+            return '';
     },
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
 const harvestFrame = createImageBtn({
-    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 2,
 }, () => {
     if (actionConfirm) {
@@ -3556,11 +3553,10 @@ const harvestFrame = createImageBtn({
     }
     else
         manager.performAction(plotIdx, colonyIdx[plotIdx], 0 /* Actions.HARVEST */);
-}, game.settings.theme == Theme.LIGHT ?
+}, () => true, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png'));
 const harvestLabel = ui.createLatexLabel({
-    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 3,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
@@ -3584,7 +3580,7 @@ const pruneFrame = createImageBtn({
     }
     else
         manager.performAction(plotIdx, colonyIdx[plotIdx], 1 /* Actions.PRUNE */);
-}, game.settings.theme == Theme.LIGHT ?
+}, () => true, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png'));
 const pruneLabel = ui.createLatexLabel({
@@ -3635,7 +3631,7 @@ const mainMenuLabel = ui.createLatexLabel({
 const mainMenuFrame = createImageBtn({
     row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
-}, () => createShelfMenu().show(), game.settings.theme == Theme.LIGHT ?
+}, () => createShelfMenu().show(), () => true, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/white-book.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/white-book.png'));
 // const skipLabel = ui.createLatexLabel
