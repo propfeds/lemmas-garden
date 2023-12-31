@@ -108,7 +108,7 @@ you have to dig really deep to find the underlying systems behind the plants
 - [ ] Apex models for plants
 
 - [ ] Pre-calendula plant:
-  - [ ] Botched bean
+  - [ ] Pea or mung sprout
     - First (and only) microgreen?
     - https://dumbways2die.fandom.com/wiki/Botch
   - [ ] Simple solitary flower
