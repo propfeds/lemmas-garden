@@ -76,7 +76,7 @@ const LOC_STRINGS =
 {
     en:
     {
-        versionName: `Version: 0.2.3, 'Anniversary'`,
+        versionName: `Version: 0.2.3, 'Wet'`,
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
@@ -4557,7 +4557,20 @@ const waterFrame = createImageBtn
 ({
     row: 0, column: 0,
 }, () => manager.water(selectedColony),
-() => selectedColony && !selectedColony.wet ? true : false,
+() =>
+{
+    let c = selectedColony;
+    if(!c)
+        return false;
+    // @ts-expect-error
+    let threshold: BigNumber = plantData[c.id].growthCost *
+    // @ts-expect-error
+    BigNumber.from(c.sequence.length);
+    // @ts-expect-error
+    if(c && !c.wet && c.growth >= threshold/BigNumber.TWO)
+        return true;
+    return false;
+},
 game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png'));
@@ -4570,12 +4583,16 @@ const waterLabel = ui.createLatexLabel
     text: () =>
     {
         let c = selectedColony;
-        if(c && !c.wet)
+        if(!c)
+            return '';
+        // @ts-expect-error
+        let threshold: BigNumber = plantData[c.id].growthCost *
+        // @ts-expect-error
+        BigNumber.from(c.sequence.length);
+        // @ts-expect-error
+        if(!c.wet && c.growth >= threshold/BigNumber.TWO)
         {
-            // @ts-expect-error
-            if(c.growth >= plantData[c.id].growthCost *
-            // @ts-expect-error
-            BigNumber.from(c.sequence.length))
+            if(c.growth >= threshold)
                 return getLoc('labelWaterUrgent');
             else
                 return getLoc('labelWater');
@@ -5412,7 +5429,7 @@ var getCurrencyBarDelegate = () =>
         horizontalOptions: LayoutOptions.CENTER,
         columnDefinitions: ['auto', 'auto'],
         columnSpacing: () => getBtnSize(ui.screenWidth) *
-        (3 - theory.publicationUpgrade.level * Number(theory.canPublish)) / 2,
+        (2 - theory.publicationUpgrade.level * Number(theory.canPublish)),
         children: [tauLabel, pennyLabel]
     })
     return ui.createStackLayout

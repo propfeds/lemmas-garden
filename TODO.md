@@ -81,8 +81,9 @@ you have to dig really deep to find the underlying systems behind the plants
 - [ ] Watering
   - [ ] Instead of putting watering on a cooldown, make it a coefficient curve or slope that either deducts or increases energy based on the last time the plant was watered. This will communicate the effects of overwatering better?
     - Auto-watering: unlocks with classmates
-  - [ ] Make watering required for every stage, else the plant won't evolve.
-    - Auto-watering: unlocks for free (right away, or maybe after the next plant has been unlocked) with configurable stage. That means you have likely understood this plant's growth.
+  - [x] Make watering required for every stage, else the plant won't evolve.
+    - [x] Timing: only make it available after half of the growth has been filled?
+    - [ ] Auto-watering: unlocks for free (right away, or maybe after the next plant has been unlocked) with configurable stage. That means you have likely understood this plant's growth.
     - Some plants don't need watering, such as grasses.
 
 - [ ] Autobuy upgrade unlocks harvest automation config
