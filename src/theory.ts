@@ -84,6 +84,7 @@ const LOC_STRINGS =
 
         btnView: 'View L-system',
         btnAlmanac: 'World of Plants',
+        btnAlmanacNoEntry: '(Unavailable)',
         btnVar: 'Variables',
         btnSave: 'Save',
         btnReset: 'Reset Graphs',
@@ -99,7 +100,6 @@ const LOC_STRINGS =
         labelSave: 'Last saved: {0}s',
         labelSkip: 'Skip tutorial',
         labelWater: 'Water',
-        labelWaterUrgent: 'Water!',
         labelActions: ['Harvest', 'Prune'],
         labelFilter: 'Filter: ',
         labelParams: 'Parameters: ',
@@ -4701,15 +4701,9 @@ const waterLabel = ui.createLatexLabel
         // @ts-expect-error
         let threshold: BigNumber = plantData[c.id].growthCost *
         // @ts-expect-error
-        BigNumber.from(c.sequence.length);
-        // @ts-expect-error
-        if(!c.wet && c.growth >= threshold/BigNumber.TWO)
-        {
-            if(c.growth >= threshold)
-                return getLoc('labelWaterUrgent');
-            else
-                return getLoc('labelWater');
-        }
+        BigNumber.from(c.sequence.length) / BigNumber.TWO;
+        if(!c.wet && c.growth >= threshold)
+            return getLoc('labelWater');
         else
             return '';
     },
@@ -6178,10 +6172,13 @@ let createColonyViewMenu = (colony: Colony) =>
     });
     let almanacButton = ui.createButton
     ({
-        text: getLoc('btnAlmanac'),
+        text: colony.id in almanac.pageLookup ? getLoc('btnAlmanac') :
+        getLoc('btnAlmanacNoEntry'),
         row: 0, column: 1,
         onClicked: () =>
         {
+            if(!(colony.id in almanac.pageLookup))
+                return;
             Sound.playClick();
             shelfPages.almanac = almanac.pageLookup[colony.id];
             let menu = createBookMenu(almanac);
