@@ -213,7 +213,9 @@ Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
                 name: 'Pea sprout',
                 nameShort: 's',
                 info: 'Tastes nice, innit?',
-                LsDetails: `To be filled`,
+                LsDetails: `A(r, t): apex (stem shoot) providing r energy/s. Has
+t stages left until it spurts.\\\\F(p): internode (segment) of length p.
+Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/s.`,
                 actions:
                 [
                     `Harvest returns profit as the sum of all F lengths.`
@@ -4016,8 +4018,8 @@ const plantData: {[key: string]: Plant} =
         [
             'A(r, t): t>0 = A(r+0.02, t-1)',
             'A(r, t) = F(0.05)[-&(45)L(0.02)][-^(45)L(0.02)]/(137.508)A(r, 3)',
-            'F(l): l<FMaxSize = F(l+0.05)',
-            'L(s): s<LMaxSize = L(s+0.02)'
+            'F(p): p<FMaxSize = F(p+0.05)',
+            'L(r): r<LMaxSize = L(r+0.02)'
         ], 30, 0, 'A', '+-&^/\\T', 0, {
             'FMaxSize': '0.3',
             'LMaxSize': '0.12'
