@@ -220,8 +220,28 @@ Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
                 ],
                 stages:
                 {
-                    index: [0],
-                    0: 'Seedling slumber etc.'
+                    index:
+                    [
+                        0,
+                        1,
+                        4,
+                        5, 8,
+                        9,
+                        12
+                    ],
+                    0: `A seedling in its slumber.\\\\This is a plant's axiom.
+The beginning of its journey.`,
+                    1: `Rule number 1.\\\\The seedling begins to open. There's a
+timer on it.`,
+                    4: `Rule number 2.\\\\A little stem has just risen, and
+there's a tiny pair of leaves on it.`,
+                    5: `Rules 1, 3, and 4, all at the same time.`,
+                    8: `The stem rises again, and with it, a new pair of
+leaves.`,
+                    9: `The first segment reaches its limit.\\\\And at the same
+time, so do the first leaves.`,
+                    12: `You've made it. Welcome to class.\\\\Plant a few more,
+then I'll get you something new.`
                 }
             },
             calendula:
@@ -676,9 +696,7 @@ $: aligns the turtle's up vector closest to vertical.
 
 {: initiates polygon drawing mode.
 .: sets a polygon vertex.
-}: ends the polygon drawing mode.
-
-~: declares a symbol's model.`
+}: ends the polygon drawing mode.`
             },
         },
 
@@ -694,7 +712,7 @@ Surprised to see somebody visit this late,
 let alone *urge* me to let her plant on my ground.
 
 (Hum. This is not fine.)
-Well, then, welcome to... class.
+Well then, welcome to... class.
 Take one of my seeds, for now.
 Till that plot, then we'll start in the morning.
 
@@ -707,10 +725,10 @@ Tip: Tap on 'Upgrades' to acquire your first plot.`
 Can't even bear to look at this soil...
 You have lots of training to do, still.
 
-Luckily, this sprout won't die, even if say...
-stub your toe, or drag one of your chairs over it.
-Just lend it a few drops and watch it grow.
+Luckily, this sprout won't die, even if you...
+stub your toe, or drag one of your dresses over it.
 
+Watch it grow, lend a few drops when it needs to grow.
 And if you ever get lost, *go* reach for my bookshelf.`
                 }
             ],

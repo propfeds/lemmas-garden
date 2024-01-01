@@ -96,9 +96,9 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Narration revamp
     - Lemma should also know about L-systems and tell students what rule is being enacted
 
-- [ ] Pre-calendula plant:
+- [x] Pre-calendula plant:
   - [x] Pea or mung sprout
-    - [ ] Narration
+    - [x] Narration
   - [ ] Simple solitary flower
     - Tulip? But tulip is much more fancier...
     - Buttercup
