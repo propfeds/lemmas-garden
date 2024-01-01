@@ -95,6 +95,9 @@ you have to dig really deep to find the underlying systems behind the plants
   - Early game should be the time when a lot of help is needed, don't neglect your student
   - [ ] Narration revamp
     - Lemma should also know about L-systems and tell students what rule is being enacted
+    - [ ] Calendula
+    - [ ] Basil
+    - [ ] Campion
 
 - [x] Pre-calendula plant:
   - [x] Pea or mung sprout

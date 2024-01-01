@@ -58,7 +58,7 @@ const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS = {
     en: {
-        versionName: `Version: 0.2.3, 'Wet'`,
+        versionName: `Version: 0.3 (Alpha), 'Turf Tidings'`,
         wip: 'Work in Progress',
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish\\colon',
@@ -67,7 +67,7 @@ const LOC_STRINGS = {
         btnAlmanacNoEntry: '(Unavailable)',
         btnVar: 'Variables',
         btnSave: 'Save',
-        btnReset: 'Reset Graphs',
+        btnReset: 'Clear Graphs',
         btnRedraw: 'Redraw',
         btnPrev: 'Prev.',
         btnNext: 'Next',
@@ -170,6 +170,11 @@ Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
             'Account: Colonies',
             'Account: Performance (latest/avg)',
             'Account: Performance (min/max)'
+        ],
+        camModes: [
+            'Camera: Static',
+            'Camera: Follow (Linear)',
+            'Camera: Follow (Squared)'
         ],
         plants: {
             sprout: {
@@ -1964,25 +1969,25 @@ class Renderer {
         this.system = plantData[colony.id].system;
         this.configure(colony.sequence, colony.params, plantData[colony.id].camera(colony.stage), plantData[colony.id].stroke(colony.stage));
     }
-    configure(sequence, params, camera = {}, stroke = {}) {
-        this.figureScale = camera.scale || 1;
-        this.cameraMode = camera.mode ?? 0;
-        this.followFactor = camera.followFactor ?? 0.15;
-        this.camCentre = new Vector3(camera.x ?? 0, camera.y ?? 0, camera.z ?? 0);
-        this.upright = camera.upright ?? false;
-        this.tickLength = stroke.tickLength ?? 1;
-        this.initDelay = stroke.initDelay ?? 0;
+    configure(sequence = null, params = null, camera = {}, stroke = {}, redraw = true) {
+        this.figureScale = camera.scale || this.figureScale;
+        this.cameraMode = camera.mode ?? this.cameraMode;
+        this.followFactor = camera.followFactor ?? this.followFactor;
+        this.camCentre = new Vector3(camera.x ?? this.camCentre.x, camera.y ?? this.camCentre.y, camera.z ?? this.camCentre.z);
+        this.upright = camera.upright ?? this.upright;
+        this.tickLength = stroke.tickLength ?? this.tickLength;
+        this.initDelay = stroke.initDelay ?? this.initDelay;
         // Loop mode is always 0
         // Whether to reset graph on hitting reset button is a game setting
-        this.loadModels = stroke.loadModels ?? true;
-        this.quickDraw = stroke.quickDraw ?? false;
-        this.quickBacktrack = stroke.quickBacktrack ?? false;
-        this.backtrackTail = stroke.backtrackTail ?? true;
-        this.hesitateApex = stroke.hesitateApex ?? true;
-        this.hesitateFork = stroke.hesitateFork ?? true;
-        this.sequence = sequence;
-        this.params = params;
-        this.redrawing = true;
+        this.loadModels = stroke.loadModels ?? this.loadModels;
+        this.quickDraw = stroke.quickDraw ?? this.quickDraw;
+        this.quickBacktrack = stroke.quickBacktrack ?? this.quickBacktrack;
+        this.backtrackTail = stroke.backtrackTail ?? this.backtrackTail;
+        this.hesitateApex = stroke.hesitateApex ?? this.hesitateApex;
+        this.hesitateFork = stroke.hesitateFork ?? this.hesitateFork;
+        this.sequence = sequence ?? this.sequence;
+        this.params = params ?? this.params;
+        this.redrawing = redraw;
     }
     /**
      * Moves the cursor forward.
@@ -2017,7 +2022,10 @@ class Renderer {
                 return;
             }
             if (this.models.length > 0) {
-                // Unreadable pile of shit
+                /*
+                Unreadable pile of crap, but essentially same as the section
+                below.
+                */
                 for (; this.mdi[this.mdi.length - 1] <
                     this.models[this.models.length - 1].length; ++this.mdi[this.mdi.length - 1]) {
                     switch (this.models[this.models.length - 1][this.mdi[this.mdi.length - 1]]) {
@@ -2395,7 +2403,7 @@ class Renderer {
     get camera() {
         let newCamera;
         switch (this.cameraMode) {
-            case 1:
+            case 2:
                 // I accidentally discovered Bézier curves unknowingly.
                 // @ts-expect-error
                 let dist = this.centre - this.lastCamera;
@@ -2403,6 +2411,15 @@ class Renderer {
                 newCamera = this.lastCamera + dist * this.followFactor ** 2 +
                     // @ts-expect-error
                     this.lastCamVel * (1 - this.followFactor) ** 2;
+                // @ts-expect-error
+                this.lastCamVel = newCamera - this.lastCamera;
+                this.lastCamera = newCamera;
+                return newCamera;
+            case 1:
+                // @ts-expect-error
+                newCamera = this.centre * this.followFactor +
+                    // @ts-expect-error
+                    this.lastCamera * (1 - this.followFactor);
                 // @ts-expect-error
                 this.lastCamVel = newCamera - this.lastCamera;
                 this.lastCamera = newCamera;
@@ -3106,20 +3123,20 @@ const plantData = {
             'A(r, t): t<=0 && r>=AThreshold = F(0.78, 2.1)K(0)',
             'A(r, t): r>=AThreshold = [&A(r-0.15, 2)][^I(3)]',
             'A(r, t): t>0 = A(r+0.06, t-1)',
-            'A(r, t) = F(0.12, 0.6)T[-L(0.06, maxLSize)]/(180)[-L(0.06, maxLSize)]/(90)A(r, 4)',
-            'I(t): t>0 = F(0.24, 0.84)T[-L(0.06, maxLSize/3)]/(137.508)I(t-1)',
+            'A(r, t) = F(0.12, 0.6)T[-L(0.06, LMaxSize)]/(180)[-L(0.06, LMaxSize)]/(90)A(r, 4)',
+            'I(t): t>0 = F(0.24, 0.84)T[-L(0.06, LMaxSize/3)]/(137.508)I(t-1)',
             'I(t) = F(0.48, 1.44)K(0)',
-            'K(p): p<maxKSize = K(p+0.25)',
+            'K(p): p<KMaxSize = K(p+0.25)',
             'L(r, lim): r<lim = L(r+0.02, lim)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 15, 0, 'AI', '', -0.2, {
             'AThreshold': '0.96',
-            'maxKSize': '3',
-            'maxLSize': '0.68'
+            'KMaxSize': '3',
+            'LMaxSize': '0.68'
         }, [
-            '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/10+0.1)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)]}',
-            '~> K(p): p<1.5 = {[w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)]F(p/10+0.1)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.23, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-9)k(p*0.23, p*18-15)][o(p*0.22, p*17.5)]}',
-            '~> K(p) = {[w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)]F(p/10+0.1)[k(1.5/4, p*18)k(1.5/4, p*18)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.23, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-9)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.24, p*18-15)][o(1.5/4, p*22.5)o(1.5*0.22, p*17.5)o(1.5*0.18, p*10)]}',
+            '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/10+0.1)[k(p*0.225, p*18)k(p*0.225, p*18)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.21, p*18-6)k(p*0.21, p*18-6)]}',
+            '~> K(p): p<1.5 = {[w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)]F(p/10+0.1)[k(p*0.225, p*18)k(p*0.225, p*18)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.21, p*18-6)k(p*0.21, p*18-6)k(p*0.21, p*18-6)k(p*0.2, p*18-6)k(p*0.21, p*18-6)k(p*0.21, p*18-9)k(p*0.2, p*18-15)][o(p*0.2252, p*17.5)]}',
+            '~> K(p) = {[w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)]F(p/10+0.1)[k(1.5*0.225, p*18)k(1.5*0.225, p*18)k(1.5*0.225, p*18-3)k(1.5*0.225, p*18-3)k(1.5*0.225, p*18-3)k(1.5*0.225, p*18-3)k(1.5*0.21, p*18-6)k(1.5*0.21, p*18-6)k(1.5*0.21, p*18-6)k(1.5*0.2, p*18-6)k(1.5*0.21, p*18-6)k(1.5*0.21, p*18-9)k(1.5*0.2, p*18-15)k(1.5*0.2, p*18-15)k(1.5*0.2, p*18-15)k(1.5*0.2, p*18-18)k(1.5*0.2, p*18-18)k(1.5*0.2, p*18-18)k(1.5*0.2, p*18-18)k(1.5*0.2, p*18-18)k(1.5*0.21, p*18-15)][o(1.5/4, p*22.5)o(1.5*0.22, p*17.5)o(1.5*0.18, p*10)]}',
             '~> w(p, a): p<0.1 = [--(a)F(0.2).+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)[+++(a)F(0.2).].]',
             '~> w(p, a): p<0.2 = [--(a)F(0.2).+++F(0.2).^+F(0.2).]/[--(a)F(0.2)+++F(0.2).^+F(0.2).]/[--(a)F(0.2)+++F(0.2).^+F(0.2).]/[--(a)F(0.2)[+++F(0.2).].]',
             '~> w(p, a): p<0.25 = [--(a)F(p).++F(p).^F(p).]/[--(a)F(p)++F(p).^F(p).]/[--(a)F(p)++F(p).^F(p).]/[--(a)F(p)[++F(p).].]',
@@ -3127,8 +3144,8 @@ const plantData = {
             '~> k(p, a): p<0.3 = [---(a)F(p/2).+^F(p*2).+&F(p).][---(a)F(p/2)[+&F(p*2)[+^F(p).].].]/(137.508)',
             '~> k(p, a) = [---(a)F(p/2).+^F(p*2).&F(p).][---(a)F(p/2)[+&F(p*2)[^F(p).].].]/(137.508)',
             '~> o(p, a) = [-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]',
-            '~> L(p, lim): p<=maxLSize/4 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].].[^F(p).F(p).^-F(p).&&-F(p).&F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].]}',
-            '~> L(p, lim): p<=maxLSize/3 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
+            '~> L(p, lim): p<=LMaxSize/4 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].].[^F(p).F(p).^-F(p).&&-F(p).&F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].]}',
+            '~> L(p, lim): p<=LMaxSize/3 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
             '~> L(p, lim) = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
         ]),
         maxStage: 40,
@@ -3174,12 +3191,12 @@ const plantData = {
         system: new LSystem('/(90)BA(0.06, 5)', [
             'A(r, t): r>=AThreshold = S(0)F(0.24, 0.96)K(0.02, 8)',
             'A(r, t): t>0 = A(r+0.06, t-1)',
-            'A(r, t) = F(0.12, 1.44)[&[I(5)]T(0.2)L(0.06, min(r+0.12, maxLSize), 0)]/(180)[&L(0.06, min(r+0.12, maxLSize), 0)]/(90)A(r-0.06, 3)',
+            'A(r, t) = F(0.12, 1.44)[&[I(5)]T(0.2)L(0.06, min(r+0.12, LMaxSize), 0)]/(180)[&L(0.06, min(r+0.12, LMaxSize), 0)]/(90)A(r-0.06, 3)',
             'S(type) < I(t): type>=1 = S(type)',
             'I(t): t>0 = I(t-1)',
-            'I(t) = /(90)F(0.12, 0.72)T[&L(0.03, maxLSize/2, 0)]/(180)[&L(0.03, maxLSize/2, 0)]I(11)',
+            'I(t) = /(90)F(0.12, 0.72)T[&L(0.03, LMaxSize/2, 0)]/(180)[&L(0.03, LMaxSize/2, 0)]I(11)',
             'K(s, t): t>0 = K(s+0.02, 0)/(90)F(0.12, 0.72)K(0.02, t-1)',
-            'K(s, t): s<maxKSize = K(s+0.02, t)',
+            'K(s, t): s<KMaxSize = K(s+0.02, t)',
             'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
             'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
             'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
@@ -3190,8 +3207,8 @@ const plantData = {
             'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
             'AThreshold': '0.96',
-            'maxLSize': '0.6',
-            'maxKSize': '0.3'
+            'LMaxSize': '0.6',
+            'KMaxSize': '0.3'
         }, [
             '~> K(t) = {[k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))]}',
             '~> k(size): size<0.36 = [+++&F(size/2).[^^--F(size/2).]][+++^F(size/2).]',
@@ -3251,12 +3268,12 @@ const plantData = {
             'K(p, t): t<3 = K(0.1875, t+1)',
             'K(p, t): t<12 = K(1.35*p-0.8*p^2, t+1)',
             'K(p, t) = O(1)',
-            'L(s): s<maxLSize = L(s+0.025)',
+            'L(s): s<LMaxSize = L(s+0.025)',
             'O(s): s>0.5 = O(s*0.9)',
             'O(s) =',
             'F(l, t): t>0 = F(l+0.4, t-1)'
         ], 31, 0, 'A', '', -0.6, {
-            'maxLSize': '0.625'
+            'LMaxSize': '0.625'
         }, [
             '~> K(p, t): t<3 = {[+(90)b(p*4)b(p*4)b(p*4)b(p*4)b(p*4)]}',
             '~> b(s) = -[^-F(s).][--F(s*2)..][&-F(s).]+^(72)',
@@ -3459,6 +3476,7 @@ let fancyPlotTitle = false;
 let actionPanelOnTop = false;
 let actionConfirm = true;
 let quatMode = 0 /* QuaternaryModes.PROFITS */;
+let cameraMode = 0 /* CameraModes.STATIC */;
 let colonyViewConfig = {};
 let shelfPages = {
     almanac: 0,
@@ -5191,7 +5209,8 @@ let createWaterMenu = () => {
                 }),
                 ui.createLatexLabel({
                     text: getLoc('labelAutoWaterDesc'),
-                    margin: new Thickness(0, 4),
+                    fontSize: 12,
+                    margin: new Thickness(0, 0, 0, 4),
                     // heightRequest: getProgBarSize(ui.screenWidth),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     verticalTextAlignment: TextAlignment.CENTER
@@ -5324,7 +5343,8 @@ let createNotebookMenu = () => {
                 }),
                 ui.createLatexLabel({
                     text: getLoc('labelNoteDesc'),
-                    margin: new Thickness(0, 4),
+                    fontSize: 12,
+                    margin: new Thickness(0, 0, 0, 4),
                     // heightRequest: getProgBarSize(ui.screenWidth),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     verticalTextAlignment: TextAlignment.CENTER
@@ -5364,7 +5384,6 @@ let createShelfMenu = () => {
                     }
                 }),
                 ui.createButton({
-                    isVisible: Object.keys(autoWaterConfig).length > 0,
                     text: getLoc('menuAutoWater'),
                     onClicked: () => {
                         Sound.playClick();
@@ -5392,6 +5411,14 @@ let createShelfMenu = () => {
                         let menu = createWorldMenu();
                         menu.show();
                     }
+                }),
+                ui.createLatexLabel({
+                    text: getLoc('versionName'),
+                    fontSize: 12,
+                    margin: new Thickness(0, 4, 0, 0),
+                    horizontalOptions: LayoutOptions.CENTER,
+                    horizontalTextAlignment: TextAlignment.CENTER,
+                    verticalTextAlignment: TextAlignment.CENTER
                 })
             ]
         })
@@ -5469,6 +5496,7 @@ let createWorldMenu = () => {
     });
     let GM3Button = ui.createButton({
         column: 1,
+        heightRequest: getSmallBtnSize(ui.screenWidth),
         text: getLoc('btnRedraw'),
         onClicked: () => {
             Sound.playClick();
@@ -5510,19 +5538,19 @@ let createWorldMenu = () => {
             // GM2Slider.value = graphMode2D;
         }
     });
-    let CMLabel = ui.createLatexLabel({
+    let CVMLabel = ui.createLatexLabel({
         text: getLoc('colonyModes')[colonyMode],
         row: 4, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let CMSlider = ui.createSlider({
+    let CVMSlider = ui.createSlider({
         row: 4, column: 1,
         minimum: -0.25,
         maximum: 4 /* ColonyModes._SIZE */ - 0.75,
         value: colonyMode,
         onValueChanged: () => {
-            colonyMode = Math.round(CMSlider.value);
-            CMLabel.text = getLoc('colonyModes')[colonyMode];
+            colonyMode = Math.round(CVMSlider.value);
+            CVMLabel.text = getLoc('colonyModes')[colonyMode];
         },
         onDragCompleted: () => {
             Sound.playClick();
@@ -5591,6 +5619,26 @@ let createWorldMenu = () => {
             theory.invalidateQuaternaryValues();
         }
     });
+    let CMLabel = ui.createLatexLabel({
+        text: getLoc('camModes')[cameraMode],
+        row: 8, column: 0,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let CMSlider = ui.createSlider({
+        row: 8, column: 1,
+        minimum: -0.25,
+        maximum: 3 /* CameraModes._SIZE */ - 0.75,
+        value: cameraMode,
+        onValueChanged: () => {
+            cameraMode = Math.round(CMSlider.value);
+            CMLabel.text = getLoc('camModes')[cameraMode];
+        },
+        onDragCompleted: () => {
+            Sound.playClick();
+            renderer.configure(null, null, { mode: cameraMode }, {}, false);
+            theory.invalidateQuaternaryValues();
+        }
+    });
     let menu = ui.createPopup({
         isPeekable: true,
         title: Localization.get('SettingsPopupTitle'),
@@ -5612,8 +5660,8 @@ let createWorldMenu = () => {
                         GM3Switch,
                         GM2Label,
                         GM2Slider,
-                        CMLabel,
-                        CMSlider,
+                        CVMLabel,
+                        CVMSlider,
                         APLabel,
                         APSwitch,
                         PTLabel,
@@ -5623,15 +5671,10 @@ let createWorldMenu = () => {
                         QBLabel,
                         QBSlider,
                         speedLabel,
-                        speedSlider
+                        speedSlider,
+                        CMLabel,
+                        CMSlider
                     ]
-                }),
-                ui.createLatexLabel({
-                    text: getLoc('versionName'),
-                    horizontalOptions: LayoutOptions.CENTER,
-                    horizontalTextAlignment: TextAlignment.CENTER,
-                    verticalTextAlignment: TextAlignment.CENTER,
-                    fontSize: 12
                 }),
                 ui.createBox({
                     heightRequest: 1,
@@ -5758,7 +5801,8 @@ var getInternalState = () => {
             fancyPlotTitle,
             actionPanelOnTop,
             actionConfirm,
-            quatMode
+            quatMode,
+            cameraMode
         },
         colonyViewConfig,
         shelfPages,
@@ -5828,6 +5872,8 @@ var setInternalState = (stateStr) => {
             actionConfirm = state.settings.actionConfirm ?? actionConfirm;
             quatMode = state.settings.quatMode ??
                 Number(state.settings.quatBoard ?? quatMode);
+            cameraMode = state.settings.cameraMode ?? cameraMode;
+            renderer.configure(null, null, { mode: cameraMode }, {}, false);
         }
         colonyViewConfig = state.colonyViewConfig ?? colonyViewConfig;
         shelfPages = state.shelfPages ?? shelfPages;
