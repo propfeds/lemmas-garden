@@ -3,7 +3,7 @@
 - [To-do List](#to-do-list)
   - [Research](#research)
   - [Compost bin](#compost-bin)
-  - [v0.3: Invasion / 'Grass Tidings' / 'Turf Tidings?'](#v03-invasion--grass-tidings--turf-tidings)
+  - [v0.3: Invasion](#v03-invasion)
   - [v0.2: Wet](#v02-wet)
   - [v0.1: Slumber Seeds](#v01-slumber-seeds)
   - [v0: Axiom](#v0-axiom)
@@ -31,6 +31,9 @@ basically it only focuses on plant growth instead of the actual l-systems , whic
 you have to dig really deep to find the underlying systems behind the plants
 
 ## Compost bin
+
+- [ ] Get rid of daily income in the code
+  - Unless there's a use for it
 
 - [ ] Unlock conditions for each page in Lemma's book
 
@@ -77,7 +80,7 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Ginger
   - [ ] Sunflower
 
-## v0.3: Invasion / 'Grass Tidings' / 'Turf Tidings?'
+## v0.3: Invasion
 
 - [ ] Move references from loc strings to the Book class
 - [ ] Add reference to Param LSR
@@ -170,6 +173,7 @@ you have to dig really deep to find the underlying systems behind the plants
     - [x] Timing: only make it available after half of the growth has been filled?
     - [x] Auto-watering: unlocks for free (right away, or maybe after the next plant has been unlocked) with configurable stage. That means you have likely understood this plant's growth.
     - Some plants don't need watering to evolve, such as grasses.
+    - [ ] Plants start at negative stage so watering won't give too much energy?
 
 ## v0.2: Wet
 

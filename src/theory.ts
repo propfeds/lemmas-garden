@@ -1,5 +1,5 @@
 import { BigNumber } from './api/BigNumber';
-import { CompositeCost, ConstantCost, ExponentialCost, FirstFreeCost, FreeCost } from './api/Costs';
+import { CompositeCost, ConstantCost, Cost, ExponentialCost, FirstFreeCost, FreeCost } from './api/Costs';
 import { Currency } from './api/Currency';
 import { game } from './api/Game';
 import { Localization } from './api/Localization';
@@ -76,7 +76,7 @@ const LOC_STRINGS =
 {
     en:
     {
-        versionName: `Version: 0.3 (Alpha), 'Turf Tidings'`,
+        versionName: `Version: 0.3 (Alpha), 'Grass Tidings'`,
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
@@ -106,13 +106,15 @@ const LOC_STRINGS =
         labelAxiom: 'Axiom: ',
         labelAngle: 'Turning angle (°): ',
         labelRules: `Production rules: {0}\\\\Every stage, each symbol in
-the plant's sequence chooses one rule to evolve depending on its conditions.`,
+the plant's sequence chooses one rule to evolve. Rules are checked from top to
+bottom.`,
         labelIgnored: 'Turtle-ignored: ',
         labelCtxIgnored: 'Context-ignored: ',
         labelTropism: 'Tropism (gravity): ',
         labelSeed: 'Random seed: ',
-        labelModels: `Model specifications: {0}\\\\Models define how each
-symbol is drawn depending on its parameters.`,
+        labelModels: `Model specifications: {0}\\\\Models define how each symbol
+is drawn, with similar logic to production rules. If no model is specified, a
+straight line will be drawn.`,
         menuVariables: 'Defined Variables',
         labelVars: 'Variables: {0}',
 
@@ -3101,7 +3103,7 @@ class Renderer
         let newCamera: Vector3;
         switch(this.cameraMode)
         {
-            case 2:
+            case CameraModes.QUADRATIC:
                 // I accidentally discovered Bézier curves unknowingly.
                 // @ts-expect-error
                 let dist = this.centre - this.lastCamera;
@@ -3113,7 +3115,7 @@ class Renderer
                 this.lastCamVel = newCamera - this.lastCamera;
                 this.lastCamera = newCamera;
                 return newCamera;
-            case 1:
+            case CameraModes.LINEAR:
                 // @ts-expect-error
                 newCamera = this.centre * this.followFactor +
                 // @ts-expect-error
@@ -3122,7 +3124,7 @@ class Renderer
                 this.lastCamVel = newCamera - this.lastCamera;
                 this.lastCamera = newCamera;
                 return newCamera;
-            case 0:
+            case CameraModes.STATIC:
                 return this.centre;
         }
     }
@@ -3958,7 +3960,7 @@ interface Plant
 {
     system: LSystem;
     maxStage?: number;
-    cost: any;
+    cost: Cost;
     growthRate: BigNumber;
     growthCost: BigNumber;
     dailyIncome?: boolean;

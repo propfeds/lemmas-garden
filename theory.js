@@ -58,7 +58,7 @@ const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS = {
     en: {
-        versionName: `Version: 0.3 (Alpha), 'Turf Tidings'`,
+        versionName: `Version: 0.3 (Alpha), 'Grass Tidings'`,
         wip: 'Work in Progress',
         currencyTax: 'p (tax)',
         pubTax: 'Tax on publish\\colon',
@@ -84,13 +84,15 @@ const LOC_STRINGS = {
         labelAxiom: 'Axiom: ',
         labelAngle: 'Turning angle (°): ',
         labelRules: `Production rules: {0}\\\\Every stage, each symbol in
-the plant's sequence chooses one rule to evolve depending on its conditions.`,
+the plant's sequence chooses one rule to evolve. Rules are checked from top to
+bottom.`,
         labelIgnored: 'Turtle-ignored: ',
         labelCtxIgnored: 'Context-ignored: ',
         labelTropism: 'Tropism (gravity): ',
         labelSeed: 'Random seed: ',
-        labelModels: `Model specifications: {0}\\\\Models define how each
-symbol is drawn depending on its parameters.`,
+        labelModels: `Model specifications: {0}\\\\Models define how each symbol
+is drawn, with similar logic to production rules. If no model is specified, a
+straight line will be drawn.`,
         menuVariables: 'Defined Variables',
         labelVars: 'Variables: {0}',
         plotTitle: `\\text{{Plot }}{{{0}}}`,
@@ -2403,7 +2405,7 @@ class Renderer {
     get camera() {
         let newCamera;
         switch (this.cameraMode) {
-            case 2:
+            case 2 /* CameraModes.QUADRATIC */:
                 // I accidentally discovered Bézier curves unknowingly.
                 // @ts-expect-error
                 let dist = this.centre - this.lastCamera;
@@ -2415,7 +2417,7 @@ class Renderer {
                 this.lastCamVel = newCamera - this.lastCamera;
                 this.lastCamera = newCamera;
                 return newCamera;
-            case 1:
+            case 1 /* CameraModes.LINEAR */:
                 // @ts-expect-error
                 newCamera = this.centre * this.followFactor +
                     // @ts-expect-error
@@ -2424,7 +2426,7 @@ class Renderer {
                 this.lastCamVel = newCamera - this.lastCamera;
                 this.lastCamera = newCamera;
                 return newCamera;
-            case 0:
+            case 0 /* CameraModes.STATIC */:
                 return this.centre;
         }
     }
