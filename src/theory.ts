@@ -45,11 +45,12 @@ var getDescription = (language: string): string =>
     const descs =
     {
         en:
-`Last night, Lemma told you to sweep the rubbles and till her old plot.
+`Last night, Lemma swept away the fallen leaves on her old garden.
 You are her first student in a long while.
 
 Welcome to Lemma's Garden, an idle botanical theory built on the workings of ` +
-`Lindenmayer systems.`,
+`Lindenmayer systems. Reminisce the story of Lemma, a retired teacher, and ` +
+`her late partner, as she rambles about things already long passed.`,
     };
 
     return descs[language] ?? descs.en;
@@ -220,7 +221,7 @@ Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
             {
                 name: 'Pea sprout',
                 nameShort: 's',
-                info: 'Tastes nice, innit?',
+                info: `Tastes nice, doesn't it?`,
                 LsDetails: `A(r, t): apex (stem shoot) providing r energy/s. Has
 t stages left until it spurts.\\\\F(p): internode (segment) of length p.
 Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/s.`,
@@ -239,10 +240,10 @@ Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/s.`,
                         9,
                         12
                     ],
-                    0: `A seedling in its slumber.\\\\This is a plant's axiom.
-The beginning of its journey.`,
-                    1: `Rule number 1.\\\\The seedling begins to open. There's a
-timer on it.`,
+                    0: `(Why is this seed called an axiom?\\\\I'll wait for her
+return so I can ask.)`,
+                    1: `My dear I am back! Rule number... one!\\\\The seed
+begins to crack, and there's a *timer* on it.`,
                     4: `Rule number 2.\\\\A little stem has just risen, and
 there's a tiny pair of leaves on it.`,
                     5: `Rules 1, 3, and 4, all at the same time.`,
@@ -280,7 +281,7 @@ it would turn into K.\\\\K(p): flower of size p. Provides p pennies on harvest.
                         31,
                         35, 39, 40
                     ],
-                    0: 'A seedling in its warm slumber.',
+                    0: 'A seed, curling over in its warm slumber.',
                     5: 'A little stem has just risen.',
                     10: `The second pair of leaves appears. See that for this
 cultivar, each pair of leaves is rotated to 90° against the previous. Others
@@ -330,7 +331,7 @@ K).`
                         22,
                         26
                     ],
-                    0: 'A seedling in its sweet slumber.',
+                    0: 'A seed taking its sweet slumber.',
                     6: 'The first pair of leaves pops up. A stem, as well.',
                     10: 'The second pair of leaves appears.',
                     12: 'Little leaves start to grow over the first node.',
@@ -372,7 +373,7 @@ stages left until it disappears. Provides p pennies on harvest.\\\\L(s): leaf.
                         19,
                         22, 27
                     ],
-                    0: 'A seedling basking in its own dazing lullaby.',
+                    0: 'A seed basking in its own dazing lullaby.',
                     6: 'A flower bud already?',
                     9: `Most gardeners are early birds. Now, why are you still
 up, counting pennies in the middle of the night?`,
@@ -722,24 +723,27 @@ Surprised to see somebody visit this late,
 let alone *urge* me to let her plant on my ground.
 
 (Hum. This is not fine.)
-Well then, welcome to... class.
-Take one of my seeds, for now.
-Till that plot, then we'll start in the morning.
+
+...Well then, welcome to... class.
+I have got a plot, just for you.
+Take one of my seeds for now.
+Till the plot, then we'll start in the morning.
 
 Tip: Tap on 'Upgrades' to acquire your first plot.`
                 },
                 {
                     title: `Welcome to...`,
                     contents:
-`Hum.
-Can't even bear to look at this soil...
-You have lots of training to do, still.
+`Hum. Splendid work!
+Can't even bear to look at this soil.
+Luckily, this sprout won't die,
+even if later you'd stub your toe,
+or drag one of your dresses over it.
 
-Luckily, this sprout won't die, even if you...
-stub your toe, or drag one of your dresses over it.
-
-Watch it grow, lend a few drops when it needs to grow.
-And if you ever get lost, *go* reach for my bookshelf.`
+Just watch it grow,
+lend a few drops when it needs to grow.
+Anyhow, if you ever get lost, reach for my bookshelf.
+I'll be back in a bit to narrate your plant's growth.`
                 }
             ],
             basil:
@@ -748,11 +752,15 @@ And if you ever get lost, *go* reach for my bookshelf.`
                 contents:
 `Sorry for letting you wait this long.
 I have a friend who... supplies me with seeds.
-Not for you, but for my old students.
-It's a bit exorbitant, but reliable, I hope.
+It's a bit exorbitant, but still reliable, I hope.
+
+(scribbles)
 
 ...She didn't return until today. Apologies.
-Wee bit sick of that calendula?`
+Wee bit sick of that marigold soup?
+
+No, don't touch the other packet.
+That is for my old... students!`
             },
             notebook:
             {
@@ -762,8 +770,9 @@ Wee bit sick of that calendula?`
 going, you decide to buy yourself a notebook.
 
 This will help you keep track of your plantations.
+Better than pretending to buy 10 seeds, at least.
 
-(Notebook is accessible at the bookshelf.)`
+Tip: Notebook is accessible at the bookshelf.`
             },
             flood:
             {

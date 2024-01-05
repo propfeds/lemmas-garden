@@ -112,6 +112,7 @@ you have to dig really deep to find the underlying systems behind the plants
 - [ ] Calendula
   - [ ] Flower transforms into fruit with lower profit
     - Or maybe not, it's the tutorial plant.
+  - [ ] Implement some kind of puzzle?
 
 - [ ] Basil
   - [ ] Reversible leaf decay when pruning?
