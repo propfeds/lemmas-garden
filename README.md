@@ -8,9 +8,13 @@ Welcome to Lemma's Garden, an idle botanical theory built on the workings of Lin
 
 ## Installation
 
-1. Install the Exponential Idle application (Links: [Android](https://play.google.com/store/apps/details?id=com.conicgames.exponentialidle), [iOS](https://apps.apple.com/us/app/exponential-idle/id1538487382)).
+### 1. Install the Exponential Idle application.
 
-2. Acquire a dedicated save file for custom theories. This step is only for first-time players of Exponential Idle.
+Links: [Android](https://play.google.com/store/apps/details?id=com.conicgames.exponentialidle), [iOS](https://apps.apple.com/us/app/exponential-idle/id1538487382).
+
+### 2. Acquire a dedicated save file for custom theories.
+
+This step is only for first-time players of Exponential Idle.
 
 Navigate to [`save.txt`](./save.txt) then click on `Raw`. You will be delivered to the dedicated save file. Copy the entire body of text.
 
@@ -20,13 +24,13 @@ Confirm that `Lifetime f(t)` is equal to $ee44000.9.
 
 Import the save.
 
-3. Install Lemma's Garden.
+### 3. Install Lemma's Garden.
 
 Navigate to [`theory.js`](./theory.js) then click on `Raw`. You will be delivered to the source code of this theory. Copy the page's URL.
 
 Then, access the custom theory panel within Exponential Idle using the bottom arrows, until you reach a screen saying `Tap to select a custom theory`. Enter the menu, Press the `+` sign and paste in the URL.
 
-4. Tap on `Lemma's Garden` to start playing.
+### 4. Tap on 'Lemma's Garden' and start playing.
 
 ## Screenshots
 

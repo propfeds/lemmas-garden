@@ -101,6 +101,7 @@ const LOC_STRINGS =
         labelSave: 'Last saved: {0}s',
         labelSkip: 'Skip tutorial',
         labelWater: 'Water',
+        labelWaterUrgent: 'Water!',
         labelActions: ['Harvest', 'Prune'],
         labelFilter: 'Filter: ',
         labelParams: 'Parameters: ',
@@ -720,14 +721,14 @@ $: aligns the turtle's up vector closest to vertical.
                     contents:
 `Not one of my students, are you?
 Surprised to see somebody visit this late,
-let alone *urge* me to let her plant on my ground.
+let alone urge me to let her use my ground.
 
 (Hum. This is not fine.)
 
 ...Well then, welcome to... class.
-I have got a plot, just for you.
-Take one of my seeds for now.
-Till the plot, then we'll start in the morning.
+I've a plot here, just for you.
+Take one of my seeds, till the plot,
+we'll start in the morning.
 
 Tip: Tap on 'Upgrades' to acquire your first plot.`
                 },
@@ -736,14 +737,17 @@ Tip: Tap on 'Upgrades' to acquire your first plot.`
                     contents:
 `Hum. Splendid work!
 Can't even bear to look at this soil.
+
 Luckily, this sprout won't die,
 even if later you'd stub your toe,
 or drag one of your dresses over it.
 
-Just watch it grow,
-lend a few drops when it needs to grow.
-Anyhow, if you ever get lost, reach for my bookshelf.
-I'll be back in a bit to narrate your plant's growth.`
+But, neither would it thrive without you.
+Lend it a few drops, and watch it grow.
+
+Anyhow, reach for my shelf if you get lost.
+I'll be back in just a little, to narrate
+the plant's growth for you.`
                 }
             ],
             basil:
@@ -751,7 +755,7 @@ I'll be back in a bit to narrate your plant's growth.`
                 title: `Corollary`,
                 contents:
 `Sorry for letting you wait this long.
-I have a friend who... supplies me with seeds.
+I have a... friend, who supplies me with seeds.
 It's a bit exorbitant, but still reliable, I hope.
 
 (scribbles)
@@ -4740,9 +4744,17 @@ const waterLabel = ui.createLatexLabel
         // @ts-expect-error
         let threshold: BigNumber = plantData[c.id].growthCost *
         // @ts-expect-error
-        BigNumber.from(c.sequence.length) / BigNumber.TWO;
-        if(!c.wet && c.growth >= threshold)
-            return getLoc('labelWater');
+        BigNumber.from(c.sequence.length);
+        if(!c.wet)
+        {
+            if(c.growth >= threshold)
+                return getLoc('labelWaterUrgent');
+            // @ts-expect-error
+            else if(c.growth >= threshold / BigNumber.TWO)
+                return getLoc('labelWater');
+            else
+                return '';
+        }
         else
             return '';
     },

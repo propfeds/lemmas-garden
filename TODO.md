@@ -126,6 +126,7 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Add a Pruned commentary track
 
 - [x] Rose campion
+  - [ ] Standalone game: spread to nearby plot instead of same plot
   - [x] Nerf spreading rate to 1/2 or sth?
   - [ ] Make it easy to calculate profit sum
   - [x] Change the propagation stage since fruit only starts generating at 19?
