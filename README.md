@@ -34,10 +34,10 @@ Then, access the custom theory panel within Exponential Idle using the bottom ar
 
 ## Screenshots
 
-![ss0](screenshots/03.png "Basil, meet bloom.")
+<img src="screenshots/03.png" alt="Basil, meet bloom" height="50%" width="50%">
 
 > Basil, meet bloom.
 
-![ss1](screenshots/02.png "Colony management.")
+<img src="screenshots/02.png" alt="Colony management" height="50%" width="50%">
 
 > Colony management.
