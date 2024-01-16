@@ -368,19 +368,23 @@ stages left until it disappears. Provides p pennies on harvest.\\\\L(s): leaf.
                 {
                     index:
                     [
-                        0, 6, 9,
-                        10, 14,
+                        0, 6, 10, 12,
+                        14,
                         18,
                         19,
                         22, 27
                     ],
                     0: 'A seed basking in its own dazing lullaby.',
                     6: 'A flower bud already?',
-                    9: `Most gardeners are early birds. Now, why are you still
-up, counting pennies in the middle of the night?`,
                     10: 'New stem rises from a side shoot.',
+                    12: `Reminder: gardeners need to be early birds. Now, why 
+are you still up counting pennies?\\\\Look at the light. The lamp's wick is, in
+fact, one of our own campion leaves. I don't sell them.\\\\So if you ever wanted
+to know whether what I do is all about crowns and riches, please look at the
+light again.`,
                     14: `New stems have risen. This pattern will repeat
-periodically. Like a fractal.\\\\What's a graftal, you say? I made that up.`,
+periodically. Like a fractal.\\\\What's a graftal, you say? Of course I would
+make that up.`,
                     18: `Oh no. Maybe luminaries were right all along. Small 
 campion, big campion...`,
                     19: `Too late to munch on thy flowers, for the first 
@@ -3274,14 +3278,14 @@ class ColonyManager
             colony.wet = true;
         }
     }
-    reap(colony: Colony, multiplier: BigNumber = BigNumber.ONE)
+    reap(colony: Colony, multiplier: BigNumber = colony.profit)
     {
         if(multiplier.isZero)
             return;
         // @ts-expect-error
-        currency.value += colony.profit * BigNumber.from(colony.population) *
+        currency.value += BigNumber.from(colony.population) * multiplier *
         // @ts-expect-error
-        multiplier * theory.publicationMultiplier;
+        theory.publicationMultiplier;
     }
 
     addColony(plot: number, id: string, population: number,
@@ -3600,7 +3604,8 @@ class ColonyManager
         }
 
         if(id == 0)     // Harvest specific
-            this.reap(c);
+            // @ts-expect-error
+            this.reap(c, c.profit - this.actionCalcTask.profit);
 
         // Assign new stats
 
@@ -3804,7 +3809,8 @@ class ColonyManager
         c.synthRate = this.calcTask.synthRate;
         
         if(plantData[c.id].stagelyIncome)
-            this.reap(c, plantData[c.id].stagelyIncome);
+            // @ts-expect-error
+            this.reap(c, plantData[c.id].stagelyIncome * c.profit);
 
         c.profit = this.calcTask.profit;
         ++c.stage;
@@ -4050,18 +4056,18 @@ const plantData: {[key: string]: Plant} =
 {
     sprout:
     {
-        system: new LSystem('\\(45)A(0.02, 3)',
+        system: new LSystem('\\A(0.02, 3)',
         [
             'A(r, t): t>0 = A(r+0.02, t-1)',
-            'A(r, t) = F(0.05)[-&(45)L(0.02)][-^(45)L(0.02)]/(137.508)A(r, 3)',
+            'A(r, t) = F(0.05)[-&L(0.02)][-^L(0.02)]/(137.508)A(r, 3)',
             'F(p): p<FMaxSize = F(p+0.05)',
             'L(r): r<LMaxSize = L(r+0.02)'
-        ], 30, 0, 'A', '+-&^/\\T', 0, {
+        ], 45, 0, 'A', '+-&^/\\T', 0, {
             'FMaxSize': '0.3',
             'LMaxSize': '0.12'
         },
         [
-            '~> L(s) = {F(s/4)T(4*s)[\\(90-480*s)&(45)F(s/6).&F(s/3).^^F(s/3).^F(s/3).^F(s/3).^F(s/6).][F(s)..].[/(90-480*s)^(45)F(s/6).^F(s/3).&&F(s/3).&F(s/3).&F(s/3).&F(s/6).][F(s)..]}',
+            '~> L(s) = {F(s/4)T(4*s)[\\(90-480*s)&F(s/6).&(30)F(s/3).^(60)F(s/3).^(30)F(s/3).^(30)F(s/3).^(30)F(s/6).][F(s)..].[/(90-480*s)^F(s/6).^(30)F(s/3).&(60)F(s/3).&(30)F(s/3).&(30)F(s/3).&(30)F(s/6).][F(s)..]}',
         ]),
         maxStage: 12,
         cost: new FirstFreeCost(new ExponentialCost(0.25, Math.log2(3))),
