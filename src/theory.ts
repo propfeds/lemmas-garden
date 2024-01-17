@@ -223,7 +223,7 @@ Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
             {
                 name: 'Pea sprout',
                 nameShort: 's',
-                info: `Tastes nice, doesn't it?`,
+                info: `Tastes nice, innit? (\\(~\\)10 days)`,
                 LsDetails: `A(r, t): apex (stem shoot) providing r energy/s. Has
 t stages left until it spurts.\\\\F(p): internode (segment) of length p.
 Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/s.`,
@@ -239,20 +239,17 @@ Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/s.`,
                         1,
                         4,
                         5, 8,
-                        9,
                         12
                     ],
                     0: `(Why is this seed called an axiom?\\\\I must wait for
 her return to ask this.)`,
                     1: `My dear I am back! Rule number... one!\\\\The seed
 begins to crack, and there's a *timer* on it.`,
-                    4: `Rule number 2.\\\\A little stem has just risen, and
-there's a tiny pair of leaves on it.`,
+                    4: `Rule number 1 fails, so rule number 2 enacts:\\\\A
+little stem rises, and there's a tiny pair of leaves on it.`,
                     5: `Rules 1, 3, and 4, all at the same time.`,
                     8: `The stem rises again, and with it, a new pair of
-leaves.`,
-                    9: `The first segment reaches its limit.\\\\And at the same
-time, so do the first leaves.`,
+leaves.\\\\At the same time, the first segment and leaves reach their limits.`,
                     12: `You've made it. Welcome to class.\\\\Plant a few more,
 then I'll get you something new.`
                 }
@@ -261,7 +258,7 @@ then I'll get you something new.`
             {
                 name: 'Calendula',
                 nameShort: 'C',
-                info: 'The classic flower to start a month.',
+                info: 'The classic flower to start a month. (\\(~\\)7 weeks)',
                 LsDetails: `A(r, t): apex (stem shoot) providing r energy/s. Has
 t stages left until it splits.\\\\F(l, lim): internode of length l, growing up
 to lim.\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0, when
@@ -311,7 +308,8 @@ away from my little profit.`,
             {
                 name: 'Basil',
                 nameShort: 'Ba',
-                info: 'A fast growing herb that requires a bit of care.',
+                info: `A fragrant herb requiring a bit of care. (6\\(
+~\\)8 weeks)`,
                 LsDetails: `A(r, t): apex (stem shoot).\\\\B: base, used for
 communications.\\\\F(l, lim): internode.\\\\I(t): shortened stem. t stages left
 until it splits.\\\\K(s, t): flower of size s. Grows another flower until t
@@ -694,16 +692,16 @@ S: signal. Used to communicate between organs.`
             {
                 title: 'Appendix: Geometric symbols',
                 contents:
-`F(l): moves forward and draw a line of length l.
-Defaults to length 1 when omitted.
-+(n), -(n): perform yaw rotation by n degrees.
-Defaults to the angle specified by the L-system when omitted.
+`F(l): moves forward and draw a line of length l. Defaults to length 1 when ` +
+`omitted.
++(n), -(n): perform yaw rotation by n degrees. Defaults to the angle ` +
+`specified by the L-system when omitted.
 &(n), ^(n): perform pitch rotation by n degrees.
 \\(n), /(n): perform roll rotation by n degrees.
 
 |: reverses direction.
-T(n): applies tropism (gravity) with a weight of n.
-Defaults to the tropism specified by the L-system when omitted.
+T(n): applies tropism (gravity) with a weight of n. Defaults to the tropism ` +
+`specified by the L-system when omitted.
 T(n, x, y, z): applies tropism towards a custom vector.
 $: aligns the turtle's up vector closest to vertical.
 
@@ -4064,14 +4062,14 @@ const plantData: {[key: string]: Plant} =
             'F(p): p<FMaxSize = F(p+0.05)',
             'L(r): r<LMaxSize = L(r+0.02)'
         ], 45, 0, 'A', '+-&^/\\T', 0, {
-            'FMaxSize': '0.3',
-            'LMaxSize': '0.12'
+            'FMaxSize': '0.25',
+            'LMaxSize': '0.1'
         },
         [
             '~> L(s) = {F(s/4)T(4*s)[\\(90-480*s)&F(s/6).&(30)F(s/3).^(60)F(s/3).^(30)F(s/3).^(30)F(s/3).^(30)F(s/6).][F(s)..].[/(90-480*s)^F(s/6).^(30)F(s/3).&(60)F(s/3).&(30)F(s/3).&(30)F(s/3).&(30)F(s/6).][F(s)..]}',
         ]),
         maxStage: 12,
-        cost: new FirstFreeCost(new ExponentialCost(0.25, Math.log2(3))),
+        cost: new FirstFreeCost(new ExponentialCost(0.25, 1)),
         growthRate: BigNumber.from(0.3),
         growthCost: BigNumber.from(0.6),
         actions:
@@ -5630,7 +5628,7 @@ plantData[colony.id].maxStage ?? '∞');
 
 var getPrimaryEquation = () =>
 {
-    if(colonyMode == ColonyModes.OFF && quatMode == QuaternaryModes.OFF)
+    if(colonyMode == ColonyModes.OFF)
         return '';
     return Localization.format(getLoc(fancyPlotTitle ? 'plotTitleF' :
     'plotTitle'), plotIdx + 1);
@@ -6362,7 +6360,7 @@ let createBookMenu = (book: Book) =>
     let pageContents = ui.createLabel
     ({
         fontFamily: FontFamily.CMU_REGULAR,
-        fontSize: 16,
+        fontSize: 14,
         text: pages[shelfPages[key]].contents,
         horizontalTextAlignment: pages[shelfPages[key]].horizontalAlignment ??
         TextAlignment.START,
@@ -7123,6 +7121,7 @@ let createWorldMenu = () =>
         {
             Sound.playClick();
             // CMSlider.value = colonyMode;
+            theory.invalidatePrimaryEquation();
         }
     });
     let APLabel = ui.createLatexLabel
