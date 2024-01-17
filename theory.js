@@ -170,6 +170,7 @@ Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
             'Plot title: Cursive'
         ],
         quatModes: [
+            'Account: Off',
             'Account: Expected revenue',
             'Account: Colonies',
             'Account: Performance (latest/avg)',
@@ -200,8 +201,8 @@ Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/s.`,
                         9,
                         12
                     ],
-                    0: `(Why is this seed called an axiom?\\\\I'll wait for her
-return so I can ask.)`,
+                    0: `(Why is this seed called an axiom?\\\\I must wait for
+her return to ask this.)`,
                     1: `My dear I am back! Rule number... one!\\\\The seed
 begins to crack, and there's a *timer* on it.`,
                     4: `Rule number 2.\\\\A little stem has just risen, and
@@ -3496,7 +3497,7 @@ let colonyMode = 1 /* ColonyModes.VERBOSE */;
 let fancyPlotTitle = false;
 let actionPanelOnTop = false;
 let actionConfirm = true;
-let quatMode = 0 /* QuaternaryModes.PROFITS */;
+let quatMode = 1 /* QuaternaryModes.PROFITS */;
 let cameraMode = 0 /* CameraModes.STATIC */;
 let colonyViewConfig = {};
 let shelfPages = {
@@ -4197,8 +4198,8 @@ var tick = (elapsedTime, multiplier) => {
         insolationCoord = Math.max(0, -timeCos);
         growthCoord = timeCos / 2 + 1;
         switch (quatMode) {
-            case 2 /* QuaternaryModes.PERFORMANCE */:
-            case 3 /* QuaternaryModes.PERFORMANCE_MINMAX */:
+            case 3 /* QuaternaryModes.PERFORMANCE */:
+            case 4 /* QuaternaryModes.PERFORMANCE_MINMAX */:
                 theory.invalidateQuaternaryValues();
                 break;
         }
@@ -4394,6 +4395,8 @@ colony.stage, prog ? colony.growth * BigNumber.HUNDRED /
     (plantData[colony.id].growthCost * BigNumber.from(colony.sequence.length)) :
     plantData[colony.id].maxStage ?? '∞');
 var getPrimaryEquation = () => {
+    if (colonyMode == 0 /* ColonyModes.OFF */ && quatMode == 0 /* QuaternaryModes.OFF */)
+        return '';
     return Localization.format(getLoc(fancyPlotTitle ? 'plotTitleF' :
         'plotTitle'), plotIdx + 1);
 };
@@ -4475,21 +4478,21 @@ let getTimeString = () => {
 };
 var getQuaternaryEntries = () => {
     switch (quatMode) {
-        case 2 /* QuaternaryModes.PERFORMANCE */:
+        case 3 /* QuaternaryModes.PERFORMANCE */:
             for (let i = 0; i < perfs.length; ++i) {
                 let m1 = getCoordString(perfs[i].latest * 1000);
                 let m2 = getCoordString(perfs[i].mean * 1000);
                 perfQuaternaryEntries[i].value = `${m1}/${m2}`;
             }
             return perfQuaternaryEntries;
-        case 3 /* QuaternaryModes.PERFORMANCE_MINMAX */:
+        case 4 /* QuaternaryModes.PERFORMANCE_MINMAX */:
             for (let i = 0; i < perfs.length; ++i) {
                 let m1 = getCoordString(perfs[i].min * 1000);
                 let m2 = getCoordString(perfs[i].max * 1000);
                 perfQuaternaryEntries[i].value = `${m1}/${m2}`;
             }
             return perfQuaternaryEntries;
-        case 0 /* QuaternaryModes.PROFITS */:
+        case 1 /* QuaternaryModes.PROFITS */:
             if (!plotPerma.level)
                 return quaternaryEntries.slice(0, 1);
             for (let i = 0; i < plotPerma.level; ++i) {
@@ -4503,7 +4506,7 @@ var getQuaternaryEntries = () => {
                 quaternaryEntries[i].value = sum * theory.publicationMultiplier;
             }
             break;
-        case 1 /* QuaternaryModes.BOARD */:
+        case 2 /* QuaternaryModes.BOARD */:
             if (!plotPerma.level)
                 return quaternaryEntries.slice(0, 1);
             for (let i = 0; i < plotPerma.level; ++i) {
@@ -4516,6 +4519,8 @@ var getQuaternaryEntries = () => {
                 quaternaryEntries[i].value = column;
             }
             break;
+        default:
+            return [];
     }
     return quaternaryEntries; //.slice(0, plotPerma.level);
 };
@@ -5635,7 +5640,7 @@ let createWorldMenu = () => {
     let QBSlider = ui.createSlider({
         row: 5, column: 1,
         minimum: -0.25,
-        maximum: 4 /* QuaternaryModes._SIZE */ - 0.75,
+        maximum: 5 /* QuaternaryModes._SIZE */ - 0.75,
         value: quatMode,
         onValueChanged: () => {
             quatMode = Math.round(QBSlider.value);

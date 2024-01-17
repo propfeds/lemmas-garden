@@ -204,6 +204,7 @@ Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
         ],
         quatModes:
         [
+            'Account: Off',
             'Account: Expected revenue',
             'Account: Colonies',
             'Account: Performance (latest/avg)',
@@ -241,8 +242,8 @@ Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/s.`,
                         9,
                         12
                     ],
-                    0: `(Why is this seed called an axiom?\\\\I'll wait for her
-return so I can ask.)`,
+                    0: `(Why is this seed called an axiom?\\\\I must wait for
+her return to ask this.)`,
                     1: `My dear I am back! Rule number... one!\\\\The seed
 begins to crack, and there's a *timer* on it.`,
                     4: `Rule number 2.\\\\A little stem has just risen, and
@@ -4503,6 +4504,7 @@ let actionPanelOnTop = false;
 let actionConfirm = true;
 const enum QuaternaryModes
 {
+    OFF,
     PROFITS,
     BOARD,
     PERFORMANCE,
@@ -5628,6 +5630,8 @@ plantData[colony.id].maxStage ?? '∞');
 
 var getPrimaryEquation = () =>
 {
+    if(colonyMode == ColonyModes.OFF && quatMode == QuaternaryModes.OFF)
+        return '';
     return Localization.format(getLoc(fancyPlotTitle ? 'plotTitleF' :
     'plotTitle'), plotIdx + 1);
 }
@@ -5780,6 +5784,8 @@ var getQuaternaryEntries = () =>
                 quaternaryEntries[i].value = column;
             }
             break;
+        default:
+            return [];
     }
 
     return quaternaryEntries;   //.slice(0, plotPerma.level);

@@ -34,6 +34,10 @@ Then, access the custom theory panel within Exponential Idle using the bottom ar
 
 ## Screenshots
 
+<img src="screenshots/pea_small.gif" alt="Pea sprout" height="50%" width="50%">
+
+> Pea sprout.
+
 <img src="screenshots/03.png" alt="Basil, meet bloom" height="50%" width="50%">
 
 > Basil, meet bloom.
