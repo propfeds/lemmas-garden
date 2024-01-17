@@ -126,18 +126,19 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Add a Pruned commentary track
 
 - [x] Rose campion
+  - [ ] Shrub form
+  - [ ] Lower leaf size limit
+  - [ ] Why does it have 3 symbols on stage 1?
+    - Remove the & after adding shrub form
+  - [ ] Make the flowers' incomes easier to calculate
   - [ ] Standalone game: spread to nearby plot instead of same plot
   - [x] Nerf spreading rate to 1/2 or sth?
   - [ ] Make it easy to calculate profit sum
   - [x] Change the propagation stage since fruit only starts generating at 19?
-  - [ ] Maximum statements
-  - [ ] Shrub form?
-  - [ ] Halve leaf synth
   - [x] Income per evolution instead of night
   - [x] Double growth cost
   - [ ] Flower turns into fruit faster
   - [x] Fruit falls off
-  - [ ] Loading SLOW
   - [x] Add a parameter to adjust stagely income multiplier (1/2x for now?)
   - [x] Passive income
   - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?

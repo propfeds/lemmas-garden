@@ -75,7 +75,7 @@ const LOC_STRINGS = {
         btnContents: 'Table of\nContents',
         btnPage: 'p. {0}',
         actionConfirmDialogue: `You are about to perform a {0} on\\\\
-{4} (plot {1}, {2}/{3}).\\\\{5}\\\\\n\n\\\\{6}`,
+{4}.\\\\(plot {1}, {2}/{3})\\\\{5}\\\\\n\n\\\\{6}`,
         labelSave: 'Last saved: {0}s',
         labelSkip: 'Skip tutorial',
         labelWater: 'Water',
@@ -122,7 +122,7 @@ straight line will be drawn.`,
 limit.`,
         menuAutoWater: 'Watering schedules',
         labelMaxStage: 'Stopping stage',
-        labelAutoWaterDesc: `Scheduling for a species is unlocked when it is
+        labelAutoWaterDesc: `Scheduling for a species is unlocked after it is
 harvested for the first time.`,
         colony: `{0} of {1}, stage {2}`,
         colonyWMaxStg: `{0} of {1}, stage {2}/{3}`,
@@ -303,7 +303,8 @@ worry, you can still sell flowers for tea. You like tea?`,
             campion: {
                 name: 'Rose campion',
                 nameShort: 'R',
-                info: 'A great sight for your garden. Provides daily income.',
+                info: `A silvery shrub, passively providing income per ` +
+                    `stage. (\\(~\\)32 weeks)`,
                 LsDetails: `A(r, t): apex (stem shoot).\\\\F(l, t): internode of
 length l. t stages until it stops growing.\\\\K(p, t): flower of size p. t
 stages left until it disappears. Provides p pennies on harvest.\\\\L(s): leaf.
@@ -457,9 +458,8 @@ Mind the medicinal definition of herbs, however! Not all herbaceous plants ` +
 The 'pot' in its name should also suggest it's uses as a cooking herb in ` +
                     `stews and soups too.
 
-Life span: annual
-Propagation: At life cycle's end, spread 1/3 of the current population onto ` +
-                    `the same plot.
+Life span: annual (~7 weeks)
+Propagation: At life cycle's end, spread 1/3 population onto the same plot.
 
 Here's a recipe to make some delicious calendula bread for your pleasures too:`
             },
@@ -470,12 +470,12 @@ Here's a recipe to make some delicious calendula bread for your pleasures too:`
                     `by a sweet and slightly intoxicating flavour. Even my dog loves it from ` +
                     `time to time.
 
-Life span: annual
+Life span: annual (6~8 weeks)
 
-If you don't feel safe, snip off the stem before it flowers. Otherwise, let ` +
-                    `the plant go into the end of its life cycle. The leaves will lose flavour, ` +
-                    `but you will then be able to witness a fascinating chain reaction resulting ` +
-                    `from the communications between the plant's organs.`
+If you plan to harvest leaves, snip off the stem before it flowers. ` +
+                    `Otherwise, let the plant go into seed. The leaves will lose flavour, but ` +
+                    `you will then be able to witness the fascinating communication signals ` +
+                    `between the plant's organs. And the flowers do sell for good pennies.`
             },
             campion: {
                 title: 'Rose campion',
@@ -485,15 +485,14 @@ If you don't feel safe, snip off the stem before it flowers. Otherwise, let ` +
 Rose campion can be used as a sedative, or for wound treatments, or wicks ` +
                     `for a lamp, which gave it the name of 'lamp flower'.
 
+Life span: biennial (~32 weeks)
+Propagation: Late in its life cycle, spread 1/2 population onto the same plot.
+Passively provides income per stage equal to its current profit.
+
 Occasionally, visitors and artists, generous donors, they would come and ` +
                     `toss a few pennies at your doorstep, as gratitude to keep the gardens ` +
                     `running. Well, mostly birds and bees paying for their hearty meals, but ` +
-                    `there is the occasional human too.
-
-Life span: biennial
-Propagation: In the latter half of its life cycle, spread 1/2 of the current ` +
-                    `population onto the same plot.
-Passively provides income per stage equal to its current profit.`
+                    `there is the occasional human too.`
             }
         },
         manualTitle: 'Lindenmayer Systems',
@@ -537,11 +536,13 @@ Not for sale`
                 title: 'Lindenmayer systems: A primer',
                 contents: `Developed in 1968 by biologist Aristid Lindenmayer, an L-system is a formal ` +
                     `grammar that describes the growth of a sequence (string). It is often used ` +
-                    `to model plants and draw fractal figures by dividing their growth into stages.
+                    `to model plants and fractal figures for its ability to construct complex ` +
+                    `objects out of simple rules.
 
 Every L-system starts with a sequence called the axiom. From the axiom, the ` +
-                    `sequence grows according to a set of production rules that describe how ` +
-                    `each symbol (character) in the sequence would be rewritten in the next stage.
+                    `sequence grows according to a set of production rules. These rules describe ` +
+                    `how each symbol (character) of the sequence shall be rewritten in the next ` +
+                    `stage.
 Each rule is represented in the form of:
 {symbol} = {derivation(s)}
 
@@ -794,6 +795,7 @@ let getSmallBtnSize = (width) => {
 let getProgBarSize = (width) => {
     return getSmallBtnSize(width) / 2;
 };
+let isColonyVisible = (c) => c.sequence.length > 1;
 /**
  * Returns the index of the first smaller/equal element than target.
  * @param {number[]} arr the array being searched.
@@ -2582,7 +2584,7 @@ class ColonyManager {
         // Auto water
         if (autoWaterConfig[id]?.maxStage > c.stage)
             this.water(c);
-        if (plot == plotIdx && colonyIdx[plot] == this.colonies[plot].length - 1)
+        if (plot == plotIdx && slotIdx[plot] == this.colonies[plot].length - 1)
             renderer.colony = c;
         theory.invalidateQuaternaryValues();
         updateAvailability();
@@ -2603,8 +2605,8 @@ class ColonyManager {
         }
         if (index == this.colonies[plot].length - 1 && plot == plotIdx) {
             let len = this.colonies[plotIdx].length;
-            colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) % len;
-            selectedColony = this.colonies[plotIdx][colonyIdx[plotIdx]];
+            slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
+            selectedColony = this.colonies[plotIdx][slotIdx[plotIdx]];
             renderer.colony = selectedColony;
         }
         if (this.gangsta && plot == this.gangsta[0]) {
@@ -2832,7 +2834,7 @@ class ColonyManager {
                 };
         }
         if (this.actionGangsta[0] == plotIdx &&
-            this.actionGangsta[1] == colonyIdx[plotIdx])
+            this.actionGangsta[1] == slotIdx[plotIdx])
             renderer.colony = c;
         this.actionGangsta = null;
         theory.invalidateSecondaryEquation();
@@ -2991,7 +2993,7 @@ class ColonyManager {
             {
                 start: 0
             };
-        if (this.gangsta[0] == plotIdx && this.gangsta[1] == colonyIdx[plotIdx])
+        if (this.gangsta[0] == plotIdx && this.gangsta[1] == slotIdx[plotIdx])
             renderer.colony = c;
         this.gangsta = null;
         theory.invalidateSecondaryEquation();
@@ -3080,9 +3082,9 @@ const hourLength = dayLength / 24;
 const nofPlots = 6;
 const maxColoniesPerPlot = 4;
 const waterAmount = BigNumber.from(1 / 2);
-const plotCosts = new FirstFreeCost(new ExponentialCost(500, Math.log2(120)));
+const plotCosts = new FirstFreeCost(new ExponentialCost(500, Math.log2(80)));
 const plantUnlocks = ['sprout', 'calendula', 'basil', 'campion'];
-const plantUnlockCosts = new CompositeCost(1, new ConstantCost(1), new CompositeCost(1, new ConstantCost(1200), new ConstantCost(45000)));
+const plantUnlockCosts = new CompositeCost(1, new ConstantCost(1), new CompositeCost(1, new ConstantCost(1200), new ConstantCost(60000)));
 const permaCosts = [
     BigNumber.from(18),
     BigNumber.from(2100),
@@ -3237,7 +3239,7 @@ const plantData = {
             '~> L(p, lim, s): s<1 = {T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
             '~> L(p, lim, s) = {T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}'
         ]),
-        maxStage: 48,
+        maxStage: 50,
         cost: new ExponentialCost(2.5, 1),
         growthRate: BigNumber.TWO,
         growthCost: BigNumber.TWO,
@@ -3483,7 +3485,7 @@ let growthCoord = 0;
 let insolationIntegral = 0;
 let growthIntegral = 0;
 let plotIdx = 0;
-let colonyIdx = new Array(nofPlots).fill(0);
+let slotIdx = new Array(nofPlots).fill(0);
 let plantIdx = new Array(nofPlots).fill(0);
 let selectedColony = null;
 let finishedTutorial = false;
@@ -3694,11 +3696,11 @@ const harvestFrame = createImageBtn({
     row: 0, column: 2,
 }, () => {
     if (actionConfirm) {
-        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 0 /* Actions.HARVEST */);
+        let menu = createConfirmationMenu(plotIdx, slotIdx[plotIdx], 0 /* Actions.HARVEST */);
         menu.show();
     }
     else
-        manager.performAction(plotIdx, colonyIdx[plotIdx], 0 /* Actions.HARVEST */);
+        manager.performAction(plotIdx, slotIdx[plotIdx], 0 /* Actions.HARVEST */);
 }, () => true, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png'));
@@ -3721,11 +3723,11 @@ const pruneFrame = createImageBtn({
     row: 0, column: 4,
 }, () => {
     if (actionConfirm) {
-        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 1 /* Actions.PRUNE */);
+        let menu = createConfirmationMenu(plotIdx, slotIdx[plotIdx], 1 /* Actions.PRUNE */);
         menu.show();
     }
     else
-        manager.performAction(plotIdx, colonyIdx[plotIdx], 1 /* Actions.PRUNE */);
+        manager.performAction(plotIdx, slotIdx[plotIdx], 1 /* Actions.PRUNE */);
 }, () => true, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png'));
@@ -4133,7 +4135,7 @@ var init = () => {
 var updateAvailability = () => {
     perfs[5 /* Profilers.AVAILABILITY */].exec(() => {
         let x = plotIdx;
-        let y = colonyIdx;
+        let y = slotIdx;
         let p = plantIdx;
         if (!finishedTutorial) {
             finishedTutorial = plotPerma.level > 0;
@@ -4326,7 +4328,7 @@ var getCurrencyBarDelegate = () => {
         row: 0, column: 1,
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
-        selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+        selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
         if (!selectedColony)
             return;
         let seqMenu = createColonyViewMenu(selectedColony);
@@ -4338,10 +4340,10 @@ var getCurrencyBarDelegate = () => {
     }, () => {
         let len = manager.colonies[plotIdx].length;
         if (len)
-            colonyIdx[plotIdx] = (colonyIdx[plotIdx] - 1 + len) % len;
+            slotIdx[plotIdx] = (slotIdx[plotIdx] - 1 + len) % len;
         else
-            colonyIdx[plotIdx] = 0;
-        selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+            slotIdx[plotIdx] = 0;
+        selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
         renderer.colony = selectedColony;
     }, () => manager.colonies[plotIdx].length > 1, '↑');
     let switchBtn = createLabelBtn({
@@ -4350,10 +4352,10 @@ var getCurrencyBarDelegate = () => {
     }, () => {
         let len = manager.colonies[plotIdx].length;
         if (len)
-            colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) % len;
+            slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
         else
-            colonyIdx[plotIdx] = 0;
-        selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+            slotIdx[plotIdx] = 0;
+        selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
         renderer.colony = selectedColony;
     }, () => manager.colonies[plotIdx].length > 1, '↓');
     controlStack.children[0].children =
@@ -4401,7 +4403,7 @@ var getPrimaryEquation = () => {
 var getSecondaryEquation = () => {
     if (!plotPerma.level)
         return getLoc('lockedPlot');
-    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
     let c = selectedColony;
     if (!c) {
         let taxInfo = `\\text{${getLoc('pubTax')}}\\\\
@@ -4416,10 +4418,10 @@ var getSecondaryEquation = () => {
             case 1 /* ColonyModes.VERBOSE */:
                 let status = (manager.gangsta &&
                     manager.gangsta[0] == plotIdx &&
-                    manager.gangsta[1] == colonyIdx[plotIdx]) ?
+                    manager.gangsta[1] == slotIdx[plotIdx]) ?
                     getLoc('status').evolve : (manager.actionGangsta &&
                     manager.actionGangsta[0] == plotIdx &&
-                    manager.actionGangsta[1] == colonyIdx[plotIdx]) ?
+                    manager.actionGangsta[1] == slotIdx[plotIdx]) ?
                     getLoc('status').actions[manager.actionGangsta[2]] : '';
                 result = `\\text{${getColonyTitleString(c)}\\\\
                 ${Localization.format(getLoc('colonyStats'), 
@@ -4430,7 +4432,7 @@ var getSecondaryEquation = () => {
                     '∞', c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                     // @ts-expect-error
                     plantData[c.id].growthRate * BigNumber.from(growthCoord) :
-                    BigNumber.ZERO, c.profit, colonyIdx[plotIdx] + 1, manager.colonies[plotIdx].length, status)}}`;
+                    BigNumber.ZERO, c.profit, slotIdx[plotIdx] + 1, manager.colonies[plotIdx].length, status)}}`;
                 break;
             case 2 /* ColonyModes.SIMPLE */:
                 result = `\\text{${getColonyTitleString(c)}}\\\\E=${c.energy},
@@ -4438,17 +4440,17 @@ var getSecondaryEquation = () => {
                     // @ts-expect-error
                     plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
                     '∞'}\\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}
-                \\text{p}\\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})\\\\`;
+                \\text{p}\\\\(${slotIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})\\\\`;
                 break;
             case 3 /* ColonyModes.LIST */:
                 result = '\\text{';
-                for (let i = 0; i < colonyIdx[plotIdx]; ++i) {
+                for (let i = 0; i < slotIdx[plotIdx]; ++i) {
                     let d = manager.colonies[plotIdx][i];
                     result += `${getColonyTitleString(d, true)}\\\\`;
                 }
                 result += `\\underline{${getColonyTitleString(c, true)}}}\\\\
                 \\text{`;
-                for (let i = colonyIdx[plotIdx] + 1; i < manager.colonies[plotIdx].length; ++i) {
+                for (let i = slotIdx[plotIdx] + 1; i < manager.colonies[plotIdx].length; ++i) {
                     let d = manager.colonies[plotIdx][i];
                     result += `${getColonyTitleString(d, true)}\\\\`;
                 }
@@ -5475,6 +5477,7 @@ let createConfirmationMenu = (plot, index, id) => {
                 // }),
                 ui.createGrid({
                     columnDefinitions: ['1*', '1*'],
+                    // minimumHeightRequest: getBtnSize(ui.screenWidth),
                     children: [
                         ui.createButton({
                             column: 0,
@@ -5778,7 +5781,15 @@ var resetStage = () => renderer.reset(true);
 var canGoToPreviousStage = () => plotPerma.level > 0 && plotIdx > 0;
 var goToPreviousStage = () => {
     --plotIdx;
-    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    let len = manager.colonies[plotIdx].length;
+    if (len) {
+        while (!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]])) {
+            slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
+        }
+    }
+    else
+        slotIdx[plotIdx] = 0;
+    selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
     if (selectedColony)
         renderer.colony = selectedColony;
     theory.invalidatePrimaryEquation();
@@ -5788,7 +5799,15 @@ var goToPreviousStage = () => {
 var canGoToNextStage = () => plotIdx < plotPerma.level - 1;
 var goToNextStage = () => {
     ++plotIdx;
-    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    let len = manager.colonies[plotIdx].length;
+    if (len) {
+        while (!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]])) {
+            slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
+        }
+    }
+    else
+        slotIdx[plotIdx] = 0;
+    selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
     if (selectedColony)
         renderer.colony = selectedColony;
     theory.invalidatePrimaryEquation();
@@ -5821,7 +5840,7 @@ var getInternalState = () => {
         haxEnabled,
         time,
         plotIdx,
-        colonyIdx,
+        colonyIdx: slotIdx,
         plantIdx,
         finishedTutorial,
         manager,
@@ -5872,7 +5891,7 @@ var setInternalState = (stateStr) => {
             lastSave = time;
         }
         plotIdx = state.plotIdx ?? plotIdx;
-        colonyIdx = state.colonyIdx ?? colonyIdx;
+        slotIdx = state.colonyIdx ?? slotIdx;
         plantIdx = state.plantIdx ?? plantIdx;
         finishedTutorial = state.finishedTutorial ?? finishedTutorial;
         manager = new ColonyManager(state.manager, nofPlots, maxColoniesPerPlot)
@@ -5941,7 +5960,7 @@ var setInternalState = (stateStr) => {
         }
     }
     actuallyPlanting = true;
-    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
     if (selectedColony)
         renderer.colony = selectedColony;
     theory.invalidatePrimaryEquation();
