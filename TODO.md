@@ -97,6 +97,8 @@ you have to dig really deep to find the underlying systems behind the plants
 - [ ] Address Lemma's attitude
   - Early game should be the time when a lot of help is needed, don't neglect your student
   - [ ] Narration revamp
+    - [x] Narration tracks (as an integer)
+      - [ ] Complete Basil pruned track
     - Lemma should also know about L-systems and tell students what rule is being enacted
     - [ ] Calendula
     - [ ] Basil
@@ -146,6 +148,10 @@ you have to dig really deep to find the underlying systems behind the plants
   - [x] Dialogue:
   'Oh no. Maybe luminaries were right all along. Small campion, big campion,...'
 
+- [ ] Dandelion
+  - Spawn on random plot
+    - [ ] Implement RNG engine
+
 - [ ] Hopleek
   - Biting is on evolution queue instead of action?
   - [x] Leap years calculation
@@ -158,6 +164,7 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Schedule
     - Once per 2 years? Doesn't it make broomrape faster than hopleek?
   - [ ] Propagation method
+  - [ ] Get into people's shoes
 
 - [ ] Ginger
 

@@ -231,28 +231,30 @@ Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/s.`,
                 [
                     `Harvest returns profit as the sum of all F lengths.`
                 ],
-                stages:
-                {
-                    index:
-                    [
-                        0,
-                        1,
-                        4,
-                        5, 8,
-                        12
-                    ],
-                    0: `(Why is this seed called an axiom?\\\\I must wait for
-her return to ask this.)`,
-                    1: `My dear I am back! Rule number... one!\\\\The seed
+                narrations:
+                [
+                    {
+                        index:
+                        [
+                            0,
+                            1,
+                            4,
+                            5, 8,
+                            12
+                        ],
+                        0: `(Why is this seed called an axiom? What is the
+second parameter for?\\\\I must wait for her return.)`,
+                        1: `My dear I am back! Rule number... one!\\\\The seed
 begins to crack, and there's a *timer* on it.`,
-                    4: `Rule number 1 fails, so rule number 2 enacts:\\\\A
+                        4: `Rule number 1 fails, so rule number 2 enacts:\\\\A
 little stem rises, and there's a tiny pair of leaves on it.`,
-                    5: `Rules 1, 3, and 4, all at the same time.`,
-                    8: `The stem rises again, and with it, a new pair of
+                        5: `Rules 1, 3, and 4, all at the same time.`,
+                        8: `The stem rises again, and with it, a new pair of
 leaves.\\\\At the same time, the first segment and leaves reach their limits.`,
-                    12: `You've made it. Welcome to class.\\\\Plant a few more,
-then I'll get you something new.`
-                }
+                        12: `You've made it. Welcome to class.\\\\Plant a few
+more, then I'll get you something new.`
+                    }
+                ]
             },
             calendula:
             {
@@ -268,41 +270,43 @@ it would turn into K.\\\\K(p): flower of size p. Provides p pennies on harvest.
                 [
                     `Harvest returns profit as the sum of all K sizes.`
                 ],
-                stages:
-                {
-                    index:
-                    [
-                        0,
-                        5, 10,
-                        15, 19,
-                        21,
-                        23, 26, 27, 28, 30,
-                        31,
-                        35, 39, 40
-                    ],
-                    0: 'A seed, curling over in its warm slumber.',
-                    5: 'A little stem has just risen.',
-                    10: `The second pair of leaves appears. See that for this
-cultivar, each pair of leaves is rotated to 90° against the previous. Others
-might generate leaves in a spiral around the stem.`,
-                    15: 'The third pair of leaves appears.',
-                    19: `The stem has split in two. It will start to flower
+                narrations:
+                [
+                    {
+                        index:
+                        [
+                            0,
+                            5, 10,
+                            15, 19,
+                            21,
+                            23, 26, 27, 28, 30,
+                            31,
+                            35, 39, 40
+                        ],
+                        0: 'A seed, curling over in its warm slumber.',
+                        5: 'A little stem has just risen.',
+                        10: `The second pair of leaves appears. See that for
+this cultivar, each pair of leaves is rotated to 90° against the previous.
+Others might generate leaves in a spiral around the stem.`,
+                        15: 'The third pair of leaves appears.',
+                        19: `The stem has split in two. It will start to flower
 soon.`,
-                    21: `On the flower stem, little leaves will start to
-spawn in spiral around it. The spinning angle is approximately 137.508°,
-known as the golden angle.`,
-                    23: 'Our first flower bud has risen.',
-                    26: 'Wait for it...',
-                    27: 'A second flower bud appears!',
-                    28: 'The third and final flower appears.',
-                    30: `My w... sister-in-law, she really liked munching on
+                        21: `On the flower stem, little leaves will start to
+spawn in spiral around it. The spinning angle is approximately 137.508°, also
+called by Mister Fibonacci as the golden angle.`,
+                        23: 'Our first flower bud has risen.',
+                        26: 'Wait for it...',
+                        27: 'A second flower bud appears!',
+                        28: 'The third and final flower appears.',
+                        30: `My w... sister-in-law, she really liked munching on
 these flowers raw. Try it.`,
-                    31: `Try it!\\\\Naw, only teasing you ;). Keep your saliva
-away from my little profit.`,
-                    35: 'The first flower matures.',
-                    39: 'The second flower matures.',
-                    40: 'All flowers have reached maturity.',
-                }
+                        31: `Try it!\\\\Naw, only teasing you ;). Keep your
+saliva away from my little profit.`,
+                        35: 'The first flower matures.',
+                        39: 'The second flower matures.',
+                        40: 'All flowers have reached maturity.',
+                    }
+                ]
             },
             basil:
             {
@@ -323,31 +327,54 @@ signal (type 0 travels down, type 1 travels up).`,
                     `Prune cuts off all A and K (and all geometry symbols near
 K).`
                 ],
-                stages:
-                {
-                    index:
-                    [
-                        0, 6, 10, 12, 14, 16, 18, 20,
-                        22,
-                        26
-                    ],
-                    0: 'A seed taking its sweet slumber.',
-                    6: 'The first pair of leaves pops up. A stem, as well.',
-                    10: 'The second pair of leaves appears.',
-                    12: 'Little leaves start to grow over the first node.',
-                    14: 'The third pair of leaves appears.',
-                    16: 'Little leaves now grow over the second node.',
-                    18: 'This rhythm will repeat for a while.',
-                    20: `I'll show you what to do when it's about to bloom,
+                narrations:
+                [
+                    // Track 0: un-pruned or pruned late
+                    {
+                        index:
+                        [
+                            0, 6, 10, 12, 14, 16, 18, 20,
+                            22,
+                            26
+                        ],
+                        0: 'A seed taking its sweet slumber.',
+                        6: 'The first pair of leaves pops up. A stem, as well.',
+                        10: 'The second pair of leaves appears.',
+                        12: 'Little leaves start to grow over the first node.',
+                        14: 'The third pair of leaves appears.',
+                        16: 'Little leaves now grow over the second node.',
+                        18: 'This rhythm will repeat for a while.',
+                        20: `I'll show you what to do when it's about to bloom,
 soon.`,
-                    22: `It's about to bloom. You can stay up at night watching
-flowers later, or snip the bud, if you don't feel confident about your leaves
-sogging.`,
-                    26: `Is the flower there? If it is, imagine it sending a 
+                        22: `It's about to bloom. You can stay up watching
+flowers later, or snip the bud, if you don't want your leaves bitter.`,
+                        26: `The plant blooms. Imagine the flower sending a
 signal from top to bottom, all the way to base.\\\\Later, basil base will send
 another signal back to the leaves, telling them to go so very bitter.\\\\Don't
 worry, you can still sell flowers for tea. You like tea?`,
-                }
+                    },
+                    // Track 1: pruned
+                    {
+                        name: 'pruned',
+                        index:
+                        [
+                            0,
+                            6, 10, 12, 14, 16, 18, 20,
+                            22
+                        ],
+                        0: `A seed taking its sweet slumber. It shall never wake
+up.`,
+                        6: 'The first pair of leaves pops up. A stem, as well.',
+                        10: 'The second pair of leaves appears.',
+                        12: 'Little leaves start to grow over the first node.',
+                        14: 'The third pair of leaves appears.',
+                        16: 'Little leaves now grow over the second node.',
+                        18: 'This rhythm will repeat for a while.',
+                        20: `I'll show you what to do when it's about to bloom,
+soon.`,
+                        22: `Leaves secured. Now watch the side shoots grow!`,
+                    }
+                ]
             },
             campion:
             {
@@ -364,35 +391,38 @@ stages left until it disappears. Provides p pennies on harvest.\\\\L(s): leaf.
                     `Harvest returns profit as the sum of all K sizes
 (first parameter).`
                 ],
-                stages:
-                {
-                    index:
-                    [
-                        0, 6, 10, 12,
-                        14,
-                        18,
-                        19,
-                        22, 27
-                    ],
-                    0: 'A seed basking in its own dazing lullaby.',
-                    6: 'A flower bud already?',
-                    10: 'New stem rises from a side shoot.',
-                    12: `Reminder: gardeners need to be early birds. Now, why 
-are you still up counting pennies?\\\\Look at the light. The lamp's wick is, in
-fact, one of our own campion leaves. I don't sell them.\\\\So if you ever wanted
-to know whether what I do is all about crowns and riches, please look at the
-light again.`,
-                    14: `New stems have risen. This pattern will repeat
-periodically. Like a fractal.\\\\What's a graftal, you say? Of course I would
-make that up.`,
-                    18: `Oh no. Maybe luminaries were right all along. Small 
+                narrations:
+                [
+                    {
+                        index:
+                        [
+                            0, 6, 10, 12,
+                            14,
+                            18,
+                            19,
+                            22, 27
+                        ],
+                        0: 'A seed basking in its own dazing lullaby.',
+                        6: 'A flower bud already?',
+                        10: 'New stem rises from a side shoot.',
+                        12: `Reminder: gardeners need to be early birds. Now, 
+why are you still up counting pennies?\\\\Look at the light. This lamp's wick
+is, in fact, one of our own campion leaves. I don't sell them.\\\\So if you ever
+needed to know whether what I do is all about crowns and riches, please look at
+the light on your table again.`,
+                        14: `New stems have risen. This pattern will repeat
+periodically. Like a fractal.\\\\What's a graftal, you say?\\\\Oh, of course I'd
+be making that up.`,
+                        18: `Oh no. Maybe luminaries were right all along. Small
 campion, big campion...`,
-                    19: `Too late to munch on thy flowers, for the first 
+                        19: `Too late to munch on thy flowers, for the first 
 fruit...\\\\cometh.`,
-                    22: `Go to sleep. Was my campion sedative not good enough?`,
-                    27: `A fruit just fell off. Campion is a good self-seeder,
-you know.`
-                }
+                        22: `Go to sleep. Was my campion sedative not good
+enough?`,
+                        27: `A fruit just fell off.\\\\Campion is a good self
+seeder, you know. Watch for the new one near you.`
+                    }
+                ]
             },
             arrow:
             {
@@ -403,21 +433,23 @@ you know.`
 `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
 `F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
 `kills the colony.`,
-                stages:
-                {
-                    index: [0, 1, 2, 4],
-                    0: 'The first shoot rises.\\\\Already harvestable.',
-                    1: 'The shoot splits in three.\\\\The stem lengthens.',
-                    2: 'The shoots continue to divide.',
-                    4: `What do you expect? It\'s a fractal. Arrow weed is the
-friend of all mathematicians.`
-                }
+                narrations:
+                [
+                    {
+                        index: [0, 1, 2, 4],
+                        0: 'The first shoot rises.\\\\Already harvestable.',
+                        1: 'The shoot splits in three.\\\\The stem lengthens.',
+                        2: 'The shoots continue to divide.',
+                        4: `What do you expect? It\'s a fractal. Arrow weed is
+friend to all mathematicians.`
+                    }
+                ]
             },
         },
-        plantStats: `({0}) {1}\\\\—\\\\Photosynthesis ` +
-`rate: {3}/s (noon)\\\\Growth rate: {4}/s\\\\Growth cost: {5} × {6} symbols` +
-`\\\\—\\\\Sequence:`,
-        noCommentary: 'No commentary.',
+        plantStats: `({0}) {1}\\\\—\\\\Photosynthesis rate: {2}/s (noon)\\\\
+Growth rate: {3}/s\\\\Growth cost: {4} × {5} symbols\\\\—\\\\Sequence:`,
+        narrationTrack: '{0}, {1}',
+        noCommentary: 'No narrations.',
         noLsDetails: 'No explanations.',
         noActions: 'No actions available.',
 
@@ -3171,6 +3203,7 @@ interface Colony
     sequence: string;
     params: LSystemParams;
     stage: number;
+    narrationTrack: number;
 
     wet: boolean;
     energy: BigNumber;
@@ -3326,6 +3359,7 @@ class ColonyManager
             sequence: plantData[id].system.axiom,
             params: plantData[id].system.axiomParams,
             stage: 0,
+            narrationTrack: 0,
 
             wet: false,
             energy: BigNumber.ZERO,
@@ -3426,11 +3460,11 @@ class ColonyManager
     growAll(di: BigNumber, dg: BigNumber, dd: BigNumber)
     {
         if(this.actionGangsta)
-            this.continueAction();
+            this.performAction();
         else if(this.actionQueue.length)
         {
             let action = <[number, number, number]>this.actionQueue.dequeue();
-            this.performAction(...action);
+            this.queueAction(...action);
         }
         else if(this.gangsta)
             this.evolve();
@@ -3534,7 +3568,7 @@ class ColonyManager
             profit: profit
         }
     }
-    continueAction()
+    performAction()
     {
         let c = this.colonies[this.actionGangsta[0]][this.actionGangsta[1]];
         let id = this.actionGangsta[2];
@@ -3636,6 +3670,11 @@ class ColonyManager
 
         c.wet = false;
 
+        // Change narrative track if possible
+        let trackSwitch = plantData[c.id].actions[id].switchNarration;
+        if(trackSwitch)
+            c.narrationTrack = trackSwitch(c.stage, c.narrationTrack);
+
         this.actionAncestreeTask =
         {
             start: 0
@@ -3672,7 +3711,7 @@ class ColonyManager
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
     }
-    performAction(plot: number, index: number, id: number)
+    queueAction(plot: number, index: number, id: number)
     {
         let c = this.colonies[plot][index];
         if(!c || !plantData[c.id].actions[id])
@@ -3971,10 +4010,18 @@ const LsManual = new Book(getLoc('manualTitle'), 'manual',
     // getLoc('manual').note,
 ]);
 
+interface Narration
+{
+    name?: string;
+    index: number[];
+    [key: number]: string;
+}
+
 interface Action
 {
     symbols?: Set<string>;
     system?: LSystem;
+    switchNarration?: (stage: number, track: number) => number;
 }
 
 interface Plant
@@ -4225,7 +4272,8 @@ const plantData: {[key: string]: Plant} =
                     'K(s, t) < /(a) =',
                     'K(s, t) =',
                     'A(r, t) ='
-                ], 30, 0, '', '')
+                ], 30, 0, '', ''),
+                switchNarration: (stage, track) => stage < 26 ? 1 : 0
             }
         ],
         decimals:
@@ -4579,8 +4627,8 @@ let perfs = perfNames.map(element => profilers.get(element[0]));
 let perfQuaternaryEntries = perfNames.map(element =>
 new QuaternaryEntry(element[1], null));
 
-let createImageBtn = (params: {[x: string]: any}, callback: {(): void},
-isAvailable: {(): boolean}, image: ImageSource) =>
+let createImageBtn = (params: {[x: string]: any}, callback: () => void,
+isAvailable: () => boolean, image: ImageSource) =>
 {
     let triggerable = true;
     let borderColor = () => isAvailable() ? Color.BORDER : Color.TRANSPARENT;
@@ -4631,8 +4679,8 @@ isAvailable: {(): boolean}, image: ImageSource) =>
     return frame;
 }
 
-let createLabelBtn = (params: {[x: string]: any}, callback: {(): void},
-isAvailable: {(): boolean}, text: string, fontSize: number = 14): Frame =>
+let createLabelBtn = (params: {[x: string]: any}, callback: () => void,
+isAvailable: () => boolean, text: string, fontSize: number = 14): Frame =>
 {
     let triggerable = true;
     let textColor = () => isAvailable() ? Color.TEXT : Color.TEXT_MEDIUM;
@@ -4683,8 +4731,8 @@ isAvailable: {(): boolean}, text: string, fontSize: number = 14): Frame =>
     return frame;
 }
 
-let createHesitantSwitch = (params: {[x: string]: any}, callback: {(): void},
-isToggled: boolean | {(): boolean}) =>
+let createHesitantSwitch = (params: {[x: string]: any}, callback: () => void,
+isToggled: boolean | (() => boolean)) =>
 {
     let triggerable = true;
     let element = ui.createSwitch
@@ -4783,7 +4831,7 @@ const harvestFrame = createImageBtn
         menu.show();
     }
     else
-        manager.performAction(plotIdx, slotIdx[plotIdx], Actions.HARVEST);
+        manager.queueAction(plotIdx, slotIdx[plotIdx], Actions.HARVEST);
 },
 () => true, game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
@@ -4818,7 +4866,7 @@ const pruneFrame = createImageBtn
         menu.show();
     }
     else
-        manager.performAction(plotIdx, slotIdx[plotIdx], Actions.PRUNE);
+        manager.queueAction(plotIdx, slotIdx[plotIdx], Actions.PRUNE);
 },
 () => true, game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
@@ -6192,25 +6240,27 @@ let createColonyViewMenu = (colony: Colony) =>
     let tmpTitle = getColonyTitleString(colony, false, true);
     let tmpStage = colony.stage;
     let cmtStage = -1;
+    let track: Narration;
     let updateCommentary = () =>
     {
-        let stages = getLoc('plants')[colony.id]?.stages;
-        if(!stages || !stages.index || colony.stage < stages.index[0])
+        track = getLoc('plants')[colony.id]?.narrations?.
+        [colony.narrationTrack];
+        if(!track || !track.index || colony.stage < track.index[0])
             return getLoc('noCommentary');
 
-        if(stages[colony.stage])
+        if(track[colony.stage])
             cmtStage = colony.stage;
         else
-            cmtStage = stages.index[binarySearch(stages.index, colony.stage)];
-        return stages[cmtStage];
+            cmtStage = track.index[binarySearch(track.index, colony.stage)];
+        return track[cmtStage];
     }
     let tmpCmt = updateCommentary();
     let plantStats = ui.createLatexLabel
     ({
-        text: Localization.format(getLoc('plantStats'), cmtStage, tmpCmt,
-        plantData[colony.id].maxStage ?? '∞', colony.synthRate,
-        plantData[colony.id].growthRate, plantData[colony.id].growthCost,
-        colony.sequence.length),
+        text: Localization.format(getLoc('plantStats'), track.name ?
+        Localization.format(getLoc('narrationTrack'), cmtStage, track.name) :
+        cmtStage, tmpCmt, colony.synthRate, plantData[colony.id].growthRate,
+        plantData[colony.id].growthCost, colony.sequence.length),
         margin: new Thickness(0, 6),
         horizontalTextAlignment: TextAlignment.START,
         verticalTextAlignment: TextAlignment.CENTER
@@ -6263,7 +6313,8 @@ let createColonyViewMenu = (colony: Colony) =>
                 tmpTitle = getColonyTitleString(colony, false, true);
                 tmpCmt = updateCommentary();
                 plantStats.text = Localization.format(getLoc('plantStats'),
-                cmtStage, tmpCmt, plantData[colony.id].maxStage ?? '∞',
+                track.name ? Localization.format(getLoc('narrationTrack'),
+                cmtStage, track.name) : cmtStage, tmpCmt,
                 colony.synthRate, plantData[colony.id].growthRate,
                 plantData[colony.id].growthCost, colony.sequence.length);
                 tmpStage = colony.stage;
@@ -6995,7 +7046,7 @@ let createConfirmationMenu = (plot: number, index: number, id: number) =>
                             onClicked: () =>
                             {
                                 Sound.playClick();
-                                manager.performAction(plot, index, id);
+                                manager.queueAction(plot, index, id);
                                 menu.hide();
                             }
                         }),
