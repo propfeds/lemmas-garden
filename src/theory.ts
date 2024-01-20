@@ -5460,10 +5460,9 @@ var getCurrencyBarDelegate = () =>
         let len = manager.colonies[plotIdx].length;
         if(len)
         {
-            while(!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]))
-            {
+            do
                 slotIdx[plotIdx] = (slotIdx[plotIdx] - 1 + len) % len;
-            }
+            while(!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]))
         }
         else
             slotIdx[plotIdx] = 0;
@@ -5480,10 +5479,9 @@ var getCurrencyBarDelegate = () =>
         let len = manager.colonies[plotIdx].length;
         if(len)
         {
-            while(!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]))
-            {
+            do
                 slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
-            }
+            while(!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]))
         }
         else
             slotIdx[plotIdx] = 0;
