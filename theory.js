@@ -269,8 +269,8 @@ saliva away from my little profit.`,
                 info: `A fragrant herb requiring a bit of care. (6\\(
 ~\\)8 weeks)`,
                 LsDetails: `A(r, t): apex (stem shoot).\\\\B: base, used for
-communications.\\\\F(l, lim): internode.\\\\I(t): shortened stem. t stages left
-until it splits.\\\\K(s, t): flower of size s. Grows another flower until t
+communications.\\\\F(l, lim): internode.\\\\I(t): side shoot. t stages left
+until it advances.\\\\K(s, t): flower of size s. Grows another flower until t
 reaches 0. Provides s pennies on harvest.\\\\L(p, lim, s): leaf. s denotes
 whether a signal has been received. Provides p pennies on harvest.\\\\S(type):
 signal (type 0 travels down, type 1 travels up).`,
@@ -284,45 +284,59 @@ K).`
                     // Track 0: un-pruned or pruned late
                     {
                         index: [
-                            0, 6, 10, 12, 14, 16, 18, 20,
+                            0, 6,
+                            10, 14,
+                            18,
                             22,
-                            26
+                            26, 27, 31, 32, 35
                         ],
                         0: 'A seed taking its sweet slumber.',
-                        6: 'The first pair of leaves pops up. A stem, as well.',
-                        10: 'The second pair of leaves appears.',
-                        12: 'Little leaves start to grow over the first node.',
-                        14: 'The third pair of leaves appears.',
-                        16: 'Little leaves now grow over the second node.',
-                        18: 'This rhythm will repeat for a while.',
-                        20: `I'll show you what to do when it's about to bloom,
+                        6: `The first pair of leaves pops up on the stem. A side
+shoot too.`,
+                        10: 'The second leaf pair appears, along wth a shoot.',
+                        14: `The third pair of leaves appears. This rhythm will
+repeat for a while`,
+                        18: `I'll show you what to do when it's about to bloom,
 soon.`,
                         22: `It's about to bloom. You can stay up watching
 flowers later, or snip the bud, if you don't want your leaves bitter.`,
-                        26: `The plant blooms. Imagine the flower sending a
-signal from top to bottom, all the way to base.\\\\Later, basil base will send
-another signal back to the leaves, telling them to go so very bitter.\\\\Don't
-worry, you can still sell flowers for tea. You like tea?`,
+                        26: 'The plant blooms. The flower sends a signal down.',
+                        27: 'The signal will travel until it hits the base.',
+                        31: 'The signal touches base.',
+                        32: 'Basil base relays the signal upward.',
+                        35: `The first leaves receive the signal from below. Let
+us unfold:\\\\
+Bitter leaf, set us free,\\\\
+as I whisper unto thee.\\\\
+Flitting pollen, set me free,\\\\
+as my mistress makes a tea,\\\\
+out of me.`,
                     },
-                    // Track 1: pruned
+                    // Track 1: well pruned
+                    {
+                        name: 'well pruned',
+                        index: [
+                            22
+                        ],
+                        22: `All leaves secured. Now watch the side shoots
+grow!`,
+                    },
+                    // Track 2: pruned
                     {
                         name: 'pruned',
                         index: [
                             0,
-                            6, 10, 12, 14, 16, 18, 20,
-                            22
+                            6, 10, 14,
+                            18
                         ],
                         0: `A seed taking its sweet slumber. It shall never wake
 up.`,
-                        6: 'The first pair of leaves pops up. A stem, as well.',
-                        10: 'The second pair of leaves appears.',
-                        12: 'Little leaves start to grow over the first node.',
-                        14: 'The third pair of leaves appears.',
-                        16: 'Little leaves now grow over the second node.',
-                        18: 'This rhythm will repeat for a while.',
-                        20: `I'll show you what to do when it's about to bloom,
-soon.`,
-                        22: `Leaves secured. Now watch the side shoots grow!`,
+                        6: `Pruning at this point nets you fairly little.`,
+                        10: `This point secures a few more leaves, at least.`,
+                        14: `At this pruning point, some of the leaves are
+secured.`,
+                        18: `At this pruning point, most of the leaves are
+secured.`,
                     }
                 ]
             },
@@ -390,8 +404,8 @@ friend to all mathematicians.`
                 ]
             },
         },
-        plantStats: `({0}) {1}\\\\—\\\\Photosynthesis rate: {2}/s (noon)\\\\
-Growth rate: {3}/s\\\\Growth cost: {4} × {5} symbols\\\\—\\\\Sequence:`,
+        plantStats: `({0}) {1}\\\\—\\\\Photosynthetic rate: {2}/s (noon)
+\\\\Growth rate: {3}/s\\\\Growth cost: {4} × {5} symbols\\\\—\\\\Sequence:`,
         narrationTrack: '{0}, {1}',
         noCommentary: 'No narrations.',
         noLsDetails: 'No explanations.',
@@ -2637,7 +2651,10 @@ class ColonyManager {
         }
         if (index == this.colonies[plot].length - 1 && plot == plotIdx) {
             let len = this.colonies[plotIdx].length;
-            slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
+            slotIdx[plotIdx] = 0;
+            while (!isColonyVisible(this.colonies[plotIdx][slotIdx[plotIdx]]) &&
+                !len)
+                slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
             selectedColony = this.colonies[plotIdx][slotIdx[plotIdx]];
             renderer.colony = selectedColony;
         }
@@ -3291,7 +3308,15 @@ const plantData = {
                     'K(s, t) =',
                     'A(r, t) ='
                 ], 30, 0, '', ''),
-                switchNarration: (stage, track) => stage < 26 ? 1 : 0
+                switchNarration: (stage, track) => {
+                    if (track)
+                        return track;
+                    if (stage >= 26)
+                        return 0; // normal track
+                    if (stage >= 22)
+                        return 1; // well pruned
+                    return 2; // poorly pruned
+                }
             }
         ],
         decimals: {
@@ -3680,17 +3705,6 @@ let createHesitantSwitch = (params, callback, isToggled) => {
     });
     return element;
 };
-// const actionsLabel = ui.createLatexLabel
-// ({
-//     isVisible: () => currentColony ? true : false,
-//     column: 0,
-//     horizontalOptions: LayoutOptions.END,
-//     verticalOptions: LayoutOptions.START,
-//     margin: new Thickness(0, 14, 80, 0),
-//     text: getLoc('labelActions'),
-//     fontSize: 10,
-//     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
-// });
 const waterFrame = createImageBtn({
     row: 0, column: 0,
 }, () => manager.water(selectedColony), () => {
@@ -3783,23 +3797,6 @@ const pruneLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-// const mutateFrame = createFramedButton
-// ({
-//     row: 0, column: 4,
-// }, 2, () => log('Mootation!'),
-// game.settings.theme == Theme.LIGHT ?
-// ImageSource.THEORY :
-// ImageSource.THEORY);
-// const mutateLabel = ui.createLatexLabel
-// ({
-//     row: 0, column: 5,
-//     // horizontalOptions: LayoutOptions.END,
-//     verticalTextAlignment: TextAlignment.START,
-//     margin: new Thickness(0, 9, 1, 9),
-//     text: 'Mutate',
-//     fontSize: 10,
-//     textColor: Color.TEXT_MEDIUM
-// });
 const mainMenuLabel = ui.createLatexLabel({
     row: 0, column: 1,
     verticalTextAlignment: TextAlignment.START,
@@ -3819,28 +3816,6 @@ const mainMenuFrame = createImageBtn({
 }, () => createShelfMenu().show(), () => true, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/white-book.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/white-book.png'));
-// const skipLabel = ui.createLatexLabel
-// ({
-//     row: 1, column: 1,
-//     isVisible: !finishedTutorial,
-//     verticalTextAlignment: TextAlignment.START,
-//     margin: new Thickness(0, 9),
-//     text: getLoc('labelSkip'),
-//     fontSize: 10,
-//     textColor: Color.TEXT_MEDIUM
-// });
-// const skipFrame = createFramedButton
-// ({
-//     row: 1, column: 0,
-//     isVisible: !finishedTutorial,
-//     horizontalOptions: LayoutOptions.START
-// }, 2, () =>
-// {
-//     plotPerma.buy(1);
-//     updateAvailability();
-// }, game.settings.theme == Theme.LIGHT ?
-// ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/shiny-apple.png') :
-// ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/shiny-apple.png'));
 var controlStack = ui.createStackLayout({
     isVisible: false,
     margin: new Thickness(6, 0, 6, 6),
@@ -3855,9 +3830,6 @@ var controlStack = ui.createStackLayout({
     ]
 });
 var switchPlant;
-// var viewColony: Upgrade;
-// var switchColony: Upgrade;
-// var switchbackColony: Upgrade;
 var plants = Array.from({ length: nofPlots }, (_) => { return {}; });
 var plotPerma;
 var plantPerma;
@@ -3935,94 +3907,18 @@ var init = () => {
     /* Switchback colony
     Too late to look back.
     */
-    // {
-    //     switchbackColony = theory.createUpgrade(-3, currency, new FreeCost);
-    //     switchbackColony.getDescription = () => Localization.format(
-    //     getLoc('switchColony'), colonyIdx[plotIdx] + 1,
-    //     manager.colonies[plotIdx].length);
-    //     switchbackColony.info = getLoc('switchColonyInfo');
-    //     switchbackColony.bought = (_) =>
-    //     {
-    //         switchbackColony.level = 0;
-    //         let len = manager.colonies[plotIdx].length;
-    //         if(len < 2)
-    //             return;
-    //         colonyIdx[plotIdx] = (colonyIdx[plotIdx] - 1 + len) % len;
-    //         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    //         renderer.colony = selectedColony;
-    //     };
-    //     switchbackColony.isAvailable = false;
-    // }
     /* Switch colony
     Modulow
     */
-    // {
-    //     switchColony = theory.createUpgrade(-2, currency, new FreeCost);
-    //     switchColony.getDescription = () => Localization.format(
-    //     getLoc('switchColony'), colonyIdx[plotIdx] + 1,
-    //     manager.colonies[plotIdx].length);
-    //     switchColony.info = getLoc('switchColonyInfo');
-    //     switchColony.bought = (_) =>
-    //     {
-    //         switchColony.level = 0;
-    //         let len = manager.colonies[plotIdx].length;
-    //         if(len < 2)
-    //             return;
-    //         colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) % len;
-    //         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    //         renderer.colony = selectedColony;
-    //     };
-    //     switchColony.isAvailable = false;
-    // }
     /* View colony
     Essential in learning the game.
     */
-    // {
-    //     viewColony = theory.createUpgrade(-4, currency, new FreeCost);
-    //     viewColony.description = getLoc('viewColony');
-    //     viewColony.info = getLoc('viewColonyInfo');
-    //     viewColony.bought = (_) =>
-    //     {
-    //         viewColony.level = 0;
-    //         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    //         if(!selectedColony)
-    //             return;
-    //         let seqMenu = createColonyViewMenu(selectedColony);
-    //         seqMenu.show();
-    //     };
-    //     viewColony.isAvailable = false;
-    // }
     /* Notebook
     Unlocks when acquiring Buy All.
     */
-    // {
-    //     shelfPerma = theory.createPermanentUpgrade(10, currency,
-    //     new FreeCost);
-    //     shelfPerma.description = getLoc('permaShelf');
-    //     shelfPerma.info = getLoc('permaShelfInfo');
-    //     shelfPerma.bought = (_) =>
-    //     {
-    //         shelfPerma.level = 0;
-    //         let menu = createShelfMenu();
-    //         menu.show();
-    //     }
-    //     shelfPerma.isAvailable = false;
-    // }
     /* Settings
     World menu.
     */
-    // {
-    //     settingsPerma = theory.createPermanentUpgrade(9000, currency,
-    //     new FreeCost);
-    //     settingsPerma.description = getLoc('permaSettings');
-    //     settingsPerma.info = getLoc('permaSettingsInfo');
-    //     settingsPerma.bought = (_) =>
-    //     {
-    //         settingsPerma.level = 0;
-    //         let settingsMenu = createWorldMenu();
-    //         settingsMenu.show();
-    //     }
-    // }
     /* Plot unlock
     Before you can plant any plants, you have to switch tab and unlock plot 0.
     */
@@ -4178,12 +4074,9 @@ var updateAvailability = () => {
             finishedTutorial = plotPerma.level > 0;
         }
         else {
-            // shelfPerma.isAvailable = true;
             switchPlant.isAvailable = !plants[x][plantUnlocks[p[x]]].level &&
                 plantPerma.level > 0;
             controlStack.isVisible = true;
-            // skipLabel.isVisible = !finishedTutorial;
-            // skipFrame.isVisible = !finishedTutorial;
         }
         for (let i = 0; i < plotPerma.level; ++i) {
             for (let j = 0; j < plantUnlocks.length; ++j)
@@ -4290,8 +4183,6 @@ var getEquationOverlay = () => {
                 children: [
                     mainMenuFrame,
                     mainMenuLabel,
-                    // skipFrame,
-                    // skipLabel
                 ]
             }),
             ui.createGrid({
@@ -4322,11 +4213,8 @@ var getEquationOverlay = () => {
                             harvestLabel,
                             pruneFrame,
                             pruneLabel,
-                            // mutateFrame,
-                            // mutateLabel
                         ]
                     }),
-                    // actionsLabel,
                 ]
             })
         ]
@@ -4376,8 +4264,11 @@ var getCurrencyBarDelegate = () => {
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
         let len = manager.colonies[plotIdx].length;
-        if (len)
-            slotIdx[plotIdx] = (slotIdx[plotIdx] - 1 + len) % len;
+        if (len) {
+            while (!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]])) {
+                slotIdx[plotIdx] = (slotIdx[plotIdx] - 1 + len) % len;
+            }
+        }
         else
             slotIdx[plotIdx] = 0;
         selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
@@ -4388,8 +4279,11 @@ var getCurrencyBarDelegate = () => {
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
         let len = manager.colonies[plotIdx].length;
-        if (len)
-            slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
+        if (len) {
+            while (!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]])) {
+                slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
+            }
+        }
         else
             slotIdx[plotIdx] = 0;
         selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
@@ -4811,12 +4705,8 @@ let createSystemMenu = (id) => {
                                         verticalTextAlignment: TextAlignment.CENTER
                                     }),
                                     tropismEntry,
-                                    // seedLabel,
-                                    // seedEntry
                                 ]
                             }),
-                            // modelsLabel,
-                            // modelStack
                         ]
                     })
                 }),
@@ -5393,14 +5283,6 @@ let createNotebookMenu = () => {
                             horizontalOptions: LayoutOptions.CENTER,
                             verticalTextAlignment: TextAlignment.CENTER
                         }),
-                        // ui.createLatexLabel
-                        // ({
-                        //     isVisible: theory.isAutoBuyerAvailable,
-                        //     text: getLoc('labelHarvestStage'),
-                        //     row: 0, column: 2,
-                        //     horizontalOptions: LayoutOptions.CENTER,
-                        //     verticalTextAlignment: TextAlignment.CENTER
-                        // })
                     ]
                 }),
                 ui.createBox({
@@ -5510,11 +5392,6 @@ let createConfirmationMenu = (plot, index, id) => {
                     horizontalTextAlignment: TextAlignment.CENTER,
                     margin: new Thickness(0, 15)
                 }),
-                // ui.createBox
-                // ({
-                //     heightRequest: 1,
-                //     margin: new Thickness(0, 6)
-                // }),
                 ui.createGrid({
                     columnDefinitions: ['1*', '1*'],
                     // minimumHeightRequest: getBtnSize(ui.screenWidth),
@@ -5991,12 +5868,6 @@ var setInternalState = (stateStr) => {
         }
         for (let j = 0; j < plantUnlocks.length; ++j) {
             plants[i][plantUnlocks[j]].level = tmpLevels[i][plantUnlocks[j]];
-            // if(theory.isBuyAllAvailable && notebook[plantUnlocks[j]])
-            // {
-            //     plants[i][plantUnlocks[j]].maxLevel = Math.max(
-            //     notebook[plantUnlocks[j]].maxLevel,
-            //     plants[i][plantUnlocks[j]].level);
-            // }
         }
     }
     actuallyPlanting = true;

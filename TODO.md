@@ -98,7 +98,8 @@ you have to dig really deep to find the underlying systems behind the plants
   - Early game should be the time when a lot of help is needed, don't neglect your student
   - [ ] Narration revamp
     - [x] Narration tracks (as an integer)
-      - [ ] Complete Basil pruned track
+      - [x] Basil pruned track
+      - [x] Basil unpruned track
     - Lemma should also know about L-systems and tell students what rule is being enacted
     - [ ] Calendula
     - [ ] Basil
