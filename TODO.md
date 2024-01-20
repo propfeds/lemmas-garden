@@ -97,12 +97,13 @@ you have to dig really deep to find the underlying systems behind the plants
 - [ ] Address Lemma's attitude
   - Early game should be the time when a lot of help is needed, don't neglect your student
   - [ ] Narration revamp
+    - Lemma should also know about L-systems and tell students what rule is being enacted
     - [x] Narration tracks (as an integer)
+    - [ ] Calendula
+    - [x] Basil
+      - [x] Only need narrations for context rules
       - [x] Basil pruned track
       - [x] Basil unpruned track
-    - Lemma should also know about L-systems and tell students what rule is being enacted
-    - [ ] Calendula
-    - [ ] Basil
     - [ ] Campion
 
 - [x] Pre-calendula plant:

@@ -186,21 +186,15 @@ Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
                 name: 'Pea sprout',
                 nameShort: 's',
                 info: `Tastes nice, innit? (\\(~\\)10 days)`,
-                LsDetails: `A(r, t): apex (stem shoot) providing r energy/s. Has
-t stages left until it spurts.\\\\F(p): internode (segment) of length p.
+                LsDetails: `A(r, t): apex (stem bud) providing r energy/s. Has
+t stages left until it spurts.\\\\F(p): segment of length p.
 Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/s.`,
                 actions: [
                     `Harvest returns profit as the sum of all F lengths.`
                 ],
                 narrations: [
                     {
-                        index: [
-                            0,
-                            1,
-                            4,
-                            5, 8,
-                            12
-                        ],
+                        index: [0, 1, 4, 5, 8, 12],
                         0: `(Why is this seed called an axiom? What is the
 second parameter for?\\\\I must wait for her return.)`,
                         1: `My dear I am back! Rule number... one!\\\\The seed
@@ -219,25 +213,18 @@ more, then I'll get you something new.`
                 name: 'Calendula',
                 nameShort: 'C',
                 info: 'The classic flower to start a month. (\\(~\\)7 weeks)',
-                LsDetails: `A(r, t): apex (stem shoot) providing r energy/s. Has
+                LsDetails: `A(r, t): apex (stem bud) providing r energy/s. Has
 t stages left until it splits.\\\\F(l, lim): internode of length l, growing up
-to lim.\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0, when
-it would turn into K.\\\\K(p): flower of size p. Provides p pennies on harvest.
+to lim.\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0,
+when it turns into K.\\\\K(p): flower of size p. Provides p pennies on harvest.
 \\\\L(r, lim): leaf providing r energy/s, growing up to lim.`,
                 actions: [
                     `Harvest returns profit as the sum of all K sizes.`
                 ],
                 narrations: [
                     {
-                        index: [
-                            0,
-                            5, 10,
-                            15, 19,
-                            21,
-                            23, 26, 27, 28, 30,
-                            31,
-                            35, 39, 40
-                        ],
+                        index: [0, 5, 10, 15, 19, 21, 23, 26, 27, 28, 30, 31,
+                            35, 39, 40],
                         0: 'A seed, curling over in its warm slumber.',
                         5: 'A little stem has just risen.',
                         10: `The second pair of leaves appears. See that for
@@ -268,8 +255,8 @@ saliva away from my little profit.`,
                 nameShort: 'Ba',
                 info: `A fragrant herb requiring a bit of care. (6\\(
 ~\\)8 weeks)`,
-                LsDetails: `A(r, t): apex (stem shoot).\\\\B: base, used for
-communications.\\\\F(l, lim): internode.\\\\I(t): side shoot. t stages left
+                LsDetails: `A(r, t): apex (stem bud).\\\\B: base, used for
+communications.\\\\F(l, lim): internode.\\\\I(t): side stem. t stages left
 until it advances.\\\\K(s, t): flower of size s. Grows another flower until t
 reaches 0. Provides s pennies on harvest.\\\\L(p, lim, s): leaf. s denotes
 whether a signal has been received. Provides p pennies on harvest.\\\\S(type):
@@ -283,29 +270,25 @@ K).`
                 narrations: [
                     // Track 0: un-pruned or pruned late
                     {
-                        index: [
-                            0, 6,
-                            10, 14,
-                            18,
-                            22,
-                            26, 27, 31, 32, 35
-                        ],
+                        index: [0, 6, 10, 14, 18, 22, 26, 27, 31, 32, 35],
                         0: 'A seed taking its sweet slumber.',
                         6: `The first pair of leaves pops up on the stem. A side
-shoot too.`,
-                        10: 'The second leaf pair appears, along wth a shoot.',
+stem too.`,
+                        10: 'The second leaf pair appears, along wth a stem.',
                         14: `The third pair of leaves appears. This rhythm will
 repeat for a while`,
                         18: `I'll show you what to do when it's about to bloom,
 soon.`,
                         22: `It's about to bloom. You can stay up watching
 flowers later, or snip the bud, if you don't want your leaves bitter.`,
-                        26: 'The plant blooms. The flower sends a signal down.',
-                        27: 'The signal will travel until it hits the base.',
+                        26: `The plant blooms. The flower sends a signal down.
+\\\\Rules 12 to 15 govern signal transport.`,
+                        27: `Rules number 12 and 14.\\\\The signal will travel
+until it hits the base.`,
                         31: 'The signal touches base.',
-                        32: 'Basil base relays the signal upward.',
-                        35: `The first leaves receive the signal from below. Let
-us unfold:\\\\
+                        32: 'Rule 15. Basil base relays the signal upward.',
+                        35: `Rule 10. The first leaves receive the signal from
+below. Let us unfold:\\\\
 Bitter leaf, set us free,\\\\
 as I whisper unto thee.\\\\
 Flitting pollen, set me free,\\\\
@@ -315,20 +298,14 @@ out of me.`,
                     // Track 1: well pruned
                     {
                         name: 'well pruned',
-                        index: [
-                            22
-                        ],
-                        22: `All leaves secured. Now watch the side shoots
+                        index: [22],
+                        22: `All leaves secured. Now watch the side stems
 grow!`,
                     },
                     // Track 2: pruned
                     {
                         name: 'pruned',
-                        index: [
-                            0,
-                            6, 10, 14,
-                            18
-                        ],
+                        index: [0, 6, 10, 14, 18],
                         0: `A seed taking its sweet slumber. It shall never wake
 up.`,
                         6: `Pruning at this point nets you fairly little.`,
@@ -345,7 +322,7 @@ secured.`,
                 nameShort: 'R',
                 info: `A silvery shrub, passively providing income per ` +
                     `stage. (\\(~\\)32 weeks)`,
-                LsDetails: `A(r, t): apex (stem shoot).\\\\F(l, t): internode of
+                LsDetails: `A(r, t): apex (stem bud).\\\\F(l, t): internode of
 length l. t stages until it stops growing.\\\\K(p, t): flower of size p. t
 stages left until it disappears. Provides p pennies on harvest.\\\\L(s): leaf.
 \\\\O(s): fruit of size s. Decorative.`,
@@ -355,16 +332,10 @@ stages left until it disappears. Provides p pennies on harvest.\\\\L(s): leaf.
                 ],
                 narrations: [
                     {
-                        index: [
-                            0, 6, 10, 12,
-                            14,
-                            18,
-                            19,
-                            22, 27
-                        ],
+                        index: [0, 6, 10, 12, 14, 18, 19, 22, 27],
                         0: 'A seed basking in its own dazing lullaby.',
                         6: 'A flower bud already?',
-                        10: 'New stem rises from a side shoot.',
+                        10: 'New stems rise forth from a bud.',
                         12: `Reminder: gardeners need to be early birds. Now, 
 why are you still up counting pennies?\\\\Look at the light. This lamp's wick
 is, in fact, one of our own campion leaves. I don't sell them.\\\\So if you ever
@@ -373,14 +344,14 @@ the light on your table again.`,
                         14: `New stems have risen. This pattern will repeat
 periodically. Like a fractal.\\\\What's a graftal, you say?\\\\Oh, of course I'd
 be making that up.`,
-                        18: `Oh no. Maybe luminaries were right all along. Small
-campion, big campion...`,
+                        18: `New stems have risen.\\\\Oh no. Perhaps luminaries
+were right all along. Small campion, big campion.`,
                         19: `Too late to munch on thy flowers, for the first 
 fruit...\\\\cometh.`,
                         22: `Go to sleep. Was my campion sedative not good
 enough?`,
                         27: `A fruit just fell off.\\\\Campion is a good self
-seeder, you know. Watch for the new one near you.`
+seeder, you know. Watch for the new one coming right near ya.`
                     }
                 ]
             },
