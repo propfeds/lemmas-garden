@@ -3437,7 +3437,10 @@ class ColonyManager
         }
         this.colonies[plot].splice(index, 1);
         if(plot == plotIdx && !this.colonies[plot].length)
+        {
+            selectedColony = null;
             renderer.colony = null;
+        }
         updateAvailability();
     }
     growAll(di: BigNumber, dg: BigNumber, dd: BigNumber)
@@ -4061,7 +4064,7 @@ const plotCosts = new FirstFreeCost(new ExponentialCost(500, Math.log2(80)));
 const plantUnlocks = ['sprout', 'calendula', 'basil', 'campion'];
 const plantUnlockCosts = new CompositeCost(1,
 new ConstantCost(1), new CompositeCost(1,
-new ConstantCost(1200),
+new ConstantCost(1500),
 new ConstantCost(60000)));
 const permaCosts =
 [
@@ -5374,7 +5377,8 @@ var getEquationOverlay = () =>
                 [
                     ui.createGrid
                     ({
-                        isVisible: () => manager.colonies[plotIdx].length > 0,
+                        isVisible: () => plotIdx < plotPerma.level &&
+                        manager.colonies[plotIdx].length > 0,
                         row: 0, column: 0,
                         margin: new Thickness(4),
                         horizontalOptions: LayoutOptions.START,
@@ -5544,18 +5548,23 @@ var getPrimaryEquation = () =>
 
 var getSecondaryEquation = () =>
 {
-    if(!plotPerma.level)
-        return getLoc('lockedPlot');
-
-    selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
+    // selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
     let c = selectedColony;
     if(!c)
     {
-        let taxInfo = `\\text{${getLoc('pubTax')}}\\\\
-        T_{\\text{p}}=${taxRate}\\times\\max\\text{p}`;
-        let tauInfo = `${theory.latexSymbol}=\\max\\text{p}^
-        ${tauRate.toString(0)}`;
-        return `\\begin{array}{c}${tauInfo}\\\\\\\\${taxInfo}\\end{array}`;
+        if(plotIdx < plotPerma.level)
+        {
+            let taxInfo = `\\text{${getLoc('pubTax')}}\\\\
+            T_{\\text{p}}=${taxRate}\\times\\max\\text{p}`;
+            let tauInfo = `${theory.latexSymbol}=\\max\\text{p}^
+            ${tauRate.toString(0)}`;
+            return `\\begin{array}{c}${taxInfo}\\\\\\\\${tauInfo}\\end{array}`;
+        }
+        let plotCost = plotCosts.getCost(plotIdx);
+        if(plotCost.isZero)
+            return getLoc('lockedPlot');
+        return `\\begin{array}{c}${getLoc('lockedPlot')}\\\\
+        (${plotCost}\\text{p})\\end{array}`;
     }
 
     let result: string;
@@ -7252,7 +7261,7 @@ var getResetStageMessage = () => getLoc('resetRenderer');
 
 var resetStage = () => renderer.reset(true);
 
-var canGoToPreviousStage = () => plotPerma.level > 0 && plotIdx > 0;
+var canGoToPreviousStage = () => plotIdx > 0;
 
 var goToPreviousStage = () =>
 {
@@ -7270,14 +7279,13 @@ var goToPreviousStage = () =>
         slotIdx[plotIdx] = 0;
 
     selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
-    if(selectedColony)
-        renderer.colony = selectedColony;
+    renderer.colony = selectedColony;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     updateAvailability();
 };
 
-var canGoToNextStage = () => plotIdx < plotPerma.level - 1;
+var canGoToNextStage = () => plotIdx < manager.length - 1;
 
 var goToNextStage = () =>
 {
@@ -7295,8 +7303,7 @@ var goToNextStage = () =>
         slotIdx[plotIdx] = 0;
 
     selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
-    if(selectedColony)
-        renderer.colony = selectedColony;
+    renderer.colony = selectedColony;
     theory.invalidatePrimaryEquation();
     theory.invalidateSecondaryEquation();
     updateAvailability();

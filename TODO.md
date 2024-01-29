@@ -99,12 +99,17 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Narration revamp
     - Lemma should also know about L-systems and tell students what rule is being enacted
     - [x] Narration tracks (as an integer)
+      - [ ] Should they have string keys instead?
     - [ ] Calendula
     - [x] Basil
       - [x] Only need narrations for context rules
       - [x] Basil pruned track
       - [x] Basil unpruned track
     - [ ] Campion
+
+- [x] Let all plots be viewable before unlocking
+  - [x] Display price before unlocking
+  - [ ] Can players perform actions in locked plots?
 
 - [x] Pre-calendula plant:
   - [x] Pea or mung sprout
@@ -121,7 +126,6 @@ you have to dig really deep to find the underlying systems behind the plants
 - [ ] Basil
   - [ ] Reversible leaf decay when pruning?
   - [ ] Align the vibes of basil & campion to make it feel smoother
-  - [ ] Unlock way sooner?
   - [ ] Two types of leaf: 2 params and 3 params
   - [ ] Two types of signal: 0 and 1 params
   - [x] Rewrite instructions to encourage blooming
