@@ -4754,7 +4754,7 @@ let createColonyViewMenu = (colony) => {
     let cmtStage = -1;
     let track;
     let updateCommentary = () => {
-        track = getLoc('plants')[colony.id]?.narrations?.[colony.narrationTrack];
+        track = getLoc('plants')[colony.id]?.narrations?.[colony.narrationTrack ?? 0];
         if (!track || !track.index || colony.stage < track.index[0])
             return getLoc('noCommentary');
         if (track[colony.stage])
