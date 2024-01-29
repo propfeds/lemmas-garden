@@ -2636,13 +2636,7 @@ class ColonyManager {
             }
         }
         if (index == this.colonies[plot].length - 1 && plot == plotIdx) {
-            let len = this.colonies[plotIdx].length;
             slotIdx[plotIdx] = 0;
-            while (!isColonyVisible(this.colonies[plotIdx][slotIdx[plotIdx]]) &&
-                !len)
-                slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
-            selectedColony = this.colonies[plotIdx][slotIdx[plotIdx]];
-            renderer.colony = selectedColony;
         }
         if (this.gangsta && plot == this.gangsta[0]) {
             if (this.gangsta[1] > index)
@@ -2664,9 +2658,14 @@ class ColonyManager {
             }
         }
         this.colonies[plot].splice(index, 1);
-        if (plot == plotIdx && !this.colonies[plot].length) {
-            selectedColony = null;
-            renderer.colony = null;
+        if (plot == plotIdx) {
+            let len = this.colonies[plotIdx].length;
+            if (len > 1) {
+                while (!isColonyVisible(this.colonies[plot][slotIdx[plot]]))
+                    slotIdx[plot] = (slotIdx[plot] + 1) % len;
+            }
+            selectedColony = this.colonies[plotIdx][slotIdx[plotIdx]];
+            renderer.colony = selectedColony;
         }
         updateAvailability();
     }
@@ -2753,7 +2752,7 @@ class ColonyManager {
             }
             if (SYNTHABLE_SYMBOLS.has(sequence[i]) && params[i])
                 synthRate += params[i][0];
-            if (harvestable.has(sequence[i]) && params[i])
+            if (harvestable?.has(sequence[i]) && params[i])
                 profit += params[i][0];
         }
         return {
@@ -3506,6 +3505,29 @@ const plantData = {
             };
         }
     },
+    invisTest: {
+        system: new LSystem('A(0.05)', ['A(r) = FA(r)']),
+        maxStage: 1,
+        growthCost: BigNumber.TWO,
+        growthRate: BigNumber.FIVE,
+        actions: [
+            {}
+        ],
+        camera: (stage) => {
+            return {
+                scale: 8,
+                x: 0,
+                y: saturate(stage / 4, 5, 9),
+                z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) => {
+            return {
+                tickLength: 1
+            };
+        }
+    }
 };
 const plantIDLookup = {
     sprout: 0,
@@ -4254,7 +4276,7 @@ var getCurrencyBarDelegate = () => {
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
         let len = manager.colonies[plotIdx].length;
-        if (len) {
+        if (len > 1) {
             do
                 slotIdx[plotIdx] = (slotIdx[plotIdx] - 1 + len) % len;
             while (!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]));
@@ -4269,7 +4291,7 @@ var getCurrencyBarDelegate = () => {
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
         let len = manager.colonies[plotIdx].length;
-        if (len) {
+        if (len > 1) {
             do
                 slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
             while (!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]));
@@ -5383,7 +5405,7 @@ let createConfirmationMenu = (plot, index, id) => {
         content: ui.createStackLayout({
             children: [
                 ui.createLatexLabel({
-                    text: Localization.format(getLoc('actionConfirmDialogue'), getLoc('labelActions')[id], plot + 1, index + 1, manager.colonies[plot].length, getColonyTitleString(c, false, false, true), getLoc('plants')[c.id]?.actions?.[id], Localization.get('GenPopupContinue')),
+                    text: Localization.format(getLoc('actionConfirmDialogue'), getLoc('labelActions')[id], plot + 1, index + 1, manager.colonies[plot].length, getColonyTitleString(c, false, false, true), getLoc('plants')[c.id]?.actions?.[id] ?? '', Localization.get('GenPopupContinue')),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     margin: new Thickness(0, 15)
                 }),
@@ -5694,7 +5716,7 @@ var canGoToPreviousStage = () => plotIdx > 0;
 var goToPreviousStage = () => {
     --plotIdx;
     let len = manager.colonies[plotIdx].length;
-    if (len) {
+    if (len > 1) {
         while (!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]])) {
             slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
         }
@@ -5711,7 +5733,7 @@ var canGoToNextStage = () => plotIdx < manager.length - 1;
 var goToNextStage = () => {
     ++plotIdx;
     let len = manager.colonies[plotIdx].length;
-    if (len) {
+    if (len > 1) {
         while (!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]])) {
             slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
         }

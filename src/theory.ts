@@ -3426,13 +3426,7 @@ class ColonyManager
         }
         if(index == this.colonies[plot].length - 1 && plot == plotIdx)
         {
-            let len = this.colonies[plotIdx].length;
             slotIdx[plotIdx] = 0;
-            while(!isColonyVisible(this.colonies[plotIdx][slotIdx[plotIdx]]) &&
-            !len)
-                slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
-            selectedColony = this.colonies[plotIdx][slotIdx[plotIdx]];
-            renderer.colony = selectedColony;
         }
         if(this.gangsta && plot == this.gangsta[0])
         {
@@ -3456,10 +3450,17 @@ class ColonyManager
             }
         }
         this.colonies[plot].splice(index, 1);
-        if(plot == plotIdx && !this.colonies[plot].length)
+        if(plot == plotIdx)
         {
-            selectedColony = null;
-            renderer.colony = null;
+            
+            let len = this.colonies[plotIdx].length;
+            if(len > 1)
+            {
+                while(!isColonyVisible(this.colonies[plot][slotIdx[plot]]))
+                    slotIdx[plot] = (slotIdx[plot] + 1) % len;
+            }
+            selectedColony = this.colonies[plotIdx][slotIdx[plotIdx]];
+            renderer.colony = selectedColony;
         }
         updateAvailability();
     }
@@ -3565,7 +3566,7 @@ class ColonyManager
             }
             if(SYNTHABLE_SYMBOLS.has(sequence[i]) && params[i])
                 synthRate += params[i][0];
-            if(harvestable.has(sequence[i]) && params[i])
+            if(harvestable?.has(sequence[i]) && params[i])
                 profit += params[i][0];
         }
         return {
@@ -4034,7 +4035,7 @@ interface Plant
 {
     system: LSystem;
     maxStage?: number;
-    cost: Cost;
+    cost?: Cost;
     growthRate: BigNumber;
     growthCost: BigNumber;
     dailyIncome?: boolean;
@@ -4505,6 +4506,31 @@ const plantData: {[key: string]: Plant} =
             };
         }
     },
+    invisTest:
+    {
+        system: new LSystem('A(0.05)', ['A(r) = FA(r)']),
+        maxStage: 1,
+        growthCost: BigNumber.TWO,
+        growthRate: BigNumber.FIVE,
+        actions:
+        [
+            {}
+        ],
+        camera: (stage) => {
+            return {
+                scale: 8,
+                x: 0,
+                y: <number>saturate(stage / 4, 5, 9),
+                z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) => {
+            return {
+                tickLength: 1
+            };
+        }
+    }
 }
 
 const plantIDLookup =
@@ -5483,7 +5509,7 @@ var getCurrencyBarDelegate = () =>
     }, () =>
     {
         let len = manager.colonies[plotIdx].length;
-        if(len)
+        if(len > 1)
         {
             do
                 slotIdx[plotIdx] = (slotIdx[plotIdx] - 1 + len) % len;
@@ -5502,7 +5528,7 @@ var getCurrencyBarDelegate = () =>
     }, () =>
     {
         let len = manager.colonies[plotIdx].length;
-        if(len)
+        if(len > 1)
         {
             do
                 slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
@@ -6898,7 +6924,7 @@ let createConfirmationMenu = (plot: number, index: number, id: number) =>
                     getLoc('labelActions')[id], plot + 1, index + 1,
                     manager.colonies[plot].length,
                     getColonyTitleString(c, false, false, true),
-                    getLoc('plants')[c.id]?.actions?.[id],
+                    getLoc('plants')[c.id]?.actions?.[id] ?? '',
                     Localization.get('GenPopupContinue')),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     margin: new Thickness(0, 15)
@@ -7289,7 +7315,7 @@ var goToPreviousStage = () =>
     --plotIdx;
 
     let len = manager.colonies[plotIdx].length;
-    if(len)
+    if(len > 1)
     {
         while(!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]))
         {
@@ -7313,7 +7339,7 @@ var goToNextStage = () =>
     ++plotIdx;
 
     let len = manager.colonies[plotIdx].length;
-    if(len)
+    if(len > 1)
     {
         while(!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]))
         {

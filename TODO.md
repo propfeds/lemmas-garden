@@ -82,7 +82,7 @@ you have to dig really deep to find the underlying systems behind the plants
 
 ## v0.3: Invasion
 
-- [ ] Move references from loc strings to the Book class
+- [x] Move references from loc strings to the Book class
 - [ ] Add reference to Param LSR
 - [x] Test book icon
 - [x] Add almanac access button to view menu
