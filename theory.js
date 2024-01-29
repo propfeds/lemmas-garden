@@ -931,13 +931,14 @@ class Queue {
  * Represents an instance of the Xorshift RNG.
  */
 class Xorshift {
-    constructor(seed = 0) {
+    constructor(seed = 1, aux = {}) {
         this.x = seed;
-        this.y = 0;
-        this.z = 0;
-        this.w = 0;
-        for (let i = 0; i < 64; ++i)
-            this.nextInt;
+        this.y = aux.p1 ?? 0;
+        this.z = aux.p2 ?? 0;
+        this.w = aux.p3 ?? 0;
+        if (!Object.keys(aux).length)
+            for (let i = 0; i < 64; ++i)
+                this.nextInt;
     }
     /**
      * Returns a random integer within [0, 2^31) probably.
@@ -989,6 +990,16 @@ class Xorshift {
      */
     choice(array) {
         return array[this.nextRange(0, array.length)];
+    }
+    toJSON() {
+        return {
+            seed: this.x,
+            aux: {
+                p1: this.y,
+                p2: this.z,
+                p3: this.w
+            }
+        };
     }
 }
 /**
@@ -1781,7 +1792,7 @@ class LSystem {
                  {
                     // Models can be drawn any time, thus, the RNG should be
                     // separate from actual rule processing.
-                    let roll = globalRNG.nextFloat;
+                    let roll = modelRNG.nextFloat;
                     let chanceSum = 0;
                     let choice = -1;
                     for (let k = 0; k < tmpRules[j].derivations.length; ++k) {
@@ -3550,7 +3561,8 @@ const yUpQuat = new Quaternion(0, 0, 1, 0);
 const zUpQuat = new Quaternion(0, 0, 0, 1);
 let manager = new ColonyManager({}, nofPlots, maxColoniesPerPlot);
 let renderer = new Renderer(new LSystem(), '', []);
-let globalRNG = new Xorshift(Date.now());
+let gameRNG = new Xorshift(1752);
+let modelRNG = new Xorshift(Date.now());
 let quaternaryEntries = [
     new QuaternaryEntry('p_1', null),
     new QuaternaryEntry('p_2', null),
@@ -5752,7 +5764,8 @@ var getInternalState = () => {
         colonyViewConfig,
         shelfPages,
         autoWaterConfig,
-        notebook
+        notebook,
+        gameRNG
     }, bigStringify);
 };
 var setInternalState = (stateStr) => {
@@ -5824,6 +5837,8 @@ var setInternalState = (stateStr) => {
         shelfPages = state.shelfPages ?? shelfPages;
         autoWaterConfig = state.autoWaterConfig ?? autoWaterConfig;
         notebook = state.notebook ?? notebook;
+        gameRNG = state.gameRNG ?
+            new Xorshift(state.gameRNG.seed, state.gameRNG.aux) : gameRNG;
     }
     actuallyPlanting = false;
     tmpLevels = Array.from({ length: nofPlots }, (_) => { return {}; });

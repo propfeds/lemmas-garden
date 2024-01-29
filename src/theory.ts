@@ -1106,20 +1106,23 @@ class Xorshift
 {
     /**
      * @constructor
-     * @param {number} seed must be initialized to non-zero.
+     * @param {number} seed must be initialized to non-zero to work.
+     * @param {object} aux contains 3 auxilliary parameters p1, p2, p3, to
+     * resume the RNG's previous state.
      */
     x: number;
     y: number;
     z: number;
     w: number;
-    constructor(seed = 0)
+    constructor(seed = 1, aux: {p1?: number, p2?: number, p3?: number} = {})
     {
         this.x = seed;
-        this.y = 0;
-        this.z = 0;
-        this.w = 0;
-        for(let i = 0; i < 64; ++i)
-            this.nextInt;
+        this.y = aux.p1 ?? 0;
+        this.z = aux.p2 ?? 0;
+        this.w = aux.p3 ?? 0;
+        if(!Object.keys(aux).length)
+            for(let i = 0; i < 64; ++i)
+                this.nextInt;
     }
     /**
      * Returns a random integer within [0, 2^31) probably.
@@ -1178,6 +1181,18 @@ class Xorshift
     choice(array: unknown[]): unknown
     {
         return array[this.nextRange(0, array.length)];
+    }
+
+    toJSON()
+    {
+        return {
+            seed: this.x,
+            aux: {
+                p1: this.y,
+                p2: this.z,
+                p3: this.w
+            }
+        }
     }
 }
 
@@ -2226,7 +2241,7 @@ class LSystem
                 {
                     // Models can be drawn any time, thus, the RNG should be
                     // separate from actual rule processing.
-                    let roll = globalRNG.nextFloat;
+                    let roll = modelRNG.nextFloat;
                     let chanceSum = 0;
                     let choice = -1;
                     for(let k = 0; k < tmpRules[j].derivations.length; ++k)
@@ -4584,7 +4599,8 @@ const zUpQuat = new Quaternion(0, 0, 0, 1);
 
 let manager = new ColonyManager({}, nofPlots, maxColoniesPerPlot);
 let renderer = new Renderer(new LSystem(), '', []);
-let globalRNG = new Xorshift(Date.now());
+let gameRNG = new Xorshift(1752);
+let modelRNG = new Xorshift(Date.now());
 
 let quaternaryEntries =
 [
@@ -7362,7 +7378,8 @@ var getInternalState = () =>
         colonyViewConfig,
         shelfPages,
         autoWaterConfig,
-        notebook
+        notebook,
+        gameRNG
     }, bigStringify);
 }
 
@@ -7449,6 +7466,9 @@ var setInternalState = (stateStr: string) =>
         shelfPages = state.shelfPages ?? shelfPages;
         autoWaterConfig = state.autoWaterConfig ?? autoWaterConfig;
         notebook = state.notebook ?? notebook;
+
+        gameRNG = state.gameRNG ?
+        new Xorshift(state.gameRNG.seed, state.gameRNG.aux) : gameRNG;
     }
 
     actuallyPlanting = false;

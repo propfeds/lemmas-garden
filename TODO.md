@@ -173,6 +173,7 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Get into people's shoes
 
 - [ ] Ginger
+  - [ ] How to not make leaves slow down too much
 
 - [ ] Sunflower
 
