@@ -477,7 +477,7 @@ The 'pot' in its name should also suggest it's uses as a cooking herb in ` +
 Life span: annual (~7 weeks)
 Propagation: At life cycle's end, spread 1/3 population onto the same plot.
 
-Here's a recipe to make some delicious calendula bread for your pleasures too:`
+Here's a recipe to make some delicious calendula bread for your pleasures:`
             },
             basil: {
                 title: 'Basil',
@@ -2612,8 +2612,12 @@ class ColonyManager {
         // Auto water
         if (autoWaterConfig[id]?.maxStage > c.stage)
             this.water(c);
-        if (plot == plotIdx && slotIdx[plot] == this.colonies[plot].length - 1)
-            renderer.colony = c;
+        if (plot == plotIdx) {
+            let prevColony = selectedColony;
+            selectedColony = this.colonies[plotIdx][slotIdx[plotIdx]];
+            if (prevColony !== selectedColony)
+                renderer.colony = selectedColony;
+        }
         theory.invalidateQuaternaryValues();
         updateAvailability();
     }
@@ -4059,8 +4063,8 @@ var updateAvailability = () => {
             finishedTutorial = plotPerma.level > 0;
         }
         else {
-            switchPlant.isAvailable = !plants[x][plantUnlocks[p[x]]].level &&
-                plantPerma.level > 0;
+            switchPlant.isAvailable = plotIdx < plotPerma.level &&
+                !plants[x][plantUnlocks[p[x]]].level && plantPerma.level > 0;
             controlStack.isVisible = true;
         }
         for (let i = 0; i < plotPerma.level; ++i) {
@@ -4328,11 +4332,11 @@ var getSecondaryEquation = () => {
             ${tauRate.toString(0)}`;
             return `\\begin{array}{c}${taxInfo}\\\\\\\\${tauInfo}\\end{array}`;
         }
-        let plotCost = plotCosts.getCost(plotIdx);
-        if (plotCost.isZero)
-            return getLoc('lockedPlot');
-        return `\\begin{array}{c}${getLoc('lockedPlot')}\\\\
-        (${plotCost}\\text{p})\\end{array}`;
+        // let plotCost = plotCosts.getCost(plotIdx);
+        // if(plotCost.isZero)
+        return getLoc('lockedPlot');
+        // return `\\begin{array}{c}${getLoc('lockedPlot')}\\\\
+        // (${plotCost}\\text{p})\\end{array}`;
     }
     let result;
     perfs[7 /* Profilers.EQ_2 */].exec(() => {
