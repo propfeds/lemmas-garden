@@ -3195,6 +3195,7 @@ interface Colony
     id: string;
     population: number;
     propagated: boolean;
+    host?: number;
     sequence: string;
     params: LSystemParams;
     stage: number;
@@ -3369,6 +3370,7 @@ class ColonyManager
         c.synthRate = stats.synthRate;
         c.profit = stats.profit;
 
+        // Insert colony into array
         if(spread === null)
             this.colonies[plot].push(c);
         else
@@ -3391,6 +3393,10 @@ class ColonyManager
 
             this.colonies[plot].splice(spread + 1, 0, c);
         }
+
+        // Establish parasitic links
+        this.linkParasites(plot);
+
         // Auto water
         if(autoWaterConfig[id]?.maxStage > c.stage)
             this.water(c);
@@ -3404,6 +3410,26 @@ class ColonyManager
         }
         theory.invalidateQuaternaryValues();
         updateAvailability();
+    }
+    linkParasites(plot: number)
+    {
+        for(let i = 0; i < this.colonies[plot].length; ++i)
+        {
+            let l = this.colonies[plot][i];
+            if(plantData[l.id].parasite)
+            {
+                l.host = undefined;
+                for(let j = 0; j < this.colonies[plot].length; ++j)
+                {
+                    let h = this.colonies[plot][j];
+                    if(plantData[l.id].parasite.has(h.id))
+                    {
+                        l.host = j;
+                        break;
+                    }
+                }
+            }
+        }
     }
     killColony(plot: number, index: number, id?: number)
     {
@@ -3424,6 +3450,7 @@ class ColonyManager
                 };
             }
         }
+        // Loop back for easy harvest spamming
         if(index == this.colonies[plot].length - 1 && plot == plotIdx)
         {
             slotIdx[plotIdx] = 0;
@@ -3449,10 +3476,14 @@ class ColonyManager
                 this.gangsta = null;
             }
         }
+
         this.colonies[plot].splice(index, 1);
+
+        // Re-establish parasitic links
+        this.linkParasites(plot);
+
         if(plot == plotIdx)
         {
-            
             let len = this.colonies[plotIdx].length;
             if(len > 1)
             {
@@ -3522,6 +3553,22 @@ class ColonyManager
                     {
                         // @ts-expect-error
                         c.energy += di * c.synthRate;
+                        if(plantData[c.id].parasite &&
+                        typeof c.host !== 'undefined')
+                        {
+                            let h = this.colonies[i][c.host];
+                            // @ts-expect-error
+                            let hEnrg = h.energy * BigNumber.from(h.population);
+                            // Leech rates = hardcoded: 1st param of 1st symbol
+                            // @ts-expect-error
+                            let maxde = hEnrg.min(dg * c.params[0][0] *
+                            // @ts-expect-error
+                            BigNumber.from(c.population));
+                            // @ts-expect-error
+                            h.energy -= maxde / h.population;
+                            // @ts-expect-error
+                            c.energy += maxde / c.population;
+                        }
                         if(notMature)
                         {
                             // @ts-expect-error
@@ -4036,6 +4083,7 @@ interface Plant
     system: LSystem;
     maxStage?: number;
     cost?: Cost;
+    parasite?: Set<string>;
     growthRate: BigNumber;
     growthCost: BigNumber;
     dailyIncome?: boolean;
@@ -4508,8 +4556,9 @@ const plantData: {[key: string]: Plant} =
     },
     invisTest:
     {
-        system: new LSystem('A(0.05)', ['A(r) = FA(r)']),
-        maxStage: 1,
+        system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
+        maxStage: 20,
+        parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
         growthCost: BigNumber.TWO,
         growthRate: BigNumber.FIVE,
         actions:

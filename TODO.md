@@ -107,6 +107,12 @@ you have to dig really deep to find the underlying systems behind the plants
       - [x] Basil unpruned track
     - [ ] Campion
 
+- [x] Parasites
+  - [x] Rate: for now, hardcode to be param #0 of symbol #0
+  - [x] Searching: for now, hardcode target to be the in the same plot
+  - [x] Dislodge and re-establish all links every time a colony is killed or spawned?
+    - [x] Do a sweeping scan for all links in the same plot in addColony and killColony
+
 - [x] Let all plots be viewable before unlocking
   - [x] Display price before unlocking
   - [ ] Can players perform actions in locked plots?
