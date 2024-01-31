@@ -90,9 +90,8 @@ you have to dig really deep to find the underlying systems behind the plants
 - [x] Make the column spacing x1.5 if there's no tax and make it branchless
 - [x] On confirmation dialogue, have the action described (like in L-s menu)
 - [x] Dynamical system inaccuracies
-  - Context: basil is pruned at stg 0 (synth rate is 0), plant can only grow when watering. Watering should give multiples of 2 energy, but when evolving, some of the energy is truncated.
-  - Well, just inaccuracies in general
-  - Let's ask someone about them
+  - [ ] Parasites sometimes eat after their hosts, resulting in loss of energy
+  - [x] basil is pruned at stg 0 (synth rate is 0), plant can only grow when watering. Watering should give multiples of 2 energy, but when evolving, some of the energy is truncated.
 
 - [ ] Address Lemma's attitude
   - Early game should be the time when a lot of help is needed, don't neglect your student

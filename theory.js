@@ -811,7 +811,8 @@ let getSmallBtnSize = (width) => {
 let getProgBarSize = (width) => {
     return getSmallBtnSize(width) / 2;
 };
-let isColonyVisible = (c) => c.sequence.length > 1;
+let isColonyVisible = (c) => c.sequence.length > 1 ||
+    trueSight.level > 0;
 /**
  * Returns the index of the first smaller/equal element than target.
  * @param {number[]} arr the array being searched.
@@ -2708,7 +2709,8 @@ class ColonyManager {
                     // @ts-expect-error
                     if (notMature && c.growth >= plantData[c.id].growthCost *
                         // @ts-expect-error
-                        BigNumber.from(c.sequence.length) && c.wet) {
+                        BigNumber.from(c.sequence.length) &&
+                        (c.wet || !plantData[c.id].requireWatering)) {
                         if (!this.gangsta)
                             this.gangsta = [i, j];
                         // @ts-expect-error
@@ -2866,6 +2868,21 @@ class ColonyManager {
         // Empty reserves
         // @ts-expect-error
         c.energy += c.diReserve * c.synthRate;
+        if (plantData[c.id].parasite &&
+            typeof c.host !== 'undefined') {
+            let h = this.colonies[this.actionGangsta[0]][c.host];
+            // @ts-expect-error
+            let hEnrg = h.energy * BigNumber.from(h.population);
+            // Leech rates = hardcoded: 1st param of 1st symbol
+            // @ts-expect-error
+            let maxde = hEnrg.min(c.dgReserve * c.params[0][0] *
+                // @ts-expect-error
+                BigNumber.from(c.population));
+            // @ts-expect-error
+            h.energy -= maxde / h.population;
+            // @ts-expect-error
+            c.energy += maxde / c.population;
+        }
         if (notMature) {
             // @ts-expect-error
             let maxdg = c.energy.min(c.dgReserve * plantData[c.id].growthRate);
@@ -3035,6 +3052,21 @@ class ColonyManager {
         // Empty reserves
         // @ts-expect-error
         c.energy += c.diReserve * c.synthRate;
+        if (plantData[c.id].parasite &&
+            typeof c.host !== 'undefined') {
+            let h = this.colonies[this.gangsta[0]][c.host];
+            // @ts-expect-error
+            let hEnrg = h.energy * BigNumber.from(h.population);
+            // Leech rates = hardcoded: 1st param of 1st symbol
+            // @ts-expect-error
+            let maxde = hEnrg.min(c.dgReserve * c.params[0][0] *
+                // @ts-expect-error
+                BigNumber.from(c.population));
+            // @ts-expect-error
+            h.energy -= maxde / h.population;
+            // @ts-expect-error
+            c.energy += maxde / c.population;
+        }
         if (notMature) {
             // @ts-expect-error
             let maxdg = c.energy.min(c.dgReserve * plantData[c.id].growthRate);
@@ -3181,6 +3213,7 @@ var getPublicationMultiplierFormula = (symbol) => `\\frac{2}{3}\\times
 {${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
 const plantData = {
     sprout: {
+        cost: new FirstFreeCost(new ExponentialCost(0.25, 1)),
         system: new LSystem('\\A(0.02, 3)', [
             'A(r, t): t>0 = A(r+0.02, t-1)',
             'A(r, t) = F(0.05)[-&L(0.02)][-^L(0.02)]/(137.508)A(r, 3)',
@@ -3193,7 +3226,7 @@ const plantData = {
             '~> L(s) = {F(s/4)T(4*s)[\\(90-480*s)&F(s/6).&(30)F(s/3).^(60)F(s/3).^(30)F(s/3).^(30)F(s/3).^(30)F(s/6).][F(s)..].[/(90-480*s)^F(s/6).^(30)F(s/3).&(60)F(s/3).&(30)F(s/3).&(30)F(s/3).&(30)F(s/6).][F(s)..]}',
         ]),
         maxStage: 12,
-        cost: new FirstFreeCost(new ExponentialCost(0.25, 1)),
+        requireWatering: true,
         growthRate: BigNumber.from(0.3),
         growthCost: BigNumber.from(0.6),
         actions: [
@@ -3217,6 +3250,7 @@ const plantData = {
         }
     },
     calendula: {
+        cost: new ExponentialCost(1, Math.log2(3)),
         system: new LSystem('-(3)A(0.06, 4)', [
             'A(r, t): t<=0 && r>=AThreshold = F(0.78, 2.1)K(0)',
             'A(r, t): r>=AThreshold = [&A(r-0.15, 2)][^I(3)]',
@@ -3247,7 +3281,7 @@ const plantData = {
             '~> L(p, lim) = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
         ]),
         maxStage: 40,
-        cost: new ExponentialCost(1, Math.log2(3)),
+        requireWatering: true,
         growthRate: BigNumber.from(1.5),
         growthCost: BigNumber.from(2.5),
         propagation: {
@@ -3286,6 +3320,7 @@ const plantData = {
         }
     },
     basil: {
+        cost: new ExponentialCost(2.5, 1),
         system: new LSystem('/(90)BA(0.06, 5)', [
             'A(r, t): r>=AThreshold = S(0)F(0.24, 0.96)K(0.02, 8)',
             'A(r, t): t>0 = A(r+0.06, t-1)',
@@ -3316,7 +3351,7 @@ const plantData = {
             '~> L(p, lim, s) = {T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}'
         ]),
         maxStage: 50,
-        cost: new ExponentialCost(2.5, 1),
+        requireWatering: true,
         growthRate: BigNumber.TWO,
         growthCost: BigNumber.TWO,
         actions: [
@@ -3368,6 +3403,7 @@ const plantData = {
         }
     },
     campion: {
+        cost: new ExponentialCost(2000, Math.log2(5)),
         system: new LSystem('/(45)&(5)A(0.1, 5)', [
             'A(r, t): t>0 = A(r+0.05, t-1)',
             'A(r, t) = F(0.4, 20)T[&L(0.025)][/(180)&L(0.025)][F(0.4, 10)K(0.125, 0)][^$A(r-0.2, 7)][&$A(r-0.1, 3)]',
@@ -3391,7 +3427,7 @@ const plantData = {
             '~> O(s) = {[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].].}'
         ]),
         maxStage: 29,
-        cost: new ExponentialCost(2000, Math.log2(5)),
+        requireWatering: true,
         growthRate: BigNumber.from(2.75),
         growthCost: BigNumber.TEN,
         stagelyIncome: BigNumber.ONE,
@@ -3431,11 +3467,12 @@ const plantData = {
     },
     arrow: // Arrow weed (test)
     {
+        cost: new FirstFreeCost(new ExponentialCost(1, 1)),
         system: new LSystem('A(1)', [
             'F(l)=F(l*2)',
             'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t)'
         ], 30),
-        cost: new FirstFreeCost(new ExponentialCost(1, 1)),
+        requireWatering: true,
         growthRate: BigNumber.ONE,
         growthCost: BigNumber.from(45),
         actions: [
@@ -3476,6 +3513,7 @@ const plantData = {
     },
     brasil: // Old basil
     {
+        cost: new ExponentialCost(1, 1),
         system: new LSystem('BA(0.18, 0)', [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
@@ -3506,7 +3544,7 @@ const plantData = {
             '~> L(p, lim, s) = {\\(90)T(lim)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}'
         ]),
         maxStage: 54,
-        cost: new ExponentialCost(1, 1),
+        requireWatering: false,
         growthRate: BigNumber.TWO,
         growthCost: BigNumber.THREE,
         actions: [
@@ -3545,6 +3583,7 @@ const plantData = {
         system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
         maxStage: 20,
         parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
+        requireWatering: false,
         growthCost: BigNumber.TWO,
         growthRate: BigNumber.FIVE,
         actions: [
@@ -3883,6 +3922,7 @@ var plotPerma;
 var plantPerma;
 var freePenny;
 var pauseGame;
+var trueSight;
 var warpTick;
 var warpDay;
 var warpYear;
@@ -4018,6 +4058,17 @@ var init = () => {
     theory.buyAllUpgrade.description = getLoc('permaNote');
     theory.buyAllUpgrade.info = getLoc('permaNoteInfo');
     // theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
+    /* Free penny
+    For testing purposes
+    */
+    {
+        freePenny = theory.createPermanentUpgrade(9001, currency, new FreeCost);
+        freePenny.description = 'Get 1 penny for free';
+        freePenny.info = 'Yields 1 penny';
+        // @ts-expect-error
+        freePenny.bought = (_) => currency.value += BigNumber.ONE;
+        freePenny.isAvailable = haxEnabled;
+    }
     /* Pause
     For testing purposes
     */
@@ -4035,16 +4086,18 @@ var init = () => {
         };
         pauseGame.isAvailable = haxEnabled;
     }
-    /* Free penny
+    /* Truesight
     For testing purposes
     */
     {
-        freePenny = theory.createPermanentUpgrade(9001, currency, new FreeCost);
-        freePenny.description = 'Get 1 penny for free';
-        freePenny.info = 'Yields 1 penny';
-        // @ts-expect-error
-        freePenny.bought = (_) => currency.value += BigNumber.ONE;
-        freePenny.isAvailable = haxEnabled;
+        trueSight = theory.createPermanentUpgrade(9007, currency, new FreeCost);
+        let descs = [`Light Luminary's lamp`, `Extinguish Luminary's lamp`];
+        trueSight.getDescription = () => descs[trueSight.level];
+        trueSight.info = 'Reveals colonies hidden underground';
+        trueSight.bought = (_) => {
+            trueSight.level &= 1;
+        };
+        trueSight.isAvailable = haxEnabled;
     }
     /* Warp tick
     For testing purposes
@@ -4056,7 +4109,7 @@ var init = () => {
         warpTick.bought = (_) => tick(0.1, 1);
         warpTick.isAvailable = haxEnabled;
     }
-    /* Warp one
+    /* Warp day
     For testing purposes
     */
     {
@@ -4840,7 +4893,7 @@ let createColonyViewMenu = (colony) => {
     };
     let tmpCmt = updateCommentary();
     let plantStats = ui.createLatexLabel({
-        text: Localization.format(getLoc('plantStats'), track.name ?
+        text: Localization.format(getLoc('plantStats'), track?.name ?
             Localization.format(getLoc('narrationTrack'), cmtStage, track.name) :
             cmtStage, tmpCmt, colony.synthRate, plantData[colony.id].growthRate, plantData[colony.id].growthCost, colony.sequence.length),
         margin: new Thickness(0, 6),
@@ -5843,6 +5896,7 @@ var setInternalState = (stateStr) => {
             pauseGame.isAvailable = haxEnabled;
             if (pauseGame.level)
                 theory.pause();
+            trueSight.isAvailable = haxEnabled;
             warpTick.isAvailable = haxEnabled;
             warpDay.isAvailable = haxEnabled;
             warpYear.isAvailable = haxEnabled;
