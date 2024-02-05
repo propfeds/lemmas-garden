@@ -49,8 +49,8 @@ var getDescription = (language: string): string =>
 You are her first student in a long while.
 
 Welcome to Lemma's Garden, an idle botanical theory built on the workings of ` +
-`Lindenmayer systems. Reminisce the story of Lemma, a retired teacher, and ` +
-`her late partner, as she rambles about things already long passed.`,
+`Lindenmayer systems. Reminisce the story of Lemma, a retired teacher, as ` +
+`she rambles about things already long passed.`,
     };
 
     return descs[language] ?? descs.en;
@@ -81,7 +81,7 @@ const LOC_STRINGS =
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
-        pubTax: 'Tax on publish\\colon',
+        pubTax: 'Publishing fee \\&\\ taxes\\colon',
 
         btnView: 'View L-system',
         btnAlmanac: 'World of Plants',
@@ -935,22 +935,45 @@ let isColonyVisible = (c: Colony) => c.sequence.length > 1 ||
 trueSight.level > 0;
 
 /**
- * Returns the index of the first smaller/equal element than target.
+ * Returns the index of the last element smaller than or equal to target.
+ * Array must be sorted ascending.
  * @param {number[]} arr the array being searched.
  * @param {number} target the value to search for.
  * @returns {number}
  */
-let binarySearch = (arr: number[], target: number): number =>
+let binarySearchLast = (arr: number[], target: number): number =>
 {
     let l = 0;
     let r = arr.length - 1;
     while(l < r)
     {
-        let m = Math.ceil((l + r) / 2);
+        let m = l + Math.ceil((r - l) / 2);
         if(arr[m] <= target)
             l = m;
         else
             r = m - 1;
+    }
+    return l;
+}
+
+/**
+ * Returns the index of the first element larger than target. Array must be
+ * sorted ascending.
+ * @param {number[]} arr the array being searched.
+ * @param {number} target the value to search for.
+ * @returns {number}
+ */
+let binarySearchNext = (arr: number[], target: number): number =>
+{
+    let l = 0;
+    let r = arr.length - 1;
+    while(l < r)
+    {
+        let m = l + Math.floor((r - l) / 2);
+        if(arr[m] <= target)
+            l = m + 1;
+        else
+            r = m;
     }
     return l;
 }
@@ -1015,17 +1038,46 @@ let purgeEmpty = (arr: string[]): string[] =>
 }
 
 const yearStartLookup = [0];
-const isLeap = [];
+const dandelionSchedule = [];
+const broomrapeSchedule = [];
+const hopleekSchedule = [];
 
 for(let i = 1; i <= 400; ++i)
 {
     let leap = !(i%4) && (!!(i%100) || !(i%400));
-    isLeap.push(leap);
     let offset = leap ? 366 : 365;
     yearStartLookup[i] = yearStartLookup[i-1] + offset;
+
+    if(leap)
+        hopleekSchedule.push(yearStartLookup[i-1] + 60);
+    if(i&2)
+        broomrapeSchedule.push(yearStartLookup[i] + 300);
+    dandelionSchedule.push(yearStartLookup[i] + 90);
 }
-// Last year (401)
-isLeap.push(false);
+
+const dandelionSpawner: Spawner =
+{
+    id: 'dandelion',
+    schedule: dandelionSchedule,
+    population: (index) => 1,
+    plot: () => gameRNG.nextInt % nofPlots
+}
+
+const broomrapeSpawner: Spawner =
+{
+    id: 'broomrape',
+    schedule: broomrapeSchedule,
+    population: (index) => Math.min(index + 1, 5),
+    plot: () => 0
+}
+
+const hopleekSpawner: Spawner =
+{
+    id: 'hopleek',
+    schedule: hopleekSchedule,
+    population: (index) => Math.min(index + 2, 6),
+    plot: () => nofPlots - 1
+}
 
 // Classes
 
@@ -3212,6 +3264,20 @@ interface Colony
     ddReserve?: BigNumber;
 }
 
+interface Spawner
+{
+    id: string;
+    schedule: number[];
+    population: (index: number) => number;
+    plot: () => number;
+}
+
+interface SpawnerState
+{
+    spawner: Spawner;
+    index: number;
+}
+
 const enum Actions
 {
     HARVEST,
@@ -3235,7 +3301,7 @@ class ColonyManager
     actionAncestreeTask: Task;
     actionDeriveTask: Task;
     actionCalcTask: Task;
-    restTick: number;
+    spawnerStates: SpawnerState[];
     constructor(object: ManagerInput = {}, length: number, width: number)
     {
         this.length = length;
@@ -3274,6 +3340,7 @@ class ColonyManager
             start: 0
         };
         // this.restTick = 0;
+        this.spawnerStates = [];
     }
 
     toJSON()
@@ -3319,98 +3386,28 @@ class ColonyManager
         // @ts-expect-error
         theory.publicationMultiplier;
     }
-
-    addColony(plot: number, id: string, population: number,
-    spread: number = null)
+    registerSpawner(s: Spawner)
     {
-        if(population <= 0)
-            return;
-
-        if(spread === null)
+        let state: SpawnerState =
         {
-            for(let i = 0; i < this.colonies[plot].length; ++i)
+            spawner: s,
+            index: binarySearchNext(s.schedule, days)
+        };
+        this.spawnerStates.push(state);
+    }
+    updateSpawners(day: number)
+    {
+        for(let i = 0; i < this.spawnerStates.length; ++i)
+        {
+            let sp = this.spawnerStates[i];
+            while(day >= sp.spawner.schedule[sp.index])
             {
-                let groupCandidate = this.colonies[plot][i];
-                if(groupCandidate.id == id && !groupCandidate.propagated &&
-                !groupCandidate.stage)
-                {
-                    groupCandidate.population += population;
-                    theory.invalidateQuaternaryValues();
-                    return;
-                }
+                let plot = sp.spawner.plot();
+                let pop = sp.spawner.population(sp.index);
+                this.addColony(plot, sp.spawner.id, pop);
+                ++sp.index;
             }
         }
-
-        if(this.colonies[plot].length >= this.width)
-        {
-            if(spread === null)
-                plants[plot][id]?.refund?.(population);
-            return;
-        }
-
-        let c: Colony =
-        {
-            id: id,
-            population: population,
-            propagated: spread === null ? false : true,
-            sequence: plantData[id].system.axiom,
-            params: plantData[id].system.axiomParams,
-            stage: 0,
-            narrationTrack: 0,
-
-            wet: false,
-            energy: BigNumber.ZERO,
-            growth: BigNumber.ZERO,
-
-            diReserve: BigNumber.ZERO,
-            dgReserve: BigNumber.ZERO
-        };
-        if(plantData[id].dailyIncome)
-            c.ddReserve = BigNumber.ZERO;
-        let stats = this.calculateStats(c);
-        c.synthRate = stats.synthRate;
-        c.profit = stats.profit;
-
-        // Insert colony into array
-        if(spread === null)
-            this.colonies[plot].push(c);
-        else
-        {
-            // Inherit parent's reserve
-
-            let parent = this.colonies[plot][spread];
-            // @ts-expect-error
-            c.energy += parent.diReserve * c.synthRate;
-            // @ts-expect-error
-            let maxdg = c.energy.min(parent.dgReserve *
-            // @ts-expect-error
-            plantData[id].growthRate);
-            // @ts-expect-error
-            c.growth += maxdg;
-            // @ts-expect-error
-            c.energy -= maxdg;
-            if(plantData[id].dailyIncome)
-                c.ddReserve = parent.ddReserve;
-
-            this.colonies[plot].splice(spread + 1, 0, c);
-        }
-
-        // Establish parasitic links
-        this.linkParasites(plot);
-
-        // Auto water
-        if(autoWaterConfig[id]?.maxStage > c.stage)
-            this.water(c);
-
-        if(plot == plotIdx)
-        {
-            let prevColony = selectedColony;
-            selectedColony = this.colonies[plotIdx][slotIdx[plotIdx]];
-            if(prevColony !== selectedColony)
-                renderer.colony = selectedColony;
-        }
-        theory.invalidateQuaternaryValues();
-        updateAvailability();
     }
     linkParasites(plot: number)
     {
@@ -3431,6 +3428,104 @@ class ColonyManager
                 }
             }
         }
+    }
+
+    addColony(plot: number, id: string, population: number,
+    parent: [number, number] = null)
+    {
+        if(!plantData[id])
+            return;
+        if(population <= 0)
+            return;
+
+        if(parent === null)
+        {
+            for(let i = 0; i < this.colonies[plot].length; ++i)
+            {
+                let groupCandidate = this.colonies[plot][i];
+                if(groupCandidate.id == id && !groupCandidate.propagated &&
+                !groupCandidate.stage)
+                {
+                    groupCandidate.population += population;
+                    theory.invalidateQuaternaryValues();
+                    return;
+                }
+            }
+        }
+
+        if(this.colonies[plot].length >= this.width)
+        {
+            if(parent === null)
+                plants[plot][id]?.refund?.(population);
+            return;
+        }
+
+        let c: Colony =
+        {
+            id: id,
+            population: population,
+            propagated: parent === null ? false : true,
+            sequence: plantData[id].system.axiom,
+            params: plantData[id].system.axiomParams,
+            stage: 0,
+            narrationTrack: 0,
+
+            wet: false,
+            energy: BigNumber.ZERO,
+            growth: BigNumber.ZERO,
+
+            diReserve: BigNumber.ZERO,
+            dgReserve: BigNumber.ZERO
+        };
+        if(plantData[id].dailyIncome)
+            c.ddReserve = BigNumber.ZERO;
+        let stats = this.calculateStats(c);
+        c.synthRate = stats.synthRate;
+        c.profit = stats.profit;
+
+        // Insert colony into array
+        if(parent === null)
+            this.colonies[plot].push(c);
+        else
+        {
+            // Inherit parent's reserve
+
+            let p = this.colonies[parent[0]][parent[1]];
+            // @ts-expect-error
+            c.energy += p.diReserve * c.synthRate;
+            // @ts-expect-error
+            let maxdg = c.energy.min(p.dgReserve *
+            // @ts-expect-error
+            plantData[id].growthRate);
+            // @ts-expect-error
+            c.growth += maxdg;
+            // @ts-expect-error
+            c.energy -= maxdg;
+            if(plantData[id].dailyIncome)
+                c.ddReserve = p.ddReserve;
+
+            if(plot == parent[0])
+                this.colonies[plot].splice(parent[1] + 1, 0, c);
+            else
+                this.colonies[plot].push(c);
+        }
+
+        // Establish parasitic links
+        this.linkParasites(plot);
+
+        // Auto water
+        if(autoWaterConfig[id]?.maxStage > c.stage)
+            this.water(c);
+
+        if(plot == plotIdx)
+        {
+            let prevColony = selectedColony;
+            selectedColony = this.colonies[plotIdx][slotIdx[plotIdx]];
+            if(prevColony !== selectedColony)
+                renderer.colony = selectedColony;
+        }
+        theory.invalidateQuaternaryValues();
+        updateAvailability();
     }
     killColony(plot: number, index: number, id?: number)
     {
@@ -3973,14 +4068,13 @@ class ColonyManager
             this.water(c);
 
         // Propagate
-
         let prop = plantData[c.id].propagation;
         if(prop && c.stage === (prop.stage ?? maxStage))
         {
             let pop = Math.round(c.population * prop.rate);
             let target = this.findVacantPlot(this.gangsta[0], prop.priority);
             if(target !== null)
-                this.addColony(target, prop.id ?? c.id, pop, this.gangsta[1]);
+                this.addColony(target, prop.id ?? c.id, pop, this.gangsta);
         }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
@@ -4627,6 +4721,87 @@ const plantData: {[key: string]: Plant} =
                 tickLength: 1
             };
         }
+    },
+    hopleek:
+    {
+        system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
+        maxStage: 20,
+        parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
+        requireWatering: false,
+        growthCost: BigNumber.TWO,
+        growthRate: BigNumber.FIVE,
+        actions:
+        [
+            {}
+        ],
+        camera: (stage) => {
+            return {
+                scale: 8,
+                x: 0,
+                y: <number>saturate(stage / 4, 5, 9),
+                z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) => {
+            return {
+                tickLength: 1
+            };
+        }
+    },
+    dandelion:
+    {
+        system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
+        maxStage: 20,
+        parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
+        requireWatering: false,
+        growthCost: BigNumber.TWO,
+        growthRate: BigNumber.FIVE,
+        actions:
+        [
+            {}
+        ],
+        camera: (stage) => {
+            return {
+                scale: 8,
+                x: 0,
+                y: <number>saturate(stage / 4, 5, 9),
+                z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) => {
+            return {
+                tickLength: 1
+            };
+        }
+    },
+    broomrape:
+    {
+        system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
+        maxStage: 20,
+        parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
+        requireWatering: false,
+        growthCost: BigNumber.TWO,
+        growthRate: BigNumber.FIVE,
+        actions:
+        [
+            {}
+        ],
+        camera: (stage) => {
+            return {
+                scale: 8,
+                x: 0,
+                y: <number>saturate(stage / 4, 5, 9),
+                z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) => {
+            return {
+                tickLength: 1
+            };
+        }
     }
 }
 
@@ -5069,6 +5244,7 @@ var pauseGame: Upgrade;
 var trueSight: Upgrade;
 var warpTick: Upgrade;
 var warpDay: Upgrade;
+var warpWeek: Upgrade;
 var warpYear: Upgrade;
 var warpZero: Upgrade;
 
@@ -5287,7 +5463,7 @@ var init = () =>
         }
         trueSight.isAvailable = haxEnabled;
     }
-    /* Warp tick
+    /* Warp forward
     For testing purposes
     */
     {
@@ -5297,22 +5473,21 @@ var init = () =>
         warpTick.info = 'Warps forward by a tick';
         warpTick.bought = (_) => tick(0.1, 1);
         warpTick.isAvailable = haxEnabled;
-    }
-    /* Warp day
-    For testing purposes
-    */
-    {
+
         warpDay = theory.createPermanentUpgrade(9003, currency,
         new FreeCost);
         warpDay.description = 'Warp day';
         warpDay.info = 'Warps forward by a day';
         warpDay.bought = (_) => tick(dayLength / speeds[speedIdx], 1);
         warpDay.isAvailable = haxEnabled;
-    }
-    /* Warp year
-    For testing purposes
-    */
-    {
+
+        warpWeek = theory.createPermanentUpgrade(9008, currency,
+        new FreeCost);
+        warpWeek.description = 'Warp week';
+        warpWeek.info = 'Warps forward by a week';
+        warpWeek.bought = (_) => tick(7 * dayLength / speeds[speedIdx], 1);
+        warpWeek.isAvailable = haxEnabled;
+
         warpYear = theory.createPermanentUpgrade(9005, currency,
         new FreeCost);
         warpYear.description = 'Warp year';
@@ -5320,7 +5495,7 @@ var init = () =>
         warpYear.bought = (_) => tick(dayLength * 365 / speeds[speedIdx], 1);
         warpYear.isAvailable = haxEnabled;
     }
-    /* Warp zero
+    /* Reset time
     For testing purposes
     */
     {
@@ -5446,6 +5621,7 @@ var tick = (elapsedTime: number, multiplier: number) =>
         dg = newGI - growthIntegral;
         growthIntegral = newGI;
     });
+    manager.updateSpawners(days);
     manager.growAll(BigNumber.from(di), BigNumber.from(dg), BigNumber.from(dd));
 
     if(!game.isCalculatingOfflineProgress)
@@ -6272,7 +6448,7 @@ let createColonyViewMenu = (colony: Colony) =>
         if(track[colony.stage])
             cmtStage = colony.stage;
         else
-            cmtStage = track.index[binarySearch(track.index, colony.stage)];
+            cmtStage = track.index[binarySearchLast(track.index, colony.stage)];
         return track[cmtStage];
     }
     let tmpCmt = updateCommentary();
@@ -7545,6 +7721,7 @@ var setInternalState = (stateStr: string) =>
             trueSight.isAvailable = haxEnabled;
             warpTick.isAvailable = haxEnabled;
             warpDay.isAvailable = haxEnabled;
+            warpWeek.isAvailable = haxEnabled;
             warpYear.isAvailable = haxEnabled;
             warpZero.isAvailable = haxEnabled;
         }
@@ -7554,7 +7731,7 @@ var setInternalState = (stateStr: string) =>
             time = state.time ?? time;
             let cycles = time / dayLength;
             days = Math.floor(cycles);
-            years = binarySearch(yearStartLookup, days);
+            years = binarySearchLast(yearStartLookup, days);
             let phase = <number>saturate(cycles - days - 0.25, 0, 0.5);
             insolationIntegral = days * dayLength / Math.PI - halfDayLength *
             (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
@@ -7614,6 +7791,9 @@ var setInternalState = (stateStr: string) =>
         gameRNG = state.gameRNG ?
         new Xorshift(state.gameRNG.seed, state.gameRNG.aux) : gameRNG;
     }
+    manager.registerSpawner(dandelionSpawner);
+    manager.registerSpawner(broomrapeSpawner);
+    manager.registerSpawner(hopleekSpawner);
 
     actuallyPlanting = false;
     tmpLevels = Array.from({length: nofPlots}, (_) => {return {};});
