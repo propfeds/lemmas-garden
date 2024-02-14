@@ -18,7 +18,6 @@ import { ui } from './api/ui/UI';
 import { Aspect } from './api/ui/properties/Aspect';
 import { ClearButtonVisibility } from './api/ui/properties/ClearButtonVisibility';
 import { Color } from './api/ui/properties/Color';
-import { Easing } from './api/ui/properties/Easing';
 import { FontFamily } from './api/ui/properties/FontFamily';
 import { ImageSource } from './api/ui/properties/ImageSource';
 import { Keyboard } from './api/ui/properties/Keyboard';
@@ -35,7 +34,7 @@ var getName = (language: string): string =>
 {
     const names =
     {
-        en: `Lemma's Garden`,
+        en: `Lemma's Garden (perch)`,
     };
 
     return names[language] ?? names.en;
@@ -1050,7 +1049,7 @@ for(let i = 1; i <= 400; ++i)
 
     if(leap)
         hopleekSchedule.push(yearStartLookup[i-1] + 60);
-    if(i&2)
+    if(i&1)
         broomrapeSchedule.push(yearStartLookup[i] + 300);
     dandelionSchedule.push(yearStartLookup[i] + 90);
 }
@@ -1067,7 +1066,7 @@ const broomrapeSpawner: Spawner =
 {
     id: 'broomrape',
     schedule: broomrapeSchedule,
-    population: (index) => Math.min(index + 1, 5),
+    population: (index) => Math.min(index + 2, 7) + gameRNG.nextInt % 4,
     plot: () => 0
 }
 
@@ -3504,9 +3503,9 @@ class ColonyManager
             if(plantData[id].dailyIncome)
                 c.ddReserve = p.ddReserve;
 
-            if(plot == parent[0])
-                this.colonies[plot].splice(parent[1] + 1, 0, c);
-            else
+            // if(plot == parent[0])
+            //     this.colonies[plot].splice(parent[1] + 1, 0, c);
+            // else
                 this.colonies[plot].push(c);
         }
 
@@ -4524,10 +4523,10 @@ const plantData: {[key: string]: Plant} =
             'LMaxSize': '0.625'
         },
         [
-            '~> K(p, t): t<3 = {[+(90)b(p*4)b(p*4)b(p*4)b(p*4)b(p*4)]}',
             '~> b(s) = -[^-F(s).][--F(s*2)..][&-F(s).]+^(72)',
-            '~> K(p, t) = {[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]}',
             '~> c(s) = +F(s).-F(s).-F(s).+',
+            '~> K(p, t): t<3 = {[+(90)b(p*4)b(p*4)b(p*4)b(p*4)b(p*4)]}',
+            '~> K(p, t) = {[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]}',
             '~> k(s) = [^(40)F(s/2).&(10)F(s/2).&F(s/4).][F(s/2)-(10)F(s).][&(40)F(s/2)[^(10)F(s/2)[^F(s/4).].].].',
             '~> L(s) = {T(s*0.5)F(sqrt(s)).[-(48)F(s*2).+F(s*2).+&F(s*2).+F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].].[+(48)F(s*2).-F(s*2).-&F(s*2).-F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].]}',
             '~> O(s) = {[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].].}'
@@ -4571,6 +4570,106 @@ const plantData: {[key: string]: Plant} =
         },
         stroke: (stage) =>
         {
+            return {
+                tickLength: 1
+            };
+        }
+    },
+    // ginger
+    // sunflower
+    hopleek:
+    {
+        system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
+        maxStage: 20,
+        parasite: new Set(['sprout', 'basil']),
+        requireWatering: false,
+        growthRate: BigNumber.FIVE,
+        growthCost: BigNumber.TWO,
+        actions:
+        [
+            {}
+        ],
+        camera: (stage) => {
+            return {
+                scale: 8,
+                x: 0,
+                y: <number>saturate(stage / 4, 5, 9),
+                z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) => {
+            return {
+                tickLength: 1
+            };
+        }
+    },
+    broomrape:
+    {
+        system: new LSystem('B(0.1, timer)',
+        [
+            // Invisibility regenerates when the shoots go up
+            'B(r, t) > F(l, lim): t<timer = B(1.2*r-0.01*r^2, t+1)',
+            // Cheekily goes back to hiding
+            'B(r, t) > F(l, lim) = B(r-18, t)%',
+            'B(r, t): t>0 = B(1.2*r-0.01*r^2, t-1)',
+            'B(r, t) = B(r, t)F(0.1, 10)'
+        ],
+        30, 0, '', '+-&^/\\T', 0,
+        {
+            'timer': '20'
+        },
+        [
+            // models
+            ''
+        ]),
+        maxStage: 125,
+        parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
+        requireWatering: false,
+        growthRate: BigNumber.TEN,
+        growthCost: BigNumber.from(20),
+        actions:
+        [
+            {
+                symbols: new Set('K')
+            }
+        ],
+        camera: (stage) => {
+            return {
+                scale: 8,
+                x: 0,
+                y: <number>saturate(stage / 4, 5, 9),
+                z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) => {
+            return {
+                tickLength: 1
+            };
+        }
+    },
+    dandelion:
+    {
+        system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
+        maxStage: 20,
+        requireWatering: false,
+        growthRate: BigNumber.FIVE,
+        growthCost: BigNumber.TWO,
+        actions:
+        [
+            {}
+        ],
+        camera: (stage) => {
+            return {
+                scale: 8,
+                x: 0,
+                y: <number>saturate(stage / 4, 5, 9),
+                z: 0,
+                upright: true
+            };
+        },
+        stroke: (stage) => {
             return {
                 tickLength: 1
             };
@@ -4695,114 +4794,6 @@ const plantData: {[key: string]: Plant} =
             };
         }
     },
-    invisTest:
-    {
-        system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
-        maxStage: 20,
-        parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
-        requireWatering: false,
-        growthCost: BigNumber.TWO,
-        growthRate: BigNumber.FIVE,
-        actions:
-        [
-            {}
-        ],
-        camera: (stage) => {
-            return {
-                scale: 8,
-                x: 0,
-                y: <number>saturate(stage / 4, 5, 9),
-                z: 0,
-                upright: true
-            };
-        },
-        stroke: (stage) => {
-            return {
-                tickLength: 1
-            };
-        }
-    },
-    hopleek:
-    {
-        system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
-        maxStage: 20,
-        parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
-        requireWatering: false,
-        growthCost: BigNumber.TWO,
-        growthRate: BigNumber.FIVE,
-        actions:
-        [
-            {}
-        ],
-        camera: (stage) => {
-            return {
-                scale: 8,
-                x: 0,
-                y: <number>saturate(stage / 4, 5, 9),
-                z: 0,
-                upright: true
-            };
-        },
-        stroke: (stage) => {
-            return {
-                tickLength: 1
-            };
-        }
-    },
-    dandelion:
-    {
-        system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
-        maxStage: 20,
-        parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
-        requireWatering: false,
-        growthCost: BigNumber.TWO,
-        growthRate: BigNumber.FIVE,
-        actions:
-        [
-            {}
-        ],
-        camera: (stage) => {
-            return {
-                scale: 8,
-                x: 0,
-                y: <number>saturate(stage / 4, 5, 9),
-                z: 0,
-                upright: true
-            };
-        },
-        stroke: (stage) => {
-            return {
-                tickLength: 1
-            };
-        }
-    },
-    broomrape:
-    {
-        system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
-        maxStage: 20,
-        parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
-        requireWatering: false,
-        growthCost: BigNumber.TWO,
-        growthRate: BigNumber.FIVE,
-        actions:
-        [
-            {}
-        ],
-        camera: (stage) => {
-            return {
-                scale: 8,
-                x: 0,
-                y: <number>saturate(stage / 4, 5, 9),
-                z: 0,
-                upright: true
-            };
-        },
-        stroke: (stage) => {
-            return {
-                tickLength: 1
-            };
-        }
-    }
 }
 
 const plantIDLookup =
@@ -5581,18 +5572,18 @@ var updateAvailability = () =>
     });
 }
 
-let floatingWipLabel = ui.createLatexLabel
-({
-    row: 0, column: 0,
-    rotation: -24,
-    horizontalOptions: LayoutOptions.CENTER,
-    verticalOptions: LayoutOptions.END,
-    // verticalTextAlignment: TextAlignment.CENTER,
-    margin: new Thickness(8, 40),
-    text: getLoc('wip'),
-    fontSize: 9,
-    textColor: Color.TEXT_MEDIUM
-});
+// let floatingWipLabel = ui.createLatexLabel
+// ({
+//     row: 0, column: 0,
+//     rotation: -24,
+//     horizontalOptions: LayoutOptions.CENTER,
+//     verticalOptions: LayoutOptions.END,
+//     // verticalTextAlignment: TextAlignment.CENTER,
+//     margin: new Thickness(8, 40),
+//     text: getLoc('wip'),
+//     fontSize: 9,
+//     textColor: Color.TEXT_MEDIUM
+// });
 
 var tick = (elapsedTime: number, multiplier: number) =>
 {
@@ -5636,8 +5627,8 @@ var tick = (elapsedTime: number, multiplier: number) =>
                 theory.invalidateQuaternaryValues();
                 break;
         }
-        floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
-        180, Easing.LINEAR);
+        // floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
+        // 180, Easing.LINEAR);
         managerLoadingInd.isRunning = manager.busy;
     }
     theory.invalidateSecondaryEquation();
@@ -5664,7 +5655,7 @@ var getEquationOverlay = () =>
         cascadeInputTransparent: false,
         children:
         [
-            floatingWipLabel,
+            // floatingWipLabel,
             managerLoadingInd,
             ui.createLatexLabel
             ({
@@ -6510,7 +6501,7 @@ let createColonyViewMenu = (colony: Colony) =>
                 tmpTitle = getColonyTitleString(colony, false, true);
                 tmpCmt = updateCommentary();
                 plantStats.text = Localization.format(getLoc('plantStats'),
-                track.name ? Localization.format(getLoc('narrationTrack'),
+                track?.name ? Localization.format(getLoc('narrationTrack'),
                 cmtStage, track.name) : cmtStage, tmpCmt,
                 colony.synthRate, plantData[colony.id].growthRate,
                 plantData[colony.id].growthCost, colony.sequence.length);

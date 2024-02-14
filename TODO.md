@@ -179,6 +179,8 @@ you have to dig really deep to find the underlying systems behind the plants
 
 - [ ] Ginger
   - [ ] How to not make leaves slow down too much
+  - [ ] Pruning kills all leaves and the upper body
+  - [ ] Harvest spawns a new node? Probably not
 
 - [ ] Sunflower
 
