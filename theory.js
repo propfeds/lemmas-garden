@@ -2719,10 +2719,6 @@ class ColonyManager {
                     };
             }
         }
-        // Loop back for easy harvest spamming
-        if (index == this.colonies[plot].length - 1 && plot == plotIdx) {
-            slotIdx[plotIdx] = 0;
-        }
         if (this.gangsta && plot == this.gangsta[0]) {
             if (this.gangsta[1] > index)
                 --this.gangsta[1];
@@ -2745,12 +2741,17 @@ class ColonyManager {
         this.colonies[plot].splice(index, 1);
         // Re-establish parasitic links
         this.linkParasites(plot);
+        let len = this.colonies[plot].length;
+        if (len > 1) {
+            let i = slotIdx[plot];
+            do
+                --slotIdx[plot];
+            while (this.colonies[plot][slotIdx[plot]] &&
+                !isColonyVisible(manager.colonies[plot][slotIdx[plot]]));
+            if (slotIdx[plot] < 0)
+                slotIdx[plot] = i;
+        }
         if (plot == plotIdx) {
-            let len = this.colonies[plotIdx].length;
-            if (len > 1) {
-                while (!isColonyVisible(this.colonies[plot][slotIdx[plot]]))
-                    slotIdx[plot] = (slotIdx[plot] + 1) % len;
-            }
             selectedColony = this.colonies[plotIdx][slotIdx[plotIdx]];
             renderer.colony = selectedColony;
         }
@@ -4490,36 +4491,50 @@ var getCurrencyBarDelegate = () => {
         let seqMenu = createColonyViewMenu(selectedColony);
         seqMenu.show();
     }, () => manager.colonies[plotIdx].length > 0, getLoc('viewColony'), 12);
-    let switchbackBtn = createLabelBtn({
+    let plotUpBtn = createLabelBtn({
         column: 0,
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
+        --plotIdx;
         let len = manager.colonies[plotIdx].length;
         if (len > 1) {
-            do
-                slotIdx[plotIdx] = (slotIdx[plotIdx] - 1 + len) % len;
-            while (!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]));
+            while (manager.colonies[plotIdx][slotIdx[plotIdx]] &&
+                !isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]))
+                --slotIdx[plotIdx];
+            if (slotIdx[plotIdx] < 0)
+                slotIdx[plotIdx] = 0;
         }
         else
             slotIdx[plotIdx] = 0;
         selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
         renderer.colony = selectedColony;
-    }, () => manager.colonies[plotIdx].length > 1, '↑');
-    let switchBtn = createLabelBtn({
+        theory.invalidatePrimaryEquation();
+        theory.invalidateSecondaryEquation();
+        theory.invalidateQuaternaryValues();
+        updateAvailability();
+    }, () => plotIdx > 0, '↑');
+    let plotDownBtn = createLabelBtn({
         column: 1,
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
+        ++plotIdx;
         let len = manager.colonies[plotIdx].length;
         if (len > 1) {
-            do
-                slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
-            while (!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]));
+            while (manager.colonies[plotIdx][slotIdx[plotIdx]] &&
+                !isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]))
+                --slotIdx[plotIdx];
+            if (slotIdx[plotIdx] < 0)
+                slotIdx[plotIdx] = 0;
         }
         else
             slotIdx[plotIdx] = 0;
         selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
         renderer.colony = selectedColony;
-    }, () => manager.colonies[plotIdx].length > 1, '↓');
+        theory.invalidatePrimaryEquation();
+        theory.invalidateSecondaryEquation();
+        theory.invalidateQuaternaryValues();
+        updateAvailability();
+    }, () => plotIdx < manager.length - 1, '↓');
     controlStack.children[0].children =
         [
             examineBtn,
@@ -4529,8 +4544,8 @@ var getCurrencyBarDelegate = () => {
                 columnSpacing: 7,
                 columnDefinitions: ['50*', '50*'],
                 children: [
-                    switchbackBtn,
-                    switchBtn
+                    plotUpBtn,
+                    plotDownBtn
                 ]
             })
         ];
@@ -4680,8 +4695,15 @@ var getQuaternaryEntries = () => {
                 let column = '';
                 for (let j = 0; j < manager.colonies[i].length; ++j) {
                     let c = manager.colonies[i][j];
-                    let plantName = getLoc('plants')[c.id]?.nameShort ?? '#';
-                    column += `${plantName}${getSubscript(c.stage)}`;
+                    if (isColonyVisible(c)) {
+                        let plantName = getLoc('plants')[c.id]?.nameShort ??
+                            '#';
+                        let cStr = `${plantName}${getSubscript(c.stage)}`;
+                        if (i == plotIdx && j == slotIdx[plotIdx])
+                            column += `(${cStr})`;
+                        else
+                            column += cStr;
+                    }
                 }
                 quaternaryEntries[i].value = column;
             }
@@ -5931,39 +5953,32 @@ var postPublish = () => {
 var canResetStage = () => false;
 var getResetStageMessage = () => getLoc('resetRenderer');
 var resetStage = () => renderer.reset(true);
-var canGoToPreviousStage = () => plotIdx > 0;
+var canGoToPreviousStage = () => slotIdx[plotIdx] > 0;
 var goToPreviousStage = () => {
-    --plotIdx;
-    let len = manager.colonies[plotIdx].length;
-    if (len > 1) {
-        while (!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]])) {
-            slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
-        }
-    }
-    else
-        slotIdx[plotIdx] = 0;
+    let i = slotIdx[plotIdx];
+    do
+        --slotIdx[plotIdx];
+    while (manager.colonies[plotIdx][slotIdx[plotIdx]] &&
+        !isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]));
+    if (slotIdx[plotIdx] < 0)
+        slotIdx[plotIdx] = i;
     selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
     renderer.colony = selectedColony;
-    theory.invalidatePrimaryEquation();
-    theory.invalidateSecondaryEquation();
-    updateAvailability();
+    theory.invalidateQuaternaryValues();
 };
-var canGoToNextStage = () => plotIdx < manager.length - 1;
+var canGoToNextStage = () => slotIdx[plotIdx] <
+    manager.colonies[plotIdx].length - 1;
 var goToNextStage = () => {
-    ++plotIdx;
-    let len = manager.colonies[plotIdx].length;
-    if (len > 1) {
-        while (!isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]])) {
-            slotIdx[plotIdx] = (slotIdx[plotIdx] + 1) % len;
-        }
-    }
-    else
-        slotIdx[plotIdx] = 0;
+    let i = slotIdx[plotIdx];
+    do
+        ++slotIdx[plotIdx];
+    while (manager.colonies[plotIdx][slotIdx[plotIdx]] &&
+        !isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]));
+    if (slotIdx[plotIdx] > manager.colonies[plotIdx].length - 1)
+        slotIdx[plotIdx] = i;
     selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
     renderer.colony = selectedColony;
-    theory.invalidatePrimaryEquation();
-    theory.invalidateSecondaryEquation();
-    updateAvailability();
+    theory.invalidateQuaternaryValues();
 };
 // Copied from the ol Oiler's Formula
 let bigStringify = (_, val) => {
