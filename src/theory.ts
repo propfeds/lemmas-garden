@@ -151,9 +151,10 @@ harvested for the first time.`,
         colony: `{0} of {1}, stage {2}`,
         colonyWMaxStg: `{0} of {1}, stage {2}/{3}`,
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
-        colonyStats: `Energy\\colon\\enspace {0} +{1}/s\\\\
-Growth\\colon\\enspace {2}/{3} +{4}/s\\\\
-Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
+        colonyStats: `\\text{{Energy\\colon\\enspace {0} +{1}/s}}\\\\
+\\text{{Growth\\colon\\enspace {2}/{3} +{4}/s}}\\\\
+\\text{{Profit\\colon\\enspace {5}p}}\\\\
+\\text{{({6}/{7}) {8}}}`,
         dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}\\\\{5}',
         dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\{5}',
         hacks: 'Hax',
@@ -732,7 +733,7 @@ $: aligns the turtle's up vector closest to vertical.
             intro:
             [
                 {
-                    title: `Lemma's garden`,
+                    title: `Proven untrusted`,
                     contents:
 `Not one of my students, are you?
 Surprised to see somebody visit this late,
@@ -928,6 +929,32 @@ let getSmallBtnSize = (width: number): number =>
 let getProgBarSize = (width: number): number =>
 {
     return getSmallBtnSize(width) / 2;
+}
+
+let getNavColumnDefs = (width: number): string[] =>
+{
+    // if(width >= 1080)
+    //     return 80;
+    if(width >= 540)    // 25%
+        return ['30*', '90*', '30*', '50*'];
+    if(width >= 450)    // 30%
+        return ['28*', '84*', '28*', '60*'];
+
+    // 35%?
+    return ['25*', '75*', '25*', '75*'];
+}
+
+let getActBarColumnDefs = (width: number): string[] =>
+{
+    // if(width >= 1080)
+    //     return 80;
+    if(width >= 540)    // 25%
+        return ['75*', '25*'];
+    if(width >= 450)    // 30%
+        return ['70*', '30*'];
+
+    // 35%?
+    return ['65*', '35*'];
 }
 
 let isColonyVisible = (c: Colony) => c.sequence.length > 1 ||
@@ -5038,6 +5065,53 @@ isAvailable: () => boolean, text: string, fontSize: number = 14): Frame =>
     return frame;
 }
 
+let createNakedLabelBtn = (params: {[x: string]: any}, callback: () => void,
+isAvailable: () => boolean, text: string, fontSize: number = 14): Grid =>
+{
+    let triggerable = true;
+    let frame = ui.createGrid
+    ({
+        children:
+        [
+            ui.createLatexLabel
+            ({
+                isVisible: isAvailable,
+                text,
+                horizontalTextAlignment: TextAlignment.CENTER,
+                verticalTextAlignment: TextAlignment.CENTER,
+                textColor: Color.TEXT,
+                fontSize
+            }),
+        ],
+        ...params
+    });
+    frame.onTouched = (e: TouchEvent) =>
+    {
+        if(e.type == TouchType.PRESSED)
+        {
+            (<LatexLabel>frame.children[0]).textColor = Color.TEXT_MEDIUM;
+        }
+        else if(e.type.isReleased())
+        {
+            (<LatexLabel>frame.children[0]).textColor = Color.TEXT;
+            if(triggerable && isAvailable())
+            {
+                Sound.playClick();
+                callback();
+            }
+            else
+                triggerable = true;
+        }
+        else if(e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
+        e.x > frame.width || e.y > frame.height))
+        {
+            (<LatexLabel>frame.children[0]).textColor = Color.TEXT;
+            triggerable = false;
+        }
+    };
+    return frame;
+}
+
 let createHesitantSwitch = (params: {[x: string]: any}, callback: () => void,
 isToggled: boolean | (() => boolean)) =>
 {
@@ -5647,17 +5721,88 @@ let managerLoadingInd = ui.createActivityIndicator
     isRunning: manager.busy
 });
 
+let canGTPS = () => slotIdx[plotIdx] > 0;
+
+let GTPS = () =>
+{
+    let i = slotIdx[plotIdx];
+    do
+        --slotIdx[plotIdx];
+    while(manager.colonies[plotIdx][slotIdx[plotIdx]] &&
+    !isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]))
+    if(slotIdx[plotIdx] < 0)
+        slotIdx[plotIdx] = i;
+
+    selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
+    renderer.colony = selectedColony;
+
+    theory.invalidateQuaternaryValues();
+};
+
+let canGTNS = () => slotIdx[plotIdx] < manager.colonies[plotIdx].length - 1;
+
+let GTNS = () =>
+{
+    let i = slotIdx[plotIdx];
+    do
+        ++slotIdx[plotIdx];
+    while(manager.colonies[plotIdx][slotIdx[plotIdx]] &&
+    !isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]))
+    if(slotIdx[plotIdx] > manager.colonies[plotIdx].length - 1)
+        slotIdx[plotIdx] = i;
+
+    selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
+    renderer.colony = selectedColony;
+
+    theory.invalidateQuaternaryValues();
+};
+
+let switchLeftBtn = createNakedLabelBtn
+({
+    row: 1, column: 0,
+    verticalOptions: LayoutOptions.FILL
+}, GTPS, canGTPS, '←');
+// (<LatexLabel>switchLeftBtn.children[0]).horizontalTextAlignment =
+// TextAlignment.START;
+// (<LatexLabel>switchLeftBtn.children[0]).horizontalOptions = LayoutOptions.START;
+// (<LatexLabel>switchLeftBtn.children[0]).margin = new Thickness(5, 0, 0, 0);
+
+let switchRightBtn = createNakedLabelBtn
+({
+    row: 1, column: 2,
+    verticalOptions: LayoutOptions.FILL
+}, GTNS, canGTNS, '→');
+// (<LatexLabel>switchRightBtn.children[0]).horizontalTextAlignment =
+// TextAlignment.END;
+// (<LatexLabel>switchRightBtn.children[0]).horizontalOptions = LayoutOptions.END;
+
 var getEquationOverlay = () =>
 {
     let result = ui.createGrid
     ({
-        // rowDefinitions: ['1*', '1*'],
-        // columnDefinitions: ['68*', '32*'],
         inputTransparent: true,
         cascadeInputTransparent: false,
         children:
         [
             // floatingWipLabel,
+            ui.createGrid
+            ({
+                row: 0, column: 0,
+                columnDefinitions: getNavColumnDefs(ui.screenWidth),
+                rowDefinitions: ['1*', '2*', '1*'],
+                verticalOptions: LayoutOptions.FILL,
+                inputTransparent: true,
+                cascadeInputTransparent: false,
+                children:
+                [
+                    // ui.createBox({row: 0, column: 0}),
+                    // ui.createBox({row: 1, column: 1}),
+                    // ui.createBox({row: 2, column: 2}),
+                    // ui.createBox({row: 1, column: 3}),
+                    switchLeftBtn,
+                    switchRightBtn,
+                ]
+            }),
             managerLoadingInd,
             ui.createLatexLabel
             ({
@@ -5696,7 +5841,7 @@ var getEquationOverlay = () =>
             ui.createGrid
             ({
                 row: 0, column: 0,
-                columnDefinitions: ['68*', '32*'],
+                columnDefinitions: getActBarColumnDefs(ui.screenWidth),
                 verticalOptions: () => actionPanelOnTop ?
                 LayoutOptions.START : LayoutOptions.END,
                 inputTransparent: true,
@@ -5730,7 +5875,7 @@ var getEquationOverlay = () =>
                         ]
                     }),
                 ]
-            })
+            }),
         ]
     });
     return result;
@@ -5926,8 +6071,8 @@ var getSecondaryEquation = () =>
                 manager.actionGangsta[0] == plotIdx &&
                 manager.actionGangsta[1] == slotIdx[plotIdx]) ?
                 getLoc('status').actions[manager.actionGangsta[2]] : '';
-                result = `\\text{${getColonyTitleString(c)}\\\\
-                ${Localization.format(getLoc('colonyStats'),
+                result = `\\begin{array}{c}\\text{${getColonyTitleString(c)}}
+                \\\\${Localization.format(getLoc('colonyStats'),
                 // @ts-expect-error
                 c.energy, c.synthRate * BigNumber.from(insolationCoord),
                 c.growth, c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
@@ -5937,36 +6082,41 @@ var getSecondaryEquation = () =>
                 // @ts-expect-error
                 plantData[c.id].growthRate * BigNumber.from(growthCoord) :
                 BigNumber.ZERO, c.profit, slotIdx[plotIdx] + 1,
-                manager.colonies[plotIdx].length, status)}}`;
+                manager.colonies[plotIdx].length, status)}\\end{array}`;
                 break;
             case ColonyModes.SIMPLE:
-                result = `\\text{${getColonyTitleString(c)}}\\\\E=${c.energy},
-                \\enspace g=${c.growth}/${
-                c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+                result = `\\begin{array}{c}\\text{${getColonyTitleString(c)}}
+                \\\\E=${c.energy},\\enspace g=${c.growth}/
+                ${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                 // @ts-expect-error
                 plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
                 '∞'}\\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}
                 \\text{p}\\\\(${slotIdx[plotIdx] + 1}/${
-                manager.colonies[plotIdx].length})\\\\`;
+                manager.colonies[plotIdx].length})\\\\\\end{array}`;
                 break;
             case ColonyModes.LIST:
-                result = '\\text{';
+                result = '\\begin{array}{c}';
                 for(let i = 0; i < slotIdx[plotIdx]; ++i)
                 {
                     let d = manager.colonies[plotIdx][i];
-                    result += `${getColonyTitleString(d, true)}\\\\`;
+                    if(isColonyVisible(d))
+                        result += `\\text{${getColonyTitleString(d, true)}}
+                        \\\\`;
                 }
-                result += `\\underline{${getColonyTitleString(c, true)}}}\\\\
-                \\text{`;
+                result += `\\text{\\underline{${getColonyTitleString(c, true)}}}
+                \\\\`;
 
                 for(let i = slotIdx[plotIdx] + 1;
                 i < manager.colonies[plotIdx].length; ++i)
                 {
                     let d = manager.colonies[plotIdx][i];
-                    result += `${getColonyTitleString(d, true)}\\\\`;
+                    if(isColonyVisible(d))
+                        result += `\\text{${getColonyTitleString(d, true)}}
+                        \\\\`;
                 }
 
-                result += `}E=${c.energy},\\enspace\\pi =${c.profit}\\text{p}`;
+                result += `E=${c.energy},\\enspace\\pi =${c.profit}\\text{p}
+                \\end{array}`;
                 break;
             default:
                 result = '';
@@ -7615,42 +7765,7 @@ var getResetStageMessage = () => getLoc('resetRenderer');
 
 var resetStage = () => renderer.reset(true);
 
-var canGoToPreviousStage = () => slotIdx[plotIdx] > 0;
-
-var goToPreviousStage = () =>
-{
-    let i = slotIdx[plotIdx];
-    do
-        --slotIdx[plotIdx];
-    while(manager.colonies[plotIdx][slotIdx[plotIdx]] &&
-    !isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]))
-    if(slotIdx[plotIdx] < 0)
-        slotIdx[plotIdx] = i;
-
-    selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
-    renderer.colony = selectedColony;
-
-    theory.invalidateQuaternaryValues();
-};
-
-var canGoToNextStage = () => slotIdx[plotIdx] <
-manager.colonies[plotIdx].length - 1;
-
-var goToNextStage = () =>
-{
-    let i = slotIdx[plotIdx];
-    do
-        ++slotIdx[plotIdx];
-    while(manager.colonies[plotIdx][slotIdx[plotIdx]] &&
-    !isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]))
-    if(slotIdx[plotIdx] > manager.colonies[plotIdx].length - 1)
-        slotIdx[plotIdx] = i;
-
-    selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
-    renderer.colony = selectedColony;
-
-    theory.invalidateQuaternaryValues();
-};
+// go to prev next stage
 
 // Copied from the ol Oiler's Formula
 let bigStringify = (_: string | number, val: unknown) =>
