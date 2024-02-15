@@ -23,6 +23,7 @@ import { ImageSource } from './api/ui/properties/ImageSource';
 import { Keyboard } from './api/ui/properties/Keyboard';
 import { LayoutOptions } from './api/ui/properties/LayoutOptions';
 import { LineBreakMode } from './api/ui/properties/LineBreakMode';
+import { ScrollOrientation } from './api/ui/properties/ScrollOrientation';
 import { StackOrientation } from './api/ui/properties/StackOrientation';
 import { TextAlignment } from './api/ui/properties/TextAlignment';
 import { Thickness } from './api/ui/properties/Thickness';
@@ -94,8 +95,10 @@ const LOC_STRINGS =
         btnContents: 'Table of\nContents',
         btnPage: 'p. {0}',
 
-        actionConfirmDialogue: `You are about to perform a {0} on\\\\
+        actionConfirm: `You are about to perform a {0} on\\\\
 {4}.\\\\(plot {1}, {2}/{3})\\\\{5}\\\\\n\n\\\\{6}`,
+        bulkActionConfirm: `You are about to perform a {0} on all plants on\\\\
+plot {1}.\\\\\n\n\\\\{2}`,
 
         labelSave: 'Last saved: {0}s',
         labelSkip: 'Skip tutorial',
@@ -733,18 +736,19 @@ $: aligns the turtle's up vector closest to vertical.
             intro:
             [
                 {
-                    title: `Proven untrusted`,
+                    title: `Proven, untrusted`,
                     contents:
 `Not one of my students, are you?
 Surprised to see somebody visit this late,
-let alone urge me to let her use my ground.
+let alone urge me to let her plant on my ground?
 
-(Hum. This is not fine.)
+(Hum. This is not fine.
+But I can do something.)
 
-...Well then, welcome to... class.
-I've a plot here, just for you.
+...You're not in my classes yet,
+but I can spare a little plot here for you.
 Take one of my seeds, till the plot,
-we'll start in the morning.
+and we'll start in the morning.
 
 Tip: Tap on 'Upgrades' to acquire your first plot.`
                 },
@@ -4962,7 +4966,7 @@ let perfQuaternaryEntries = perfNames.map(element =>
 new QuaternaryEntry(element[1], null));
 
 let createImageBtn = (params: {[x: string]: any}, callback: () => void,
-isAvailable: () => boolean, image: ImageSource) =>
+isAvailable: () => boolean, image: ImageSource): Frame =>
 {
     let triggerable = true;
     let borderColor = () => isAvailable() ? Color.BORDER : Color.TRANSPARENT;
@@ -4971,7 +4975,7 @@ isAvailable: () => boolean, image: ImageSource) =>
         cornerRadius: 1,
         margin: new Thickness(2),
         padding: new Thickness(1),
-        hasShadow: true,
+        hasShadow: isAvailable,
         heightRequest: getImageSize(ui.screenWidth),
         widthRequest: getImageSize(ui.screenWidth),
         content: ui.createImage
@@ -5004,6 +5008,67 @@ isAvailable: () => boolean, image: ImageSource) =>
         }
         else if(e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
         e.x > frame.width || e.y > frame.height))
+        {
+            frame.borderColor = borderColor;
+            // frame.hasShadow = true;
+            triggerable = false;
+        }
+    };
+    return frame;
+}
+
+let createScrollBarImageBtn = (params: {[x: string]: any}, callback: () => void,
+heldCallback: () => void = null, isAvailable: () => boolean,
+image: ImageSource): Frame =>
+{
+    let triggerable = true;
+    let borderColor = () => isAvailable() ? Color.BORDER : Color.TRANSPARENT;
+    let frame = ui.createFrame
+    ({
+        cornerRadius: 1,
+        margin: new Thickness(2),
+        padding: new Thickness(1),
+        hasShadow: isAvailable,
+        heightRequest: getImageSize(ui.screenWidth),
+        widthRequest: getImageSize(ui.screenWidth),
+        content: ui.createImage
+        ({
+            source: image,
+            aspect: Aspect.ASPECT_FIT,
+            useTint: false
+        }),
+        borderColor,
+        ...params
+    });
+    frame.onTouched = (e: TouchEvent) =>
+    {
+        if(e.type == TouchType.PRESSED)
+        {
+            frame.borderColor = Color.TRANSPARENT;
+        }
+        else if(e.type == TouchType.LONGPRESS)
+        {
+            frame.borderColor = borderColor;
+            if(triggerable && isAvailable() && heldCallback)
+            {
+                Sound.playClick();
+                heldCallback();
+                // Prevent further callback
+                triggerable = false;
+            }
+        }
+        else if(e.type.isReleased())
+        {
+            frame.borderColor = borderColor;
+            if(triggerable && isAvailable())
+            {
+                Sound.playClick();
+                callback();
+            }
+            else
+                triggerable = true;
+        }
+        else if(e.type == TouchType.MOVED)
         {
             frame.borderColor = borderColor;
             // frame.hasShadow = true;
@@ -5142,10 +5207,18 @@ isToggled: boolean | (() => boolean)) =>
     return element;
 }
 
-const waterFrame = createImageBtn
+const waterFrame = createScrollBarImageBtn
 ({
     row: 0, column: 0,
 }, () => manager.water(selectedColony),
+() =>
+{
+    for(let i = 0; i < manager.colonies[plotIdx].length; ++i)
+    {
+        // Water also seeps into invisible colonies
+        manager.water(manager.colonies[plotIdx][i]);
+    }
+},
 () =>
 {
     let c = selectedColony;
@@ -5188,7 +5261,7 @@ const waterLabel = ui.createLatexLabel
     textColor: Color.TEXT_MEDIUM
 });
 
-const harvestFrame = createImageBtn
+const harvestFrame = createScrollBarImageBtn
 ({
     row: 0, column: 2,
 }, () =>
@@ -5201,6 +5274,22 @@ const harvestFrame = createImageBtn
     }
     else
         manager.queueAction(plotIdx, slotIdx[plotIdx], Actions.HARVEST);
+},
+() =>
+{
+    if(actionConfirm)
+    {
+        let menu = createBulkConfirmationMenu(plotIdx, Actions.HARVEST);
+        menu.show();
+    }
+    else
+    {
+        for(let i = manager.colonies[plotIdx].length - 1; i >= 0; --i)
+        {
+            if(isColonyVisible(manager.colonies[plotIdx][i]))
+                manager.queueAction(plotIdx, i, Actions.HARVEST);
+        }
+    }
 },
 () => true, game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
@@ -5216,7 +5305,7 @@ const harvestLabel = ui.createLatexLabel
     textColor: Color.TEXT_MEDIUM
 });
 
-const pruneFrame = createImageBtn
+const pruneFrame = createScrollBarImageBtn
 ({
     isVisible: () =>
     {
@@ -5237,7 +5326,7 @@ const pruneFrame = createImageBtn
     else
         manager.queueAction(plotIdx, slotIdx[plotIdx], Actions.PRUNE);
 },
-() => true, game.settings.theme == Theme.LIGHT ?
+null, () => true, game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png'));
 const pruneLabel = ui.createLatexLabel
@@ -5757,25 +5846,6 @@ let GTNS = () =>
     theory.invalidateQuaternaryValues();
 };
 
-let switchLeftBtn = createNakedLabelBtn
-({
-    row: 1, column: 0,
-    verticalOptions: LayoutOptions.FILL
-}, GTPS, canGTPS, '←');
-// (<LatexLabel>switchLeftBtn.children[0]).horizontalTextAlignment =
-// TextAlignment.START;
-// (<LatexLabel>switchLeftBtn.children[0]).horizontalOptions = LayoutOptions.START;
-// (<LatexLabel>switchLeftBtn.children[0]).margin = new Thickness(5, 0, 0, 0);
-
-let switchRightBtn = createNakedLabelBtn
-({
-    row: 1, column: 2,
-    verticalOptions: LayoutOptions.FILL
-}, GTNS, canGTNS, '→');
-// (<LatexLabel>switchRightBtn.children[0]).horizontalTextAlignment =
-// TextAlignment.END;
-// (<LatexLabel>switchRightBtn.children[0]).horizontalOptions = LayoutOptions.END;
-
 var getEquationOverlay = () =>
 {
     let result = ui.createGrid
@@ -5799,8 +5869,29 @@ var getEquationOverlay = () =>
                     // ui.createBox({row: 1, column: 1}),
                     // ui.createBox({row: 2, column: 2}),
                     // ui.createBox({row: 1, column: 3}),
-                    switchLeftBtn,
-                    switchRightBtn,
+                    createNakedLabelBtn
+                    ({
+                        row: 1, column: 0,
+                        verticalOptions: LayoutOptions.FILL
+                    }, GTPS, canGTPS, '←'),
+                    // createNakedLabelBtn
+                    // ({
+                    //     row: 1, column: 1,
+                    //     verticalOptions: LayoutOptions.FILL
+                    // }, () =>
+                    // {
+                    //     selectedColony = manager.colonies[plotIdx][slotIdx[
+                    //     plotIdx]];
+                    //     if(!selectedColony)
+                    //         return;
+                    //     let seqMenu = createColonyViewMenu(selectedColony);
+                    //     seqMenu.show();
+                    // }, () => manager.colonies[plotIdx].length > 0, ''),
+                    createNakedLabelBtn
+                    ({
+                        row: 1, column: 2,
+                        verticalOptions: LayoutOptions.FILL
+                    }, GTNS, canGTNS, '→'),
                 ]
             }),
             managerLoadingInd,
@@ -5841,6 +5932,7 @@ var getEquationOverlay = () =>
             ui.createGrid
             ({
                 row: 0, column: 0,
+                rowDefinitions: ['auto'],
                 columnDefinitions: getActBarColumnDefs(ui.screenWidth),
                 verticalOptions: () => actionPanelOnTop ?
                 LayoutOptions.START : LayoutOptions.END,
@@ -5848,31 +5940,36 @@ var getEquationOverlay = () =>
                 cascadeInputTransparent: false,
                 children:
                 [
-                    ui.createGrid
+                    ui.createScrollView
                     ({
-                        isVisible: () => plotIdx < plotPerma.level &&
-                        manager.colonies[plotIdx].length > 0,
                         row: 0, column: 0,
-                        margin: new Thickness(4),
-                        horizontalOptions: LayoutOptions.START,
-                        // verticalOptions: LayoutOptions.END,
-                        columnDefinitions:
-                        [
-                            'auto', 'auto',
-                            'auto', 'auto',
-                            'auto', 'auto'
-                        ],
-                        inputTransparent: true,
-                        cascadeInputTransparent: false,
-                        children:
-                        [
-                            waterFrame,
-                            waterLabel,
-                            harvestFrame,
-                            harvestLabel,
-                            pruneFrame,
-                            pruneLabel,
-                        ]
+                        orientation: ScrollOrientation.BOTH,
+                        content: ui.createGrid
+                        ({
+                            isVisible: () => plotIdx < plotPerma.level &&
+                            manager.colonies[plotIdx].length > 0,
+                            row: 0, column: 0,
+                            margin: new Thickness(4),
+                            horizontalOptions: LayoutOptions.START,
+                            // verticalOptions: LayoutOptions.END,
+                            columnDefinitions:
+                            [
+                                'auto', 'auto',
+                                'auto', 'auto',
+                                'auto', 'auto'
+                            ],
+                            inputTransparent: true,
+                            cascadeInputTransparent: false,
+                            children:
+                            [
+                                waterFrame,
+                                waterLabel,
+                                harvestFrame,
+                                harvestLabel,
+                                pruneFrame,
+                                pruneLabel,
+                            ]
+                        }),
                     }),
                 ]
             }),
@@ -6090,9 +6187,9 @@ var getSecondaryEquation = () =>
                 ${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                 // @ts-expect-error
                 plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
-                '∞'}\\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}
-                \\text{p}\\\\(${slotIdx[plotIdx] + 1}/${
-                manager.colonies[plotIdx].length})\\\\\\end{array}`;
+                '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{s},\\enspace\\pi =
+                ${c.profit}\\text{p}\\\\(${slotIdx[plotIdx] + 1}/
+                ${manager.colonies[plotIdx].length})\\\\\\end{array}`;
                 break;
             case ColonyModes.LIST:
                 result = '\\begin{array}{c}';
@@ -7377,7 +7474,7 @@ let createConfirmationMenu = (plot: number, index: number, id: number) =>
             [
                 ui.createLatexLabel
                 ({
-                    text: Localization.format(getLoc('actionConfirmDialogue'),
+                    text: Localization.format(getLoc('actionConfirm'),
                     getLoc('labelActions')[id], plot + 1, index + 1,
                     manager.colonies[plot].length,
                     getColonyTitleString(c, false, false, true),
@@ -7400,6 +7497,65 @@ let createConfirmationMenu = (plot: number, index: number, id: number) =>
                             {
                                 Sound.playClick();
                                 manager.queueAction(plot, index, id);
+                                menu.hide();
+                            }
+                        }),
+                        ui.createButton
+                        ({
+                            column: 1,
+                            text: Localization.get('GenPopupNo'),
+                            onClicked: () =>
+                            {
+                                Sound.playClick();
+                                menu.hide();
+                            }
+                        }),
+                    ]
+                })
+            ]
+        })
+    });
+    return menu;
+}
+
+let createBulkConfirmationMenu = (plot: number, id: number) =>
+{
+    let menu = ui.createPopup
+    ({
+        // isPeekable: true,
+        title: Localization.get('GenPopupConfirm'),
+        content: ui.createStackLayout
+        ({
+            children:
+            [
+                ui.createLatexLabel
+                ({
+                    text: Localization.format(getLoc('bulkActionConfirm'),
+                    getLoc('labelActions')[id], plot + 1,
+                    Localization.get('GenPopupContinue')),
+                    horizontalTextAlignment: TextAlignment.CENTER,
+                    margin: new Thickness(0, 15)
+                }),
+                ui.createGrid
+                ({
+                    columnDefinitions: ['1*', '1*'],
+                    // minimumHeightRequest: getBtnSize(ui.screenWidth),
+                    children:
+                    [
+                        ui.createButton
+                        ({
+                            column: 0,
+                            text: Localization.get('GenPopupYes'),
+                            onClicked: () =>
+                            {
+                                Sound.playClick();
+                                for(let i = manager.colonies[plot].length - 1;
+                                i >= 0; --i)
+                                {
+                                    if(isColonyVisible(manager.colonies[plot][i]
+                                    ))
+                                        manager.queueAction(plot, i, id);
+                                }
                                 menu.hide();
                             }
                         }),
