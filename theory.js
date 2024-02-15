@@ -76,8 +76,8 @@ const LOC_STRINGS = {
         btnPage: 'p. {0}',
         actionConfirm: `You are about to perform a {0} on\\\\
 {4}.\\\\(plot {1}, {2}/{3})\\\\{5}\\\\\n\n\\\\{6}`,
-        bulkActionConfirm: `You are about to perform a {0} on all plants on\\\\
-plot {1}.\\\\\n\n\\\\{2}`,
+        bulkActionConfirm: `You are about to perform a {0} on all plants in ` +
+            `plot {1}.\\\\\n\n\\\\{2}`,
         labelSave: 'Last saved: {0}s',
         labelSkip: 'Skip tutorial',
         labelWater: 'Water',
