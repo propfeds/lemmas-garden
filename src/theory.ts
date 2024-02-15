@@ -5021,7 +5021,10 @@ let createScrollBarImageBtn = (params: {[x: string]: any}, callback: () => void,
 heldCallback: () => void = null, isAvailable: () => boolean,
 image: ImageSource): Frame =>
 {
+    const bound = getImageSize(ui.screenWidth);
     let triggerable = true;
+    let origx: number = null;
+    let origy: number = null;
     let borderColor = () => isAvailable() ? Color.BORDER : Color.TRANSPARENT;
     let frame = ui.createFrame
     ({
@@ -5045,33 +5048,48 @@ image: ImageSource): Frame =>
         if(e.type == TouchType.PRESSED)
         {
             frame.borderColor = Color.TRANSPARENT;
+            if(origx == null)
+            {
+                origx = e.x;
+                origy = e.y;
+            }
         }
         else if(e.type == TouchType.LONGPRESS)
         {
             frame.borderColor = borderColor;
-            if(triggerable && isAvailable() && heldCallback)
+            if(triggerable && isAvailable() && heldCallback &&
+            !(Math.abs(e.x - origx) > bound || Math.abs(e.y - origy) > bound))
             {
                 Sound.playClick();
                 heldCallback();
                 // Prevent further callback
                 triggerable = false;
+                origx = null;
+                origy = null;
             }
         }
         else if(e.type.isReleased())
         {
             frame.borderColor = borderColor;
-            if(triggerable && isAvailable())
+            if(triggerable && isAvailable() && !(Math.abs(e.x - origx) > bound
+            || Math.abs(e.y - origy) > bound))
             {
                 Sound.playClick();
                 callback();
+                origx = null;
+                origy = null;
             }
             else
+            {
                 triggerable = true;
+                origx = null;
+                origy = null;
+            }
         }
-        else if(e.type == TouchType.MOVED)
+        else if(e.type == TouchType.MOVED && (Math.abs(e.x - origx) > bound ||
+        Math.abs(e.y - origy) > bound))
         {
             frame.borderColor = borderColor;
-            // frame.hasShadow = true;
             triggerable = false;
         }
     };
