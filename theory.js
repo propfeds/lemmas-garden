@@ -3883,8 +3883,9 @@ let createImageBtn = (params, callback, isAvailable, image) => {
     };
     return frame;
 };
-let createScrollBarImageBtn = (params, callback, heldCallback = null, isAvailable, image) => {
+let createScrollBarImageBtn = (params, callback, heldCallback = null, repeatable = false, isAvailable, image) => {
     const bound = getImageSize(ui.screenWidth);
+    let held = false;
     let triggerable = true;
     let origx = null;
     let origy = null;
@@ -3899,7 +3900,11 @@ let createScrollBarImageBtn = (params, callback, heldCallback = null, isAvailabl
         content: ui.createImage({
             source: image,
             aspect: Aspect.ASPECT_FIT,
-            useTint: false
+            useTint: () => {
+                if (heldCallback && repeatable && held)
+                    heldCallback();
+                return false;
+            }
         }),
         borderColor,
         ...params
@@ -3913,15 +3918,14 @@ let createScrollBarImageBtn = (params, callback, heldCallback = null, isAvailabl
             }
         }
         else if (e.type == TouchType.LONGPRESS) {
-            frame.borderColor = borderColor;
-            if (triggerable && isAvailable() && heldCallback &&
+            // frame.borderColor = borderColor;
+            if (heldCallback &&
                 !(Math.abs(e.x - origx) > bound || Math.abs(e.y - origy) > bound)) {
                 Sound.playClick();
                 heldCallback();
+                held = true;
                 // Prevent further callback
                 triggerable = false;
-                origx = null;
-                origy = null;
             }
         }
         else if (e.type.isReleased()) {
@@ -3930,18 +3934,18 @@ let createScrollBarImageBtn = (params, callback, heldCallback = null, isAvailabl
                 || Math.abs(e.y - origy) > bound)) {
                 Sound.playClick();
                 callback();
-                origx = null;
-                origy = null;
             }
             else {
                 triggerable = true;
-                origx = null;
-                origy = null;
             }
+            held = false;
+            origx = null;
+            origy = null;
         }
         else if (e.type == TouchType.MOVED && (Math.abs(e.x - origx) > bound ||
             Math.abs(e.y - origy) > bound)) {
             frame.borderColor = borderColor;
+            held = false;
             triggerable = false;
         }
     };
@@ -4050,14 +4054,8 @@ let createHesitantSwitch = (params, callback, isToggled) => {
 };
 const waterFrame = createScrollBarImageBtn({
     row: 0, column: 0,
-}, () => manager.water(selectedColony), () => {
-    for (let i = 0; i < manager.colonies[plotIdx].length; ++i) {
-        // Water also seeps into invisible colonies
-        manager.water(manager.colonies[plotIdx][i]);
-    }
-}, () => {
-    let c = selectedColony;
-    if (c && !c.wet)
+}, () => manager.water(selectedColony), () => manager.water(selectedColony), true, () => {
+    if (selectedColony && !selectedColony.wet)
         return true;
     return false;
 }, game.settings.theme == Theme.LIGHT ?
@@ -4111,7 +4109,7 @@ const harvestFrame = createScrollBarImageBtn({
                 manager.queueAction(plotIdx, i, 0 /* Actions.HARVEST */);
         }
     }
-}, () => true, game.settings.theme == Theme.LIGHT ?
+}, false, () => true, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png'));
 const harvestLabel = ui.createLatexLabel({
@@ -4138,7 +4136,7 @@ const pruneFrame = createScrollBarImageBtn({
     }
     else
         manager.queueAction(plotIdx, slotIdx[plotIdx], 1 /* Actions.PRUNE */);
-}, null, () => true, game.settings.theme == Theme.LIGHT ?
+}, null, false, () => true, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png'));
 const pruneLabel = ui.createLatexLabel({

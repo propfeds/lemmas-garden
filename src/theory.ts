@@ -5018,10 +5018,11 @@ isAvailable: () => boolean, image: ImageSource): Frame =>
 }
 
 let createScrollBarImageBtn = (params: {[x: string]: any}, callback: () => void,
-heldCallback: () => void = null, isAvailable: () => boolean,
-image: ImageSource): Frame =>
+heldCallback: () => void = null, repeatable: boolean = false,
+isAvailable: () => boolean, image: ImageSource): Frame =>
 {
     const bound = getImageSize(ui.screenWidth);
+    let held = false;
     let triggerable = true;
     let origx: number = null;
     let origy: number = null;
@@ -5038,7 +5039,12 @@ image: ImageSource): Frame =>
         ({
             source: image,
             aspect: Aspect.ASPECT_FIT,
-            useTint: false
+            useTint: () =>
+            {
+                if(heldCallback && repeatable && held)
+                    heldCallback();
+                return false;
+            }
         }),
         borderColor,
         ...params
@@ -5056,16 +5062,15 @@ image: ImageSource): Frame =>
         }
         else if(e.type == TouchType.LONGPRESS)
         {
-            frame.borderColor = borderColor;
-            if(triggerable && isAvailable() && heldCallback &&
+            // frame.borderColor = borderColor;
+            if(heldCallback &&
             !(Math.abs(e.x - origx) > bound || Math.abs(e.y - origy) > bound))
             {
                 Sound.playClick();
                 heldCallback();
+                held = true;
                 // Prevent further callback
                 triggerable = false;
-                origx = null;
-                origy = null;
             }
         }
         else if(e.type.isReleased())
@@ -5076,20 +5081,20 @@ image: ImageSource): Frame =>
             {
                 Sound.playClick();
                 callback();
-                origx = null;
-                origy = null;
             }
             else
             {
                 triggerable = true;
-                origx = null;
-                origy = null;
             }
+            held = false;
+            origx = null;
+            origy = null;
         }
         else if(e.type == TouchType.MOVED && (Math.abs(e.x - origx) > bound ||
         Math.abs(e.y - origy) > bound))
         {
             frame.borderColor = borderColor;
+            held = false;
             triggerable = false;
         }
     };
@@ -5229,18 +5234,10 @@ const waterFrame = createScrollBarImageBtn
 ({
     row: 0, column: 0,
 }, () => manager.water(selectedColony),
+() => manager.water(selectedColony), true,
 () =>
 {
-    for(let i = 0; i < manager.colonies[plotIdx].length; ++i)
-    {
-        // Water also seeps into invisible colonies
-        manager.water(manager.colonies[plotIdx][i]);
-    }
-},
-() =>
-{
-    let c = selectedColony;
-    if(c && !c.wet)
+    if(selectedColony && !selectedColony.wet)
         return true;
     return false;
 },
@@ -5308,7 +5305,7 @@ const harvestFrame = createScrollBarImageBtn
                 manager.queueAction(plotIdx, i, Actions.HARVEST);
         }
     }
-},
+}, false,
 () => true, game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png'));
@@ -5344,7 +5341,7 @@ const pruneFrame = createScrollBarImageBtn
     else
         manager.queueAction(plotIdx, slotIdx[plotIdx], Actions.PRUNE);
 },
-null, () => true, game.settings.theme == Theme.LIGHT ?
+null, false, () => true, game.settings.theme == Theme.LIGHT ?
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
 ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png'));
 const pruneLabel = ui.createLatexLabel
