@@ -75,7 +75,7 @@ const LOC_STRINGS = {
         btnContents: 'Table of\nContents',
         btnPage: 'p. {0}',
         actionConfirm: `You are about to perform a {0} on\\\\
-{4}.\\\\(plot {1}, {2}/{3})\\\\{5}\\\\\n\n\\\\{6}`,
+{4}.\\\\(plot {1}, {2})\\\\{5}\\\\\n\n\\\\{6}`,
         bulkActionConfirm: `You are about to perform a {0} on all plants in ` +
             `plot {1}.\\\\\n\n\\\\{2}`,
         labelSave: 'Last saved: {0}s',
@@ -124,8 +124,8 @@ straight line will be drawn.`,
 limit.`,
         menuAutoWater: 'Watering schedules',
         labelMaxStage: 'Stopping stage',
-        labelAutoWaterDesc: `Scheduling for a species is unlocked after it is
-harvested for the first time.`,
+        labelAutoWaterDesc: `Scheduling is unlocked for a species after 
+harvesting it for the first time.`,
         colony: `{0} of {1}, stage {2}`,
         colonyWMaxStg: `{0} of {1}, stage {2}/{3}`,
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
@@ -200,8 +200,8 @@ Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/s.`,
                         index: [0, 1, 4, 5, 8, 12],
                         0: `(Why is this seed called an axiom? What is the
 second parameter for?\\\\I must wait for her return.)`,
-                        1: `My dear I am back! Rule number... one!\\\\The seed
-begins to crack, and there's a *timer* on it.`,
+                        1: `I am back! Rule number... one:\\\\The seed begins to
+crack, and there's a 'timer' on it until something happens.`,
                         4: `Rule number 1 fails, so rule number 2 enacts:\\\\A
 little stem rises, and there's a tiny pair of leaves on it.`,
                         5: `Rules 1, 3, and 4, all at the same time.`,
@@ -358,9 +358,13 @@ seeder, you know. Watch for the new one coming right near ya.`
                     }
                 ]
             },
+            broomrape: {
+                name: 'Broomrape',
+                nameShort: 'Br',
+            },
             arrow: {
                 name: '(Test) Arrow weed',
-                nameShort: 'A',
+                nameShort: 'Ar',
                 info: 'Not balanced for regular play.',
                 LsDetails: `The symbol A represents a rising shoot (apex), ` +
                     `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
@@ -939,7 +943,7 @@ for (let i = 1; i <= 400; ++i) {
 const dandelionSpawner = {
     id: 'dandelion',
     schedule: dandelionSchedule,
-    population: (index) => 1,
+    population: (index) => 2 + gameRNG.nextInt % 2,
     plot: () => gameRNG.nextInt % nofPlots
 };
 const broomrapeSpawner = {
@@ -2690,6 +2694,8 @@ class ColonyManager {
         };
         if (plantData[id].dailyIncome)
             c.ddReserve = BigNumber.ZERO;
+        if (plantData[id].propagation)
+            c.propCnt = 0;
         let stats = this.calculateStats(c);
         c.synthRate = stats.synthRate;
         c.profit = stats.profit;
@@ -3123,12 +3129,13 @@ class ColonyManager {
         c.growth -= plantData[c.id].growthCost *
             // @ts-expect-error
             BigNumber.from(c.sequence.length);
-        if (!c.synthRate.isZero) {
-            // @ts-expect-error
-            c.diReserve += c.growth / c.synthRate;
-            // @ts-expect-error
-            c.energy -= c.growth;
-        }
+        // if(!c.synthRate.isZero)
+        // {
+        //     // @ts-expect-error
+        //     c.diReserve += c.growth / c.synthRate;
+        //     // @ts-expect-error
+        //     c.energy -= c.growth;
+        // }
         // Assign new stage's stats
         c.sequence = this.deriveTask.derivation;
         c.params = this.deriveTask.parameters;
@@ -3172,11 +3179,12 @@ class ColonyManager {
             this.water(c);
         // Propagate
         let prop = plantData[c.id].propagation;
-        if (prop && c.stage === (prop.stage ?? maxStage)) {
-            let pop = Math.round(c.population * prop.rate);
+        if (prop && c.stage == prop.stage[c.propCnt]) {
+            let pop = Math.round(c.population * prop.rate[c.propCnt]);
             let target = this.findVacantPlot(this.gangsta[0], prop.priority);
             if (target !== null)
                 this.addColony(target, prop.id ?? c.id, pop, this.gangsta);
+            ++c.propCnt;
         }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
@@ -3376,7 +3384,8 @@ const plantData = {
         growthRate: BigNumber.from(1.5),
         growthCost: BigNumber.from(2.5),
         propagation: {
-            rate: 1 / 3,
+            stage: [40],
+            rate: [1 / 3],
             priority: 'c'
         },
         actions: [
@@ -3523,8 +3532,8 @@ const plantData = {
         growthCost: BigNumber.TEN,
         stagelyIncome: BigNumber.ONE,
         propagation: {
-            stage: 27,
-            rate: 1 / 2,
+            stage: [27],
+            rate: [1 / 2],
             priority: 'c'
         },
         actions: [
@@ -3586,22 +3595,27 @@ const plantData = {
     broomrape: {
         system: new LSystem('B(0.1, timer)', [
             // Invisibility regenerates when the shoots go up
-            'B(r, t) > F(l, lim): t<timer = B(1.2*r-0.01*r^2, t+1)',
+            'B(r, t) > F(l, lim): t<timer = B(1.2*r-0.01*r^2, t+2)',
             // Cheekily goes back to hiding
-            'B(r, t) > F(l, lim) = B(r-18, t)%',
+            'B(r, t) > F(l, lim) = B(0.1, t)%',
             'B(r, t): t>0 = B(1.2*r-0.01*r^2, t-1)',
-            'B(r, t) = B(r, t)F(0.1, 10)'
+            'B(r, t) = B(r, t)I(12)',
+            'I(t): t>0 = F(0.05, 0.5)[-K(0)]/(137.508)I(t-1)',
+            'K(t): t<9 = K(t+1)',
+            'K(t) = O(1)',
+            'O(s) = O(s)',
+            'F(l, lim): l<lim = F(l+0.05, lim)',
         ], 30, 0, '', '+-&^/\\T', 0, {
-            'timer': '20'
+            'timer': '30'
         }, [
             // models
             ''
         ]),
-        maxStage: 125,
+        maxStage: 140,
         parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
         requireWatering: false,
-        growthRate: BigNumber.TEN,
-        growthCost: BigNumber.from(20),
+        growthRate: BigNumber.NINE,
+        growthCost: BigNumber.from(24),
         actions: [
             {
                 symbols: new Set('K')
