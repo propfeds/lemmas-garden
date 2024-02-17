@@ -1086,7 +1086,9 @@ for(let i = 1; i <= 400; ++i)
     if(leap)
         hopleekSchedule.push(yearStartLookup[i-1] + 60);
     if(i&1)
-        broomrapeSchedule.push(yearStartLookup[i] + 300);
+        broomrapeSchedule.push(yearStartLookup[i] + 301);
+    else
+        broomrapeSchedule.push(yearStartLookup[i] + 350);
     dandelionSchedule.push(yearStartLookup[i] + 90);
 }
 
@@ -1102,7 +1104,8 @@ const broomrapeSpawner: Spawner =
 {
     id: 'broomrape',
     schedule: broomrapeSchedule,
-    population: (index) => Math.min(index + 2, 7) + gameRNG.nextInt % 4,
+    population: (index) => Math.min(Math.floor(index/2) + 1, 4) +
+    gameRNG.nextInt % 2,
     plot: () => 0
 }
 
@@ -4319,7 +4322,7 @@ const permaCosts =
 ];
 
 const taxRate = BigNumber.from(.12);
-const tauRate = BigNumber.TWO;
+const tauRate = BigNumber.ONE;
 const pubCoef = BigNumber.from(2/3);
 // @ts-expect-error
 const pubExp = BigNumber.from(.15) / tauRate;
@@ -4327,10 +4330,11 @@ const pubExp = BigNumber.from(.15) / tauRate;
 var getPublicationMultiplier = (tau: BigNumber) => pubCoef *
 // @ts-expect-error
 tau.max(BigNumber.ONE).pow(pubExp *
-    // @ts-expect-error
-tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
+// @ts-expect-error
+(BigNumber.TWO * (tau + BigNumber.ONE).log() + BigNumber.ONE).log());
 var getPublicationMultiplierFormula = (symbol: string) => `\\frac{2}{3}\\times
-{${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
+{${symbol}}^{${pubExp.toString(2)}\\times h},\\quad
+h=\\ln{(2\\ln{(${symbol}+1)}+1)}`;
 
 const plantData: {[key: string]: Plant} =
 {
@@ -6013,7 +6017,18 @@ var getCurrencyBarDelegate = () =>
     let tauLabel = ui.createLatexLabel
     ({
         row: 0, column: 0,
-        text: () => Utils.getMath(`${theory.tau}${theory.latexSymbol}`),
+        text: () => 
+        {
+            if(theory.publicationUpgrade.level && theory.canPublish)
+            {
+                // @ts-expect-error
+                taxCurrency.value = getCurrencyFromTau(theory.tau)[0] * taxRate;
+                return Utils.getMath(`${theory.tau}${theory.latexSymbol}
+                \\enspace (${taxCurrency.symbol} =
+                ${taxCurrency.value}\\text{${currency.symbol}})`);
+            }
+            return Utils.getMath(`${theory.tau}${theory.latexSymbol}`);
+        },
         heightRequest: getImageSize(ui.screenWidth),
         // margin: new Thickness(0, 2, 0, 0),
         fontSize: 12,
@@ -6023,18 +6038,7 @@ var getCurrencyBarDelegate = () =>
     let pennyLabel = ui.createLatexLabel
     ({
         row: 0, column: 1,
-        text: () =>
-        {
-            if(theory.publicationUpgrade.level && theory.canPublish)
-            {
-                // @ts-expect-error
-                taxCurrency.value = getCurrencyFromTau(theory.tau)[0] * taxRate;
-                return Utils.getMath(`${currency.value}
-                \\text{${currency.symbol}}\\enspace (${taxCurrency.symbol} =
-                ${taxCurrency.value}\\text{${currency.symbol}})`);
-            }
-            return Utils.getMath(`${currency.value}\\text{${currency.symbol}}`);
-        },
+        text: () => Utils.getMath(`${currency.value}\\text{p}`),
         heightRequest: getImageSize(ui.screenWidth),
         // margin: new Thickness(0, 2, 0, 0),
         fontSize: 12,
@@ -6173,9 +6177,8 @@ var getSecondaryEquation = () =>
         if(plotIdx < plotPerma.level)
         {
             let taxInfo = `\\text{${getLoc('pubTax')}}\\\\
-            T_{\\text{p}}=${taxRate}\\times\\max\\text{p}`;
-            let tauInfo = `${theory.latexSymbol}=\\max\\text{p}^
-            ${tauRate.toString(0)}`;
+            T_{\\text{p}}=${taxRate}\\times ${theory.latexSymbol}`;
+            let tauInfo = `${theory.latexSymbol}=\\max\\text{p}`;
             return `\\begin{array}{c}${taxInfo}\\\\\\\\${tauInfo}\\end{array}`;
         }
         // let plotCost = plotCosts.getCost(plotIdx);
