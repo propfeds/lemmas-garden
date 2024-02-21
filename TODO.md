@@ -172,9 +172,11 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Or maybe repelled by calendula and basil?
 
 - [ ] Broomrape
-  - [ ] Schedule
+  - [x] Schedule
     - Once per 2 years? Doesn't it make broomrape faster than hopleek?
-  - [ ] Propagation method
+  - [x] Propagation method
+  - [ ] Models
+  - [ ] Narrations
   - [ ] Get into people's shoes
 
 - [ ] Ginger

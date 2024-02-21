@@ -1087,12 +1087,12 @@ for(let i = 1; i <= 400; ++i)
         hopleekSchedule.push(yearStartLookup[i-1] + 60);
 
     let b = i%4;
-    if(b == 1)  // Year 2, 6, 10
-        broomrapeSchedule.push(yearStartLookup[i] + 301);
-    else if(b == 3) // Year 4, 8, 12
-        broomrapeSchedule.push(yearStartLookup[i] + 364);
+    if(b == 1 || b == 3)  // Year 2, 4, 6, 8, 10
+        broomrapeSchedule.push(yearStartLookup[i] + 105);
+    // else if(b == 3) // Year 4, 8, 12
+    //     broomrapeSchedule.push(yearStartLookup[i] + 364);
 
-    dandelionSchedule.push(yearStartLookup[i] + 90);
+    dandelionSchedule.push(yearStartLookup[i] + 91);
 }
 
 const dandelionSpawner: Spawner =
@@ -3411,10 +3411,10 @@ class ColonyManager
     {
         if(!colony.wet)
         {
+            let amount = BigNumber.from(Math.min(colony.sequence.length,
+            waterScale * Math.max(colony.stage, 1)));
             // @ts-expect-error
-            colony.energy += plantData[colony.id].growthCost *
-            // @ts-expect-error
-            BigNumber.from(colony.stage).max(BigNumber.ONE) * waterAmount;
+            colony.energy += plantData[colony.id].growthCost * amount;
             colony.wet = true;
         }
     }
@@ -3661,7 +3661,7 @@ class ColonyManager
                     if(notMature && c.growth >= plantData[c.id].growthCost *
                     // @ts-expect-error
                     BigNumber.from(c.sequence.length) &&
-                    (c.wet || !plantData[c.id].requireWatering))
+                    (c.wet || !plantData[c.id].requiresWater))
                     {
                         if(!this.gangsta)
                             this.gangsta = [i, j];
@@ -4264,7 +4264,7 @@ interface Plant
     system: LSystem;
     maxStage?: number;
     parasite?: Set<string>;
-    requireWatering: boolean;
+    requiresWater: boolean;
     growthRate: BigNumber;
     growthCost: BigNumber;
     dailyIncome?: boolean;
@@ -4308,7 +4308,7 @@ const hourLength = dayLength / 24;
 
 const nofPlots = 6;
 const maxColoniesPerPlot = 4;
-const waterAmount = BigNumber.from(1/2);
+const waterScale = 1/2;
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(500, Math.log2(80)));
 const plantUnlocks = ['sprout', 'calendula', 'basil', 'campion'];
@@ -4357,7 +4357,7 @@ const plantData: {[key: string]: Plant} =
             '~> L(s) = {F(s/4)T(4*s)[\\(90-480*s)&F(s/6).&(30)F(s/3).^(60)F(s/3).^(30)F(s/3).^(30)F(s/3).^(30)F(s/6).][F(s)..].[/(90-480*s)^F(s/6).^(30)F(s/3).&(60)F(s/3).&(30)F(s/3).&(30)F(s/3).&(30)F(s/6).][F(s)..]}',
         ]),
         maxStage: 12,
-        requireWatering: true,
+        requiresWater: true,
         growthRate: BigNumber.from(0.3),
         growthCost: BigNumber.from(0.6),
         actions:
@@ -4418,7 +4418,7 @@ const plantData: {[key: string]: Plant} =
             '~> L(p, lim) = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
         ]),
         maxStage: 40,
-        requireWatering: true,
+        requiresWater: true,
         growthRate: BigNumber.from(1.5),
         growthCost: BigNumber.from(2.5),
         propagation:
@@ -4497,7 +4497,7 @@ const plantData: {[key: string]: Plant} =
             '~> L(p, lim, s) = {T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}'
         ]),
         maxStage: 50,
-        requireWatering: true,
+        requiresWater: true,
         growthRate: BigNumber.TWO,
         growthCost: BigNumber.TWO,
         actions:
@@ -4581,7 +4581,7 @@ const plantData: {[key: string]: Plant} =
             '~> O(s) = {[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].].}'
         ]),
         maxStage: 29,
-        requireWatering: true,
+        requiresWater: true,
         growthRate: BigNumber.from(2.75),
         growthCost: BigNumber.TEN,//BigNumber.from(2.5),
         stagelyIncome: BigNumber.ONE,
@@ -4631,7 +4631,7 @@ const plantData: {[key: string]: Plant} =
         system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
         maxStage: 20,
         parasite: new Set(['sprout', 'basil']),
-        requireWatering: false,
+        requiresWater: false,
         growthRate: BigNumber.FIVE,
         growthCost: BigNumber.TWO,
         actions:
@@ -4655,16 +4655,16 @@ const plantData: {[key: string]: Plant} =
     },
     broomrape:
     {
-        system: new LSystem('B(0.1, timer)',
+        system: new LSystem('B(0.05, timer)',
         [
             // Invisibility regenerates when the shoots go up
-            'B(r, t) > F(l, lim): t<timer = B(1.14*r-0.007*r^2, t+2)',
+            'B(r, t) > F(l, lim): t<timer = B(1.15*r-0.005*r^2, t+2)',
             // Cheekily goes back to hiding
-            'B(r, t) > F(l, lim) = B(0.1, t)%',
-            'B(r, t): t>0 = B(1.14*r-0.007*r^2, t-1)',
+            'B(r, t) > F(l, lim) = B(0.05, t)%',
+            'B(r, t): t>0 = B(1.15*r-0.005*r^2, t-1)',
             'B(r, t) = B(r, t)F(0.05, 0.5)I(12)',
             'I(t): t>0 = F(0.05, 0.5)[-K(0)]/(137.508)I(t-1)',
-            'K(s): s<KMaxSize = K(t+0.5)',
+            'K(s): s<KMaxSize = K(s+0.5)',
             'K(s) = O(0.2)',
             'O(s): s>OMinSize = O(s-0.05)',
             'F(l, lim): l<lim = F(l+0.05, lim)',
@@ -4681,19 +4681,19 @@ const plantData: {[key: string]: Plant} =
         ]),
         maxStage: 140,
         parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
-        requireWatering: false,
+        requiresWater: false,
         growthRate: BigNumber.from(12),
-        growthCost: BigNumber.from(27),
+        growthCost: BigNumber.from(30),
         propagation:
         {
             stage: [48, 95],
             rate: [0.55, 0.55],
-            priority: 'c'
+            priority: 'm'
         },
         actions:
         [
             {
-                symbols: new Set('K')
+                symbols: new Set('KF')
             }
         ],
         camera: (stage) => {
@@ -4715,7 +4715,7 @@ const plantData: {[key: string]: Plant} =
     {
         system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
         maxStage: 20,
-        requireWatering: false,
+        requiresWater: false,
         growthRate: BigNumber.FIVE,
         growthCost: BigNumber.TWO,
         actions:
@@ -4744,7 +4744,7 @@ const plantData: {[key: string]: Plant} =
             'F(l)=F(l*2)',
             'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t)'
         ], 30),
-        requireWatering: true,
+        requiresWater: true,
         growthRate: BigNumber.ONE,
         growthCost: BigNumber.from(45),
         actions:
@@ -4821,7 +4821,7 @@ const plantData: {[key: string]: Plant} =
             '~> L(p, lim, s) = {\\(90)T(lim)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}'
         ]),
         maxStage: 54,
-        requireWatering: false,
+        requiresWater: false,
         growthRate: BigNumber.TWO,
         growthCost: BigNumber.THREE,
         actions: [
