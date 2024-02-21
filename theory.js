@@ -936,10 +936,11 @@ for (let i = 1; i <= 400; ++i) {
     yearStartLookup[i] = yearStartLookup[i - 1] + offset;
     if (leap)
         hopleekSchedule.push(yearStartLookup[i - 1] + 60);
-    if (i & 1)
+    let b = i % 4;
+    if (b == 1) // Year 2, 6, 10
         broomrapeSchedule.push(yearStartLookup[i] + 301);
-    else
-        broomrapeSchedule.push(yearStartLookup[i] + 350);
+    else if (b == 3) // Year 4, 8, 12
+        broomrapeSchedule.push(yearStartLookup[i] + 364);
     dandelionSchedule.push(yearStartLookup[i] + 90);
 }
 const dandelionSpawner = {
@@ -951,8 +952,7 @@ const dandelionSpawner = {
 const broomrapeSpawner = {
     id: 'broomrape',
     schedule: broomrapeSchedule,
-    population: (index) => Math.min(Math.floor(index / 2) + 1, 4) +
-        gameRNG.nextInt % 2,
+    population: (index) => Math.min(Math.floor(index / 2) + 1, 4),
     plot: () => 0
 };
 const hopleekSpawner = {
@@ -1231,7 +1231,7 @@ class Quaternion {
         let dp = src.x * dst.x + src.y * dst.y +
             src.z * dst.z;
         let rotAxis;
-        if (dp < -1 + 1e-8) {
+        if (dp < -1 + 1e-9) {
             /* Edge case
             If the two vectors are in opposite directions, just reverse.
             */
@@ -3599,18 +3599,20 @@ const plantData = {
     broomrape: {
         system: new LSystem('B(0.1, timer)', [
             // Invisibility regenerates when the shoots go up
-            'B(r, t) > F(l, lim): t<timer = B(1.2*r-0.01*r^2, t+2)',
+            'B(r, t) > F(l, lim): t<timer = B(1.14*r-0.007*r^2, t+2)',
             // Cheekily goes back to hiding
             'B(r, t) > F(l, lim) = B(0.1, t)%',
-            'B(r, t): t>0 = B(1.2*r-0.01*r^2, t-1)',
-            'B(r, t) = B(r, t)I(12)',
+            'B(r, t): t>0 = B(1.14*r-0.007*r^2, t-1)',
+            'B(r, t) = B(r, t)F(0.05, 0.5)I(12)',
             'I(t): t>0 = F(0.05, 0.5)[-K(0)]/(137.508)I(t-1)',
-            'K(t): t<9 = K(t+1)',
-            'K(t) = O(1)',
-            'O(s) = O(s)',
+            'K(s): s<KMaxSize = K(t+0.5)',
+            'K(s) = O(0.2)',
+            'O(s): s>OMinSize = O(s-0.05)',
             'F(l, lim): l<lim = F(l+0.05, lim)',
         ], 30, 0, '', '+-&^/\\T', 0, {
-            'timer': '30'
+            'timer': '30',
+            'KMaxSize': '4.5',
+            'OMinSize': '0.05 - 1e-9'
         }, [
             // models
             ''
@@ -3618,8 +3620,13 @@ const plantData = {
         maxStage: 140,
         parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
         requireWatering: false,
-        growthRate: BigNumber.NINE,
-        growthCost: BigNumber.from(24),
+        growthRate: BigNumber.from(12),
+        growthCost: BigNumber.from(27),
+        propagation: {
+            stage: [48, 95],
+            rate: [0.55, 0.55],
+            priority: 'c'
+        },
         actions: [
             {
                 symbols: new Set('K')
