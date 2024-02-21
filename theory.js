@@ -952,14 +952,15 @@ const dandelionSpawner = {
 const broomrapeSpawner = {
     id: 'broomrape',
     schedule: broomrapeSchedule,
-    population: (index) => Math.min(Math.floor(index / 2) + 1, 4),
+    population: (index) => Math.min(index + 1, 5),
     plot: () => 0
 };
+const fibonacci = [1, 2, 3, 5, 8, 13];
 const hopleekSpawner = {
     id: 'hopleek',
     schedule: hopleekSchedule,
-    population: (index) => Math.min(index + 2, 6),
-    plot: () => nofPlots - 1
+    population: (index) => fibonacci[Math.min(index, 5)],
+    plot: () => nofPlots - 1 - gameRNG.nextInt % 2
 };
 /**
  * What else do you expect?
@@ -3598,10 +3599,10 @@ const plantData = {
     broomrape: {
         system: new LSystem('B(0.05, timer)', [
             // Invisibility regenerates when the shoots go up
-            'B(r, t) > F(l, lim): t<timer = B(1.15*r-0.005*r^2, t+2)',
+            'B(r, t) > F(l, lim): t<timer = B(1.15*r-0.003*r^2, t+2)',
             // Cheekily goes back to hiding
             'B(r, t) > F(l, lim) = B(0.05, t)%',
-            'B(r, t): t>0 = B(1.15*r-0.005*r^2, t-1)',
+            'B(r, t): t>0 = B(1.15*r-0.003*r^2, t-1)',
             'B(r, t) = B(r, t)F(0.05, 0.5)I(12)',
             'I(t): t>0 = F(0.05, 0.5)[-K(0)]/(137.508)I(t-1)',
             'K(s): s<KMaxSize = K(s+0.5)',
@@ -4391,6 +4392,7 @@ var init = () => {
         trueSight.info = 'Reveals colonies hidden underground';
         trueSight.bought = (_) => {
             trueSight.level &= 1;
+            theory.invalidateQuaternaryValues();
         };
         trueSight.isAvailable = haxEnabled;
     }
@@ -4911,6 +4913,11 @@ var getQuaternaryEntries = () => {
             if (!plotPerma.level)
                 return quaternaryEntries.slice(0, 1);
             for (let i = 0; i < plotPerma.level; ++i) {
+                // if(i >= plotPerma.level && !manager.colonies[i].length)
+                // {
+                //     quaternaryEntries[i].value = null;
+                //     continue;
+                // }
                 let sum = BigNumber.ZERO;
                 for (let j = 0; j < manager.colonies[i].length; ++j) {
                     let c = manager.colonies[i][j];
@@ -4925,6 +4932,11 @@ var getQuaternaryEntries = () => {
             if (!plotPerma.level)
                 return quaternaryEntries.slice(0, 1);
             for (let i = 0; i < plotPerma.level; ++i) {
+                // if(i >= plotPerma.level && !manager.colonies[i].length)
+                // {
+                //     quaternaryEntries[i].value = null;
+                //     continue;
+                // }
                 let column = '';
                 for (let j = 0; j < manager.colonies[i].length; ++j) {
                     let c = manager.colonies[i][j];
