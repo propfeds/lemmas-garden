@@ -167,7 +167,7 @@ you have to dig really deep to find the underlying systems behind the plants
   - Biting is on evolution queue instead of action?
   - [x] Leap years calculation
     - [ ] 400-year cycle wrapping
-  - [ ] Hopleek schedule
+  - [x] Hopleek schedule
   - [ ] Repelled by rose campions and sunflowers
   - [ ] Or maybe repelled by calendula and basil?
 
@@ -175,7 +175,10 @@ you have to dig really deep to find the underlying systems behind the plants
   - [x] Schedule
     - Once per 2 years? Doesn't it make broomrape faster than hopleek?
   - [x] Propagation method
-  - [ ] Models
+  - [x] Models
+    - [ ] Calyxes
+    - [ ] Flowers opening
+    - [ ] Fruits droop more
   - [ ] Narrations
   - [ ] Get into people's shoes
 

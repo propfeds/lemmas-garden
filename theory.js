@@ -27,6 +27,7 @@ var id = 'lemmas_garden';
 var getName = (language) => {
     const names = {
         en: `Lemma's Garden (perch)`,
+        ja: `レンマ苑`
     };
     return names[language] ?? names.en;
 };
@@ -3603,19 +3604,27 @@ const plantData = {
             // Cheekily goes back to hiding
             'B(r, t) > F(l, lim) = B(0.05, t)%',
             'B(r, t): t>0 = B(1.15*r-0.003*r^2, t-1)',
-            'B(r, t) = B(r, t)F(0.05, 0.5)I(12)',
-            'I(t): t>0 = F(0.05, 0.5)[-K(0)]/(137.508)I(t-1)',
+            'B(r, t) = B(r, t)F(0.15, 0.9)I(12)',
+            'I(t): t>0 = F(0.05, 0.3)[-K(0)]/(137.508)I(t-1)',
             'K(s): s<KMaxSize = K(s+0.5)',
             'K(s) = O(0.2)',
             'O(s): s>OMinSize = O(s-0.05)',
             'F(l, lim): l<lim = F(l+0.05, lim)',
-        ], 30, 0, '', '+-&^/\\T', 0, {
+        ], 30, 0, 'B', '+-&^/\\T', 0, {
             'timer': '30',
             'KMaxSize': '4.5',
             'OMinSize': '0.05 - 1e-9'
         }, [
-            // models
-            ''
+            // Stem
+            '~> I(t) = F(0.15)[aaaa]',
+            '~> a = {[-F(0.15).+(45)F(0.15).][F(0.4).][+F(0.15)[-(45)F(0.15).].]}/(90)',
+            // Flower lips: down, up, left, right
+            '~> K(s) = {[T((s-2)/10)F(0.05)d(sqrt(s+0.5)/20)u(sqrt(s+0.5)/20)l(sqrt(s+0.5)/20)r(sqrt(s+0.5)/20)]}',
+            '~> d(s) = [-(45)F(s).+[&(45)F(s).^(45)F(s*2).-F(s*3)..][F(s*3)-F(s*2).][^(45)F(s)[&(45)F(s*2)[-F(s*3)..].].].]',
+            '~> u(s) = [+F(s*1.5).-[&(45)F(s).^(45)F(s*2).-(45)F(s*4)..][F(s*3)-(45)F(s*3).][^(45)F(s)[&(45)F(s*2)[-(45)F(s*4)..].].].]',
+            '~> l(s) = [-(15)&(45)F(s).^(45)[-(45)F(s).+(45)F(s*3).-&(15)F(s*2)..][F(s*3)&F(s*2).][+(45)F(s*2)[-(45)F(s*2)[-&(15)F(s*3)..].].].]',
+            '~> r(s) = [-(15)^(45)F(s).&(45)[-(45)F(s).+(45)F(s*3).-^(15)F(s*2)..][F(s*3)^F(s*2).][+(45)F(s*2)[-(45)F(s*2)[-^(15)F(s*3)..].].].]',
+            '~> O(s) = T((2.5-s)/10)K(4.5)'
         ]),
         maxStage: 140,
         parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
@@ -3633,10 +3642,12 @@ const plantData = {
             }
         ],
         camera: (stage) => {
+            let m = (stage - 1) % 47;
+            m = Math.max(m - 30, 0);
             return {
-                scale: 8,
+                scale: 4,
                 x: 0,
-                y: saturate(stage / 4, 5, 9),
+                y: 2.5 + m / 10,
                 z: 0,
                 upright: true
             };
