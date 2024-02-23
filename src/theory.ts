@@ -155,6 +155,7 @@ harvesting it for the first time.`,
         colony: `{0} of {1}, stage {2}`,
         colonyWMaxStg: `{0} of {1}, stage {2}/{3}`,
         colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
+        invisibleColony: `\\text{Tilled soil.}`,
         colonyStats: `\\text{{Energy\\colon\\enspace {0} +{1}/s}}\\\\
 \\text{{Growth\\colon\\enspace {2}/{3} +{4}/s}}\\\\
 \\text{{Profit\\colon\\enspace {5}p}}\\\\
@@ -3639,7 +3640,23 @@ class ColonyManager
 
         if(plot == plotIdx)
         {
-            // TODO: weave out of invisible slots
+            let len = manager.colonies[plotIdx].length;
+            slotIdx = Math.min(slotIdx, len - 1);
+            if(len > 1)
+            {
+                let i = slotIdx;
+                while(manager.colonies[plotIdx][slotIdx] &&
+                !isColonyVisible(manager.colonies[plotIdx][slotIdx]))
+                    --slotIdx;
+                if(slotIdx < 0)
+                    slotIdx = i;
+    
+                while(manager.colonies[plotIdx][slotIdx] &&
+                !isColonyVisible(manager.colonies[plotIdx][slotIdx]))
+                    ++slotIdx;
+                if(slotIdx > len - 1)
+                    slotIdx = i;
+            }
             selectedColony = this.colonies[plotIdx][slotIdx];
             renderer.colony = selectedColony;
         }
@@ -6080,13 +6097,21 @@ var getCurrencyBarDelegate = () =>
         --plotIdx;
 
         let len = manager.colonies[plotIdx].length;
+        slotIdx = Math.min(slotIdx, len - 1);
         if(len > 1)
         {
+            let i = slotIdx;
             while(manager.colonies[plotIdx][slotIdx] &&
             !isColonyVisible(manager.colonies[plotIdx][slotIdx]))
                 --slotIdx;
             if(slotIdx < 0)
-                slotIdx = 0;
+                slotIdx = i;
+
+            while(manager.colonies[plotIdx][slotIdx] &&
+            !isColonyVisible(manager.colonies[plotIdx][slotIdx]))
+                ++slotIdx;
+            if(slotIdx > len - 1)
+                slotIdx = i;
         }
         else
             slotIdx = 0;
@@ -6108,13 +6133,21 @@ var getCurrencyBarDelegate = () =>
         ++plotIdx;
 
         let len = manager.colonies[plotIdx].length;
+        slotIdx = Math.min(slotIdx, len - 1);
         if(len > 1)
         {
+            let i = slotIdx;
             while(manager.colonies[plotIdx][slotIdx] &&
             !isColonyVisible(manager.colonies[plotIdx][slotIdx]))
                 --slotIdx;
             if(slotIdx < 0)
-                slotIdx = 0;
+                slotIdx = i;
+
+            while(manager.colonies[plotIdx][slotIdx] &&
+            !isColonyVisible(manager.colonies[plotIdx][slotIdx]))
+                ++slotIdx;
+            if(slotIdx > len - 1)
+                slotIdx = i;
         }
         else
             slotIdx = 0;
@@ -6205,6 +6238,11 @@ var getSecondaryEquation = () =>
         switch(colonyMode)
         {
             case ColonyModes.VERBOSE:
+                if(!isColonyVisible(c))
+                {
+                    result = getLoc('invisibleColony');
+                    break;
+                }
                 let status = (manager.gangsta &&
                 manager.gangsta[0] == plotIdx &&
                 manager.gangsta[1] == slotIdx) ?
@@ -6226,6 +6264,11 @@ var getSecondaryEquation = () =>
                 manager.colonies[plotIdx].length, status)}\\end{array}`;
                 break;
             case ColonyModes.SIMPLE:
+                if(!isColonyVisible(c))
+                {
+                    result = getLoc('invisibleColony');
+                    break;
+                }
                 result = `\\begin{array}{c}\\text{${getColonyTitleString(c)}}
                 \\\\E=${c.energy},\\enspace g=${c.growth}/
                 ${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
@@ -7204,7 +7247,6 @@ let createWaterMenu = () =>
                 ]
             });
             maxStageEntries.push(tmpGrid);
-            // TODO: Create harvest entry
         }
     }
     let noteGrid = ui.createGrid
@@ -7358,7 +7400,6 @@ let createNotebookMenu = () =>
             ]
         });
         maxLevelEntries.push(tmpGrid);
-        // TODO: Create harvest entry
     }
     let noteGrid = ui.createGrid
     ({
