@@ -6287,8 +6287,9 @@ var getSecondaryEquation = () =>
                         result += `\\text{${getColonyTitleString(d, true)}}
                         \\\\`;
                 }
-                result += `\\text{\\underline{${getColonyTitleString(c, true)}}}
-                \\\\`;
+                let cStr = isColonyVisible(c) ? getColonyTitleString(c, true) :
+                getLoc('invisibleColony');
+                result += `\\text{\\underline{${cStr}}}\\\\`;
 
                 for(let i = slotIdx + 1;
                 i < manager.colonies[plotIdx].length; ++i)
@@ -6383,16 +6384,19 @@ var getQuaternaryEntries = () =>
                 for(let j = 0; j < manager.colonies[i].length; ++j)
                 {
                     let c = manager.colonies[i][j];
+                    let cStr: string;
                     if(isColonyVisible(c))
                     {
                         let plantName = getLoc('plants')[c.id]?.nameShort ??
                         '#';
-                        let cStr = `${plantName}${getSubscript(c.stage)}`;
-                        if(i == plotIdx && j == slotIdx)
-                            column += `(${cStr})`;
-                        else
-                            column += cStr;
+                        cStr = `${plantName}${getSubscript(c.stage)}`;
                     }
+                    else
+                        cStr = '   ';
+                    if(i == plotIdx && j == slotIdx)
+                        column += `(${cStr})`;
+                    else
+                        column += cStr;
                 }
                 quaternaryEntries[i].value = column;
             }
