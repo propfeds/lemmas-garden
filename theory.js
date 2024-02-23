@@ -4835,7 +4835,7 @@ var getPrimaryEquation = () => {
 };
 var getSecondaryEquation = () => {
     let c = selectedColony;
-    if (!c) {
+    if (!c || !isColonyVisible(c)) {
         if (plotIdx < plotPerma.level) {
             let taxInfo = `\\text{${getLoc('pubTax')}}\\\\
             T_{\\text{p}}=${taxRate}\\times ${theory.latexSymbol}`;
@@ -4852,10 +4852,11 @@ var getSecondaryEquation = () => {
     perfs[7 /* Profilers.EQ_2 */].exec(() => {
         switch (colonyMode) {
             case 1 /* ColonyModes.VERBOSE */:
-                if (!isColonyVisible(c)) {
-                    result = getLoc('invisibleColony');
-                    break;
-                }
+                // if(!isColonyVisible(c))
+                // {
+                //     result = getLoc('invisibleColony');
+                //     break;
+                // }
                 let status = (manager.gangsta &&
                     manager.gangsta[0] == plotIdx &&
                     manager.gangsta[1] == slotIdx) ?
@@ -4875,10 +4876,11 @@ var getSecondaryEquation = () => {
                     BigNumber.ZERO, c.profit, slotIdx + 1, manager.colonies[plotIdx].length, status)}\\end{array}`;
                 break;
             case 2 /* ColonyModes.SIMPLE */:
-                if (!isColonyVisible(c)) {
-                    result = getLoc('invisibleColony');
-                    break;
-                }
+                // if(!isColonyVisible(c))
+                // {
+                //     result = getLoc('invisibleColony');
+                //     break;
+                // }
                 result = `\\begin{array}{c}\\text{${getColonyTitleString(c)}}
                 \\\\E=${c.energy},\\enspace g=${c.growth}/
                 ${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
@@ -4980,13 +4982,13 @@ var getQuaternaryEntries = () => {
                         let plantName = getLoc('plants')[c.id]?.nameShort ??
                             '#';
                         cStr = `${plantName}${getSubscript(c.stage)}`;
+                        if (i == plotIdx && j == slotIdx)
+                            column += `(${cStr})`;
+                        else
+                            column += cStr;
                     }
-                    else
-                        cStr = '   ';
-                    if (i == plotIdx && j == slotIdx)
-                        column += `(${cStr})`;
-                    else
-                        column += cStr;
+                    // else
+                    //     cStr = '   ';
                 }
                 quaternaryEntries[i].value = column;
             }
