@@ -2023,7 +2023,7 @@ class Renderer {
         this.cameraMode = camera.mode ?? 0;
         this.followFactor = camera.followFactor ?? 0.15;
         this.camCentre = new Vector3(camera.x ?? 0, camera.y ?? 0, camera.z ?? 0);
-        this.upright = camera.upright ?? false;
+        this.upright = camera.upright ?? true;
         this.lastCamera = new Vector3(0, 0, 0);
         this.lastCamVel = new Vector3(0, 0, 0);
         this.tickLength = stroke.tickLength ?? 1;
@@ -2093,21 +2093,21 @@ class Renderer {
         this.configure(colony.sequence, colony.params, plantData[colony.id].camera(colony.stage), plantData[colony.id].stroke(colony.stage));
     }
     configure(sequence = null, params = null, camera = {}, stroke = {}, redraw = true) {
-        this.figureScale = camera.scale || this.figureScale;
-        this.cameraMode = camera.mode ?? this.cameraMode;
-        this.followFactor = camera.followFactor ?? this.followFactor;
-        this.camCentre = new Vector3(camera.x ?? this.camCentre.x, camera.y ?? this.camCentre.y, camera.z ?? this.camCentre.z);
-        this.upright = camera.upright ?? this.upright;
-        this.tickLength = stroke.tickLength ?? this.tickLength;
-        this.initDelay = stroke.initDelay ?? this.initDelay;
+        this.figureScale = camera.scale || 1;
+        this.cameraMode = camera.mode ?? 0;
+        this.followFactor = camera.followFactor ?? 0.15;
+        this.camCentre = new Vector3(camera.x ?? 0, camera.y ?? 0, camera.z ?? 0);
+        this.upright = camera.upright ?? true;
+        this.tickLength = stroke.tickLength ?? 1;
+        this.initDelay = stroke.initDelay ?? 0;
         // Loop mode is always 0
         // Whether to reset graph on hitting reset button is a game setting
-        this.loadModels = stroke.loadModels ?? this.loadModels;
-        this.quickDraw = stroke.quickDraw ?? this.quickDraw;
-        this.quickBacktrack = stroke.quickBacktrack ?? this.quickBacktrack;
-        this.backtrackTail = stroke.backtrackTail ?? this.backtrackTail;
-        this.hesitateApex = stroke.hesitateApex ?? this.hesitateApex;
-        this.hesitateFork = stroke.hesitateFork ?? this.hesitateFork;
+        this.loadModels = stroke.loadModels ?? true;
+        this.quickDraw = stroke.quickDraw ?? false;
+        this.quickBacktrack = stroke.quickBacktrack ?? false;
+        this.backtrackTail = stroke.backtrackTail ?? true;
+        this.hesitateApex = stroke.hesitateApex ?? true;
+        this.hesitateFork = stroke.hesitateFork ?? true;
         this.sequence = sequence ?? this.sequence;
         this.params = params ?? this.params;
         this.redrawing = redraw;
@@ -3344,13 +3344,10 @@ const plantData = {
                 x: 0,
                 y: 0.625,
                 z: 0,
-                upright: true
             };
         },
         stroke: (stage) => {
-            return {
-                tickLength: 1,
-            };
+            return {};
         }
     },
     calendula: {
@@ -3415,13 +3412,10 @@ const plantData = {
                 x: 0,
                 y: saturate(stage / 4, 3.75, 5),
                 z: 0,
-                upright: true
             };
         },
         stroke: (stage) => {
-            return {
-                tickLength: 1,
-            };
+            return {};
         }
     },
     basil: {
@@ -3498,13 +3492,10 @@ const plantData = {
                 x: 0,
                 y: saturate(stage / 4, 5, 7),
                 z: 0,
-                upright: true
             };
         },
         stroke: (stage) => {
-            return {
-                tickLength: 1
-            };
+            return {};
         }
     },
     campion: {
@@ -3561,13 +3552,10 @@ const plantData = {
                 x: 0,
                 y: saturate(stage, 7.5, 22.5),
                 z: 0,
-                upright: true
             };
         },
         stroke: (stage) => {
-            return {
-                tickLength: 1
-            };
+            return {};
         }
     },
     // ginger
@@ -3588,13 +3576,10 @@ const plantData = {
                 x: 0,
                 y: saturate(stage / 4, 5, 9),
                 z: 0,
-                upright: true
             };
         },
         stroke: (stage) => {
-            return {
-                tickLength: 1
-            };
+            return {};
         }
     },
     broomrape: {
@@ -3643,19 +3628,16 @@ const plantData = {
         ],
         camera: (stage) => {
             let m = (stage - 1) % 47;
-            m = Math.max(m - 30, 0);
+            m = Math.max(m - 35, 0);
             return {
                 scale: 4,
                 x: 0,
-                y: 2.5 + m / 10,
+                y: 2.5 + m / 5,
                 z: 0,
-                upright: true
             };
         },
         stroke: (stage) => {
-            return {
-                tickLength: 1
-            };
+            return {};
         }
     },
     dandelion: {
@@ -3673,13 +3655,10 @@ const plantData = {
                 x: 0,
                 y: saturate(stage / 4, 5, 9),
                 z: 0,
-                upright: true
             };
         },
         stroke: (stage) => {
-            return {
-                tickLength: 1
-            };
+            return {};
         }
     },
     arrow: // Arrow weed (test)
@@ -3791,9 +3770,7 @@ const plantData = {
             };
         },
         stroke: (stage) => {
-            return {
-                tickLength: 1
-            };
+            return {};
         }
     },
 };

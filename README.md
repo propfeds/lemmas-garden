@@ -28,7 +28,7 @@ Import the save.
 
 Navigate to [`theory.js`](./theory.js) then click on `Raw`. You will be delivered to the source code of this theory. Copy the page's URL.
 
-Then, access the custom theory panel within Exponential Idle using the bottom arrows, until you reach a screen saying `Tap to select a custom theory`. Enter the menu, Press the `+` sign and paste in the URL.
+Then, access the custom theory panel within Exponential Idle using the bottom arrows, until you reach a screen saying `Tap to select a custom theory`. Enter the menu, press the `+` sign and paste in the URL.
 
 ### 4. Tap on 'Lemma's Garden' and start playing.
 
