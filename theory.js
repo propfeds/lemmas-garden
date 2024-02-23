@@ -287,11 +287,11 @@ soon.`,
 flowers later, or snip the bud, if you don't want your leaves bitter.`,
                         26: `The plant blooms. The flower sends a signal down.
 \\\\Rules 12 to 15 govern signal transport.`,
-                        27: `Rules number 12 and 14.\\\\The signal will travel
-until it hits the base.`,
+                        27: `Rules 12 and 14:\\\\The signal will travel until it
+hits the base.`,
                         31: 'The signal touches base.',
-                        32: 'Rule 15. Basil base relays the signal upward.',
-                        35: `Rule 10. The first leaves receive the signal from
+                        32: 'Rule 15: Basil base relays the signal upward.',
+                        35: `Rule 10: The first leaves receive the signal from
 below. Let us unfold:\\\\
 Bitter leaf, set us free,\\\\
 as I whisper unto thee.\\\\
@@ -329,7 +329,7 @@ secured.`,
                 LsDetails: `A(r, t): apex (stem bud).\\\\F(l, t): internode of
 length l. t stages until it stops growing.\\\\K(p, t): flower of size p. t
 stages left until it disappears. Provides p pennies on harvest.\\\\L(s): leaf.
-\\\\O(s): fruit of size s. Decorative.`,
+\\\\O(s): fruit of size s.`,
                 actions: [
                     `Harvest returns profit as the sum of all K sizes
 (first parameter).`
@@ -355,13 +355,31 @@ fruit...\\\\cometh.`,
                         22: `Go to sleep. Was my campion sedative not good
 enough?`,
                         27: `A fruit just fell off.\\\\Campion is a good self
-seeder, you know. Watch for the new one coming right near ya.`
+seeder. Watch for the new one coming right near ya.`
                     }
                 ]
             },
             broomrape: {
                 name: 'Broomrape',
                 nameShort: 'Br',
+                // No info because can't be bought
+                LsDetails: `B(r, t): base, providing r energy/s.\\\\F(l, lim):
+internode of length l. Provides l pennies on harvest.\\\\I(t): stem providing
+no energy. Spawns flowers for t turns.\\\\K(s): flower of size s. Provides s
+pennies on harvest.\\\\O(s): fruit of size s.`,
+                actions: [
+                    `Harvest returns profit as the sum of all K and F sizes
+(first parameter).`
+                ],
+                narrations: [
+                    {
+                        index: [0, 31],
+                        0: `A curled up sleepy-head. It only grows if it can
+establish a link with one of its favourite species.`,
+                        31: `Rule number 4: The vampire fang shoots above the
+ground.`
+                    }
+                ]
             },
             arrow: {
                 name: '(Test) Arrow weed',
@@ -2733,7 +2751,7 @@ class ColonyManager {
             this.water(c);
         if (plot == plotIdx) {
             let prevColony = selectedColony;
-            selectedColony = this.colonies[plotIdx][slotIdx[plotIdx]];
+            selectedColony = this.colonies[plotIdx][slotIdx];
             if (prevColony !== selectedColony)
                 renderer.colony = selectedColony;
         }
@@ -2776,18 +2794,9 @@ class ColonyManager {
         this.colonies[plot].splice(index, 1);
         // Re-establish parasitic links
         this.linkParasites(plot);
-        let len = this.colonies[plot].length;
-        if (len > 1) {
-            let i = slotIdx[plot];
-            do
-                --slotIdx[plot];
-            while (this.colonies[plot][slotIdx[plot]] &&
-                !isColonyVisible(manager.colonies[plot][slotIdx[plot]]));
-            if (slotIdx[plot] < 0)
-                slotIdx[plot] = i;
-        }
         if (plot == plotIdx) {
-            selectedColony = this.colonies[plotIdx][slotIdx[plotIdx]];
+            // TODO: weave out of invisible slots
+            selectedColony = this.colonies[plotIdx][slotIdx];
             renderer.colony = selectedColony;
         }
         updateAvailability();
@@ -3028,7 +3037,7 @@ class ColonyManager {
                 };
         }
         if (this.actionGangsta[0] == plotIdx &&
-            this.actionGangsta[1] == slotIdx[plotIdx])
+            this.actionGangsta[1] == slotIdx)
             renderer.colony = c;
         this.actionGangsta = null;
         theory.invalidateSecondaryEquation();
@@ -3204,7 +3213,7 @@ class ColonyManager {
             {
                 start: 0
             };
-        if (this.gangsta[0] == plotIdx && this.gangsta[1] == slotIdx[plotIdx])
+        if (this.gangsta[0] == plotIdx && this.gangsta[1] == slotIdx)
             renderer.colony = c;
         this.gangsta = null;
         theory.invalidateSecondaryEquation();
@@ -3609,7 +3618,7 @@ const plantData = {
             '~> u(s) = [+F(s*1.5).-[&(45)F(s).^(45)F(s*2).-(45)F(s*4)..][F(s*3)-(45)F(s*3).][^(45)F(s)[&(45)F(s*2)[-(45)F(s*4)..].].].]',
             '~> l(s) = [-(15)&(45)F(s).^(45)[-(45)F(s).+(45)F(s*3).-&(15)F(s*2)..][F(s*3)&F(s*2).][+(45)F(s*2)[-(45)F(s*2)[-&(15)F(s*3)..].].].]',
             '~> r(s) = [-(15)^(45)F(s).&(45)[-(45)F(s).+(45)F(s*3).-^(15)F(s*2)..][F(s*3)^F(s*2).][+(45)F(s*2)[-(45)F(s*2)[-^(15)F(s*3)..].].].]',
-            '~> O(s) = T((2.5-s)/5)K(4.5)'
+            '~> O(s) = T((2.5-s)/5)K(4.25+s)'
         ]),
         maxStage: 140,
         parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
@@ -3802,7 +3811,7 @@ let growthCoord = 0;
 let insolationIntegral = 0;
 let growthIntegral = 0;
 let plotIdx = 0;
-let slotIdx = new Array(nofPlots).fill(0);
+let slotIdx = 0;
 let plantIdx = new Array(nofPlots).fill(0);
 let selectedColony = null;
 let finishedTutorial = false;
@@ -4106,11 +4115,11 @@ const harvestFrame = createScrollBarImageBtn({
     row: 0, column: 2,
 }, () => {
     if (actionConfirm) {
-        let menu = createConfirmationMenu(plotIdx, slotIdx[plotIdx], 0 /* Actions.HARVEST */);
+        let menu = createConfirmationMenu(plotIdx, slotIdx, 0 /* Actions.HARVEST */);
         menu.show();
     }
     else
-        manager.queueAction(plotIdx, slotIdx[plotIdx], 0 /* Actions.HARVEST */);
+        manager.queueAction(plotIdx, slotIdx, 0 /* Actions.HARVEST */);
 }, () => {
     if (actionConfirm) {
         let menu = createBulkConfirmationMenu(plotIdx, 0 /* Actions.HARVEST */);
@@ -4144,11 +4153,11 @@ const pruneFrame = createScrollBarImageBtn({
     row: 0, column: 4,
 }, () => {
     if (actionConfirm) {
-        let menu = createConfirmationMenu(plotIdx, slotIdx[plotIdx], 1 /* Actions.PRUNE */);
+        let menu = createConfirmationMenu(plotIdx, slotIdx, 1 /* Actions.PRUNE */);
         menu.show();
     }
     else
-        manager.queueAction(plotIdx, slotIdx[plotIdx], 1 /* Actions.PRUNE */);
+        manager.queueAction(plotIdx, slotIdx, 1 /* Actions.PRUNE */);
 }, null, false, () => true, game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png'));
@@ -4455,7 +4464,7 @@ var updateAvailability = () => {
             finishedTutorial = plotPerma.level > 0;
         }
         else {
-            switchPlant.isAvailable = plotIdx < plotPerma.level &&
+            switchPlant.isAvailable = x < plotPerma.level &&
                 !plants[x][plantUnlocks[p[x]]].level && plantPerma.level > 0;
             controlStack.isVisible = true;
         }
@@ -4531,29 +4540,31 @@ let managerLoadingInd = ui.createActivityIndicator({
     widthRequest: getImageSize(ui.screenWidth),
     isRunning: manager.busy
 });
-let canGTPS = () => slotIdx[plotIdx] > 0;
+// Go to previous slot
+let canGTPS = () => slotIdx > 0;
 let GTPS = () => {
-    let i = slotIdx[plotIdx];
+    let i = slotIdx;
     do
-        --slotIdx[plotIdx];
-    while (manager.colonies[plotIdx][slotIdx[plotIdx]] &&
-        !isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]));
-    if (slotIdx[plotIdx] < 0)
-        slotIdx[plotIdx] = i;
-    selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
+        --slotIdx;
+    while (manager.colonies[plotIdx][slotIdx] &&
+        !isColonyVisible(manager.colonies[plotIdx][slotIdx]));
+    if (slotIdx < 0)
+        slotIdx = i;
+    selectedColony = manager.colonies[plotIdx][slotIdx];
     renderer.colony = selectedColony;
     theory.invalidateQuaternaryValues();
 };
-let canGTNS = () => slotIdx[plotIdx] < manager.colonies[plotIdx].length - 1;
+// Go to next slot
+let canGTNS = () => slotIdx < manager.colonies[plotIdx].length - 1;
 let GTNS = () => {
-    let i = slotIdx[plotIdx];
+    let i = slotIdx;
     do
-        ++slotIdx[plotIdx];
-    while (manager.colonies[plotIdx][slotIdx[plotIdx]] &&
-        !isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]));
-    if (slotIdx[plotIdx] > manager.colonies[plotIdx].length - 1)
-        slotIdx[plotIdx] = i;
-    selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
+        ++slotIdx;
+    while (manager.colonies[plotIdx][slotIdx] &&
+        !isColonyVisible(manager.colonies[plotIdx][slotIdx]));
+    if (slotIdx > manager.colonies[plotIdx].length - 1)
+        slotIdx = i;
+    selectedColony = manager.colonies[plotIdx][slotIdx];
     renderer.colony = selectedColony;
     theory.invalidateQuaternaryValues();
 };
@@ -4585,8 +4596,7 @@ var getEquationOverlay = () => {
                     //     verticalOptions: LayoutOptions.FILL
                     // }, () =>
                     // {
-                    //     selectedColony = manager.colonies[plotIdx][slotIdx[
-                    //     plotIdx]];
+                    //     selectedColony = manager.colonies[plotIdx][slotIdx];
                     //     if(!selectedColony)
                     //         return;
                     //     let seqMenu = createColonyViewMenu(selectedColony);
@@ -4702,7 +4712,7 @@ var getCurrencyBarDelegate = () => {
         row: 0, column: 1,
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
-        selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
+        selectedColony = manager.colonies[plotIdx][slotIdx];
         if (!selectedColony)
             return;
         let seqMenu = createColonyViewMenu(selectedColony);
@@ -4715,15 +4725,15 @@ var getCurrencyBarDelegate = () => {
         --plotIdx;
         let len = manager.colonies[plotIdx].length;
         if (len > 1) {
-            while (manager.colonies[plotIdx][slotIdx[plotIdx]] &&
-                !isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]))
-                --slotIdx[plotIdx];
-            if (slotIdx[plotIdx] < 0)
-                slotIdx[plotIdx] = 0;
+            while (manager.colonies[plotIdx][slotIdx] &&
+                !isColonyVisible(manager.colonies[plotIdx][slotIdx]))
+                --slotIdx;
+            if (slotIdx < 0)
+                slotIdx = 0;
         }
         else
-            slotIdx[plotIdx] = 0;
-        selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
+            slotIdx = 0;
+        selectedColony = manager.colonies[plotIdx][slotIdx];
         renderer.colony = selectedColony;
         theory.invalidatePrimaryEquation();
         theory.invalidateSecondaryEquation();
@@ -4737,15 +4747,15 @@ var getCurrencyBarDelegate = () => {
         ++plotIdx;
         let len = manager.colonies[plotIdx].length;
         if (len > 1) {
-            while (manager.colonies[plotIdx][slotIdx[plotIdx]] &&
-                !isColonyVisible(manager.colonies[plotIdx][slotIdx[plotIdx]]))
-                --slotIdx[plotIdx];
-            if (slotIdx[plotIdx] < 0)
-                slotIdx[plotIdx] = 0;
+            while (manager.colonies[plotIdx][slotIdx] &&
+                !isColonyVisible(manager.colonies[plotIdx][slotIdx]))
+                --slotIdx;
+            if (slotIdx < 0)
+                slotIdx = 0;
         }
         else
-            slotIdx[plotIdx] = 0;
-        selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
+            slotIdx = 0;
+        selectedColony = manager.colonies[plotIdx][slotIdx];
         renderer.colony = selectedColony;
         theory.invalidatePrimaryEquation();
         theory.invalidateSecondaryEquation();
@@ -4795,7 +4805,6 @@ var getPrimaryEquation = () => {
         'plotTitle'), plotIdx + 1);
 };
 var getSecondaryEquation = () => {
-    // selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
     let c = selectedColony;
     if (!c) {
         if (plotIdx < plotPerma.level) {
@@ -4816,10 +4825,10 @@ var getSecondaryEquation = () => {
             case 1 /* ColonyModes.VERBOSE */:
                 let status = (manager.gangsta &&
                     manager.gangsta[0] == plotIdx &&
-                    manager.gangsta[1] == slotIdx[plotIdx]) ?
+                    manager.gangsta[1] == slotIdx) ?
                     getLoc('status').evolve : (manager.actionGangsta &&
                     manager.actionGangsta[0] == plotIdx &&
-                    manager.actionGangsta[1] == slotIdx[plotIdx]) ?
+                    manager.actionGangsta[1] == slotIdx) ?
                     getLoc('status').actions[manager.actionGangsta[2]] : '';
                 result = `\\begin{array}{c}\\text{${getColonyTitleString(c)}}
                 \\\\${Localization.format(getLoc('colonyStats'), 
@@ -4830,7 +4839,7 @@ var getSecondaryEquation = () => {
                     '∞', c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                     // @ts-expect-error
                     plantData[c.id].growthRate * BigNumber.from(growthCoord) :
-                    BigNumber.ZERO, c.profit, slotIdx[plotIdx] + 1, manager.colonies[plotIdx].length, status)}\\end{array}`;
+                    BigNumber.ZERO, c.profit, slotIdx + 1, manager.colonies[plotIdx].length, status)}\\end{array}`;
                 break;
             case 2 /* ColonyModes.SIMPLE */:
                 result = `\\begin{array}{c}\\text{${getColonyTitleString(c)}}
@@ -4839,12 +4848,12 @@ var getSecondaryEquation = () => {
                     // @ts-expect-error
                     plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
                     '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{s},\\enspace\\pi =
-                ${c.profit}\\text{p}\\\\(${slotIdx[plotIdx] + 1}/
+                ${c.profit}\\text{p}\\\\(${slotIdx + 1}/
                 ${manager.colonies[plotIdx].length})\\\\\\end{array}`;
                 break;
             case 3 /* ColonyModes.LIST */:
                 result = '\\begin{array}{c}';
-                for (let i = 0; i < slotIdx[plotIdx]; ++i) {
+                for (let i = 0; i < slotIdx; ++i) {
                     let d = manager.colonies[plotIdx][i];
                     if (isColonyVisible(d))
                         result += `\\text{${getColonyTitleString(d, true)}}
@@ -4852,7 +4861,7 @@ var getSecondaryEquation = () => {
                 }
                 result += `\\text{\\underline{${getColonyTitleString(c, true)}}}
                 \\\\`;
-                for (let i = slotIdx[plotIdx] + 1; i < manager.colonies[plotIdx].length; ++i) {
+                for (let i = slotIdx + 1; i < manager.colonies[plotIdx].length; ++i) {
                     let d = manager.colonies[plotIdx][i];
                     if (isColonyVisible(d))
                         result += `\\text{${getColonyTitleString(d, true)}}
@@ -4932,7 +4941,7 @@ var getQuaternaryEntries = () => {
                         let plantName = getLoc('plants')[c.id]?.nameShort ??
                             '#';
                         let cStr = `${plantName}${getSubscript(c.stage)}`;
-                        if (i == plotIdx && j == slotIdx[plotIdx])
+                        if (i == plotIdx && j == slotIdx)
                             column += `(${cStr})`;
                         else
                             column += cStr;
@@ -6255,7 +6264,7 @@ var getInternalState = () => {
         haxEnabled,
         time,
         plotIdx,
-        colonyIdx: slotIdx,
+        slotIdx,
         plantIdx,
         finishedTutorial,
         manager,
@@ -6309,7 +6318,7 @@ var setInternalState = (stateStr) => {
             lastSave = time;
         }
         plotIdx = state.plotIdx ?? plotIdx;
-        slotIdx = state.colonyIdx ?? slotIdx;
+        slotIdx = state.slotIdx ?? slotIdx;
         plantIdx = state.plantIdx ?? plantIdx;
         finishedTutorial = state.finishedTutorial ?? finishedTutorial;
         manager = new ColonyManager(state.manager, nofPlots, maxColoniesPerPlot)
@@ -6377,7 +6386,7 @@ var setInternalState = (stateStr) => {
         }
     }
     actuallyPlanting = true;
-    selectedColony = manager.colonies[plotIdx][slotIdx[plotIdx]];
+    selectedColony = manager.colonies[plotIdx][slotIdx];
     if (selectedColony)
         renderer.colony = selectedColony;
     theory.invalidatePrimaryEquation();
