@@ -204,8 +204,8 @@ Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/s.`,
 second parameter for?\\\\I must wait for her return.)`,
                         1: `I am back! Rule number... one:\\\\The seed begins to
 crack, and there's a 'timer' on it until something happens.`,
-                        4: `Rule number 1 fails, so rule number 2 enacts:\\\\A
-little stem rises, and there's a tiny pair of leaves on it.`,
+                        4: `Rule number 1 fails, so rule number 2
+triggers:\\\\A little stem rises, and there's a tiny pair of leaves on it.`,
                         5: `Rules 1, 3, and 4, all at the same time.`,
                         8: `The stem rises again, and with it, a new pair of
 leaves.\\\\At the same time, the first segment and leaves reach their limits.`,
@@ -341,16 +341,16 @@ stages left until it disappears. Provides p pennies on harvest.\\\\L(s): leaf.
                         0: 'A seed basking in its own dazing lullaby.',
                         6: 'A flower bud already?',
                         10: 'New stems rise forth from a bud.',
-                        12: `Reminder: gardeners need to be early birds. Now, 
+                        12: `A reminder, gardeners need to be early birds. Now, 
 why are you still up counting pennies?\\\\Look at the light. This lamp's wick
-is, in fact, one of our own campion leaves. I don't sell them.\\\\So if you ever
-needed to know whether what I do is all about crowns and riches, please look at
-the light on your table again.`,
+is, in fact, from our own campion leaves. I don't sell them.\\\\I don't want to
+sell most of the flowers I plant. So... so if you ever needed to know if all I
+ever cared about was crowns and riches...\\\\Are you... did you just pass out?`,
                         14: `New stems have risen. This pattern will repeat
-periodically. Like a fractal.\\\\What's a graftal, you say?\\\\Oh, of course I'd
-be making that up.`,
+periodically. It grows like a... fractal?\\\\What is a graftal- who wrote that
+document? Oh, of course they'd be making that up.`,
                         18: `New stems have risen.\\\\Oh no. Perhaps luminaries
-were right all along. Small campion, big campion.`,
+were right all along. Small campion, big campion. Lena surrenders!`,
                         19: `Too late to munch on thy flowers, for the first 
 fruit...\\\\cometh.`,
                         22: `Go to sleep. Was my campion sedative not good
@@ -365,20 +365,39 @@ seeder. Watch for the new one coming right near ya.`
                 nameShort: 'Br',
                 // No info because can't be bought
                 LsDetails: `B(r, t): base, providing r energy/s.\\\\F(l, lim):
-internode of length l. Provides l pennies on harvest.\\\\I(t): stem providing
-no energy. Spawns flowers for t turns.\\\\K(s): flower of size s. Provides s
-pennies on harvest.\\\\O(s): fruit of size s.`,
+internode of length l. Provides l pennies on harvest.\\\\I(t): stem head
+providing no energy. Spawns flowers for t turns.\\\\K(s): flower of size s.
+Provides s pennies on harvest.\\\\O(s): fruit of size s.`,
                 actions: [
                     `Harvest returns profit as the sum of all K and F sizes
 (first parameter).`
                 ],
                 narrations: [
                     {
-                        index: [0, 31],
+                        index: [0, 31, 32, 36, 40, 44, 47, 48, 50],
                         0: `A curled up sleepy-head. It only grows if it can
 establish a link with one of its favourite species.`,
-                        31: `Rule number 4: The vampire fang shoots above the
-ground.`
+                        31: `Rule number 4: The striga's head peeks above the
+ground, seeking a vantage point.`,
+                        32: `The base has grown a stem above it, so rule 1
+triggers.\\\\At the same time, the head will grow a new flower every turn,
+according to rule number 5.`,
+                        36: `Yes, it is a weed, and I know it hurts your
+daisies. But as long as it's not one of those bloody bunnies, I want you to
+continue keeping it around. And keep watching it. It's not everyday that a
+parasite graces your garden!`,
+                        40: `What do I do with it after harvest?\\\\'Forgotten
+by most, it carries great culinary value, and can be prepared in ways akin to
+that of asparagus'?\\\\No, this pretend 'ancient cynomorion' I'd be well off
+selling as diarrhoea medicine.`,
+                        44: `The head stops growing. Flowers have also been
+producing seeds for a while now.`,
+                        47: `Rule number 2 produced a \\%\\ symbol on the base.
+It signifies that the branch above it will fall away soon.`,
+                        48: `The wind violently shook, and there went the seeds!
+Can you spot where they landed?`,
+                        50: `Most broomrape varieties would end here after
+seeding. This variety loves you!`
                     }
                 ]
             },
@@ -694,15 +713,15 @@ Tip: Tap on 'Upgrades' to acquire your first plot.`
 Can't even bear to look at this soil.
 
 Luckily, this sprout won't die,
-even if later you'd stub your toe,
-or drag one of your dresses over it.
+even if later you'd stub your toe over it.
 
 But, neither would it thrive without you.
-Lend it a few drops, and watch it grow.
+Lend it a few drops when it needs it,
+then watch it grow.
 
-Anyhow, reach for my shelf if you get lost.
+Reach for my shelf if you get lost.
 I'll be back in just a little, to narrate
-the plant's growth for you.`
+your sprout's growth.`
                 }
             ],
             basil: {
@@ -3607,12 +3626,12 @@ const plantData = {
         }
     },
     broomrape: {
-        system: new LSystem('B(0.05, timer)', [
+        system: new LSystem('B(0.025, timer)', [
             // Invisibility regenerates when the shoots go up
-            'B(r, t) > F(l, lim): t<timer = B(1.15*r-0.003*r^2, t+2)',
+            'B(r, t) > F(l, lim): t<timer = B(1.15*r-0.006*r^2, t+2)',
             // Cheekily goes back to hiding
-            'B(r, t) > F(l, lim) = B(0.05, t)%',
-            'B(r, t): t>0 = B(1.15*r-0.003*r^2, t-1)',
+            'B(r, t) > F(l, lim) = B(0.025, t)%',
+            'B(r, t): t>0 = B(1.15*r-0.006*r^2, t-1)',
             'B(r, t) = B(r, t)F(0.15, 0.9)I(12)',
             'I(t): t>0 = F(0.05, 0.3)[-K(0)]/(137.508)I(t-1)',
             'K(s): s<KMaxSize = K(s+0.5)',
@@ -3622,7 +3641,7 @@ const plantData = {
         ], 30, 0, 'B', '+-&^/\\T', 0, {
             'timer': '30',
             'KMaxSize': '4.5',
-            'OMinSize': '0.05 - 1e-9'
+            'OMinSize': '0.05 + 1e-9'
         }, [
             // Stem
             '~> I(t) = F(0.2)[aaaa]',
@@ -3636,13 +3655,19 @@ const plantData = {
             '~> O(s) = T((2.5-s)/5)K(4.25+s)'
         ]),
         maxStage: 140,
-        parasite: new Set(['sprout', 'calendula', 'sunflower', 'dandelion']),
+        parasite: new Set([
+            'sprout',
+            'calendula',
+            'sunflower',
+            'dandelion',
+            'clover'
+        ]),
         requiresWater: false,
-        growthRate: BigNumber.from(12),
-        growthCost: BigNumber.from(30),
+        growthRate: BigNumber.SIX,
+        growthCost: BigNumber.from(15),
         propagation: {
             stage: [48, 95],
-            rate: [0.55, 0.55],
+            rate: [0.6, 0.6],
             priority: 'm'
         },
         actions: [
@@ -5338,7 +5363,7 @@ let createColonyViewMenu = (colony) => {
     });
     let pageContents = ui.createLabel({
         fontFamily: FontFamily.CMU_REGULAR,
-        fontSize: 16,
+        fontSize: 14,
         text: () => updateReconstruction(),
         lineBreakMode: LineBreakMode.CHARACTER_WRAP
     });
