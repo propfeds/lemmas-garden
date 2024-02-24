@@ -375,7 +375,7 @@ Provides s pennies on harvest.\\\\O(s): fruit of size s.`,
                 narrations: [
                     {
                         index: [0, 31, 32, 36, 40, 44, 47, 48, 50],
-                        0: `A curled up sleepy-head. It only grows if it can
+                        0: `A curled up sleepy-head. It'll only grow if it can
 establish a link with one of its favourite species.`,
                         31: `Rule number 4: The striga's head peeks above the
 ground, seeking a vantage point.`,
@@ -5031,7 +5031,8 @@ let createVariableMenu = (variables) => {
         varEntries.push(ui.createEntry({
             row: i,
             column: 0,
-            text: variables[i][0]
+            text: variables[i][0],
+            fontSize: 14,
         }));
         varEntries.push(ui.createLatexLabel({
             text: '=',
@@ -5044,6 +5045,7 @@ let createVariableMenu = (variables) => {
             row: i,
             column: 2,
             text: variables[i][1],
+            fontSize: 14,
             horizontalTextAlignment: TextAlignment.END
         }));
     }
@@ -5092,7 +5094,8 @@ let createSystemMenu = (id) => {
     let axiomEntry = ui.createEntry({
         text: tmpAxiom,
         row: 0,
-        column: 1
+        column: 1,
+        fontSize: 14,
     });
     let tmpVars = Object.entries(values.variables);
     let varButton = ui.createButton({
@@ -5120,7 +5123,8 @@ let createSystemMenu = (id) => {
         }));
         ruleEntries.push(ui.createEntry({
             row: i, column: 1,
-            text: tmpRules[i]
+            text: tmpRules[i],
+            fontSize: 14,
         }));
     }
     let rulesLabel = ui.createLatexLabel({
@@ -5142,7 +5146,8 @@ let createSystemMenu = (id) => {
     //     modelEntries.push(ui.createEntry
     //     ({
     //         row: i,
-    //         text: tmpModels[i]
+    //         text: tmpModels[i],
+    //         fontSize: 14,
     //     }));
     // }
     // let modelsLabel = ui.createLatexLabel
@@ -5161,6 +5166,7 @@ let createSystemMenu = (id) => {
         text: tmpIgnore,
         row: 0,
         column: 1,
+        fontSize: 14,
         horizontalTextAlignment: TextAlignment.END
     });
     let tmpCI = values.ctxIgnoreList ?? '';
@@ -5168,6 +5174,7 @@ let createSystemMenu = (id) => {
         text: tmpCI,
         row: 1,
         column: 1,
+        fontSize: 14,
         horizontalTextAlignment: TextAlignment.END
     });
     let tmpAngle = values.turnAngle ?? '0';
@@ -5175,6 +5182,7 @@ let createSystemMenu = (id) => {
         text: tmpAngle.toString(),
         row: 2,
         column: 1,
+        fontSize: 14,
         horizontalTextAlignment: TextAlignment.END
     });
     let tmpTropism = values.tropism ?? '0';
@@ -5182,6 +5190,7 @@ let createSystemMenu = (id) => {
         text: tmpTropism.toString(),
         row: 3,
         column: 1,
+        fontSize: 14,
         horizontalTextAlignment: TextAlignment.END
     });
     /*
@@ -5207,6 +5216,7 @@ let createSystemMenu = (id) => {
         keyboard: Keyboard.NUMERIC,
         row: 4,
         column: 1,
+        fontSize: 14,
         horizontalTextAlignment: TextAlignment.END
     });
     */
@@ -5308,6 +5318,7 @@ let createColonyViewMenu = (colony) => {
     let filterEntry = ui.createEntry({
         column: 1,
         text: colonyViewConfig[colony.id].filter,
+        fontSize: 14,
         clearButtonVisibility: ClearButtonVisibility.WHILE_EDITING,
         onTextChanged: (ot, nt) => {
             colonyViewConfig[colony.id].filter = nt;
@@ -5488,7 +5499,8 @@ let createBookMenu = (book) => {
         row: 0,
         column: 1,
         text: 'source' in pages[shelfPages[key]] ?
-            pages[shelfPages[key]].source : ''
+            pages[shelfPages[key]].source : '',
+        fontSize: 14,
     });
     let sourceGrid = ui.createGrid({
         isVisible: 'source' in pages[shelfPages[key]],
@@ -5655,6 +5667,7 @@ let createWaterMenu = () => {
                 text: autoWaterConfig[plantUnlocks[i]].maxStage == INT_MAX ?
                     '∞' : autoWaterConfig[plantUnlocks[i]].maxStage?.toString() ??
                     '?',
+                fontSize: 14,
                 keyboard: Keyboard.NUMERIC,
                 horizontalTextAlignment: TextAlignment.END,
                 onTextChanged: (ot, nt) => {
@@ -5778,6 +5791,7 @@ let createNotebookMenu = () => {
             column: 0,
             text: notebook[plantUnlocks[i]].maxLevel == INT_MAX ? '∞' :
                 notebook[plantUnlocks[i]].maxLevel?.toString() ?? '?',
+            fontSize: 14,
             keyboard: Keyboard.NUMERIC,
             horizontalTextAlignment: TextAlignment.END,
             onTextChanged: (ot, nt) => {

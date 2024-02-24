@@ -427,7 +427,7 @@ Provides s pennies on harvest.\\\\O(s): fruit of size s.`,
                 [
                     {
                         index: [0, 31, 32, 36, 40, 44, 47, 48, 50],
-                        0: `A curled up sleepy-head. It only grows if it can
+                        0: `A curled up sleepy-head. It'll only grow if it can
 establish a link with one of its favourite species.`,
                         31: `Rule number 4: The striga's head peeks above the
 ground, seeking a vantage point.`,
@@ -6445,7 +6445,8 @@ let createVariableMenu = (variables: [string, string][]) =>
         ({
             row: i,
             column: 0,
-            text: variables[i][0]
+            text: variables[i][0],
+            fontSize: 14,
         }));
         varEntries.push(ui.createLatexLabel
         ({
@@ -6460,6 +6461,7 @@ let createVariableMenu = (variables: [string, string][]) =>
             row: i,
             column: 2,
             text: variables[i][1],
+            fontSize: 14,
             horizontalTextAlignment: TextAlignment.END
         }));
     }
@@ -6524,7 +6526,8 @@ let createSystemMenu = (id: string) =>
     ({
         text: tmpAxiom,
         row: 0,
-        column: 1
+        column: 1,
+        fontSize: 14,
     });
 
     let tmpVars = Object.entries(values.variables);
@@ -6559,7 +6562,8 @@ let createSystemMenu = (id: string) =>
         ruleEntries.push(ui.createEntry
         ({
             row: i, column: 1,
-            text: tmpRules[i]
+            text: tmpRules[i],
+            fontSize: 14,
         }));
     }
     let rulesLabel = ui.createLatexLabel
@@ -6584,7 +6588,8 @@ let createSystemMenu = (id: string) =>
     //     modelEntries.push(ui.createEntry
     //     ({
     //         row: i,
-    //         text: tmpModels[i]
+    //         text: tmpModels[i],
+    //         fontSize: 14,
     //     }));
     // }
     // let modelsLabel = ui.createLatexLabel
@@ -6605,6 +6610,7 @@ let createSystemMenu = (id: string) =>
         text: tmpIgnore,
         row: 0,
         column: 1,
+        fontSize: 14,
         horizontalTextAlignment: TextAlignment.END
     });
     let tmpCI = values.ctxIgnoreList ?? '';
@@ -6613,6 +6619,7 @@ let createSystemMenu = (id: string) =>
         text: tmpCI,
         row: 1,
         column: 1,
+        fontSize: 14,
         horizontalTextAlignment: TextAlignment.END
     });
     let tmpAngle = values.turnAngle ?? '0';
@@ -6621,6 +6628,7 @@ let createSystemMenu = (id: string) =>
         text: tmpAngle.toString(),
         row: 2,
         column: 1,
+        fontSize: 14,
         horizontalTextAlignment: TextAlignment.END
     });
     let tmpTropism = values.tropism ?? '0';
@@ -6629,6 +6637,7 @@ let createSystemMenu = (id: string) =>
         text: tmpTropism.toString(),
         row: 3,
         column: 1,
+        fontSize: 14,
         horizontalTextAlignment: TextAlignment.END
     });
     /*
@@ -6654,6 +6663,7 @@ let createSystemMenu = (id: string) =>
         keyboard: Keyboard.NUMERIC,
         row: 4,
         column: 1,
+        fontSize: 14,
         horizontalTextAlignment: TextAlignment.END
     });
     */
@@ -6787,6 +6797,7 @@ let createColonyViewMenu = (colony: Colony) =>
     ({
         column: 1,
         text: colonyViewConfig[colony.id].filter,
+        fontSize: 14,
         clearButtonVisibility: ClearButtonVisibility.WHILE_EDITING,
         onTextChanged: (ot: string, nt: string) =>
         {
@@ -7016,7 +7027,8 @@ let createBookMenu = (book: Book) =>
         row: 0,
         column: 1,
         text: 'source' in pages[shelfPages[key]] ?
-        pages[shelfPages[key]].source : ''
+        pages[shelfPages[key]].source : '',
+        fontSize: 14,
     });
     let sourceGrid = ui.createGrid
     ({
@@ -7227,6 +7239,7 @@ let createWaterMenu = () =>
                 text: autoWaterConfig[plantUnlocks[i]].maxStage == INT_MAX ?
                 '∞' : autoWaterConfig[plantUnlocks[i]].maxStage?.toString() ??
                 '?',
+                fontSize: 14,
                 keyboard: Keyboard.NUMERIC,
                 horizontalTextAlignment: TextAlignment.END,
                 onTextChanged: (ot: string, nt: string) =>
@@ -7378,6 +7391,7 @@ let createNotebookMenu = () =>
             column: 0,
             text: notebook[plantUnlocks[i]].maxLevel == INT_MAX ? '∞' :
             notebook[plantUnlocks[i]].maxLevel?.toString() ?? '?',
+            fontSize: 14,
             keyboard: Keyboard.NUMERIC,
             horizontalTextAlignment: TextAlignment.END,
             onTextChanged: (ot: string, nt: string) =>

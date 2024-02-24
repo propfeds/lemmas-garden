@@ -171,7 +171,7 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Repelled by rose campions and sunflowers
   - [ ] Or maybe repelled by calendula and basil?
 
-- [ ] Broomrape
+- [x] Broomrape
   - [x] Schedule
     - Once per 2 years? Doesn't it make broomrape faster than hopleek?
   - [x] Propagation method
@@ -179,7 +179,7 @@ you have to dig really deep to find the underlying systems behind the plants
     - [ ] Calyxes
     - [ ] Flowers opening
     - [ ] Fruits droop more
-  - [ ] Narrations
+  - [x] Narrations
   - [ ] Get into people's shoes
 
 - [ ] Ginger
