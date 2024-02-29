@@ -374,7 +374,7 @@ Provides s pennies on harvest.\\\\O(s): fruit of size s.`,
                 ],
                 narrations: [
                     {
-                        index: [0, 31, 32, 36, 40, 44, 47, 48, 50],
+                        index: [0, 31, 32, 36, 40, 44, 47, 48, 50, 95],
                         0: `A curled up sleepy-head. It'll only grow if it can
 establish a link with one of its favourite species.`,
                         31: `Rule number 4: The striga's head peeks above the
@@ -397,7 +397,10 @@ It signifies that the branch above it will fall away soon.`,
                         48: `The wind violently shook, and there went the seeds!
 Can you spot where they landed?`,
                         50: `Most broomrape varieties would end here after
-seeding. This variety loves you!`
+seeding. This variety, let's just say it's very much establishing a good link
+with one of its favourite species!`,
+                        95: `The wind violently shook, and there went the seeds!
+Can you spot where they landed this time?`
                     }
                 ]
             },
@@ -3494,7 +3497,7 @@ const plantData = {
         ]),
         maxStage: 50,
         requiresWater: true,
-        growthRate: BigNumber.TWO,
+        growthRate: BigNumber.from(2.5),
         growthCost: BigNumber.TWO,
         actions: [
             {
