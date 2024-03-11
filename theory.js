@@ -42,8 +42,8 @@ Welcome to Lemma's Garden, an idle botanical theory built on the workings of ` +
     };
     return descs[language] ?? descs.en;
 };
-var authors = 'propfeds\n\nThanks to:\nProf. Nakamura, research supervisor\n' +
-    'game-icons.net, for providing the icons';
+var authors = 'propfeds/a_spiralist\n\nThanks to:\nProf. Nakamura, research ' +
+    'supervisor\nThe six questionnaire takers\ngame-icons.net';
 var version = 0.23;
 // Numbers are often converted into 32-bit signed integers in JINT.
 const INT_MAX = 0x7fffffff;
