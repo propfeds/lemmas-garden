@@ -133,7 +133,7 @@ harvesting it for the first time.`,
         invisibleColony: `\\text{Tilled soil.}`,
         colonyStats: `\\text{{Energy\\colon\\enspace {0} +{1}/s}}\\\\
 \\text{{Growth\\colon\\enspace {2}/{3} +{4}/s}}\\\\
-\\text{{Profit\\colon\\enspace {5}p}}\\\\
+\\text{{Base profit\\colon\\enspace {5}p}}\\\\
 \\text{{({6}/{7}) {8}}}`,
         dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}\\\\{5}',
         dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\{5}',
@@ -4987,10 +4987,11 @@ var getQuaternaryEntries = () => {
                 for (let j = 0; j < manager.colonies[i].length; ++j) {
                     let c = manager.colonies[i][j];
                     // @ts-expect-error
-                    sum += c.profit * BigNumber.from(c.population);
+                    sum += c.profit * BigNumber.from(c.population) *
+                        // @ts-expect-error
+                        theory.publicationMultiplier;
                 }
-                // @ts-expect-error
-                quaternaryEntries[i].value = sum * theory.publicationMultiplier;
+                quaternaryEntries[i].value = `${sum}p`;
             }
             break;
         case 2 /* QuaternaryModes.BOARD */:
