@@ -314,8 +314,7 @@ signal (type 0 travels down, type 1 travels up).`,
                 [
                     `Harvest returns profit as the sum of all L and K sizes
 (first parameter).`,
-                    `Prune cuts off all A and K (and all geometry symbols near
-K).`
+                    `Prune cuts off all A symbols.`
                 ],
                 narrations:
                 [
@@ -4551,9 +4550,6 @@ const plantData: {[key: string]: Plant} =
             {   // Always a prune
                 system: new LSystem('',
                 [
-                    'F(l, lim) > K(s, t) =',
-                    'K(s, t) < /(a) =',
-                    'K(s, t) =',
                     'A(r, t) ='
                 ], 30, 0, '', ''),
                 switchNarration: (stage, track) =>
