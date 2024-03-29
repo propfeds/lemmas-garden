@@ -97,7 +97,7 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Can players perform actions in locked plots?
 - [ ] Capitalise plant names (Rose Campion instead of campion)?
 
-- [ ] Button to display action L-systems
+- [x] Button to display action L-systems
 
 - [ ] Address Lemma's attitude
   - Early game should be the time when a lot of help is needed, don't neglect your student
@@ -144,7 +144,7 @@ you have to dig really deep to find the underlying systems behind the plants
   - [x] Rewrite instructions to encourage blooming
     - Stg 24: 'It's about to bloom soon. Cutting the bud now or watching flowers later, it's up to you.'
     - Separate stg 26 and 27 description for basil, and only stg 27 has the signal explanation
-  - [ ] Add a Pruned commentary track
+  - [x] Add a Pruned commentary track
 
 - [x] Rose campion
   - [ ] Shrub form

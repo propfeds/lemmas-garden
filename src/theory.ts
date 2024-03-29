@@ -85,6 +85,7 @@ const LOC_STRINGS =
         pubTax: 'Publishing fee \\&\\ taxes\\colon',
 
         btnView: 'View L-system',
+        btnViewAction: 'View Action L-system',
         btnAlmanac: 'World of Plants',
         btnAlmanacNoEntry: '(Unavailable)',
         btnVar: 'Variables',
@@ -5427,7 +5428,7 @@ const pruneLabel = ui.createLatexLabel
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9, 1, 9),
-    text: getLoc('labelActions')[1],
+    text: getLoc('labelActions')[Actions.PRUNE],
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
@@ -6516,9 +6517,11 @@ let createVariableMenu = (variables: [string, string][]) =>
     return menu;
 }
 
-let createSystemMenu = (id: string) =>
+let createSystemMenu = (id: string, action: number = null) =>
 {
-    let values = plantData[id].system.toJSON();
+    let system = action ? plantData[id].actions[action].system :
+    plantData[id].system;
+    let values = system.toJSON();
 
     let tmpAxiom = values.axiom;
     let axiomEntry = ui.createEntry
@@ -6666,13 +6669,16 @@ let createSystemMenu = (id: string) =>
         horizontalTextAlignment: TextAlignment.END
     });
     */
-    let LsExplanations =
+    let LsExplanations = action ? getLoc('plants')[id]?.actions[action] :
     `${getLoc('plants')[id]?.LsDetails ?? getLoc('noLsDetails')}\\\\—
     \\\\${getLoc('plants')[id]?.actions?.join('\\\\') ?? getLoc('noActions')}`;
+    let plantTitle = getLoc('plants')[id]?.name ?? `#${id}`;
+    let LsTitle = action ? `${plantTitle} - ${getLoc('labelActions')[action]}` :
+    plantTitle;
 
     let menu = ui.createPopup
     ({
-        title: getLoc('plants')[id]?.name ?? `#${id}`,
+        title: LsTitle,
         isPeekable: true,
         content: ui.createStackLayout
         ({
@@ -7620,6 +7626,18 @@ let createConfirmationMenu = (plot: number, index: number, id: number) =>
                     Localization.get('GenPopupContinue')),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     margin: new Thickness(0, 15)
+                }),
+                ui.createButton
+                ({
+                    isVisible: plantData[c.id].actions[id].system ? true :
+                    false,
+                    text: getLoc('btnViewAction'),
+                    onClicked: () =>
+                    {
+                        Sound.playClick();
+                        let menu = createSystemMenu(c.id, id);
+                        menu.show();
+                    }
                 }),
                 ui.createGrid
                 ({

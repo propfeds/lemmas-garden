@@ -65,6 +65,7 @@ const LOC_STRINGS = {
         currencyTax: 'p (tax)',
         pubTax: 'Publishing fee \\&\\ taxes\\colon',
         btnView: 'View L-system',
+        btnViewAction: 'View Action L-system',
         btnAlmanac: 'World of Plants',
         btnAlmanacNoEntry: '(Unavailable)',
         btnVar: 'Variables',
@@ -4210,7 +4211,7 @@ const pruneLabel = ui.createLatexLabel({
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9, 1, 9),
-    text: getLoc('labelActions')[1],
+    text: getLoc('labelActions')[1 /* Actions.PRUNE */],
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
@@ -5087,8 +5088,10 @@ let createVariableMenu = (variables) => {
     });
     return menu;
 };
-let createSystemMenu = (id) => {
-    let values = plantData[id].system.toJSON();
+let createSystemMenu = (id, action = null) => {
+    let system = action ? plantData[id].actions[action].system :
+        plantData[id].system;
+    let values = system.toJSON();
     let tmpAxiom = values.axiom;
     let axiomEntry = ui.createEntry({
         text: tmpAxiom,
@@ -5219,10 +5222,14 @@ let createSystemMenu = (id) => {
         horizontalTextAlignment: TextAlignment.END
     });
     */
-    let LsExplanations = `${getLoc('plants')[id]?.LsDetails ?? getLoc('noLsDetails')}\\\\—
+    let LsExplanations = action ? getLoc('plants')[id]?.actions[action] :
+        `${getLoc('plants')[id]?.LsDetails ?? getLoc('noLsDetails')}\\\\—
     \\\\${getLoc('plants')[id]?.actions?.join('\\\\') ?? getLoc('noActions')}`;
+    let plantTitle = getLoc('plants')[id]?.name ?? `#${id}`;
+    let LsTitle = action ? `${plantTitle} - ${getLoc('labelActions')[action]}` :
+        plantTitle;
     let menu = ui.createPopup({
-        title: getLoc('plants')[id]?.name ?? `#${id}`,
+        title: LsTitle,
         isPeekable: true,
         content: ui.createStackLayout({
             children: [
@@ -5970,6 +5977,16 @@ let createConfirmationMenu = (plot, index, id) => {
                     text: Localization.format(getLoc('actionConfirm'), getLoc('labelActions')[id], plot + 1, index + 1, manager.colonies[plot].length, getColonyTitleString(c, false, false, true), getLoc('plants')[c.id]?.actions?.[id] ?? '', Localization.get('GenPopupContinue')),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     margin: new Thickness(0, 15)
+                }),
+                ui.createButton({
+                    isVisible: plantData[c.id].actions[id].system ? true :
+                        false,
+                    text: getLoc('btnViewAction'),
+                    onClicked: () => {
+                        Sound.playClick();
+                        let menu = createSystemMenu(c.id, id);
+                        menu.show();
+                    }
                 }),
                 ui.createGrid({
                     columnDefinitions: ['1*', '1*'],
