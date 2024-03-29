@@ -4327,6 +4327,7 @@ interface Plant
     decimals?: {[key: string]: number[]};
     camera: (stage: number) => RendererCamera;
     stroke: (stage: number) => RendererStroke;
+    colour?: string;
 }
 
 interface ColonyViewEntry
@@ -4501,7 +4502,8 @@ const plantData: {[key: string]: Plant} =
         stroke: (stage) =>
         {
             return {};
-        }
+        },
+        colour: 'orange'
     },
     basil:
     {
@@ -4587,7 +4589,8 @@ const plantData: {[key: string]: Plant} =
         stroke: (stage) =>
         {
             return {};
-        }
+        },
+        colour: 'green'
     },
     campion:
     {
@@ -4654,7 +4657,8 @@ const plantData: {[key: string]: Plant} =
         stroke: (stage) =>
         {
             return {};
-        }
+        },
+        colour: 'magenta'
     },
     // ginger
     // sunflower
@@ -4754,7 +4758,8 @@ const plantData: {[key: string]: Plant} =
         stroke: (stage) =>
         {
             return {};
-        }
+        },
+        colour: 'brown'
     },
     dandelion:
     {
@@ -5947,7 +5952,7 @@ var getEquationOverlay = () =>
             ui.createGrid
             ({
                 row: 0, column: 0,
-                columnDefinitions: getNavColumnDefs(ui.screenWidth),
+                columnDefinitions: ['1*', '4*', '1*'],
                 rowDefinitions: ['1*', '2*', '1*'],
                 verticalOptions: LayoutOptions.FILL,
                 inputTransparent: true,
@@ -5961,7 +5966,7 @@ var getEquationOverlay = () =>
                     createNakedLabelBtn
                     ({
                         row: 1, column: 0,
-                        verticalOptions: LayoutOptions.FILL
+                        verticalOptions: LayoutOptions.FILL,
                     }, GTPS, canGTPS, '←'),
                     // createNakedLabelBtn
                     // ({
@@ -5977,7 +5982,7 @@ var getEquationOverlay = () =>
                     // }, () => manager.colonies[plotIdx].length > 0, ''),
                     createNakedLabelBtn
                     ({
-                        row: 1, column: 3,
+                        row: 1, column: 2,
                         verticalOptions: LayoutOptions.FILL
                     }, GTNS, canGTNS, '→'),
                 ]
@@ -6219,16 +6224,25 @@ var getCurrencyBarDelegate = () =>
 /**
  * Returns the colony title for representation.
  */
-let getColonyTitleString = (colony: Colony, prog = false, maxStage = false,
-escapeHash = false) =>
-Localization.format(getLoc(prog ? 'colonyProg' : (maxStage ? 'colonyWMaxStg':
-'colony')), colony.propagated ? `+${colony.population}` : colony.population,
-getLoc('plants')[colony.id]?.name ?? `${escapeHash ? '\\' : ''}#${colony.id}`,
-// @ts-expect-error
-colony.stage, prog ? colony.growth * BigNumber.HUNDRED /
-// @ts-expect-error
-(plantData[colony.id].growthCost * BigNumber.from(colony.sequence.length)) :
-plantData[colony.id].maxStage ?? '∞');
+let getColonyTitleString = (colony: Colony,
+options: {[key: string]: boolean} = {}) =>
+{
+    let format = getLoc(options.prog ? 'colonyProg' : (options.maxStage ?
+    'colonyWMaxStg': 'colony'));
+    let pop = colony.propagated ? `+${colony.population}` : colony.population;
+    let name = getLoc('plants')[colony.id]?.name ??
+    `${options.escapeHash ? '\\' : ''}#${colony.id}`;
+    let colour = plantData[colony.id].colour;
+    if(options.colour && colour)
+        name = `\\color{${colour}}{${name}}`;
+    let arg3 = // @ts-expect-error
+    options.prog ? colony.growth * BigNumber.HUNDRED /
+    // @ts-expect-error
+    (plantData[colony.id].growthCost * BigNumber.from(colony.sequence.length)) :
+    plantData[colony.id].maxStage ?? '∞';
+
+    return Localization.format(format, pop, name, colony.stage, arg3);
+}
 
 var getPrimaryEquation = () =>
 {
@@ -6275,7 +6289,8 @@ var getSecondaryEquation = () =>
                 manager.actionGangsta[0] == plotIdx &&
                 manager.actionGangsta[1] == slotIdx) ?
                 getLoc('status').actions[manager.actionGangsta[2]] : '';
-                result = `\\begin{array}{c}\\text{${getColonyTitleString(c)}}
+                result = `\\begin{array}{c}\\text{${getColonyTitleString(c,
+                {colour: true})}}
                 \\\\${Localization.format(getLoc('colonyStats'),
                 // @ts-expect-error
                 c.energy, c.synthRate * BigNumber.from(insolationCoord),
@@ -6294,8 +6309,8 @@ var getSecondaryEquation = () =>
                 //     result = getLoc('invisibleColony');
                 //     break;
                 // }
-                result = `\\begin{array}{c}\\text{${getColonyTitleString(c)}}
-                \\\\E=${c.energy},\\enspace g=${c.growth}/
+                result = `\\begin{array}{c}\\text{${getColonyTitleString(c,
+                {colour: true})}}\\\\E=${c.energy},\\enspace g=${c.growth}/
                 ${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                 // @ts-expect-error
                 plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
@@ -6309,11 +6324,11 @@ var getSecondaryEquation = () =>
                 {
                     let d = manager.colonies[plotIdx][i];
                     if(isColonyVisible(d))
-                        result += `\\text{${getColonyTitleString(d, true)}}
-                        \\\\`;
+                        result += `\\text{${getColonyTitleString(d,
+                        {prog: true, colour: true})}}\\\\`;
                 }
-                let cStr = isColonyVisible(c) ? getColonyTitleString(c, true) :
-                getLoc('invisibleColony');
+                let cStr = isColonyVisible(c) ? getColonyTitleString(c,
+                {prog: true, colour: true}) : getLoc('invisibleColony');
                 result += `\\text{\\underline{${cStr}}}\\\\`;
 
                 for(let i = slotIdx + 1;
@@ -6321,8 +6336,8 @@ var getSecondaryEquation = () =>
                 {
                     let d = manager.colonies[plotIdx][i];
                     if(isColonyVisible(d))
-                        result += `\\text{${getColonyTitleString(d, true)}}
-                        \\\\`;
+                        result += `\\text{${getColonyTitleString(d,
+                        {prog: true, colour: true})}}\\\\`;
                 }
 
                 result += `E=${c.energy},\\enspace\\pi =${c.profit}\\text{p}
@@ -6843,7 +6858,7 @@ let createColonyViewMenu = (colony: Colony) =>
         return reconstructionTask.result;
     }
 
-    let tmpTitle = getColonyTitleString(colony, false, true);
+    let tmpTitle = getColonyTitleString(colony, {maxStage: true});
     let tmpStage = colony.stage;
     let cmtStage = -1;
     let track: Narration;
@@ -6916,7 +6931,7 @@ let createColonyViewMenu = (colony: Colony) =>
                 Menu title and commentary are updated dynamically without
                 the player having to close and re-open.
                 */
-                tmpTitle = getColonyTitleString(colony, false, true);
+                tmpTitle = getColonyTitleString(colony, {maxStage: true});
                 tmpCmt = updateCommentary();
                 plantStats.text = Localization.format(getLoc('plantStats'),
                 track?.name ? Localization.format(getLoc('narrationTrack'),
@@ -7621,7 +7636,7 @@ let createConfirmationMenu = (plot: number, index: number, id: number) =>
                     text: Localization.format(getLoc('actionConfirm'),
                     getLoc('labelActions')[id], plot + 1, index + 1,
                     manager.colonies[plot].length,
-                    getColonyTitleString(c, false, false, true),
+                    getColonyTitleString(c, {escapeHash: true}),
                     getLoc('plants')[c.id]?.actions?.[id] ?? '',
                     Localization.get('GenPopupContinue')),
                     horizontalTextAlignment: TextAlignment.CENTER,

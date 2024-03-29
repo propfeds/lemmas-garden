@@ -111,6 +111,12 @@ you have to dig really deep to find the underlying systems behind the plants
       - [x] Basil pruned track
       - [x] Basil unpruned track
     - [ ] Campion
+  - [ ] Lessons
+    - [ ] L0: Ls?
+    - [ ] L1: Parametric Ls (resource accumulation)
+    - [ ] L2: Parametric Ls (Number of parameters)
+    - [ ] L3: Context Ls
+    - [ ] L4: Connections to fractals
 
 - [x] Parasites
   - [x] Rate: for now, hardcode to be param #0 of symbol #0
