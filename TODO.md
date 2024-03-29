@@ -76,7 +76,7 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Basil
   - [ ] Campion
   - [ ] Hopleek
-  - [ ] Broomrape
+  - [x] Broomrape
   - [ ] Ginger
   - [ ] Sunflower
 
@@ -92,6 +92,12 @@ you have to dig really deep to find the underlying systems behind the plants
 - [x] Dynamical system inaccuracies
   - [ ] Parasites sometimes eat after their hosts, resulting in loss of energy
   - [x] basil is pruned at stg 0 (synth rate is 0), plant can only grow when watering. Watering should give multiples of 2 energy, but when evolving, some of the energy is truncated.
+- [x] Let all plots be viewable before unlocking
+  - [x] Display price before unlocking
+  - [ ] Can players perform actions in locked plots?
+- [ ] Capitalise plant names (Rose Campion instead of campion)?
+
+- [ ] Button to display action L-systems
 
 - [ ] Address Lemma's attitude
   - Early game should be the time when a lot of help is needed, don't neglect your student
@@ -112,9 +118,11 @@ you have to dig really deep to find the underlying systems behind the plants
   - [x] Dislodge and re-establish all links every time a colony is killed or spawned?
     - [x] Do a sweeping scan for all links in the same plot in addColony and killColony
 
-- [x] Let all plots be viewable before unlocking
-  - [x] Display price before unlocking
-  - [ ] Can players perform actions in locked plots?
+- [ ] Extra pot
+  - [ ] Can be transferred into a real plot
+  - [ ] Potted plants only grow up to a stage?
+  - [ ] Can only do 1 population at a time?
+    - [ ] Can colony size be updated?
 
 - [x] Pre-calendula plant:
   - [x] Pea or mung sprout
@@ -124,9 +132,9 @@ you have to dig really deep to find the underlying systems behind the plants
     - Buttercup
 
 - [ ] Calendula
-  - [ ] Flower transforms into fruit with lower profit
-    - Or maybe not, it's the tutorial plant.
-  - [ ] Implement some kind of puzzle?
+  - [ ] Flower transforms into seed pod with lower profit
+    - Turns `K(9)` into `K(9-1.5, 0)` (to avoid further interactions) and add seed pod
+  - [ ] Singular inflorescence
 
 - [ ] Basil
   - [ ] Reversible leaf decay when pruning?
@@ -161,15 +169,18 @@ you have to dig really deep to find the underlying systems behind the plants
 
 - [ ] Dandelion
   - Spawn on random plot
-    - [ ] Implement RNG engine
+    - [x] Implement RNG engine
 
 - [ ] Hopleek
   - Biting is on evolution queue instead of action?
   - [x] Leap years calculation
     - [ ] 400-year cycle wrapping
   - [x] Hopleek schedule
-  - [ ] Repelled by rose campions and sunflowers
-  - [ ] Or maybe repelled by calendula and basil?
+  - [ ] Move every stage
+  - [ ] Repelled by?
+    - [ ] rose campions and sunflowers?
+    - [ ] calendula and basil?
+    - [ ] nothing.
 
 - [x] Broomrape
   - [x] Schedule

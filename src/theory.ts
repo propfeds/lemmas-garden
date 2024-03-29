@@ -784,19 +784,18 @@ $: aligns the turtle's up vector closest to vertical.
             intro:
             [
                 {
-                    title: `Proven, untrusted`,
+                    title: `Lemma's Garden`,
                     contents:
-`Not one of my students, are you?
-Surprised to see somebody visit this late,
-let alone urge me to let her plant on my ground?
+`(The sky was dark.
+You were out there picking up dirt.)
 
-(Hum. This is not fine.
-But I can do something.)
+You there. Why are you picking up dirt?
+Not one of my old students, are you?
+(points lantern) You were not in my class,
+so I can only spare you a corner... here.
 
-...You're not in my classes yet,
-but I can spare a little plot here for you.
-Take one of my seeds, till the plot,
-and we'll start in the morning.
+Take this seed, till the soil,
+then we'll start in the morning.
 
 Tip: Tap on 'Upgrades' to acquire your first plot.`
                 },
@@ -814,8 +813,8 @@ Lend it a few drops when it needs it,
 then watch it grow.
 
 Reach for my shelf if you get lost.
-I'll be back in just a little, to narrate
-your sprout's growth.`
+I'll be back in just a little,
+so I can teach you about its growth.`
                 }
             ],
             basil:
@@ -5977,7 +5976,7 @@ var getEquationOverlay = () =>
                     // }, () => manager.colonies[plotIdx].length > 0, ''),
                     createNakedLabelBtn
                     ({
-                        row: 1, column: 2,
+                        row: 1, column: 3,
                         verticalOptions: LayoutOptions.FILL
                     }, GTNS, canGTNS, '→'),
                 ]
