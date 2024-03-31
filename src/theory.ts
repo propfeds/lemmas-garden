@@ -57,7 +57,7 @@ Welcome to Lemma's Garden, an idle botanical theory built on the workings of ` +
     return descs[language] ?? descs.en;
 }
 var authors = 'propfeds/a_spiralist\n\nThanks to:\nProf. Nakamura, research ' +
-'supervisor\nThe six questionnaire takers\ngame-icons.net';
+'supervisor\nThe six questionnaire takers\nSir Gilles\ngame-icons.net';
 var version = 0.23;
 
 // Numbers are often converted into 32-bit signed integers in JINT.
@@ -8097,23 +8097,14 @@ var resetStage = () => renderer.reset(true);
 // Copied from the ol Oiler's Formula
 let bigStringify = (_: string | number, val: unknown) =>
 {
-    try
-    {
-        if(val instanceof BigNumber)
-            return 'BigNumber' + val.toBase64String();
-    }
-    catch {};
-    return val;
+    return (val instanceof BigNumber) ?
+    ('BigNumber' + val.toBase64String()) : val;
 }
 
 let unBigStringify = (_: string | number, val: unknown) =>
 {
-    if (val && typeof val === 'string')
-    {
-        if(val.startsWith('BigNumber'))
-            return BigNumber.fromBase64String(val.substring(9));
-    }
-    return val;
+    return (val && typeof val === 'string' && val.startsWith('BigNumber')) ?
+    BigNumber.fromBase64String(val.substring(9)) : val;
 }
 
 var getInternalState = () =>
