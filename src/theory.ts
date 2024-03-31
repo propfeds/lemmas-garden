@@ -4355,7 +4355,7 @@ const quarterDayLength = halfDayLength / 2;
 const hourLength = dayLength / 24;
 
 const nofPlots = 6;
-const maxColoniesPerPlot = 4;
+const maxColoniesPerPlot = 5;
 const waterScale = 1/2;
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(500, Math.log2(80)));
