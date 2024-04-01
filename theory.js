@@ -6345,7 +6345,7 @@ var resetStage = () => renderer.reset(true);
 // go to prev next stage
 // Copied from the ol Oiler's Formula
 let bigStringify = (_, val) => {
-    return (val instanceof BigNumber) ?
+    return val && val.hasOwnProperty('toBase64String') ?
         ('BigNumber' + val.toBase64String()) : val;
 };
 let unBigStringify = (_, val) => {
