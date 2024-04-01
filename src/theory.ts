@@ -7923,7 +7923,8 @@ let createWorldMenu = () =>
     ({
         row: 5, column: 1,
         minimum: -0.25,
-        maximum: QuaternaryModes._SIZE - 0.75,
+        maximum: haxEnabled ? QuaternaryModes._SIZE - 0.75 :
+        QuaternaryModes._SIZE - 2.75,
         value: quatMode,
         onValueChanged: () =>
         {

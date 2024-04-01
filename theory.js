@@ -6209,7 +6209,8 @@ let createWorldMenu = () => {
     let QBSlider = ui.createSlider({
         row: 5, column: 1,
         minimum: -0.25,
-        maximum: 5 /* QuaternaryModes._SIZE */ - 0.75,
+        maximum: haxEnabled ? 5 /* QuaternaryModes._SIZE */ - 0.75 :
+            5 /* QuaternaryModes._SIZE */ - 2.75,
         value: quatMode,
         onValueChanged: () => {
             quatMode = Math.round(QBSlider.value);
