@@ -3663,6 +3663,7 @@ class ColonyManager
         {
             let len = manager.colonies[plotIdx].length;
             slotIdx = Math.min(slotIdx, len - 1);
+            slotIdx = Math.max(slotIdx, 0);
             if(len > 1)
             {
                 let i = slotIdx;
@@ -6128,6 +6129,7 @@ var getCurrencyBarDelegate = () =>
 
         let len = manager.colonies[plotIdx].length;
         slotIdx = Math.min(slotIdx, len - 1);
+        slotIdx = Math.max(slotIdx, 0);
         if(len > 1)
         {
             let i = slotIdx;
@@ -6164,6 +6166,7 @@ var getCurrencyBarDelegate = () =>
 
         let len = manager.colonies[plotIdx].length;
         slotIdx = Math.min(slotIdx, len - 1);
+        slotIdx = Math.max(slotIdx, 0);
         if(len > 1)
         {
             let i = slotIdx;
