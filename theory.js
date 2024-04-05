@@ -119,20 +119,25 @@ straight line will be drawn.`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
         lockedPlot: `\\text{Untilled soil.}`,
+        permaExtraPot: `Sheltered pot`,
+        permaExtraPotInfo: `Holds one plant, seeds free of charge, pest-proof`,
         permaNote: `Notebook \\&\\ 'Buy All' button`,
         permaNoteInfo: 'Allows management of colony sizes',
         menuNote: 'Notebook',
         labelSpecies: 'Species',
         labelMaxLevel: 'Maximum level',
-        labelNoteDesc: `The species' variable levels will not go beyond this
-limit.`,
+        labelNoteDesc: `The species' upgrade levels shall not go beyond these
+limits.`,
         menuAutoWater: 'Watering schedules',
-        labelMaxStage: 'Stopping stage',
+        labelMaxStage: 'Water until',
         labelAutoWaterDesc: `Scheduling is unlocked for a species after 
 harvesting it for the first time.`,
+        menuExtraPot: 'Sheltered pot',
+        labelTransferPot: 'Transfer plant to plot: ',
         colony: `{0} of {1}, stage {2}`,
         colonyWMaxStg: `{0} of {1}, stage {2}/{3}`,
-        colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
+        colonyProg: `{0} of {1}, stg. {2} ({3}\\%)`,
+        colonyExtraPot: `Sheltered pot: {0}, stg. {1} ({2}%)`,
         invisibleColony: `\\text{Tilled soil.}`,
         colonyStats: `\\text{{Energy\\colon\\enspace {0} +{1}/s}}\\\\
 \\text{{Growth\\colon\\enspace {2}/{3} +{4}/s}}\\\\
@@ -2137,21 +2142,21 @@ class Renderer {
         this.configure(colony.sequence, colony.params, plantData[colony.id].camera(colony.stage), plantData[colony.id].stroke(colony.stage));
     }
     configure(sequence = null, params = null, camera = {}, stroke = {}, redraw = true) {
-        this.figureScale = camera.scale || 1;
-        this.cameraMode = camera.mode ?? 0;
-        this.followFactor = camera.followFactor ?? 0.15;
-        this.camCentre = new Vector3(camera.x ?? 0, camera.y ?? 0, camera.z ?? 0);
-        this.upright = camera.upright ?? true;
-        this.tickLength = stroke.tickLength ?? 1;
-        this.initDelay = stroke.initDelay ?? 0;
+        this.figureScale = camera.scale || this.figureScale;
+        this.cameraMode = camera.mode ?? this.cameraMode;
+        this.followFactor = camera.followFactor ?? this.followFactor;
+        this.camCentre = new Vector3(camera.x ?? this.camCentre.x, camera.y ?? this.camCentre.y, camera.z ?? this.camCentre.z);
+        this.upright = camera.upright ?? this.upright;
+        this.tickLength = stroke.tickLength ?? this.tickLength;
+        this.initDelay = stroke.initDelay ?? this.initDelay;
         // Loop mode is always 0
         // Whether to reset graph on hitting reset button is a game setting
-        this.loadModels = stroke.loadModels ?? true;
-        this.quickDraw = stroke.quickDraw ?? false;
-        this.quickBacktrack = stroke.quickBacktrack ?? false;
-        this.backtrackTail = stroke.backtrackTail ?? true;
-        this.hesitateApex = stroke.hesitateApex ?? true;
-        this.hesitateFork = stroke.hesitateFork ?? true;
+        this.loadModels = stroke.loadModels ?? this.loadModels;
+        this.quickDraw = stroke.quickDraw ?? this.quickDraw;
+        this.quickBacktrack = stroke.quickBacktrack ?? this.quickBacktrack;
+        this.backtrackTail = stroke.backtrackTail ?? this.backtrackTail;
+        this.hesitateApex = stroke.hesitateApex ?? this.hesitateApex;
+        this.hesitateFork = stroke.hesitateFork ?? this.hesitateFork;
         this.sequence = sequence ?? this.sequence;
         this.params = params ?? this.params;
         this.redrawing = redraw;
@@ -3351,9 +3356,10 @@ const maxColoniesPerPlot = 5;
 const waterScale = 1 / 2;
 const plotCosts = new FirstFreeCost(new ExponentialCost(500, Math.log2(80)));
 const plantUnlocks = ['sprout', 'calendula', 'basil', 'campion'];
-const plantUnlockCosts = new CompositeCost(1, new ConstantCost(1), new CompositeCost(1, new ConstantCost(1500), new ConstantCost(60000)));
+const plantUnlockCosts = new CompositeCost(1, new ConstantCost(1), new CompositeCost(1, new ConstantCost(1500), new ConstantCost(44000)));
 const permaCosts = [
     BigNumber.from(18),
+    BigNumber.from(100),
     BigNumber.from(2100),
     BigNumber.from(1e45)
 ];
@@ -4404,10 +4410,15 @@ var init = () => {
     }
     theory.createPublicationUpgrade(1, currency, permaCosts[0]);
     theory.publicationUpgrade.bought = (_) => theory.invalidateQuaternaryValues();
-    theory.createBuyAllUpgrade(2, currency, permaCosts[1]);
+    {
+        extraPotPerma = theory.createPermanentUpgrade(3, currency, new ConstantCost(permaCosts[1]));
+        extraPotPerma.description = getLoc('permaExtraPot');
+        extraPotPerma.info = getLoc('permaExtraPotInfo');
+        extraPotPerma.maxLevel = 1;
+    }
+    theory.createBuyAllUpgrade(2, currency, permaCosts[2]);
     theory.buyAllUpgrade.description = getLoc('permaNote');
     theory.buyAllUpgrade.info = getLoc('permaNoteInfo');
-    // theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
     /* Free penny
     For testing purposes
     */
@@ -6011,6 +6022,27 @@ let createShelfMenu = () => {
                         menu.show();
                     }
                 }),
+                ui.createButton({
+                    isVisible: extraPotPerma.level > 0,
+                    text: () => {
+                        if (extraManager.colonies[0].length) {
+                            let ec = extraManager.colonies[0][0];
+                            // @ts-expect-error
+                            let prog = ec.growth * BigNumber.HUNDRED /
+                                // @ts-expect-error
+                                (plantData[ec.id].growthCost *
+                                    // @ts-expect-error
+                                    BigNumber.from(ec.sequence.length));
+                            return Localization.format(getLoc('colonyExtraPot'), getLoc('plants')[ec.id], ec.stage, prog);
+                        }
+                        return getLoc('menuExtraPot');
+                    },
+                    onClicked: () => {
+                        Sound.playClick();
+                        let menu = createExtraPotMenu();
+                        menu.show();
+                    }
+                }),
                 ui.createBox({
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
@@ -6033,6 +6065,89 @@ let createShelfMenu = () => {
                 })
             ]
         })
+    });
+    return menu;
+};
+let createExtraPotMenu = () => {
+    /*
+    {// fix later
+        switch(colonyMode)
+        {
+            case ColonyModes.VERBOSE:
+                // if(!isColonyVisible(c))
+                // {
+                //     result = getLoc('invisibleColony');
+                //     break;
+                // }
+                let status = (manager.gangsta &&
+                manager.gangsta[0] == plotIdx &&
+                manager.gangsta[1] == slotIdx) ?
+                getLoc('status').evolve : (manager.actionGangsta &&
+                manager.actionGangsta[0] == plotIdx &&
+                manager.actionGangsta[1] == slotIdx) ?
+                getLoc('status').actions[manager.actionGangsta[2]] : '';
+                result = `\\begin{array}{c}\\text{${getColonyTitleString(c,
+                {colour: true})}}
+                \\\\${Localization.format(getLoc('colonyStats'),
+                // @ts-expect-error
+                c.energy, c.synthRate * BigNumber.from(insolationCoord),
+                c.growth, c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+                // @ts-expect-error
+                plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
+                '∞', c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+                // @ts-expect-error
+                plantData[c.id].growthRate * BigNumber.from(growthCoord) :
+                BigNumber.ZERO, c.profit, slotIdx + 1,
+                manager.colonies[plotIdx].length, status)}\\end{array}`;
+                break;
+            case ColonyModes.SIMPLE:
+                // if(!isColonyVisible(c))
+                // {
+                //     result = getLoc('invisibleColony');
+                //     break;
+                // }
+                result = `\\begin{array}{c}\\text{${getColonyTitleString(c,
+                {colour: true})}}\\\\E=${c.energy},\\enspace g=${c.growth}/
+                ${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+                // @ts-expect-error
+                plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
+                '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{s},\\enspace\\pi =
+                ${c.profit}\\text{p}\\\\(${slotIdx + 1}/
+                ${manager.colonies[plotIdx].length})\\\\\\end{array}`;
+                break;
+            case ColonyModes.LIST:
+                result = '\\begin{array}{c}';
+                for(let i = 0; i < slotIdx; ++i)
+                {
+                    let d = manager.colonies[plotIdx][i];
+                    if(isColonyVisible(d))
+                        result += `\\text{${getColonyTitleString(d,
+                        {prog: true, colour: true})}}\\\\`;
+                }
+                let cStr = isColonyVisible(c) ? getColonyTitleString(c,
+                {prog: true, colour: true}) : getLoc('invisibleColony');
+                result += `\\text{\\underline{${cStr}}}\\\\`;
+
+                for(let i = slotIdx + 1;
+                i < manager.colonies[plotIdx].length; ++i)
+                {
+                    let d = manager.colonies[plotIdx][i];
+                    if(isColonyVisible(d))
+                        result += `\\text{${getColonyTitleString(d,
+                        {prog: true, colour: true})}}\\\\`;
+                }
+
+                result += `E=${c.energy},\\enspace\\pi =${c.profit}\\text{p}
+                \\end{array}`;
+                break;
+            default:
+                result = '';
+        }
+    }
+    */
+    let menu = ui.createPopup({
+        isPeekable: true,
+        title: getLoc('menuExtraPot'),
     });
     return menu;
 };
