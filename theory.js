@@ -134,6 +134,20 @@ limits.`,
 harvesting it for the first time.`,
         menuExtraPot: 'Sheltered pot',
         labelTransferPot: 'Transfer plant to plot: ',
+        extraPotEqPlaceholder: [
+            '',
+            `States a note on Lemma's bookshelf:
+\\\\To my sister's best friend
+\\\\Your soul is sheltered here
+\\\\don't you dare forget.
+\\\\Dot`,
+            `Etched on the pot's side:
+\\\\For Ms. Ruddles' class,
+\\\\With love of course!
+\\\\C.`,
+            `The pot is adorned with pearly grooves,
+\\\\reminiscent of a vast, misting lake.`
+        ],
         colony: `{0} of {1}, stage {2}`,
         colonyWMaxStg: `{0} of {1}, stage {2}/{3}`,
         colonyProg: `{0} of {1}, stg. {2} ({3}\\%)`,
@@ -2755,9 +2769,9 @@ class ColonyManager {
         c.profit = stats.profit;
         // Insert colony into array. If there are null coordinates provided,
         // spawn a propagated colony.
-        if (parent === null)
-            this.colonies[plot].push(c);
-        else if (parent[0] !== null && parent[1] !== null) {
+        // if(parent === null)
+        //     this.colonies[plot].push(c);
+        if (parent && parent[0] !== null && parent[1] !== null) {
             // Inherit parent's reserve
             let p = this.colonies[parent[0]][parent[1]];
             // @ts-expect-error
@@ -2775,14 +2789,17 @@ class ColonyManager {
             // if(plot == parent[0])
             //     this.colonies[plot].splice(parent[1] + 1, 0, c);
             // else
-            this.colonies[plot].push(c);
         }
+        this.colonies[plot].push(c);
         // Establish parasitic links
         this.linkParasites(plot);
         // Auto water
         if (autoWaterConfig[id]?.maxStage > c.stage)
             this.water(c);
-        if (plot == plotIdx) {
+        // Change renderer plant
+        // If there's no waitFor, then this is the main manager
+        // Spaghetti code
+        if (!this.waitFor && plot == plotIdx) {
             let prevColony = selectedColony;
             selectedColony = this.colonies[plotIdx][slotIdx];
             if (prevColony !== selectedColony)
@@ -2827,7 +2844,8 @@ class ColonyManager {
         this.colonies[plot].splice(index, 1);
         // Re-establish parasitic links
         this.linkParasites(plot);
-        if (plot == plotIdx) {
+        // waitFor is spaghetti code
+        if (!this.waitFor && plot == plotIdx) {
             let len = manager.colonies[plotIdx].length;
             slotIdx = Math.min(slotIdx, len - 1);
             slotIdx = Math.max(slotIdx, 0);
@@ -3088,7 +3106,8 @@ class ColonyManager {
                     start: 0
                 };
         }
-        if (this.actionGangsta[0] == plotIdx &&
+        // waitFor is spaghetti code
+        if (!this.waitFor && this.actionGangsta[0] == plotIdx &&
             this.actionGangsta[1] == slotIdx)
             renderer.colony = c;
         this.actionGangsta = null;
@@ -3265,7 +3284,9 @@ class ColonyManager {
             {
                 start: 0
             };
-        if (this.gangsta[0] == plotIdx && this.gangsta[1] == slotIdx)
+        // waitFor is spaghetti code
+        if (!this.waitFor && this.gangsta[0] == plotIdx &&
+            this.gangsta[1] == slotIdx)
             renderer.colony = c;
         this.gangsta = null;
         theory.invalidateSecondaryEquation();
@@ -3873,6 +3894,7 @@ let growthIntegral = 0;
 let plotIdx = 0;
 let slotIdx = 0;
 let plantIdx = new Array(nofPlots).fill(0);
+let extraPotPlantIdx = 0;
 let selectedColony = null;
 let finishedTutorial = false;
 let actuallyPlanting = true;
@@ -4521,7 +4543,7 @@ var init = () => {
     theory.createAchievement(1, null, achievements?.immortal?.title, achievements?.immortal?.desc, () => years >= 200);
     theory.primaryEquationHeight = 30;
     theory.primaryEquationScale = 0.96;
-    theory.secondaryEquationHeight = 105;
+    theory.secondaryEquationHeight = 111;
 };
 var updateAvailability = () => {
     perfs[5 /* Profilers.AVAILABILITY */].exec(() => {
@@ -4582,7 +4604,11 @@ var tick = (elapsedTime, multiplier) => {
         growthIntegral = newGI;
     });
     manager.updateSpawners(days);
-    manager.growAll(BigNumber.from(di), BigNumber.from(dg), BigNumber.from(dd));
+    let BNdi = BigNumber.from(di);
+    let BNdg = BigNumber.from(dg);
+    let BNdd = BigNumber.from(dd);
+    manager.growAll(BNdi, BNdg, BNdd);
+    extraManager.growAll(BNdi, BNdg, BNdd);
     if (!game.isCalculatingOfflineProgress) {
         let timeCos = Math.cos(time * Math.PI / halfDayLength);
         insolationCoord = Math.max(0, -timeCos);
@@ -6033,7 +6059,7 @@ let createShelfMenu = () => {
                                 (plantData[ec.id].growthCost *
                                     // @ts-expect-error
                                     BigNumber.from(ec.sequence.length));
-                            return Localization.format(getLoc('colonyExtraPot'), getLoc('plants')[ec.id], ec.stage, prog);
+                            return Localization.format(getLoc('colonyExtraPot'), getLoc('plants')[ec.id].name, ec.stage, prog);
                         }
                         return getLoc('menuExtraPot');
                     },
@@ -6148,6 +6174,14 @@ let createExtraPotMenu = () => {
     let menu = ui.createPopup({
         isPeekable: true,
         title: getLoc('menuExtraPot'),
+        content: ui.createStackLayout({
+            children: [
+                ui.createLatexLabel({
+                    text: getLoc('extraPotEqPlaceholder')[colonyMode],
+                    horizontalTextAlignment: TextAlignment.CENTER
+                })
+            ]
+        })
     });
     return menu;
 };
@@ -6540,6 +6574,7 @@ var getInternalState = () => {
         plotIdx,
         slotIdx,
         plantIdx,
+        extraPotPlantIdx,
         finishedTutorial,
         manager,
         extraManager,
@@ -6595,6 +6630,7 @@ var setInternalState = (stateStr) => {
         plotIdx = state.plotIdx ?? plotIdx;
         slotIdx = state.slotIdx ?? slotIdx;
         plantIdx = state.plantIdx ?? plantIdx;
+        extraPotPlantIdx = state.extraPotPlantIdx ?? extraPotPlantIdx;
         finishedTutorial = state.finishedTutorial ?? finishedTutorial;
         manager = new ColonyManager(state.manager, nofPlots, maxColoniesPerPlot)
             ?? manager;
