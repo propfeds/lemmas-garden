@@ -2600,9 +2600,10 @@ class Renderer {
  * This is not ECS, I'm not good enough to understand ECS.
 */
 class ColonyManager {
-    constructor(object = {}, length, width) {
+    constructor(object = {}, length, width, waitFor = null) {
         this.length = length;
         this.width = width;
+        this.waitFor = waitFor;
         this.colonies = object.colonies ??
             Array.from({ length: this.length }, (_) => []);
         // Everyone gangsta until a colony starts evolving
@@ -2844,14 +2845,18 @@ class ColonyManager {
         updateAvailability();
     }
     growAll(di, dg, dd) {
-        if (this.actionGangsta)
-            this.performAction();
-        else if (this.actionQueue.length) {
-            let action = this.actionQueue.dequeue();
-            this.queueAction(...action);
+        if (!this.waitFor || !this.waitFor.busy) {
+            if (this.actionGangsta)
+                this.performQueuedAction();
+            else if (this.actionQueue.length) {
+                let action = this.actionQueue.
+                    dequeue();
+                this.queueAction(...action);
+                this.performQueuedAction();
+            }
+            else if (this.gangsta)
+                this.evolve();
         }
-        else if (this.gangsta)
-            this.evolve();
         perfs[1 /* Profilers.MANAGER */].exec(() => {
             for (let i = 0; i < this.colonies.length; ++i) {
                 for (let j = 0; j < this.colonies[i].length; ++j) {
@@ -2951,7 +2956,7 @@ class ColonyManager {
             profit: profit
         };
     }
-    performAction() {
+    performQueuedAction() {
         let c = this.colonies[this.actionGangsta[0]][this.actionGangsta[1]];
         let id = this.actionGangsta[2];
         if (!c) {
@@ -3889,7 +3894,7 @@ const xUpQuat = new Quaternion(0, 1, 0, 0);
 const yUpQuat = new Quaternion(0, 0, 1, 0);
 const zUpQuat = new Quaternion(0, 0, 0, 1);
 let manager = new ColonyManager({}, nofPlots, maxColoniesPerPlot);
-let extraManager = new ColonyManager({}, 1, 1);
+let extraManager = new ColonyManager({}, 1, 1, manager);
 let renderer = new Renderer(new LSystem(), '', []);
 let gameRNG = new Xorshift(1752);
 let modelRNG = new Xorshift(Date.now());
@@ -4579,7 +4584,7 @@ var tick = (elapsedTime, multiplier) => {
         }
         // floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
         // 180, Easing.LINEAR);
-        managerLoadingInd.isRunning = manager.busy;
+        managerLoadingInd.isRunning = manager.busy || extraManager.busy;
     }
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
@@ -4590,7 +4595,7 @@ let managerLoadingInd = ui.createActivityIndicator({
     verticalOptions: LayoutOptions.END,
     heightRequest: getImageSize(ui.screenWidth),
     widthRequest: getImageSize(ui.screenWidth),
-    isRunning: manager.busy
+    isRunning: manager.busy || extraManager.busy
 });
 // Go to previous slot
 let canGTPS = () => slotIdx > 0;
@@ -5400,7 +5405,7 @@ let createColonyViewMenu = (colony) => {
             };
     }, colonyViewConfig[colony.id].expand);
     let updateReconstruction = () => {
-        if (manager.busy)
+        if (manager.busy || extraManager.busy)
             return reconstructionTask.result;
         if (!('result' in reconstructionTask) || reconstructionTask.start) {
             reconstructionTask = plantData[colony.id].system.reconstruct(colony, colonyViewConfig[colony.id], reconstructionTask);
@@ -5482,7 +5487,7 @@ let createColonyViewMenu = (colony) => {
                 plantStats,
                 ui.createFrame({
                     padding: new Thickness(8, 6),
-                    heightRequest: ui.screenHeight * 0.18,
+                    heightRequest: ui.screenHeight * 0.2,
                     content: ui.createScrollView({
                         content: ui.createStackLayout({
                             children: [
@@ -6478,6 +6483,8 @@ var setInternalState = (stateStr) => {
         finishedTutorial = state.finishedTutorial ?? finishedTutorial;
         manager = new ColonyManager(state.manager, nofPlots, maxColoniesPerPlot)
             ?? manager;
+        extraManager = new ColonyManager(state.extraManager, 1, 1, manager) ??
+            extraManager;
         if (v < 0.105) {
             for (let i = 0; i < manager.length; ++i)
                 for (let j = 0; j < manager.colonies[i].length; ++j)
@@ -6561,7 +6568,7 @@ var get2DGraphValue = () => {
     }
 };
 var get3DGraphPoint = () => {
-    if (graphMode3D && !manager.busy) {
+    if (graphMode3D && !manager.busy && !extraManager.busy) {
         perfs[6 /* Profilers.RENDERER */].exec(() => {
             renderer.draw();
         });

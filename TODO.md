@@ -125,7 +125,7 @@ you have to dig really deep to find the underlying systems behind the plants
     - [x] Do a sweeping scan for all links in the same plot in addColony and killColony
 
 - [ ] Extra pot
-  - [ ] Make pot manager wait until main manager finishes processing
+  - [x] Make pot manager wait until main manager finishes processing
 - [ ] Beehives
 
 - [x] Pre-calendula plant:
