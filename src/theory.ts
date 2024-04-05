@@ -56,8 +56,8 @@ Welcome to Lemma's Garden, an idle botanical theory built on the workings of ` +
 
     return descs[language] ?? descs.en;
 }
-var authors = 'propfeds/a_spiralist\n\nThanks to:\nProf. Nakamura, research ' +
-'supervisor\nThe six questionnaire takers\nSir Gilles\ngame-icons.net';
+var authors = 'propfeds (a_spiralist)\n\nThanks to:\nProf. Nakamura, ' +
+'research supervisor\nThe six questionnaire takers\nSir Gilles\ngame-icons.net';
 var version = 0.23;
 
 // Numbers are often converted into 32-bit signed integers in JINT.
@@ -143,7 +143,7 @@ straight line will be drawn.`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
         lockedPlot: `\\text{Untilled soil.}`,
-        permaExtraPot: `Sheltered pot`,
+        permaExtraPot: `Borrow Lemma's flower pot`,
         permaExtraPotInfo: `Holds one plant, seeds free of charge, pest-proof`,
         permaNote: `Notebook \\&\\ 'Buy All' button`,
         permaNoteInfo: 'Allows management of colony sizes',
@@ -162,13 +162,13 @@ harvesting it for the first time.`,
         extraPotEqPlaceholder:
         [
             '',
-            `States a note on Lemma's bookshelf:
-\\\\To my sister's best friend
-\\\\Your soul is sheltered here
-\\\\don't you dare forget.
-\\\\Dot`,
+            `Says a note on the bookshelf:
+\\\\To my sister's best friend, for life
+\\\\You can always find shelter here
+\\\\don't you dare forget it.
+\\\\Dorian`,
             `Etched on the pot's side:
-\\\\For Ms. Ruddles' class,
+\\\\For Miss Ruddles' class,
 \\\\With love of course!
 \\\\C.`,
             `The pot is adorned with pearly grooves,
@@ -176,9 +176,10 @@ harvesting it for the first time.`,
         ],
 
         colony: `{0} of {1}, stage {2}`,
-        colonyWMaxStg: `{0} of {1}, stage {2}/{3}`,
+        colonyWithMaxStg: `{0} of {1}, stage {2}/{3}`,
         colonyProg: `{0} of {1}, stg. {2} ({3}\\%)`,
-        colonyExtraPot: `Sheltered pot: {0}, stg. {1} ({2}%)`,
+        colonyNoPop: `{1}, stg. {2} ({3}%)`,
+        colonyNoPopEsc: `{1}, stg. {2} ({3}\\%)`,
         invisibleColony: `\\text{Tilled soil.}`,
         colonyStats: `\\text{{Energy\\colon\\enspace {0} +{1}/s}}\\\\
 \\text{{Growth\\colon\\enspace {2}/{3} +{4}/s}}\\\\
@@ -5407,7 +5408,7 @@ const harvestFrame = createScrollBarImageBtn
 {
     if(actionConfirm)
     {
-        let menu = createConfirmationMenu(plotIdx, slotIdx,
+        let menu = createConfirmationMenu(manager, plotIdx, slotIdx,
         Actions.HARVEST);
         menu.show();
     }
@@ -5418,7 +5419,7 @@ const harvestFrame = createScrollBarImageBtn
 {
     if(actionConfirm)
     {
-        let menu = createBulkConfirmationMenu(plotIdx, Actions.HARVEST);
+        let menu = createBulkConfirmationMenu(manager, plotIdx, Actions.HARVEST);
         menu.show();
     }
     else
@@ -5458,7 +5459,7 @@ const pruneFrame = createScrollBarImageBtn
 {
     if(actionConfirm)
     {
-        let menu = createConfirmationMenu(plotIdx, slotIdx,
+        let menu = createConfirmationMenu(manager, plotIdx, slotIdx,
         Actions.PRUNE);
         menu.show();
     }
@@ -6286,24 +6287,25 @@ var getCurrencyBarDelegate = () =>
 
 /**
  * Returns the colony title for representation.
+ * Interface coming soon?
  */
 let getColonyTitleString = (colony: Colony,
 options: {[key: string]: boolean} = {}) =>
 {
-    let format = getLoc(options.prog ? 'colonyProg' : (options.maxStage ?
-    'colonyWMaxStg': 'colony'));
+    let format = getLoc(options.prog ? 'colonyProg' : options.maxStage ?
+    'colonyWithMaxStg': options.noPop ?
+    (options.escape ? 'colonyNoPopEsc' : 'colonyNoPop') : 'colony');
     let pop = colony.propagated ? `+${colony.population}` : colony.population;
     let name = getLoc('plants')[colony.id]?.name ??
-    `${options.escapeHash ? '\\' : ''}#${colony.id}`;
+    `${options.escape ? '\\' : ''}#${colony.id}`;
     let colour = plantData[colony.id].colour;
     if(options.colour && colour)
         name = `\\color{${colour}}{${name}}`;
-    let arg3 = // @ts-expect-error
-    options.prog ? colony.growth * BigNumber.HUNDRED /
+    let arg3 = (options.prog || options.noPop) ? // @ts-expect-error
+    colony.growth * BigNumber.HUNDRED /
     // @ts-expect-error
     (plantData[colony.id].growthCost * BigNumber.from(colony.sequence.length)) :
     plantData[colony.id].maxStage ?? '∞';
-
     return Localization.format(format, pop, name, colony.stage, arg3);
 }
 
@@ -7684,52 +7686,62 @@ let createShelfMenu = () =>
                         menu.show();
                     }
                 }),
-                ui.createButton
+                ui.createBox
                 ({
-                    text: getLoc('menuAutoWater'),
-                    onClicked: () =>
-                    {
-                        Sound.playClick();
-                        let menu = createWaterMenu();
-                        menu.show();
-                    }
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
                 }),
-                ui.createButton
+                ui.createGrid
                 ({
-                    isVisible: theory.isBuyAllAvailable,
-                    text: getLoc('menuNote'),
-                    onClicked: () =>
-                    {
-                        Sound.playClick();
-                        let menu = createNotebookMenu();
-                        menu.show();
-                    }
-                }),
-                ui.createButton
-                ({
-                    isVisible: extraPotPerma.level > 0,
-                    text: () =>
-                    {
-                        if(extraManager.colonies[0].length)
-                        {
-                            let ec = extraManager.colonies[0][0];
-                            // @ts-expect-error
-                            let prog = ec.growth * BigNumber.HUNDRED /
-                            // @ts-expect-error
-                            (plantData[ec.id].growthCost *
-                            // @ts-expect-error
-                            BigNumber.from(ec.sequence.length));
-                            return Localization.format(getLoc('colonyExtraPot'),
-                            getLoc('plants')[ec.id].name, ec.stage, prog);
-                        }
-                        return getLoc('menuExtraPot');
-                    },
-                    onClicked: () =>
-                    {
-                        Sound.playClick();
-                        let menu = createExtraPotMenu();
-                        menu.show();
-                    }
+                    rowDefinitions: ['auto', 'auto'],
+                    // columnDefinitions: ['auto', 'auto'],
+                    children:
+                    [
+                        ui.createButton
+                        ({
+                            row: 0, column: 0,
+                            text: getLoc('menuAutoWater'),
+                            onClicked: () =>
+                            {
+                                Sound.playClick();
+                                let menu = createWaterMenu();
+                                menu.show();
+                            }
+                        }),
+                        ui.createButton
+                        ({
+                            row: 0, column: 1,
+                            isVisible: extraPotPerma.level > 0,
+                            text: () =>
+                            {
+                                if(extraManager.colonies[0].length)
+                                {
+                                    return getColonyTitleString(
+                                    extraManager.colonies[0][0], {noPop: true});
+                                }
+                                return getLoc('menuExtraPot');
+                            },
+                            onClicked: () =>
+                            {
+                                Sound.playClick();
+                                let menu = createExtraPotMenu();
+                                menu.show();
+                            }
+                        }),
+                        ui.createButton
+                        ({
+                            row: 1, column: 0,
+                            isVisible: theory.isBuyAllAvailable,
+                            text: getLoc('menuNote'),
+                            onClicked: () =>
+                            {
+                                Sound.playClick();
+                                let menu = createNotebookMenu();
+                                menu.show();
+                            }
+                        }),
+                        // Beehive
+                    ]
                 }),
                 ui.createBox
                 ({
@@ -7761,84 +7773,231 @@ let createShelfMenu = () =>
     return menu;
 }
 
+let getExtraPotEquation = () =>
+{
+    let result: string;
+    let c = extraManager.colonies[0][0];
+    switch(colonyMode)
+    {
+        case ColonyModes.VERBOSE:
+            // if(!isColonyVisible(c))
+            // {
+            //     result = getLoc('invisibleColony');
+            //     break;
+            // }
+            let status = extraManager.gangsta ?
+            getLoc('status').evolve : extraManager.actionGangsta ?
+            getLoc('status').actions[extraManager.actionGangsta[2]] : '';
+            result = `\\begin{array}{c}\\text{${getColonyTitleString(c,
+            {noPop: true, escape: true, colour: true})}}
+            \\\\${Localization.format(getLoc('colonyStats'),
+            // @ts-expect-error
+            c.energy, c.synthRate * BigNumber.from(insolationCoord),
+            c.growth, c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+            // @ts-expect-error
+            plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
+            '∞', c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+            // @ts-expect-error
+            plantData[c.id].growthRate * BigNumber.from(growthCoord) :
+            BigNumber.ZERO, c.profit, 1, 1, status)}\\end{array}`;
+            break;
+        case ColonyModes.SIMPLE:
+            // if(!isColonyVisible(c))
+            // {
+            //     result = getLoc('invisibleColony');
+            //     break;
+            // }
+            result = `\\begin{array}{c}\\text{${getColonyTitleString(c,
+            {noPop: true, escape: true, colour: true})}}\\\\E=${c.energy},
+            \\enspace
+            g=${c.growth}/${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+            // @ts-expect-error
+            plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
+            '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{s},\\enspace\\pi =
+            ${c.profit}\\text{p}\\\\(1/1)\\end{array}`;
+            break;
+        case ColonyModes.LIST:
+            result = '\\begin{array}{c}';
+            let cStr = isColonyVisible(c) ? getColonyTitleString(c,
+            {noPop: true, escape: true, colour: true}) :
+            getLoc('invisibleColony');
+            result += `\\text{\\underline{${cStr}}}\\\\
+            E=${c.energy},\\enspace\\pi =${c.profit}\\text{p}\\end{array}`;
+            break;
+        default:
+            result = '';
+    }
+    return Utils.getMath(result);
+}
+
 let createExtraPotMenu = () =>
 {
-    /*
-    {// fix later
-        switch(colonyMode)
+    // extraManager.colonies[0][0]
+    let waterFrame = createScrollBarImageBtn
+    ({
+        row: 0, column: 0,
+    }, () => extraManager.water(extraManager.colonies[0][0]),
+    () => extraManager.water(extraManager.colonies[0][0]), true,
+    () =>
+    {
+        if(extraManager.colonies[0][0] && !extraManager.colonies[0][0].wet)
+            return true;
+        return false;
+    },
+    game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png'));
+    let waterLabel = ui.createLatexLabel
+    ({
+        row: 0, column: 1,
+        // horizontalOptions: LayoutOptions.END,
+        verticalTextAlignment: TextAlignment.START,
+        margin: new Thickness(0, 9, 1, 9),
+        text: () =>
         {
-            case ColonyModes.VERBOSE:
-                // if(!isColonyVisible(c))
-                // {
-                //     result = getLoc('invisibleColony');
-                //     break;
-                // }
-                let status = (manager.gangsta &&
-                manager.gangsta[0] == plotIdx &&
-                manager.gangsta[1] == slotIdx) ?
-                getLoc('status').evolve : (manager.actionGangsta &&
-                manager.actionGangsta[0] == plotIdx &&
-                manager.actionGangsta[1] == slotIdx) ?
-                getLoc('status').actions[manager.actionGangsta[2]] : '';
-                result = `\\begin{array}{c}\\text{${getColonyTitleString(c,
-                {colour: true})}}
-                \\\\${Localization.format(getLoc('colonyStats'),
+            let c = extraManager.colonies[0][0];
+            if(!c)
+                return '';
+            // @ts-expect-error
+            let threshold: BigNumber = plantData[c.id].growthCost *
+            // @ts-expect-error
+            BigNumber.from(c.sequence.length);
+            if(!c.wet)
+            {
+                if(c.growth >= threshold)
+                    return getLoc('labelWaterUrgent');
                 // @ts-expect-error
-                c.energy, c.synthRate * BigNumber.from(insolationCoord),
-                c.growth, c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
-                // @ts-expect-error
-                plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
-                '∞', c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
-                // @ts-expect-error
-                plantData[c.id].growthRate * BigNumber.from(growthCoord) :
-                BigNumber.ZERO, c.profit, slotIdx + 1,
-                manager.colonies[plotIdx].length, status)}\\end{array}`;
-                break;
-            case ColonyModes.SIMPLE:
-                // if(!isColonyVisible(c))
-                // {
-                //     result = getLoc('invisibleColony');
-                //     break;
-                // }
-                result = `\\begin{array}{c}\\text{${getColonyTitleString(c,
-                {colour: true})}}\\\\E=${c.energy},\\enspace g=${c.growth}/
-                ${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
-                // @ts-expect-error
-                plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
-                '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{s},\\enspace\\pi =
-                ${c.profit}\\text{p}\\\\(${slotIdx + 1}/
-                ${manager.colonies[plotIdx].length})\\\\\\end{array}`;
-                break;
-            case ColonyModes.LIST:
-                result = '\\begin{array}{c}';
-                for(let i = 0; i < slotIdx; ++i)
-                {
-                    let d = manager.colonies[plotIdx][i];
-                    if(isColonyVisible(d))
-                        result += `\\text{${getColonyTitleString(d,
-                        {prog: true, colour: true})}}\\\\`;
-                }
-                let cStr = isColonyVisible(c) ? getColonyTitleString(c,
-                {prog: true, colour: true}) : getLoc('invisibleColony');
-                result += `\\text{\\underline{${cStr}}}\\\\`;
+                else if(c.growth >= threshold / BigNumber.TWO)
+                    return getLoc('labelWater');
+                else
+                    return '';
+            }
+            else
+                return '';
+        },
+        fontSize: 10,
+        textColor: Color.TEXT_MEDIUM
+    });
 
-                for(let i = slotIdx + 1;
-                i < manager.colonies[plotIdx].length; ++i)
-                {
-                    let d = manager.colonies[plotIdx][i];
-                    if(isColonyVisible(d))
-                        result += `\\text{${getColonyTitleString(d,
-                        {prog: true, colour: true})}}\\\\`;
-                }
-
-                result += `E=${c.energy},\\enspace\\pi =${c.profit}\\text{p}
-                \\end{array}`;
-                break;
-            default:
-                result = '';
+    let harvestFrame = createScrollBarImageBtn
+    ({
+        row: 0, column: 2,
+    }, () =>
+    {
+        if(actionConfirm)
+        {
+            let menu = createConfirmationMenu(extraManager, 0, 0,
+            Actions.HARVEST);
+            menu.show();
         }
-    }
-    */
+        else
+            extraManager.queueAction(0, 0, Actions.HARVEST);
+    },
+    () =>
+    {
+        if(actionConfirm)
+        {
+            let menu = createBulkConfirmationMenu(extraManager, 0,
+            Actions.HARVEST);
+            menu.show();
+        }
+        else
+        {
+            for(let i = extraManager.colonies[0].length - 1; i >= 0; --i)
+            {
+                if(isColonyVisible(extraManager.colonies[0][i]))
+                    extraManager.queueAction(0, i, Actions.HARVEST);
+            }
+        }
+    }, false,
+    () => true, game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png'));
+    let harvestLabel = ui.createLatexLabel
+    ({
+        row: 0, column: 3,
+        // horizontalOptions: LayoutOptions.END,
+        verticalTextAlignment: TextAlignment.START,
+        margin: new Thickness(0, 9, 1, 9),
+        text: getLoc('labelActions')[Actions.HARVEST],
+        fontSize: 10,
+        textColor: Color.TEXT_MEDIUM
+    });
+
+    let pruneFrame = createScrollBarImageBtn
+    ({
+        isVisible: () =>
+        {
+            if(!extraManager.colonies[0][0] ||
+            !plantData[extraManager.colonies[0][0].id].actions[Actions.PRUNE])
+                return false;
+            return true;
+        },
+        row: 0, column: 4,
+    }, () =>
+    {
+        if(actionConfirm)
+        {
+            let menu = createConfirmationMenu(extraManager, 0, 0,
+            Actions.PRUNE);
+            menu.show();
+        }
+        else
+            extraManager.queueAction(0, 0, Actions.PRUNE);
+    },
+    null, false, () => true, game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png'));
+    let pruneLabel = ui.createLatexLabel
+    ({
+        isVisible: () =>
+        {
+            if(!extraManager.colonies[0][0] ||
+            !plantData[extraManager.colonies[0][0].id].actions[Actions.PRUNE])
+                return false;
+            return true;
+        },
+        row: 0, column: 5,
+        // horizontalOptions: LayoutOptions.END,
+        verticalTextAlignment: TextAlignment.START,
+        margin: new Thickness(0, 9, 1, 9),
+        text: getLoc('labelActions')[Actions.PRUNE],
+        fontSize: 10,
+        textColor: Color.TEXT_MEDIUM
+    });
+
+    let plantGrid = ui.createGrid
+    ({
+        isVisible: () => !extraManager.colonies[0].length,
+        columnDefinitions: ['85*', '15*'],
+        children:
+        [
+            ui.createButton
+            ({
+                column: 0,
+                text: () => getLoc('plants')[
+                plantUnlocks[extraPotPlantIdx]].name,
+                onClicked: () =>
+                {
+                    Sound.playClick();
+                    extraManager.addColony(0, plantUnlocks[extraPotPlantIdx],
+                    1, [null, null]);
+                }
+            }),
+            ui.createButton
+            ({
+                column: 1,
+                text: '►',
+                onClicked: () =>
+                {
+                    Sound.playClick();
+                    extraPotPlantIdx = (extraPotPlantIdx + 1) %
+                    (plantPerma.level + 1);
+                }
+            })
+        ]
+    })
+
     let menu = ui.createPopup
     ({
         isPeekable: true,
@@ -7849,18 +8008,55 @@ let createExtraPotMenu = () =>
             [
                 ui.createLatexLabel
                 ({
-                    text: getLoc('extraPotEqPlaceholder')[colonyMode],
+                    text: () =>
+                    {
+                        if(extraManager.colonies[0].length)
+                            return getExtraPotEquation();
+                        return getLoc('extraPotEqPlaceholder')[colonyMode];
+                    },
                     horizontalTextAlignment: TextAlignment.CENTER
-                })
+                }),
+                ui.createScrollView
+                ({
+                    row: 0, column: 0,
+                    orientation: ScrollOrientation.BOTH,
+                    content: ui.createGrid
+                    ({
+                        isVisible: () => extraManager.colonies[0].length > 0,
+                        margin: new Thickness(4),
+                        horizontalOptions: LayoutOptions.START,
+                        // verticalOptions: LayoutOptions.END,
+                        columnDefinitions:
+                        [
+                            'auto', 'auto',
+                            'auto', 'auto',
+                            'auto', 'auto'
+                        ],
+                        inputTransparent: true,
+                        cascadeInputTransparent: false,
+                        children:
+                        [
+                            waterFrame,
+                            waterLabel,
+                            harvestFrame,
+                            harvestLabel,
+                            pruneFrame,
+                            pruneLabel,
+                        ]
+                    }),
+                }),
+                // transfer
+                plantGrid
             ]
         })
     });
     return menu;
 }
 
-let createConfirmationMenu = (plot: number, index: number, id: number) =>
+let createConfirmationMenu = (mgr: ColonyManager, plot: number, index: number,
+id: number) =>
 {
-    let c = manager.colonies[plot][index];
+    let c = mgr.colonies[plot][index];
     let menu = ui.createPopup
     ({
         // isPeekable: true,
@@ -7873,8 +8069,8 @@ let createConfirmationMenu = (plot: number, index: number, id: number) =>
                 ({
                     text: Localization.format(getLoc('actionConfirm'),
                     getLoc('labelActions')[id], plot + 1, index + 1,
-                    manager.colonies[plot].length,
-                    getColonyTitleString(c, {escapeHash: true}),
+                    mgr.colonies[plot].length,
+                    getColonyTitleString(c, {escape: true}),
                     getLoc('plants')[c.id]?.actions?.[id] ?? '',
                     Localization.get('GenPopupContinue')),
                     horizontalTextAlignment: TextAlignment.CENTER,
@@ -7905,7 +8101,7 @@ let createConfirmationMenu = (plot: number, index: number, id: number) =>
                             onClicked: () =>
                             {
                                 Sound.playClick();
-                                manager.queueAction(plot, index, id);
+                                mgr.queueAction(plot, index, id);
                                 menu.hide();
                             }
                         }),
@@ -7927,7 +8123,8 @@ let createConfirmationMenu = (plot: number, index: number, id: number) =>
     return menu;
 }
 
-let createBulkConfirmationMenu = (plot: number, id: number) =>
+let createBulkConfirmationMenu = (mgr: ColonyManager,
+plot: number, id: number) =>
 {
     let menu = ui.createPopup
     ({
@@ -7958,12 +8155,12 @@ let createBulkConfirmationMenu = (plot: number, id: number) =>
                             onClicked: () =>
                             {
                                 Sound.playClick();
-                                for(let i = manager.colonies[plot].length - 1;
+                                for(let i = mgr.colonies[plot].length - 1;
                                 i >= 0; --i)
                                 {
-                                    if(isColonyVisible(manager.colonies[plot][i]
+                                    if(isColonyVisible(mgr.colonies[plot][i]
                                     ))
-                                        manager.queueAction(plot, i, id);
+                                        mgr.queueAction(plot, i, id);
                                 }
                                 menu.hide();
                             }
