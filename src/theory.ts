@@ -109,6 +109,8 @@ const LOC_STRINGS =
         labelActions: ['Harvest', 'Prune'],
         labelFilter: 'Filter: ',
         labelParams: 'Parameters: ',
+        labelIndent: 'Indent: ',
+        labelExpand: 'Expand brackets: ',
         labelAxiom: 'Axiom: ',
         labelAngle: 'Turning angle (°): ',
         labelRules: `Production rules: {0}\\\\Every stage, each symbol in
@@ -2440,22 +2442,25 @@ class LSystem
     /**
      * Reconstructs the string representation of a sequence.
      * @param {Colony} colony the plant colony.
-     * @param {string} filter the filter.
-     * @param {boolean} displayParams whether to display parameters.
-     * @param {number} indentation the number of spaces to indent.
+     * @param {ColonyViewEntry} settings the settings.
      * @param {Task} task the current task.
      * @returns {Task}
      */
-    reconstruct(colony: Colony, filter = '', displayParams = true,
-    indentation = 4, task: Task = {}): Task
+    reconstruct(colony: Colony, settings: ColonyViewEntry,
+    task: Task = {}): Task
     {
+        let filter = settings.filter ?? '';
+        let displayParams = settings.params ?? true;
+        let expand = settings.expand ?? true;
+        let indentation = settings.indentation ?? 8;
         if(indentation < 0)
             indentation = -indentation;
+
         let sequence = colony.sequence;
         let params = colony.params;
-        let level = 0;
+        let level = task.level ?? 0;
         let lineStart = false;
-        if(!displayParams && !filter)
+        if(!displayParams && !filter && !expand)
         {
             return {
                 start: 0,
@@ -2477,7 +2482,7 @@ class LSystem
                 }
             }
 
-            if(displayParams && lineStart)
+            if(expand && lineStart)
             {
                 result += `\n${' '.repeat(indentation * Math.max(0, level))}`;
                 lineStart = false;
@@ -2493,7 +2498,7 @@ class LSystem
                         lineStart = true;
                         break;
                     case ']':
-                        lineStart = true;
+                        // lineStart = true;
                         break;
                 }
 
@@ -2509,7 +2514,7 @@ class LSystem
                 switch(sequence[i + 1])
                 {
                     case '[':
-                        lineStart = true;
+                        // lineStart = true;
                         break;
                     case ']':
                         --level;
@@ -3568,10 +3573,11 @@ class ColonyManager
         c.synthRate = stats.synthRate;
         c.profit = stats.profit;
 
-        // Insert colony into array
+        // Insert colony into array. If there are null coordinates provided,
+        // spawn a propagated colony.
         if(parent === null)
             this.colonies[plot].push(c);
-        else
+        else if(parent[0] !== null && parent[1] !== null)
         {
             // Inherit parent's reserve
 
@@ -4334,7 +4340,9 @@ interface Plant
 interface ColonyViewEntry
 {
     filter: string;
-    params: boolean
+    params: boolean;
+    expand: boolean;
+    indentation: number;
 }
 
 interface NotebookEntry
@@ -5002,6 +5010,7 @@ const yUpQuat = new Quaternion(0, 0, 1, 0);
 const zUpQuat = new Quaternion(0, 0, 0, 1);
 
 let manager = new ColonyManager({}, nofPlots, maxColoniesPerPlot);
+let extraManager = new ColonyManager({}, 1, 1);
 let renderer = new Renderer(new LSystem(), '', []);
 let gameRNG = new Xorshift(1752);
 let modelRNG = new Xorshift(Date.now());
@@ -5486,6 +5495,8 @@ var plants = Array.from({length: nofPlots}, (_) => {return {};});
 
 var plotPerma: Upgrade;
 var plantPerma: Upgrade;
+var extraPotPerma: Upgrade;
+var beehivePerma: Upgrade;
 
 var freePenny: Upgrade;
 var pauseGame: Upgrade;
@@ -6094,7 +6105,7 @@ var getCurrencyBarDelegate = () =>
         fontSize: 12,
         horizontalTextAlignment: TextAlignment.CENTER,
         verticalTextAlignment: TextAlignment.CENTER
-    })
+    });
     let pennyLabel = ui.createLatexLabel
     ({
         row: 0, column: 1,
@@ -6808,8 +6819,15 @@ let createColonyViewMenu = (colony: Colony) =>
         colonyViewConfig[colony.id] =
         {
             filter: '',
-            params: true
+            params: true,
+            expand: true,
+            indentation: 8
         };
+    }
+    else if(!colonyViewConfig[colony.id].expand)
+    {
+        colonyViewConfig[colony.id].expand = true;
+        colonyViewConfig[colony.id].indentation = 8;
     }
     let reconstructionTask: Task =
     {
@@ -6818,7 +6836,7 @@ let createColonyViewMenu = (colony: Colony) =>
 
     let filterEntry = ui.createEntry
     ({
-        column: 1,
+        row: 0, column: 1,
         text: colonyViewConfig[colony.id].filter,
         fontSize: 14,
         clearButtonVisibility: ClearButtonVisibility.WHILE_EDITING,
@@ -6833,7 +6851,7 @@ let createColonyViewMenu = (colony: Colony) =>
     });
     let paramSwitch = createHesitantSwitch
     ({
-        column: 3,
+        row: 0, column: 3,
     }, () =>
     {
         colonyViewConfig[colony.id].params =
@@ -6847,6 +6865,37 @@ let createColonyViewMenu = (colony: Colony) =>
         };
     }, colonyViewConfig[colony.id].params);
 
+    let indentEntry = ui.createEntry
+    ({
+        row: 1, column: 1,
+        text: colonyViewConfig[colony.id].indentation.toString(),
+        keyboard: Keyboard.NUMERIC,
+        fontSize: 14,
+        onTextChanged: (ot: string, nt: string) =>
+        {
+            colonyViewConfig[colony.id].indentation = parseInt(nt) ?? 0;
+            if(isNaN(colonyViewConfig[colony.id].indentation))
+                colonyViewConfig[colony.id].indentation = 0;
+            reconstructionTask =
+            {
+                start: 0
+            };
+        }
+    });
+    let expandSwitch = createHesitantSwitch
+    ({
+        row: 1, column: 3,
+    }, () =>
+    {
+        colonyViewConfig[colony.id].expand =
+        !colonyViewConfig[colony.id].expand;
+        expandSwitch.isToggled = colonyViewConfig[colony.id].expand;
+        reconstructionTask =
+        {
+            start: 0
+        };
+    }, colonyViewConfig[colony.id].expand);
+
     let updateReconstruction = () =>
     {
         if(manager.busy)
@@ -6855,8 +6904,7 @@ let createColonyViewMenu = (colony: Colony) =>
         if(!('result' in reconstructionTask) || reconstructionTask.start)
         {
             reconstructionTask = plantData[colony.id].system.reconstruct(
-            colony, colonyViewConfig[colony.id].filter,
-            colonyViewConfig[colony.id].params, 4, reconstructionTask);
+            colony, colonyViewConfig[colony.id], reconstructionTask);
         }
         return reconstructionTask.result;
     }
@@ -6977,25 +7025,40 @@ let createColonyViewMenu = (colony: Colony) =>
                 }),
                 ui.createGrid
                 ({
-                    minimumHeightRequest: getSmallBtnSize(ui.screenWidth),
+                    // minimumHeightRequest: getSmallBtnSize(ui.screenWidth),
                     columnDefinitions: ['20*', '30*', '35*', '15*'],
                     children:
                     [
                         ui.createLatexLabel
                         ({
                             text: getLoc('labelFilter'),
-                            column: 0,
+                            row: 0, column: 0,
                             verticalTextAlignment: TextAlignment.CENTER
                         }),
                         filterEntry,
                         ui.createLatexLabel
                         ({
                             text: getLoc('labelParams'),
-                            column: 2,
+                            row: 0, column: 2,
                             horizontalOptions: LayoutOptions.END,
                             verticalTextAlignment: TextAlignment.CENTER
                         }),
-                        paramSwitch
+                        paramSwitch,
+                        ui.createLatexLabel
+                        ({
+                            text: getLoc('labelIndent'),
+                            row: 1, column: 0,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        }),
+                        indentEntry,
+                        ui.createLatexLabel
+                        ({
+                            text: getLoc('labelExpand'),
+                            row: 1, column: 2,
+                            horizontalOptions: LayoutOptions.END,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        }),
+                        expandSwitch
                     ]
                 }),
                 ui.createBox
@@ -8127,6 +8190,7 @@ var getInternalState = () =>
         plantIdx,
         finishedTutorial,
         manager,
+        extraManager,
         settings:
         {
             speedIdx,

@@ -96,8 +96,8 @@ you have to dig really deep to find the underlying systems behind the plants
   - [x] Display price before unlocking
   - [ ] Can players perform actions in locked plots?
 - [ ] Capitalise plant names (Rose Campion instead of campion)?
-
 - [x] Button to display action L-systems
+- [x] Sequence view nesting is broken
 
 - [ ] Address Lemma's attitude
   - Early game should be the time when a lot of help is needed, don't neglect your student
@@ -125,10 +125,8 @@ you have to dig really deep to find the underlying systems behind the plants
     - [x] Do a sweeping scan for all links in the same plot in addColony and killColony
 
 - [ ] Extra pot
-  - [ ] Can be transferred into a real plot
-  - [ ] Potted plants only grow up to a stage?
-  - [ ] Can only do 1 population at a time?
-    - [ ] Can colony size be updated?
+  - [ ] Make pot manager wait until main manager finishes processing
+- [ ] Beehives
 
 - [x] Pre-calendula plant:
   - [x] Pea or mung sprout
@@ -153,6 +151,8 @@ you have to dig really deep to find the underlying systems behind the plants
   - [x] Add a Pruned commentary track
 
 - [x] Rose campion
+  - [ ] Replace with normal rose in standalone game
+    - [ ] No profit per stage
   - [ ] Shrub form
   - [ ] Lower leaf size limit
   - [ ] Why does it have 3 symbols on stage 1?
