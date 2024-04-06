@@ -1,3 +1,6 @@
+import { Layout } from "./Layout";
+import { StackOrientation } from "./properties/StackOrientation";
+
 /**
  * Stack layout
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.stacklayout
@@ -14,5 +17,3 @@ export class StackLayout extends Layout {
      */
     public spacing: number;
 }
-import { Layout } from "./Layout";
-import { StackOrientation } from "./properties/StackOrientation";

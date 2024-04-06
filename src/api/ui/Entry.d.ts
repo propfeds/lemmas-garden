@@ -1,3 +1,12 @@
+import { View } from "./View";
+import { ClearButtonVisibility } from "./properties/ClearButtonVisibility";
+import { Color } from "./properties/Color";
+import { FontAttributes } from "./properties/FontAttributes";
+import { FontFamily } from "./properties/FontFamily";
+import { Keyboard } from "./properties/Keyboard";
+import { ReturnType } from "./properties/ReturnType";
+import { TextAlignment } from "./properties/TextAlignment";
+
 /**
  * Entry view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.entry
@@ -114,11 +123,3 @@ export class Entry extends View {
      */
     public verticalTextAlignment: TextAlignment;
 }
-import { ClearButtonVisibility } from "./properties/ClearButtonVisibility";
-import { FontAttributes } from "./properties/FontAttributes";
-import { FontFamily } from "./properties/FontFamily";
-import { TextAlignment } from "./properties/TextAlignment";
-import { Keyboard } from "./properties/Keyboard";
-import { ReturnType } from "./properties/ReturnType";
-import { Color } from "./properties/Color";
-import { View } from "./View";

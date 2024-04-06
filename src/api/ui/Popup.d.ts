@@ -1,3 +1,5 @@
+import { View } from "./View";
+
 /**
  * Popup view
  */
@@ -46,4 +48,3 @@ export class Popup extends View {
      */
     hide(): any;
 }
-import { View } from "./View";

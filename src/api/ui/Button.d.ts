@@ -1,3 +1,9 @@
+import { Color } from "./properties/Color";
+import { FontAttributes } from "./properties/FontAttributes";
+import { FontFamily } from "./properties/FontFamily";
+import { Thickness } from "./properties/Thickness";
+import { View } from "./View";
+
 /**
  * Button view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.button
@@ -64,8 +70,3 @@ export class Button extends View {
      */
     public onReleased: (arg0: void) => void;
 }
-import { Color } from "./properties/Color";
-import { FontAttributes } from "./properties/FontAttributes";
-import { FontFamily } from "./properties/FontFamily";
-import { Thickness } from "./properties/Thickness";
-import { View } from "./View";

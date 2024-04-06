@@ -27,6 +27,14 @@ export class Color {
      * */
     static fromRgb(r: number, g: number, b: number): Color;
     /**
+     * @param {number} r - Red value in [0,1]
+     * @param {number} g - Green value in [0,1]
+     * @param {number} b - Blue value in [0,1]
+     * @param {number} a - Alpha value in [0,1]
+     * @returns {Color}
+     * */
+    static fromRgba(r: number, g: number, b: number, a: number): Color;
+    /**
      * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.color.fromhex?view=xamarin-forms#Xamarin_Forms_Color_FromHex_System_String_
      * @param {string} hex - Hexadecimal value
      * @returns {Color}

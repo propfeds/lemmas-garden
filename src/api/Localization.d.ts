@@ -5,10 +5,10 @@ export class Localization {
     /**
      * Provides safe formatting using C# syntax.
      * @param {String} text - Templated literal, e.g., "Increase {0} by {1}"
-     * @param {...object} args - Values to use in place of {0} and {1}
+     * @param {...any} args - Values to use in place of {0} and {1}
      * @returns {String}
      */
-    static format(text: string, ...args: unknown[]): string;
+    static format(text: string, ...args: any[]): string;
     /**
      * Access to the translation service of the game.
      * @param {String} id - ID from the translation source document

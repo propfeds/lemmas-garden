@@ -1,3 +1,7 @@
+import { Layout } from "./Layout";
+import { Color } from "./properties/Color";
+import { View } from "./View";
+
 /**
  * Frame layout
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.frame
@@ -24,6 +28,3 @@ export class Frame extends Layout {
      */
     public content: View;
 }
-import { Layout } from "./Layout";
-import { Color } from "./properties/Color";
-import { View } from "./View";

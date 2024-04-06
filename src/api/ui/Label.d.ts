@@ -1,3 +1,12 @@
+import { View } from "./View";
+import { Color } from "./properties/Color";
+import { FontAttributes } from "./properties/FontAttributes";
+import { FontFamily } from "./properties/FontFamily";
+import { LineBreakMode } from "./properties/LineBreakMode";
+import { TextAlignment } from "./properties/TextAlignment";
+import { TextDecorations } from "./properties/TextDecorations";
+import { Thickness } from "./properties/Thickness";
+
 /**
  * Label view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.label
@@ -69,11 +78,3 @@ export class Label extends View {
      */
     public verticalTextAlignment: TextAlignment;
 }
-import { FontAttributes } from "./properties/FontAttributes";
-import { FontFamily } from "./properties/FontFamily";
-import { TextAlignment } from "./properties/TextAlignment";
-import { LineBreakMode } from "./properties/LineBreakMode";
-import { Thickness } from "./properties/Thickness";
-import { Color } from "./properties/Color";
-import { TextDecorations } from "./properties/TextDecorations";import { View } from "./View";
-

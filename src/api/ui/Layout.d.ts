@@ -1,3 +1,6 @@
+import { Thickness } from "./properties/Thickness";
+import { View } from "./View";
+
 /**
  * Layout view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.layout
@@ -29,6 +32,3 @@ export class Layout extends View {
      */
     public onLayoutChanged: (arg0: void) => void;
 }
-import { Thickness } from "./properties/Thickness";
-import { View } from "./View";
-

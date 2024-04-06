@@ -1,3 +1,6 @@
+import { Cost } from "./Costs";
+import { Currency } from "./Currency";
+
 /**
  * Generic upgrade
  */
@@ -134,5 +137,3 @@ export class Research extends Upgrade {
      */
     get power(): number;
 }
-import { Currency } from "./Currency";
-import { Cost } from "./Costs";

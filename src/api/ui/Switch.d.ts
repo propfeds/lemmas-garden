@@ -1,3 +1,6 @@
+import { View } from "./View";
+import { Color } from "./properties/Color";
+
 /**
  * Switch view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.switch
@@ -24,5 +27,3 @@ export class Switch extends View {
      */
     public onToggled: (arg0: void) => void;
 }
-import { View } from "./View";
-import { Color } from "./properties/Color";

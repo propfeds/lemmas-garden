@@ -1,3 +1,9 @@
+import { Color } from "./properties/Color";
+import { Easing } from "./properties/Easing";
+import { LayoutOptions } from "./properties/LayoutOptions";
+import { Thickness } from "./properties/Thickness";
+import { TouchEvent } from "./properties/TouchEvent";
+
 /**
  * Base view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.view
@@ -206,8 +212,3 @@ export class View {
      */
     translateTo(valueX: number, valueY: number, length: number, easing?: Easing): any;
 }
-import { Color } from "./properties/Color";
-import { Thickness } from "./properties/Thickness";
-import { LayoutOptions } from "./properties/LayoutOptions";
-import { TouchEvent } from "./properties/TouchEvent";
-import { Easing } from "./properties/Easing";

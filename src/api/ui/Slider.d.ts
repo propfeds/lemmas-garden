@@ -1,3 +1,7 @@
+import { View } from "./View";
+import { Color } from "./properties/Color";
+import { ImageSource } from "./properties/ImageSource";
+
 /**
  * Slider view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.slider
@@ -54,6 +58,3 @@ export class Slider extends View {
      */
     public onDragCompleted: (arg0: void) => void;
 }
-import { View } from "./View";
-import { Color } from "./properties/Color";
-import { ImageSource } from "./properties/ImageSource";
