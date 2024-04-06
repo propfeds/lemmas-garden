@@ -3380,7 +3380,7 @@ const LsManual = new Book(getLoc('manualTitle'), 'manual', [
 const dayLength = 24;
 const halfDayLength = dayLength / 2;
 const quarterDayLength = halfDayLength / 2;
-const hourLength = dayLength / 24;
+// const hourLength = dayLength / 24;
 const nofPlots = 6;
 const maxColoniesPerPlot = 5;
 const waterAmount = 1 / 2;
@@ -5022,8 +5022,9 @@ let getTimeString = () => {
     let resolution = speedAdjDayLengths[speedIdx];
     let quantum = dayLength / resolution;
     let quanToD = Math.floor(timeofDay / quantum) * quantum;
-    let hour = Math.floor(quanToD / hourLength);
-    let min = Math.floor((quanToD % hourLength) / speeds[speedIdx]) *
+    // Now that hour-length is 1, let's do something else
+    let hour = Math.floor(quanToD);
+    let min = Math.round((quanToD - hour) / speeds[speedIdx]) *
         clockMinDiv[speedIdx];
     return Localization.format(getLoc(actionPanelOnTop ? 'dateTimeBottom' :
         'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1, hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'), haxEnabled ? getLoc('hacks') : '');
