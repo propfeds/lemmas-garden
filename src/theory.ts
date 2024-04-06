@@ -374,21 +374,18 @@ out of me.`,
                     {
                         name: 'well pruned',
                         index: [22],
-                        22: `All leaves secured. Now watch the side stems
-grow!`,
+                        22: `All leaves saved. Now watch the side stems grow.`,
                     },
                     // Track 2: pruned
                     {
                         name: 'pruned',
                         index: [0, 6, 10, 14, 18],
                         0: `A seed taking its sweet slumber. It shall never wake
-up.`,
+up. Bye bye.`,
                         6: `Pruning at this point nets you fairly little.`,
-                        10: `This point secures a few more leaves, at least.`,
-                        14: `At this pruning point, some of the leaves are
-secured.`,
-                        18: `At this pruning point, most of the leaves are
-secured.`,
+                        10: `This point saves a few more leaves, at least.`,
+                        14: `Pruning here can secure some more of the leaves.`,
+                        18: `Pruning at this point can net you even more.`,
                     }
                 ]
             },
@@ -3363,6 +3360,7 @@ interface Colony
     params: LSystemParams;
     stage: number;
     narrationTrack: number;
+    actionsPerformed?: number;
 
     wet: boolean;
     energy: BigNumber;
@@ -3484,7 +3482,7 @@ class ColonyManager
         if(!colony.wet)
         {
             let amount = BigNumber.from(Math.min(colony.sequence.length,
-            waterScale * Math.max(colony.stage, 1)));
+            waterAmount * Math.max(colony.stage, 1)));
             // @ts-expect-error
             colony.energy += plantData[colony.id].growthCost * amount;
             colony.wet = true;
@@ -3936,7 +3934,12 @@ class ColonyManager
         c.sequence = this.actionDeriveTask.derivation;
         c.params = this.actionDeriveTask.parameters;
 
-        let notMature = c.stage < (plantData[c.id].maxStage ?? INT_MAX);
+        let maxStage = plantData[c.id].maxStage ?? INT_MAX;
+        // Don't mess with stage, it will fuck up narrations
+        // c.stage = Math.min(c.stage + 1, maxStage);
+        if(!c.actionsPerformed)
+            c.actionsPerformed = 0;
+        ++c.actionsPerformed;
 
         // Empty reserves
 
@@ -3959,8 +3962,8 @@ class ColonyManager
             // @ts-expect-error
             c.energy += maxde / c.population;
         }
-    
-        if(notMature)
+
+        if(c.stage < maxStage)
         {
             // @ts-expect-error
             let maxdg = c.energy.min(c.dgReserve * plantData[c.id].growthRate);
@@ -4088,6 +4091,13 @@ class ColonyManager
             this.gangsta = null;
             return;
         }
+        // Prevent spamming actions
+        let maxStage = plantData[c.id].maxStage ?? INT_MAX;
+        // if(c.stage >= maxStage)
+        // {
+        //     this.gangsta = null;
+        //     return;
+        // }
         // Ancestree, derive and calc stats
         if(!('ancestors' in this.ancestreeTask) || this.ancestreeTask.start)
         {
@@ -4161,9 +4171,6 @@ class ColonyManager
         c.profit = this.calcTask.profit;
         ++c.stage;
 
-        let maxStage = plantData[c.id].maxStage ?? INT_MAX;
-        let notMature = c.stage < maxStage;
-
         // Empty reserves
 
         // @ts-expect-error
@@ -4186,7 +4193,7 @@ class ColonyManager
             c.energy += maxde / c.population;
         }
 
-        if(notMature)
+        if(c.stage < maxStage)
         {
             // @ts-expect-error
             let maxdg = c.energy.min(c.dgReserve * plantData[c.id].growthRate);
@@ -4402,7 +4409,8 @@ const hourLength = dayLength / 24;
 
 const nofPlots = 6;
 const maxColoniesPerPlot = 5;
-const waterScale = 1/2;
+const waterAmount = 1/2;
+const transferMinStage = 20;
 
 const plotCosts = new FirstFreeCost(new ExponentialCost(500, Math.log2(80)));
 const plantUnlocks = ['sprout', 'calendula', 'basil', 'campion'];
@@ -4413,7 +4421,7 @@ new ConstantCost(44000)));
 const permaCosts =
 [
     BigNumber.from(18),
-    BigNumber.from(100),
+    BigNumber.from(270),
     BigNumber.from(2100),
     BigNumber.from(1e45)
 ];
@@ -6473,7 +6481,7 @@ var getQuaternaryEntries = () =>
                     // @ts-expect-error
                     theory.publicationMultiplier;
                 }
-                quaternaryEntries[i].value = `${sum}p`;
+                quaternaryEntries[i].value = sum;//`${sum}p`;
             }
             break;
         case QuaternaryModes.BOARD:
@@ -7996,7 +8004,38 @@ let createExtraPotMenu = () =>
                 }
             })
         ]
-    })
+    });
+
+    // Transfer
+    // Wait, people can spam transfer to get unlimited plants...
+    // Should transfer have a fee, or require stage 20 (or maxStage for peas)?
+    let transferLabel;
+    let transferBtns = [];
+    for(let i = 0; i < plotPerma.level; ++i)
+    {
+        transferBtns.push(ui.createButton
+        ({
+            column: i,
+            text: (i + 1).toString(),
+            onClicked: () =>
+            {
+                Sound.playClick();
+                let c = extraManager.colonies[0][0];
+                if(c && c.stage >= Math.min(plantData[c.id].maxStage,
+                transferMinStage) && manager.colonies[i].length < manager.width)
+                {
+                    manager.colonies[i].push(c);
+                    extraManager.killColony(0, 0);
+                }
+            }
+        }));
+    }
+
+    let transferGrid = ui.createGrid
+    ({
+        isVisible: () => extraManager.colonies[0].length > 0,
+        children: transferBtns
+    });
 
     let menu = ui.createPopup
     ({
@@ -8045,8 +8084,8 @@ let createExtraPotMenu = () =>
                         ]
                     }),
                 }),
-                // transfer
-                plantGrid
+                plantGrid,
+                transferGrid
             ]
         })
     });
