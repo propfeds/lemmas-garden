@@ -1,0 +1,16 @@
+{
+    // Instructions on converting Custom Theory API to .d.ts
+    // Put this file into the SDK root folder, and rename to 'tsconfig.json'.
+    // Run 'tsc' in command line.
+    // Navigate to ./build, and move the api folder to your TypeScript project.
+    // Then prepare to make oh so many changes.
+    "include": ["./api"],
+    "compilerOptions": {
+        "declarationDir": "./build/api",
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        // "declarationMap": true,
+        "allowJs": true,
+        "target": "ES2020"
+    }
+}
