@@ -182,8 +182,8 @@ harvesting it for the first time.`,
         colonyNoPop: `{1}, stg. {2} ({3}%)`,
         colonyNoPopEsc: `{1}, stg. {2} ({3}\\%)`,
         invisibleColony: `\\text{Tilled soil.}`,
-        colonyStats: `\\text{{Energy\\colon\\enspace {0} +{1}/s}}\\\\
-\\text{{Growth\\colon\\enspace {2}/{3} +{4}/s}}\\\\
+        colonyStats: `\\text{{Energy\\colon\\enspace {0} +{1}/hr}}\\\\
+\\text{{Growth\\colon\\enspace {2}/{3} +{4}/hr}}\\\\
 \\text{{Base profit\\colon\\enspace {5}p}}\\\\
 \\text{{({6}/{7}) {8}}}`,
         dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}\\\\{5}',
@@ -255,9 +255,9 @@ harvesting it for the first time.`,
                 name: 'Pea sprout',
                 nameShort: 's',
                 info: `Tastes nice, innit? (\\(~\\)10 days)`,
-                LsDetails: `A(r, t): apex (stem bud) providing r energy/s. Has
+                LsDetails: `A(r, t): apex (stem bud) providing r energy/hr. Has
 t stages left until it spurts.\\\\F(p): segment of length p.
-Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/s.`,
+Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/hr.`,
                 actions:
                 [
                     `Harvest returns profit as the sum of all F lengths.`
@@ -285,11 +285,11 @@ more, then I'll get you something new.`
                 name: 'Calendula',
                 nameShort: 'C',
                 info: 'The classic flower to start a month. (\\(~\\)7 weeks)',
-                LsDetails: `A(r, t): apex (stem bud) providing r energy/s. Has
+                LsDetails: `A(r, t): apex (stem bud) providing r energy/hr. Has
 t stages left until it splits.\\\\F(l, lim): internode of length l, growing up
 to lim.\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0,
 when it turns into K.\\\\K(p): flower of size p. Provides p pennies on harvest.
-\\\\L(r, lim): leaf providing r energy/s, growing up to lim.`,
+\\\\L(r, lim): leaf providing r energy/hr, growing up to lim.`,
                 actions:
                 [
                     `Harvest returns profit as the sum of all K sizes.`
@@ -436,7 +436,7 @@ seeder. Watch for the new one coming right near ya.`
                 name: 'Broomrape',
                 nameShort: 'Br',
                 // No info because can't be bought
-                LsDetails: `B(r, t): base, providing r energy/s.\\\\F(l, lim):
+                LsDetails: `B(r, t): base, providing r energy/hr.\\\\F(l, lim):
 internode of length l. Provides l pennies on harvest.\\\\I(t): stem head
 providing no energy. Spawns flowers for t turns.\\\\K(s): flower of size s.
 Provides s pennies on harvest.\\\\O(s): fruit of size s.`,
@@ -500,8 +500,8 @@ friend to all mathematicians.`
                 ]
             },
         },
-        plantStats: `({0}) {1}\\\\—\\\\Photosynthetic rate: {2}/s (noon)
-\\\\Growth rate: {3}/s\\\\Growth cost: {4} × {5} symbols\\\\—\\\\Sequence:`,
+        plantStats: `({0}) {1}\\\\—\\\\Photosynthetic rate: {2}/hr (noon)
+\\\\Growth rate: {3}/hr\\\\Growth cost: {4} × {5} symbols\\\\—\\\\Sequence:`,
         narrationTrack: '{0}, {1}',
         noCommentary: 'No narrations.',
         noLsDetails: 'No explanations.',
@@ -4403,7 +4403,7 @@ interface AutoWaterEntry
 
 // Balance parameters
 
-const dayLength = 120;
+const dayLength = 24;
 const halfDayLength = dayLength / 2;
 const quarterDayLength = halfDayLength / 2;
 const hourLength = dayLength / 24;
@@ -4447,22 +4447,22 @@ const plantData: {[key: string]: Plant} =
     sprout:
     {
         cost: new FirstFreeCost(new ExponentialCost(0.25, 1)),
-        system: new LSystem('\\A(0.02, 3)',
+        system: new LSystem('\\A(0.1, 3)',
         [
-            'A(r, t): t>0 = A(r+0.02, t-1)',
-            'A(r, t) = F(0.05)[-&L(0.02)][-^L(0.02)]/(137.508)A(r, 3)',
+            'A(r, t): t>0 = A(r+0.1, t-1)',
+            'A(r, t) = F(0.05)[-&L(0.1)][-^L(0.1)]/(137.508)A(r, 3)',
             'F(p): p<FMaxSize = F(p+0.05)',
-            'L(r): r<LMaxSize = L(r+0.02)'
+            'L(r): r<LMaxSize = L(r+0.1)'
         ], 45, 0, 'A', '+-&^/\\T', 0, {
             'FMaxSize': '0.25',
-            'LMaxSize': '0.1'
+            'LMaxSize': '0.5'
         },
         [
-            '~> L(s) = {F(s/4)T(4*s)[\\(90-480*s)&F(s/6).&(30)F(s/3).^(60)F(s/3).^(30)F(s/3).^(30)F(s/3).^(30)F(s/6).][F(s)..].[/(90-480*s)^F(s/6).^(30)F(s/3).&(60)F(s/3).&(30)F(s/3).&(30)F(s/3).&(30)F(s/6).][F(s)..]}',
+            '~> L(s) = {F(s/20)T(0.8*s)[\\(90-96*s)&F(s/30).&(30)F(s/15).^(60)F(s/15).^(30)F(s/15).^(30)F(s/15).^(30)F(s/30).][F(s/5)..].[/(90-96*s)^F(s/30).^(30)F(s/15).&(60)F(s/15).&(30)F(s/15).&(30)F(s/15).&(30)F(s/30).][F(s/5)..]}',
         ]),
         maxStage: 12,
         requiresWater: true,
-        growthRate: BigNumber.from(0.3),
+        growthRate: BigNumber.from(1.5),
         growthCost: BigNumber.from(0.6),
         actions:
         [
@@ -4487,21 +4487,21 @@ const plantData: {[key: string]: Plant} =
     calendula:
     {
         cost: new ExponentialCost(1, Math.log2(3)),
-        system: new LSystem('-(3)A(0.06, 4)',
+        system: new LSystem('-(3)A(0.3, 4)',
         [
             'A(r, t): t<=0 && r>=AThreshold = F(0.78, 2.1)K(0)',
-            'A(r, t): r>=AThreshold = [&A(r-0.15, 2)][^I(3)]',
-            'A(r, t): t>0 = A(r+0.06, t-1)',
-            'A(r, t) = F(0.12, 0.6)T[-L(0.06, LMaxSize)]/(180)[-L(0.06, LMaxSize)]/(90)A(r, 4)',
-            'I(t): t>0 = F(0.24, 0.84)T[-L(0.06, LMaxSize/3)]/(137.508)I(t-1)',
+            'A(r, t): r>=AThreshold = [&A(r-0.75, 2)][^I(3)]',
+            'A(r, t): t>0 = A(r+0.3, t-1)',
+            'A(r, t) = F(0.12, 0.6)T[-L(0.3, LMaxSize)]/(180)[-L(0.3, LMaxSize)]/(90)A(r, 4)',
+            'I(t): t>0 = F(0.24, 0.84)T[-L(0.3, LMaxSize/3)]/(137.508)I(t-1)',
             'I(t) = F(0.48, 1.44)K(0)',
             'K(p): p<KMaxSize = K(p+0.25)',
-            'L(r, lim): r<lim = L(r+0.02, lim)',
+            'L(r, lim): r<lim = L(r+0.1, lim)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 15, 0, 'AI', '', -0.2, {
-            'AThreshold': '0.96',
+            'AThreshold': '4.8',
             'KMaxSize': '3',
-            'LMaxSize': '0.68'
+            'LMaxSize': '3.4'
         },
         [
             '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/10+0.1)[k(p*0.225, p*18)k(p*0.225, p*18)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.21, p*18-6)k(p*0.21, p*18-6)]}',
@@ -4514,13 +4514,13 @@ const plantData: {[key: string]: Plant} =
             '~> k(p, a): p<0.3 = [---(a)F(p/2).+^F(p*2).+&F(p).][---(a)F(p/2)[+&F(p*2)[+^F(p).].].]/(137.508)',
             '~> k(p, a) = [---(a)F(p/2).+^F(p*2).&F(p).][---(a)F(p/2)[+&F(p*2)[^F(p).].].]/(137.508)',
             '~> o(p, a) = [-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]',
-            '~> L(p, lim): p<=LMaxSize/4 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].].[^F(p).F(p).^-F(p).&&-F(p).&F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].]}',
-            '~> L(p, lim): p<=LMaxSize/3 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
-            '~> L(p, lim) = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
+            '~> L(p, lim): p<=LMaxSize/4 = {T(0.16*p^2)[&F(p/5).F(p/5).&-F(p/5).^^-F(p/5).^F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[F(p/5)[-F(p/5).].].].].].].[^F(p/5).F(p/5).^-F(p/5).&&-F(p/5).&F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[F(p/5)[-F(p/5).].].].].].]}',
+            '~> L(p, lim): p<=LMaxSize/3 = {T(0.16*p^2)[&F(p/5).F(p/5).&-F(p/5).^^-F(p/5).^-F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[-F(p/5)..].].].].].[^F(p/5).F(p/5).^-F(p/5).&&-F(p/5).&-F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[-F(p/5)..].].].].]}',
+            '~> L(p, lim) = {T(0.16*p^2)[&F(p/5).F(p/5).&-F(p/5).^^-F(p/5).^--F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[--F(p/5)..].].].].].[^F(p/5).F(p/5).^-F(p/5).&&-F(p/5).&--F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[--F(p/5)..].].].].]}'
         ]),
         maxStage: 40,
         requiresWater: true,
-        growthRate: BigNumber.from(1.5),
+        growthRate: BigNumber.from(7.5),
         growthCost: BigNumber.from(2.5),
         propagation:
         {
@@ -4564,11 +4564,11 @@ const plantData: {[key: string]: Plant} =
     basil:
     {
         cost: new ExponentialCost(2.5, 1),
-        system: new LSystem('/(90)BA(0.06, 5)',
+        system: new LSystem('/(90)BA(0.3, 5)',
         [
             'A(r, t): r>=AThreshold = S(0)F(0.24, 0.96)K(0.02, 8)',
-            'A(r, t): t>0 = A(r+0.06, t-1)',
-            'A(r, t) = F(0.12, 1.44)[&[I(5)]T(0.2)L(0.06, min(r+0.12, LMaxSize), 0)]/(180)[&L(0.06, min(r+0.12, LMaxSize), 0)]/(90)A(r-0.06, 3)',
+            'A(r, t): t>0 = A(r+0.3, t-1)',
+            'A(r, t) = F(0.12, 1.44)[&[I(5)]T(0.2)L(0.06, min(r+0.12, LMaxSize), 0)]/(180)[&L(0.06, min(r+0.12, LMaxSize), 0)]/(90)A(r-0.3, 3)',
             'S(type) < I(t): type>=1 = S(type)',
             'I(t): t>0 = I(t-1)',
             'I(t) = /(90)F(0.12, 0.72)T[&L(0.03, LMaxSize/2, 0)]/(180)[&L(0.03, LMaxSize/2, 0)]I(11)',
@@ -4583,7 +4583,7 @@ const plantData: {[key: string]: Plant} =
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
-            'AThreshold': '0.96',
+            'AThreshold': '4.8',
             'LMaxSize': '0.6',
             'KMaxSize': '0.3'
         },
@@ -4597,8 +4597,8 @@ const plantData: {[key: string]: Plant} =
         ]),
         maxStage: 50,
         requiresWater: true,
-        growthRate: BigNumber.from(2.5),
-        growthCost: BigNumber.TWO,
+        growthRate: BigNumber.from(12.5),
+        growthCost: BigNumber.from(1.5),
         actions:
         [
             {   // Always a harvest
@@ -4651,19 +4651,19 @@ const plantData: {[key: string]: Plant} =
     campion:
     {
         cost: new ExponentialCost(2000, Math.log2(5)),
-        system: new LSystem('/(45)&(5)A(0.1, 5)', [
-            'A(r, t): t>0 = A(r+0.05, t-1)',
-            'A(r, t) = F(0.4, 20)T[&L(0.025)][/(180)&L(0.025)][F(0.4, 10)K(0.125, 0)][^$A(r-0.2, 7)][&$A(r-0.1, 3)]',
+        system: new LSystem('/(45)&(5)A(0.5, 5)', [
+            'A(r, t): t>0 = A(r+0.25, t-1)',
+            'A(r, t) = F(0.4, 20)T[&L(0.125)][/(180)&L(0.125)][F(0.4, 10)K(0.125, 0)][^$A(r-1, 7)][&$A(r-0.5, 3)]',
             'K(p, t): t<2 = K(p*1.1, t+1)',
             'K(p, t): t<3 = K(0.1875, t+1)',
             'K(p, t): t<12 = K(1.35*p-0.8*p^2, t+1)',
             'K(p, t) = O(1)',
-            'L(s): s<LMaxSize = L(s+0.025)',
+            'L(s): s<LMaxSize = L(s+0.125)',
             'O(s): s>0.5 = O(s*0.9)',
             'O(s) =',
             'F(l, t): t>0 = F(l+0.4, t-1)'
         ], 31, 0, 'A', '', -0.6, {
-            'LMaxSize': '0.625'
+            'LMaxSize': '3'
         },
         [
             '~> b(s) = -[^-F(s).][--F(s*2)..][&-F(s).]+^(72)',
@@ -4671,12 +4671,12 @@ const plantData: {[key: string]: Plant} =
             '~> K(p, t): t<3 = {[+(90)b(p*4)b(p*4)b(p*4)b(p*4)b(p*4)]}',
             '~> K(p, t) = {[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]}',
             '~> k(s) = [^(40)F(s/2).&(10)F(s/2).&F(s/4).][F(s/2)-(10)F(s).][&(40)F(s/2)[^(10)F(s/2)[^F(s/4).].].].',
-            '~> L(s) = {T(s*0.5)F(sqrt(s)).[-(48)F(s*2).+F(s*2).+&F(s*2).+F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].].[+(48)F(s*2).-F(s*2).-&F(s*2).-F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].]}',
+            '~> L(s) = {T(s*0.1)F(sqrt(s/5)).[-(48)F(s*0.4).+F(s*0.4).+&F(s*0.4).+F(s*0.4).][F(s*0.4)[&F(s*0.4)[F(s*0.4)[^F(s*0.4).].].].].[+(48)F(s*0.4).-F(s*0.4).-&F(s*0.4).-F(s*0.4).][F(s*0.4)[&F(s*0.4)[F(s*0.4)[^F(s*0.4).].].].]}',
             '~> O(s) = {[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].].}'
         ]),
         maxStage: 29,
         requiresWater: true,
-        growthRate: BigNumber.from(2.75),
+        growthRate: BigNumber.from(13.75),
         growthCost: BigNumber.TEN,//BigNumber.from(2.5),
         stagelyIncome: BigNumber.ONE,
         propagation:
@@ -4745,13 +4745,13 @@ const plantData: {[key: string]: Plant} =
     },
     broomrape:
     {
-        system: new LSystem('B(0.025, timer)',
+        system: new LSystem('B(0.125, timer)',
         [
             // Invisibility regenerates when the shoots go up
-            'B(r, t) > F(l, lim): t<timer = B(1.15*r-0.006*r^2, t+2)',
+            'B(r, t) > F(l, lim): t<timer = B(1.15*r-0.0012*r^2, t+2)',
             // Cheekily goes back to hiding
-            'B(r, t) > F(l, lim) = B(0.025, t)%',
-            'B(r, t): t>0 = B(1.15*r-0.006*r^2, t-1)',
+            'B(r, t) > F(l, lim) = B(0.125, t)%',
+            'B(r, t): t>0 = B(1.15*r-0.0012*r^2, t-1)',
             'B(r, t) = B(r, t)F(0.15, 0.9)I(12)',
             'I(t): t>0 = F(0.05, 0.3)[-K(0)]/(137.508)I(t-1)',
             'K(s): s<KMaxSize = K(s+0.5)',
@@ -4787,7 +4787,7 @@ const plantData: {[key: string]: Plant} =
             'clover'
         ]),
         requiresWater: false,
-        growthRate: BigNumber.SIX,
+        growthRate: BigNumber.from(30),
         growthCost: BigNumber.from(15),
         propagation:
         {
@@ -4978,9 +4978,9 @@ const plantIDLookup =
     9002: 'brasil'
 }
 
-const speeds = [1, 5/4, 5/3, 5/2];
+const speeds = [1/5, 1/4, 1/3, 1/2, 1];
 const speedAdjDayLengths = speeds.map(x => dayLength / x);
-const clockMinDiv = [12, 15, 20, 30];
+const clockMinDiv = [12, 15, 20, 30, 60];
 
 let haxEnabled = false;
 let time = 0;
