@@ -133,7 +133,8 @@ limits.`,
         labelAutoWaterDesc: `Scheduling is unlocked for a species after 
 harvesting it for the first time.`,
         menuExtraPot: 'Sheltered pot',
-        labelTransferPot: 'Transfer plant to plot: ',
+        labelPlantPot: 'Shelter plant in pot: ',
+        labelTransferPot: 'Transfer to plot (stg. 20/max required): ',
         extraPotEqPlaceholder: [
             '',
             `Says a note on the bookshelf:
@@ -6164,7 +6165,7 @@ let getExtraPotEquation = () => {
 };
 let createExtraPotMenu = () => {
     // extraManager.colonies[0][0]
-    let waterFrame = createScrollBarImageBtn({
+    let extraWaterFrame = createScrollBarImageBtn({
         row: 0, column: 0,
     }, () => extraManager.water(extraManager.colonies[0][0]), () => extraManager.water(extraManager.colonies[0][0]), true, () => {
         if (extraManager.colonies[0][0] && !extraManager.colonies[0][0].wet)
@@ -6173,7 +6174,7 @@ let createExtraPotMenu = () => {
     }, game.settings.theme == Theme.LIGHT ?
         ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
         ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png'));
-    let waterLabel = ui.createLatexLabel({
+    let extraWaterLabel = ui.createLatexLabel({
         row: 0, column: 1,
         // horizontalOptions: LayoutOptions.END,
         verticalTextAlignment: TextAlignment.START,
@@ -6201,7 +6202,7 @@ let createExtraPotMenu = () => {
         fontSize: 10,
         textColor: Color.TEXT_MEDIUM
     });
-    let harvestFrame = createScrollBarImageBtn({
+    let extraHarvestFrame = createScrollBarImageBtn({
         row: 0, column: 2,
     }, () => {
         if (actionConfirm) {
@@ -6224,7 +6225,7 @@ let createExtraPotMenu = () => {
     }, false, () => true, game.settings.theme == Theme.LIGHT ?
         ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
         ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png'));
-    let harvestLabel = ui.createLatexLabel({
+    let extraHarvestLabel = ui.createLatexLabel({
         row: 0, column: 3,
         // horizontalOptions: LayoutOptions.END,
         verticalTextAlignment: TextAlignment.START,
@@ -6233,7 +6234,7 @@ let createExtraPotMenu = () => {
         fontSize: 10,
         textColor: Color.TEXT_MEDIUM
     });
-    let pruneFrame = createScrollBarImageBtn({
+    let extraPruneFrame = createScrollBarImageBtn({
         isVisible: () => {
             if (!extraManager.colonies[0][0] ||
                 !plantData[extraManager.colonies[0][0].id].actions[1 /* Actions.PRUNE */])
@@ -6251,7 +6252,7 @@ let createExtraPotMenu = () => {
     }, null, false, () => true, game.settings.theme == Theme.LIGHT ?
         ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
         ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png'));
-    let pruneLabel = ui.createLatexLabel({
+    let extraPruneLabel = ui.createLatexLabel({
         isVisible: () => {
             if (!extraManager.colonies[0][0] ||
                 !plantData[extraManager.colonies[0][0].id].actions[1 /* Actions.PRUNE */])
@@ -6265,6 +6266,12 @@ let createExtraPotMenu = () => {
         text: getLoc('labelActions')[1 /* Actions.PRUNE */],
         fontSize: 10,
         textColor: Color.TEXT_MEDIUM
+    });
+    // Plant pot
+    let plantLabel = ui.createLatexLabel({
+        isVisible: () => !extraManager.colonies[0].length,
+        text: getLoc('labelPlantPot'),
+        verticalTextAlignment: TextAlignment.CENTER
     });
     let plantGrid = ui.createGrid({
         isVisible: () => !extraManager.colonies[0].length,
@@ -6292,7 +6299,11 @@ let createExtraPotMenu = () => {
     // Transfer
     // Wait, people can spam transfer to get unlimited plants...
     // Should transfer have a fee, or require stage 20 (or maxStage for peas)?
-    let transferLabel;
+    let transferLabel = ui.createLatexLabel({
+        isVisible: () => extraManager.colonies[0].length > 0,
+        text: getLoc('labelTransferPot'),
+        verticalTextAlignment: TextAlignment.CENTER
+    });
     let transferBtns = [];
     for (let i = 0; i < plotPerma.level; ++i) {
         transferBtns.push(ui.createButton({
@@ -6341,16 +6352,18 @@ let createExtraPotMenu = () => {
                         inputTransparent: true,
                         cascadeInputTransparent: false,
                         children: [
-                            waterFrame,
-                            waterLabel,
-                            harvestFrame,
-                            harvestLabel,
-                            pruneFrame,
-                            pruneLabel,
+                            extraWaterFrame,
+                            extraWaterLabel,
+                            extraHarvestFrame,
+                            extraHarvestLabel,
+                            extraPruneFrame,
+                            extraPruneLabel,
                         ]
                     }),
                 }),
+                plantLabel,
                 plantGrid,
+                transferLabel,
                 transferGrid
             ]
         })

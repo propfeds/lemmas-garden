@@ -124,7 +124,7 @@ you have to dig really deep to find the underlying systems behind the plants
   - [x] Dislodge and re-establish all links every time a colony is killed or spawned?
     - [x] Do a sweeping scan for all links in the same plot in addColony and killColony
 
-- [ ] Extra pot
+- [x] Extra pot
   - [x] Make pot manager wait until main manager finishes processing
 - [ ] Beehives
 
