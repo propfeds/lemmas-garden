@@ -4414,7 +4414,7 @@ const maxColoniesPerPlot = 5;
 const waterAmount = 1/2;
 const transferMinStage = 20;
 
-const plotCosts = new FirstFreeCost(new ExponentialCost(500, Math.log2(80)));
+const plotCosts = new FirstFreeCost(new ExponentialCost(600, Math.log2(80)));
 const plantUnlocks = ['sprout', 'calendula', 'basil', 'campion'];
 const plantUnlockCosts = new CompositeCost(1,
 new ConstantCost(1), new CompositeCost(1,
@@ -4422,8 +4422,8 @@ new ConstantCost(1500),
 new ConstantCost(44000)));
 const permaCosts =
 [
-    BigNumber.from(18),
-    BigNumber.from(270),
+    BigNumber.from(15),
+    BigNumber.from(180),
     BigNumber.from(2100),
     BigNumber.from(1e45)
 ];

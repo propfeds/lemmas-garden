@@ -140,7 +140,7 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Flower transforms into seed pod with lower profit
     - Turns `K(9)` into `K(9-1.5, 0)` (to avoid further interactions) and add seed pod
   - [ ] Singular inflorescence
-  - [ ] Lower pub cost to 15p
+  - [x] Lower pub cost to 15p
 
 - [ ] Basil
   - [ ] Reversible leaf decay when pruning?
