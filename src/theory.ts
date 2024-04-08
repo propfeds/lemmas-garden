@@ -186,8 +186,8 @@ harvesting it for the first time.`,
 \\text{{Growth\\colon\\enspace {2}/{3} +{4}/hr}}\\\\
 \\text{{Base profit\\colon\\enspace {5}p}}\\\\
 \\text{{({6}/{7}) {8}}}`,
-        dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}\\\\{5}',
-        dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\{5}',
+        dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}',
+        dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}',
         hacks: 'Hax',
         status:
         {
@@ -207,7 +207,7 @@ harvesting it for the first time.`,
         switchColony: 'Switch colony ({0}/{1})',
         switchColonyInfo: 'Cycles through the list of colonies',
 
-        labelSpeed: 'Game speed: {0}x',
+        labelSpeed: 'Game speed: 1/{0}',
         labelGM3D: '3D illustration: ',
         labelActionConfirm: 'Confirmation dialogue: ',
         lineGraphModes:
@@ -4598,7 +4598,7 @@ const plantData: {[key: string]: Plant} =
         maxStage: 50,
         requiresWater: true,
         growthRate: BigNumber.from(12.5),
-        growthCost: BigNumber.from(1.5),
+        growthCost: BigNumber.from(1.6),
         actions:
         [
             {   // Always a harvest
@@ -4978,8 +4978,8 @@ const plantIDLookup =
     9002: 'brasil'
 }
 
-const speeds = [1/5, 1/4, 1/3, 1/2, 1];
-const speedAdjDayLengths = speeds.map(x => dayLength / x);
+const speeds = [5, 4, 3, 2, 1];
+const speedAdjDayLengths = speeds.map(x => dayLength * x);
 const clockMinDiv = [12, 15, 20, 30, 60];
 
 let haxEnabled = false;
@@ -5503,7 +5503,7 @@ const mainMenuLabel = ui.createLatexLabel
     margin: new Thickness(0, 9),
     text: () =>
     {
-        let dt = (time - lastSave) / speeds[speedIdx];
+        let dt = (time - lastSave) * speeds[speedIdx];
         if(dt < 30)
             return getLoc('permaShelf');
         return Localization.format(getLoc('labelSave'), Math.floor(dt));
@@ -5793,21 +5793,21 @@ var init = () =>
         new FreeCost);
         warpDay.description = 'Warp day';
         warpDay.info = 'Warps forward by a day';
-        warpDay.bought = (_) => tick(dayLength / speeds[speedIdx], 1);
+        warpDay.bought = (_) => tick(dayLength, 1);
         warpDay.isAvailable = haxEnabled;
 
         warpWeek = theory.createPermanentUpgrade(9008, currency,
         new FreeCost);
         warpWeek.description = 'Warp week';
         warpWeek.info = 'Warps forward by a week';
-        warpWeek.bought = (_) => tick(7 * dayLength / speeds[speedIdx], 1);
+        warpWeek.bought = (_) => tick(7 * dayLength, 1);
         warpWeek.isAvailable = haxEnabled;
 
         warpYear = theory.createPermanentUpgrade(9005, currency,
         new FreeCost);
         warpYear.description = 'Warp year';
         warpYear.info = 'Warps forward by 365 days';
-        warpYear.bought = (_) => tick(dayLength * 365 / speeds[speedIdx], 1);
+        warpYear.bought = (_) => tick(dayLength * 365, 1);
         warpYear.isAvailable = haxEnabled;
     }
     /* Reset time
@@ -5914,7 +5914,7 @@ var tick = (elapsedTime: number, multiplier: number) =>
     let dd: number, di: number, dg: number;
     perfs[Profilers.TICK].exec(() =>
     {
-        let dt = elapsedTime * speeds[speedIdx];
+        let dt = elapsedTime / speeds[speedIdx];
         time += dt;
         // https://www.desmos.com/calculator/pfku4nopgy
         // insolation = max(0, -cos(x*pi/72))
@@ -6020,6 +6020,13 @@ var getEquationOverlay = () =>
         children:
         [
             // floatingWipLabel,
+            ui.createLabel
+            ({
+                isVisible: haxEnabled,
+                horizontalOptions: LayoutOptions.END,
+                verticalOptions: LayoutOptions.START,
+                text: getLoc('hacks')
+            }),
             ui.createGrid
             ({
                 row: 0, column: 0,
@@ -6435,13 +6442,12 @@ let getTimeString = () =>
     let quanToD = Math.floor(timeofDay / quantum) * quantum;
     // Now that hour-length is 1, let's do something else
     let hour = Math.floor(quanToD);
-    let min = Math.round((quanToD - hour) / speeds[speedIdx]) *
+    let min = Math.floor((quanToD - hour) / speeds[speedIdx] + 1e-9) *
     clockMinDiv[speedIdx];
 
     return Localization.format(getLoc(actionPanelOnTop ? 'dateTimeBottom' :
     'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1,
-    hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'),
-    haxEnabled ? getLoc('hacks') : '');
+    hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'));
 }
 
 var getQuaternaryEntries = () =>
@@ -8241,8 +8247,7 @@ let createWorldMenu = () =>
 {
     let speedLabel = ui.createLatexLabel
     ({
-        text: Localization.format(getLoc('labelSpeed'),
-        parseFloat(speeds[speedIdx].toFixed(2))),
+        text: Localization.format(getLoc('labelSpeed'), speeds[speedIdx]),
         row: 0, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
@@ -8256,7 +8261,7 @@ let createWorldMenu = () =>
         {
             speedIdx = Math.round(speedSlider.value);
             speedLabel.text = Localization.format(getLoc('labelSpeed'),
-            parseFloat(speeds[speedIdx].toFixed(2)));
+            speeds[speedIdx]);
         },
         onDragCompleted: () =>
         {

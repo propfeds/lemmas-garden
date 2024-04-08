@@ -61,8 +61,9 @@ you have to dig really deep to find the underlying systems behind the plants
   - Provide context: making a game about the logical aspects of Ls
   - [x] Initial email
 
-- [ ] Change /sec indicators to /hr (in-game) and display 5x the value
+- [x] Change /sec indicators to /hr (in-game) and display 5x the value
   - Counter-argument: all parameters display /sec
+  - [ ] Test basil balance
 
 - [ ] Popup title gets truncated on iOS if it exceeds 1 line
 
@@ -139,6 +140,7 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Flower transforms into seed pod with lower profit
     - Turns `K(9)` into `K(9-1.5, 0)` (to avoid further interactions) and add seed pod
   - [ ] Singular inflorescence
+  - [ ] Lower pub cost to 15p
 
 - [ ] Basil
   - [ ] Reversible leaf decay when pruning?
