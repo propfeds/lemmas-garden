@@ -4500,9 +4500,9 @@ const plantData: {[key: string]: Plant} =
             'L(r, lim): r<lim = L(r+0.1, lim)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 15, 0, 'AI', '', -0.2, {
-            'AThreshold': '4.8',
+            'AThreshold': '4.8 - 1e-9',
             'KMaxSize': '3',
-            'LMaxSize': '3.4'
+            'LMaxSize': '3.6'
         },
         [
             '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/10+0.1)[k(p*0.225, p*18)k(p*0.225, p*18)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.21, p*18-6)k(p*0.21, p*18-6)]}',
