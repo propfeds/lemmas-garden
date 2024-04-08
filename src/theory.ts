@@ -186,6 +186,7 @@ harvesting it for the first time.`,
 \\text{{Growth\\colon\\enspace {2}/{3} +{4}/hr}}\\\\
 \\text{{Base profit\\colon\\enspace {5}p}}\\\\
 \\text{{({6}/{7}) {8}}}`,
+        hour: 'hr',
         dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}',
         dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}',
         hacks: 'Hax',
@@ -6395,8 +6396,8 @@ var getSecondaryEquation = () =>
                 ${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                 // @ts-expect-error
                 plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
-                '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{hr},\\enspace\\pi =
-                ${c.profit}\\text{p}\\\\(${slotIdx + 1}/
+                '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{${getLoc('hour')}},
+                \\enspace\\pi = ${c.profit}\\text{p}\\\\(${slotIdx + 1}/
                 ${manager.colonies[plotIdx].length})\\\\\\end{array}`;
                 break;
             case ColonyModes.LIST:
@@ -7829,8 +7830,8 @@ let getExtraPotEquation = () =>
             g=${c.growth}/${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
             // @ts-expect-error
             plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
-            '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{hr},\\enspace\\pi =
-            ${c.profit}\\text{p}\\\\(1/1)\\end{array}`;
+            '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{${getLoc('hour')}},\\enspace
+            \\pi = ${c.profit}\\text{p}\\\\(1/1)\\end{array}`;
             break;
         case ColonyModes.LIST:
             result = '\\begin{array}{c}';
