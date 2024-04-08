@@ -6395,7 +6395,7 @@ var getSecondaryEquation = () =>
                 ${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                 // @ts-expect-error
                 plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
-                '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{s},\\enspace\\pi =
+                '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{hr},\\enspace\\pi =
                 ${c.profit}\\text{p}\\\\(${slotIdx + 1}/
                 ${manager.colonies[plotIdx].length})\\\\\\end{array}`;
                 break;
@@ -6442,7 +6442,7 @@ let getTimeString = () =>
     let quanToD = Math.floor(timeofDay / quantum) * quantum;
     // Now that hour-length is 1, let's do something else
     let hour = Math.floor(quanToD);
-    let min = Math.floor((quanToD - hour) / speeds[speedIdx] + 1e-9) *
+    let min = Math.floor((quanToD - hour) * speeds[speedIdx] + 1e-9) *
     clockMinDiv[speedIdx];
 
     return Localization.format(getLoc(actionPanelOnTop ? 'dateTimeBottom' :
@@ -7829,7 +7829,7 @@ let getExtraPotEquation = () =>
             g=${c.growth}/${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
             // @ts-expect-error
             plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
-            '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{s},\\enspace\\pi =
+            '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{hr},\\enspace\\pi =
             ${c.profit}\\text{p}\\\\(1/1)\\end{array}`;
             break;
         case ColonyModes.LIST:
