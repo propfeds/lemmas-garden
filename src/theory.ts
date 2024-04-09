@@ -4600,7 +4600,7 @@ const plantData: {[key: string]: Plant} =
         ]),
         maxStage: 50,
         requiresWater: true,
-        growthRate: BigNumber.from(9),
+        growthRate: BigNumber.from(8),
         growthCost: BigNumber.from(1),
         actions:
         [
