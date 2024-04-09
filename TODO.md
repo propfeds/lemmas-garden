@@ -63,7 +63,7 @@ you have to dig really deep to find the underlying systems behind the plants
 
 - [x] Change /sec indicators to /hr (in-game) and display 5x the value
   - Counter-argument: all parameters display /sec
-  - [ ] Test basil balance
+  - [x] Test basil balance
 
 - [ ] Popup title gets truncated on iOS if it exceeds 1 line
 
