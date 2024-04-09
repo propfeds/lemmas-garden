@@ -3544,13 +3544,14 @@ class ColonyManager
     }
 
     addColony(plot: number, id: string, population: number,
-    parent: [number, number] = null)
+    parent: [number, number] = null): Colony
     {
         if(!plantData[id])
-            return;
+            return null;
         if(population <= 0)
-            return;
+            return null;
 
+        // Grouping colonies (if stage 0)
         if(parent === null)
         {
             for(let i = 0; i < this.colonies[plot].length; ++i)
@@ -3561,7 +3562,7 @@ class ColonyManager
                 {
                     groupCandidate.population += population;
                     theory.invalidateQuaternaryValues();
-                    return;
+                    return groupCandidate;
                 }
             }
         }
@@ -3570,7 +3571,7 @@ class ColonyManager
         {
             if(parent === null)
                 plants[plot][id]?.refund?.(population);
-            return;
+            return null;
         }
 
         let c: Colony =
@@ -3645,6 +3646,7 @@ class ColonyManager
         }
         theory.invalidateQuaternaryValues();
         updateAvailability();
+        return c;
     }
     killColony(plot: number, index: number, id?: number)
     {
