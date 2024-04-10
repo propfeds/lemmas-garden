@@ -155,12 +155,13 @@ harvesting it for the first time.`,
         colonyNoPop: `{1}, stg. {2} ({3}%)`,
         colonyNoPopEsc: `{1}, stg. {2} ({3}\\%)`,
         invisibleColony: `\\text{Tilled soil.}`,
-        colonyStats: `\\text{{Energy\\colon\\enspace {0} +{1}/s}}\\\\
-\\text{{Growth\\colon\\enspace {2}/{3} +{4}/s}}\\\\
+        colonyStats: `\\text{{Energy\\colon\\enspace {0} +{1}/hr}}\\\\
+\\text{{Growth\\colon\\enspace {2}/{3} +{4}/hr}}\\\\
 \\text{{Base profit\\colon\\enspace {5}p}}\\\\
 \\text{{({6}/{7}) {8}}}`,
-        dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}\\\\{5}',
-        dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\{5}',
+        hour: 'hr',
+        dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}',
+        dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}',
         hacks: 'Hax',
         status: {
             evolve: 'Growing...',
@@ -176,7 +177,7 @@ harvesting it for the first time.`,
         viewColonyInfo: 'Displays details about the colony',
         switchColony: 'Switch colony ({0}/{1})',
         switchColonyInfo: 'Cycles through the list of colonies',
-        labelSpeed: 'Game speed: {0}x',
+        labelSpeed: 'Game speed: 1/{0}',
         labelGM3D: '3D illustration: ',
         labelActionConfirm: 'Confirmation dialogue: ',
         lineGraphModes: [
@@ -215,9 +216,9 @@ harvesting it for the first time.`,
                 name: 'Pea sprout',
                 nameShort: 's',
                 info: `Tastes nice, innit? (\\(~\\)10 days)`,
-                LsDetails: `A(r, t): apex (stem bud) providing r energy/s. Has
+                LsDetails: `A(r, t): apex (stem bud) providing r energy/hr. Has
 t stages left until it spurts.\\\\F(p): segment of length p.
-Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/s.`,
+Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/hr.`,
                 actions: [
                     `Harvest returns profit as the sum of all F lengths.`
                 ],
@@ -242,11 +243,11 @@ more, then I'll get you something new.`
                 name: 'Calendula',
                 nameShort: 'C',
                 info: 'The classic flower to start a month. (\\(~\\)7 weeks)',
-                LsDetails: `A(r, t): apex (stem bud) providing r energy/s. Has
+                LsDetails: `A(r, t): apex (stem bud) providing r energy/hr. Has
 t stages left until it splits.\\\\F(l, lim): internode of length l, growing up
 to lim.\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0,
 when it turns into K.\\\\K(p): flower of size p. Provides p pennies on harvest.
-\\\\L(r, lim): leaf providing r energy/s, growing up to lim.`,
+\\\\L(r, lim): leaf providing r energy/hr, growing up to lim.`,
                 actions: [
                     `Harvest returns profit as the sum of all K sizes.`
                 ],
@@ -384,7 +385,7 @@ seeder. Watch for the new one coming right near ya.`
                 name: 'Broomrape',
                 nameShort: 'Br',
                 // No info because can't be bought
-                LsDetails: `B(r, t): base, providing r energy/s.\\\\F(l, lim):
+                LsDetails: `B(r, t): base, providing r energy/hr.\\\\F(l, lim):
 internode of length l. Provides l pennies on harvest.\\\\I(t): stem head
 providing no energy. Spawns flowers for t turns.\\\\K(s): flower of size s.
 Provides s pennies on harvest.\\\\O(s): fruit of size s.`,
@@ -444,8 +445,8 @@ friend to all mathematicians.`
                 ]
             },
         },
-        plantStats: `({0}) {1}\\\\—\\\\Photosynthetic rate: {2}/s (noon)
-\\\\Growth rate: {3}/s\\\\Growth cost: {4} × {5} symbols\\\\—\\\\Sequence:`,
+        plantStats: `({0}) {1}\\\\—\\\\Photosynthetic rate: {2}/hr (noon)
+\\\\Growth rate: {3}/hr\\\\Growth cost: {4} × {5} symbols\\\\—\\\\Sequence:`,
         narrationTrack: '{0}, {1}',
         noCommentary: 'No narrations.',
         noLsDetails: 'No explanations.',
@@ -2726,9 +2727,10 @@ class ColonyManager {
     }
     addColony(plot, id, population, parent = null) {
         if (!plantData[id])
-            return;
+            return null;
         if (population <= 0)
-            return;
+            return null;
+        // Grouping colonies (if stage 0)
         if (parent === null) {
             for (let i = 0; i < this.colonies[plot].length; ++i) {
                 let groupCandidate = this.colonies[plot][i];
@@ -2736,14 +2738,14 @@ class ColonyManager {
                     !groupCandidate.stage) {
                     groupCandidate.population += population;
                     theory.invalidateQuaternaryValues();
-                    return;
+                    return groupCandidate;
                 }
             }
         }
         if (this.colonies[plot].length >= this.width) {
             if (parent === null)
                 plants[plot][id]?.refund?.(population);
-            return;
+            return null;
         }
         let c = {
             id: id,
@@ -2806,6 +2808,7 @@ class ColonyManager {
         }
         theory.invalidateQuaternaryValues();
         updateAvailability();
+        return c;
     }
     killColony(plot, index, id) {
         let c = this.colonies[plot][index];
@@ -3377,20 +3380,20 @@ const LsManual = new Book(getLoc('manualTitle'), 'manual', [
     // getLoc('manual').note,
 ]);
 // Balance parameters
-const dayLength = 120;
+const dayLength = 24;
 const halfDayLength = dayLength / 2;
 const quarterDayLength = halfDayLength / 2;
-const hourLength = dayLength / 24;
+// const hourLength = dayLength / 24;
 const nofPlots = 6;
 const maxColoniesPerPlot = 5;
 const waterAmount = 1 / 2;
 const transferMinStage = 20;
-const plotCosts = new FirstFreeCost(new ExponentialCost(500, Math.log2(80)));
+const plotCosts = new FirstFreeCost(new ExponentialCost(600, Math.log2(80)));
 const plantUnlocks = ['sprout', 'calendula', 'basil', 'campion'];
 const plantUnlockCosts = new CompositeCost(1, new ConstantCost(1), new CompositeCost(1, new ConstantCost(1500), new ConstantCost(44000)));
 const permaCosts = [
-    BigNumber.from(18),
-    BigNumber.from(270),
+    BigNumber.from(15),
+    BigNumber.from(180),
     BigNumber.from(2100),
     BigNumber.from(1e45)
 ];
@@ -3411,20 +3414,20 @@ h=\\ln{(2\\ln{(${symbol}+1)}+1)}`;
 const plantData = {
     sprout: {
         cost: new FirstFreeCost(new ExponentialCost(0.25, 1)),
-        system: new LSystem('\\A(0.02, 3)', [
-            'A(r, t): t>0 = A(r+0.02, t-1)',
-            'A(r, t) = F(0.05)[-&L(0.02)][-^L(0.02)]/(137.508)A(r, 3)',
+        system: new LSystem('\\A(0.1, 3)', [
+            'A(r, t): t>0 = A(r+0.1, t-1)',
+            'A(r, t) = F(0.05)[-&L(0.1)][-^L(0.1)]/(137.508)A(r, 3)',
             'F(p): p<FMaxSize = F(p+0.05)',
-            'L(r): r<LMaxSize = L(r+0.02)'
+            'L(r): r<LMaxSize = L(r+0.1)'
         ], 45, 0, 'A', '+-&^/\\T', 0, {
             'FMaxSize': '0.25',
-            'LMaxSize': '0.1'
+            'LMaxSize': '0.5'
         }, [
-            '~> L(s) = {F(s/4)T(4*s)[\\(90-480*s)&F(s/6).&(30)F(s/3).^(60)F(s/3).^(30)F(s/3).^(30)F(s/3).^(30)F(s/6).][F(s)..].[/(90-480*s)^F(s/6).^(30)F(s/3).&(60)F(s/3).&(30)F(s/3).&(30)F(s/3).&(30)F(s/6).][F(s)..]}',
+            '~> L(s) = {F(s/20)T(0.8*s)[\\(90-96*s)&F(s/30).&(30)F(s/15).^(60)F(s/15).^(30)F(s/15).^(30)F(s/15).^(30)F(s/30).][F(s/5)..].[/(90-96*s)^F(s/30).^(30)F(s/15).&(60)F(s/15).&(30)F(s/15).&(30)F(s/15).&(30)F(s/30).][F(s/5)..]}',
         ]),
         maxStage: 12,
         requiresWater: true,
-        growthRate: BigNumber.from(0.3),
+        growthRate: BigNumber.from(1.5),
         growthCost: BigNumber.from(0.6),
         actions: [
             {
@@ -3445,20 +3448,20 @@ const plantData = {
     },
     calendula: {
         cost: new ExponentialCost(1, Math.log2(3)),
-        system: new LSystem('-(3)A(0.06, 4)', [
+        system: new LSystem('-(3)A(0.3, 4)', [
             'A(r, t): t<=0 && r>=AThreshold = F(0.78, 2.1)K(0)',
-            'A(r, t): r>=AThreshold = [&A(r-0.15, 2)][^I(3)]',
-            'A(r, t): t>0 = A(r+0.06, t-1)',
-            'A(r, t) = F(0.12, 0.6)T[-L(0.06, LMaxSize)]/(180)[-L(0.06, LMaxSize)]/(90)A(r, 4)',
-            'I(t): t>0 = F(0.24, 0.84)T[-L(0.06, LMaxSize/3)]/(137.508)I(t-1)',
+            'A(r, t): r>=AThreshold = [&A(r-0.75, 2)][^I(3)]',
+            'A(r, t): t>0 = A(r+0.3, t-1)',
+            'A(r, t) = F(0.12, 0.6)T[-L(0.3, LMaxSize)]/(180)[-L(0.3, LMaxSize)]/(90)A(r, 4)',
+            'I(t): t>0 = F(0.24, 0.84)T[-L(0.3, LMaxSize/3)]/(137.508)I(t-1)',
             'I(t) = F(0.48, 1.44)K(0)',
             'K(p): p<KMaxSize = K(p+0.25)',
-            'L(r, lim): r<lim = L(r+0.02, lim)',
+            'L(r, lim): r<lim = L(r+0.1, lim)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 15, 0, 'AI', '', -0.2, {
-            'AThreshold': '0.96',
+            'AThreshold': '4.8 - 1e-9',
             'KMaxSize': '3',
-            'LMaxSize': '0.68'
+            'LMaxSize': '3.6'
         }, [
             '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/10+0.1)[k(p*0.225, p*18)k(p*0.225, p*18)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.21, p*18-6)k(p*0.21, p*18-6)]}',
             '~> K(p): p<1.5 = {[w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)]F(p/10+0.1)[k(p*0.225, p*18)k(p*0.225, p*18)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.21, p*18-6)k(p*0.21, p*18-6)k(p*0.21, p*18-6)k(p*0.2, p*18-6)k(p*0.21, p*18-6)k(p*0.21, p*18-9)k(p*0.2, p*18-15)][o(p*0.2252, p*17.5)]}',
@@ -3470,13 +3473,13 @@ const plantData = {
             '~> k(p, a): p<0.3 = [---(a)F(p/2).+^F(p*2).+&F(p).][---(a)F(p/2)[+&F(p*2)[+^F(p).].].]/(137.508)',
             '~> k(p, a) = [---(a)F(p/2).+^F(p*2).&F(p).][---(a)F(p/2)[+&F(p*2)[^F(p).].].]/(137.508)',
             '~> o(p, a) = [-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]',
-            '~> L(p, lim): p<=LMaxSize/4 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].].[^F(p).F(p).^-F(p).&&-F(p).&F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].]}',
-            '~> L(p, lim): p<=LMaxSize/3 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
-            '~> L(p, lim) = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
+            '~> L(p, lim): p<=LMaxSize/4 = {T(0.16*p^2)[&F(p/5).F(p/5).&-F(p/5).^^-F(p/5).^F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[F(p/5)[-F(p/5).].].].].].].[^F(p/5).F(p/5).^-F(p/5).&&-F(p/5).&F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[F(p/5)[-F(p/5).].].].].].]}',
+            '~> L(p, lim): p<=LMaxSize/3 = {T(0.16*p^2)[&F(p/5).F(p/5).&-F(p/5).^^-F(p/5).^-F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[-F(p/5)..].].].].].[^F(p/5).F(p/5).^-F(p/5).&&-F(p/5).&-F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[-F(p/5)..].].].].]}',
+            '~> L(p, lim) = {T(0.16*p^2)[&F(p/5).F(p/5).&-F(p/5).^^-F(p/5).^--F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[--F(p/5)..].].].].].[^F(p/5).F(p/5).^-F(p/5).&&-F(p/5).&--F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[--F(p/5)..].].].].]}'
         ]),
         maxStage: 40,
         requiresWater: true,
-        growthRate: BigNumber.from(1.5),
+        growthRate: BigNumber.from(7.5),
         growthCost: BigNumber.from(2.5),
         propagation: {
             stage: [40],
@@ -3513,40 +3516,40 @@ const plantData = {
         colour: 'orange'
     },
     basil: {
-        cost: new ExponentialCost(2.5, 1),
-        system: new LSystem('/(90)BA(0.06, 5)', [
-            'A(r, t): r>=AThreshold = S(0)F(0.24, 0.96)K(0.02, 8)',
-            'A(r, t): t>0 = A(r+0.06, t-1)',
-            'A(r, t) = F(0.12, 1.44)[&[I(5)]T(0.2)L(0.06, min(r+0.12, LMaxSize), 0)]/(180)[&L(0.06, min(r+0.12, LMaxSize), 0)]/(90)A(r-0.06, 3)',
+        cost: new ExponentialCost(7.5, 2),
+        system: new LSystem('/(90)BA(0.2, 5)', [
+            'A(r, t): r>=AThreshold = S(0)F(0.24, 0.96)K(0.03, 8)',
+            'A(r, t): t>0 = A(r+0.4, t-1)',
+            'A(r, t) = F(0.12, 1.44)[&[I(5)]T(0.2)L(0.12, min(r+0.12, LMaxSize), 0)]/(180)[&L(0.12, min(r+0.12, LMaxSize), 0)]/(90)A(r-0.4, 3)',
             'S(type) < I(t): type>=1 = S(type)',
             'I(t): t>0 = I(t-1)',
-            'I(t) = /(90)F(0.12, 0.72)T[&L(0.03, LMaxSize/2, 0)]/(180)[&L(0.03, LMaxSize/2, 0)]I(11)',
-            'K(s, t): t>0 = K(s+0.02, 0)/(90)F(0.12, 0.72)K(0.02, t-1)',
-            'K(s, t): s<KMaxSize = K(s+0.02, t)',
-            'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
+            'I(t) = /(90)F(0.12, 0.72)T[&L(0.06, LMaxSize/2, 0)]/(180)[&L(0.06, LMaxSize/2, 0)]I(9)',
+            'K(s, t): t>0 = K(s+0.03, 0)/(90)F(0.12, 0.72)K(0.03, t-1)',
+            'K(s, t): s<KMaxSize = K(s+0.03, t)',
+            'L(p, lim, s): s<1 && p<lim = L(p+0.06, lim, s)',
             'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
-            'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
+            'L(p, lim, s): s>=1 && p>0.12 = L(p-0.12, lim, s)',
             'F(l, lim) > S(type): type<=0 = S(type)F(l, lim)',
             'S(type) < F(l, lim): type>=1 = F(l, lim)S(type)',
             'S(type) =',
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
-            'AThreshold': '0.96',
-            'LMaxSize': '0.6',
-            'KMaxSize': '0.3'
+            'AThreshold': '6.2',
+            'LMaxSize': '1.2',
+            'KMaxSize': '0.45'
         }, [
-            '~> K(t) = {[k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))]}',
+            '~> K(s, t) = {[k(min(0.6, s*2))//k(min(0.6, s*2))//k(min(0.6, s*2))//k(min(0.6, s*2))//k(min(0.6, s*2))//k(min(0.6, s*2))]}',
             '~> k(size): size<0.36 = [+++&F(size/2).[^^--F(size/2).]][+++^F(size/2).]',
             '~> k(size): size<0.48 = [++F(size/3).++[&F(size/3).][--F(size/3)[+F(size/6).].].[^F(size/3).][--F(size/3)[+F(size/6).].].[--&F(size/3).^^-F(size/3).][--^F(size/3).].]',
             '~> k(size) = [++F(size/3).++[&F(size/3).&F(size/4).][--F(size/3)[-F(size/6).].]..[^F(size/3).^F(size/4).][--F(size/3)[-F(size/6).].]..[-F(size/2).]..[F(size/3).-F(size/3).].]',
-            '~> L(p, lim, s): s<1 = {T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
-            '~> L(p, lim, s) = {T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}'
+            '~> L(p, lim, s): s<1 = {T(p*0.45)F(sqrt(p/2)).[-(48)F(p/2).+F(p/2).+&F(p/2).+F(p/2).][F(p/2)[&F(p/2)[F(p/2)[^F(p/2).].].].].[+(48)F(p/2).-F(p/2).-&F(p/2).-F(p/2).][F(p/2)[&F(p/2)[F(p/2)[^F(p/2).].].].]}',
+            '~> L(p, lim, s) = {T(lim*0.6)F(sqrt(lim/2)).[--F(lim/2).+&F(lim/2).+&F(lim/2).+F(lim/2)..][F(lim/2)[&F(lim/2)[&F(lim/2)[&F(lim/2).].].].].[++F(lim/2).-&F(lim/2).-&F(lim/2).-F(lim/2)..][F(lim/2)[&F(lim/2)[&F(lim/2)[&F(lim/2).].].].]}'
         ]),
         maxStage: 50,
         requiresWater: true,
-        growthRate: BigNumber.from(2.5),
-        growthCost: BigNumber.TWO,
+        growthRate: BigNumber.from(8),
+        growthCost: BigNumber.from(1),
         actions: [
             {
                 symbols: new Set('KL'),
@@ -3592,31 +3595,31 @@ const plantData = {
     },
     campion: {
         cost: new ExponentialCost(2000, Math.log2(5)),
-        system: new LSystem('/(45)&(5)A(0.1, 5)', [
-            'A(r, t): t>0 = A(r+0.05, t-1)',
-            'A(r, t) = F(0.4, 20)T[&L(0.025)][/(180)&L(0.025)][F(0.4, 10)K(0.125, 0)][^$A(r-0.2, 7)][&$A(r-0.1, 3)]',
+        system: new LSystem('/(45)&(5)A(0.5, 5)', [
+            'A(r, t): t>0 = A(r+0.25, t-1)',
+            'A(r, t) = F(0.4, 20)T[&L(0.125)][/(180)&L(0.125)][F(0.4, 10)K(0.125, 0)][^$A(r-1, 7)][&$A(r-0.5, 3)]',
             'K(p, t): t<2 = K(p*1.1, t+1)',
             'K(p, t): t<3 = K(0.1875, t+1)',
             'K(p, t): t<12 = K(1.35*p-0.8*p^2, t+1)',
             'K(p, t) = O(1)',
-            'L(s): s<LMaxSize = L(s+0.025)',
+            'L(s): s<LMaxSize = L(s+0.125)',
             'O(s): s>0.5 = O(s*0.9)',
             'O(s) =',
             'F(l, t): t>0 = F(l+0.4, t-1)'
         ], 31, 0, 'A', '', -0.6, {
-            'LMaxSize': '0.625'
+            'LMaxSize': '3'
         }, [
             '~> b(s) = -[^-F(s).][--F(s*2)..][&-F(s).]+^(72)',
             '~> c(s) = +F(s).-F(s).-F(s).+',
             '~> K(p, t): t<3 = {[+(90)b(p*4)b(p*4)b(p*4)b(p*4)b(p*4)]}',
             '~> K(p, t) = {[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]}',
             '~> k(s) = [^(40)F(s/2).&(10)F(s/2).&F(s/4).][F(s/2)-(10)F(s).][&(40)F(s/2)[^(10)F(s/2)[^F(s/4).].].].',
-            '~> L(s) = {T(s*0.5)F(sqrt(s)).[-(48)F(s*2).+F(s*2).+&F(s*2).+F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].].[+(48)F(s*2).-F(s*2).-&F(s*2).-F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].]}',
+            '~> L(s) = {T(s*0.1)F(sqrt(s/5)).[-(48)F(s*0.4).+F(s*0.4).+&F(s*0.4).+F(s*0.4).][F(s*0.4)[&F(s*0.4)[F(s*0.4)[^F(s*0.4).].].].].[+(48)F(s*0.4).-F(s*0.4).-&F(s*0.4).-F(s*0.4).][F(s*0.4)[&F(s*0.4)[F(s*0.4)[^F(s*0.4).].].].]}',
             '~> O(s) = {[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].].}'
         ]),
         maxStage: 29,
         requiresWater: true,
-        growthRate: BigNumber.from(2.75),
+        growthRate: BigNumber.from(13.75),
         growthCost: BigNumber.TEN,
         stagelyIncome: BigNumber.ONE,
         propagation: {
@@ -3676,12 +3679,12 @@ const plantData = {
         }
     },
     broomrape: {
-        system: new LSystem('B(0.025, timer)', [
+        system: new LSystem('B(0.125, timer)', [
             // Invisibility regenerates when the shoots go up
-            'B(r, t) > F(l, lim): t<timer = B(1.15*r-0.006*r^2, t+2)',
+            'B(r, t) > F(l, lim): t<timer = B(1.15*r-0.0012*r^2, t+2)',
             // Cheekily goes back to hiding
-            'B(r, t) > F(l, lim) = B(0.025, t)%',
-            'B(r, t): t>0 = B(1.15*r-0.006*r^2, t-1)',
+            'B(r, t) > F(l, lim) = B(0.125, t)%',
+            'B(r, t): t>0 = B(1.15*r-0.0012*r^2, t-1)',
             'B(r, t) = B(r, t)F(0.15, 0.9)I(12)',
             'I(t): t>0 = F(0.05, 0.3)[-K(0)]/(137.508)I(t-1)',
             'K(s): s<KMaxSize = K(s+0.5)',
@@ -3713,7 +3716,7 @@ const plantData = {
             'clover'
         ]),
         requiresWater: false,
-        growthRate: BigNumber.SIX,
+        growthRate: BigNumber.from(30),
         growthCost: BigNumber.from(15),
         propagation: {
             stage: [48, 95],
@@ -3889,9 +3892,9 @@ const plantIDLookup = {
     brasil: 9002,
     9002: 'brasil'
 };
-const speeds = [1, 5 / 4, 5 / 3, 5 / 2];
-const speedAdjDayLengths = speeds.map(x => dayLength / x);
-const clockMinDiv = [12, 15, 20, 30];
+const speeds = [5, 4, 3, 2, 1];
+const speedAdjDayLengths = speeds.map(x => dayLength * x);
+const clockMinDiv = [12, 15, 20, 30, 60];
 let haxEnabled = false;
 let time = 0;
 let lastSave = 0;
@@ -4167,15 +4170,16 @@ let createHesitantSwitch = (params, callback, isToggled) => {
     });
     return element;
 };
+const waterImage = game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png');
 const waterFrame = createScrollBarImageBtn({
     row: 0, column: 0,
 }, () => manager.water(selectedColony), () => manager.water(selectedColony), true, () => {
     if (selectedColony && !selectedColony.wet)
         return true;
     return false;
-}, game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png'));
+}, waterImage);
 const waterLabel = ui.createLatexLabel({
     row: 0, column: 1,
     // horizontalOptions: LayoutOptions.END,
@@ -4204,6 +4208,9 @@ const waterLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
+const harvestImage = game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png');
 const harvestFrame = createScrollBarImageBtn({
     row: 0, column: 2,
 }, () => {
@@ -4224,9 +4231,7 @@ const harvestFrame = createScrollBarImageBtn({
                 manager.queueAction(plotIdx, i, 0 /* Actions.HARVEST */);
         }
     }
-}, false, () => true, game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png'));
+}, false, () => true, harvestImage);
 const harvestLabel = ui.createLatexLabel({
     row: 0, column: 3,
     // horizontalOptions: LayoutOptions.END,
@@ -4236,6 +4241,9 @@ const harvestLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
+const pruneImage = game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png');
 const pruneFrame = createScrollBarImageBtn({
     isVisible: () => {
         if (!selectedColony ||
@@ -4251,9 +4259,7 @@ const pruneFrame = createScrollBarImageBtn({
     }
     else
         manager.queueAction(plotIdx, slotIdx, 1 /* Actions.PRUNE */);
-}, null, false, () => true, game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png'));
+}, null, false, () => true, pruneImage);
 const pruneLabel = ui.createLatexLabel({
     isVisible: () => {
         if (!selectedColony ||
@@ -4269,12 +4275,15 @@ const pruneLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
+const shelfImage = game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/white-book.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/white-book.png');
 const mainMenuLabel = ui.createLatexLabel({
     row: 0, column: 1,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9),
     text: () => {
-        let dt = (time - lastSave) / speeds[speedIdx];
+        let dt = (time - lastSave) * speeds[speedIdx];
         if (dt < 30)
             return getLoc('permaShelf');
         return Localization.format(getLoc('labelSave'), Math.floor(dt));
@@ -4285,9 +4294,7 @@ const mainMenuLabel = ui.createLatexLabel({
 const mainMenuFrame = createImageBtn({
     row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
-}, () => createShelfMenu().show(), () => true, game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/white-book.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/white-book.png'));
+}, () => createShelfMenu().show(), () => true, shelfImage);
 var controlStack = ui.createStackLayout({
     isVisible: false,
     margin: new Thickness(6, 0, 6, 6),
@@ -4505,17 +4512,17 @@ var init = () => {
         warpDay = theory.createPermanentUpgrade(9003, currency, new FreeCost);
         warpDay.description = 'Warp day';
         warpDay.info = 'Warps forward by a day';
-        warpDay.bought = (_) => tick(dayLength / speeds[speedIdx], 1);
+        warpDay.bought = (_) => tick(dayLength * speeds[speedIdx], 1);
         warpDay.isAvailable = haxEnabled;
         warpWeek = theory.createPermanentUpgrade(9008, currency, new FreeCost);
         warpWeek.description = 'Warp week';
         warpWeek.info = 'Warps forward by a week';
-        warpWeek.bought = (_) => tick(7 * dayLength / speeds[speedIdx], 1);
+        warpWeek.bought = (_) => tick(dayLength * 7 * speeds[speedIdx], 1);
         warpWeek.isAvailable = haxEnabled;
         warpYear = theory.createPermanentUpgrade(9005, currency, new FreeCost);
         warpYear.description = 'Warp year';
         warpYear.info = 'Warps forward by 365 days';
-        warpYear.bought = (_) => tick(dayLength * 365 / speeds[speedIdx], 1);
+        warpYear.bought = (_) => tick(dayLength * 365 * speeds[speedIdx], 1);
         warpYear.isAvailable = haxEnabled;
     }
     /* Reset time
@@ -4591,7 +4598,7 @@ var updateAvailability = () => {
 var tick = (elapsedTime, multiplier) => {
     let dd, di, dg;
     perfs[0 /* Profilers.TICK */].exec(() => {
-        let dt = elapsedTime * speeds[speedIdx];
+        let dt = elapsedTime / speeds[speedIdx];
         time += dt;
         // https://www.desmos.com/calculator/pfku4nopgy
         // insolation = max(0, -cos(x*pi/72))
@@ -4678,6 +4685,12 @@ var getEquationOverlay = () => {
         cascadeInputTransparent: false,
         children: [
             // floatingWipLabel,
+            ui.createLabel({
+                isVisible: haxEnabled,
+                horizontalOptions: LayoutOptions.END,
+                verticalOptions: LayoutOptions.START,
+                text: getLoc('hacks')
+            }),
             ui.createGrid({
                 row: 0, column: 0,
                 columnDefinitions: ['1*', '4*', '1*'],
@@ -4755,8 +4768,7 @@ var getEquationOverlay = () => {
                         row: 0, column: 0,
                         orientation: ScrollOrientation.BOTH,
                         content: ui.createGrid({
-                            isVisible: () => plotIdx < plotPerma.level &&
-                                manager.colonies[plotIdx].length > 0,
+                            isVisible: () => /*plotIdx < plotPerma.level &&*/ manager.colonies[plotIdx].length > 0,
                             row: 0, column: 0,
                             margin: new Thickness(4),
                             horizontalOptions: LayoutOptions.START,
@@ -4987,8 +4999,8 @@ var getSecondaryEquation = () => {
                 ${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                     // @ts-expect-error
                     plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
-                    '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{s},\\enspace\\pi =
-                ${c.profit}\\text{p}\\\\(${slotIdx + 1}/
+                    '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{${getLoc('hour')}},
+                \\enspace\\pi = ${c.profit}\\text{p}\\\\(${slotIdx + 1}/
                 ${manager.colonies[plotIdx].length})\\\\\\end{array}`;
                 break;
             case 3 /* ColonyModes.LIST */:
@@ -5022,11 +5034,12 @@ let getTimeString = () => {
     let resolution = speedAdjDayLengths[speedIdx];
     let quantum = dayLength / resolution;
     let quanToD = Math.floor(timeofDay / quantum) * quantum;
-    let hour = Math.floor(quanToD / hourLength);
-    let min = Math.floor((quanToD % hourLength) / speeds[speedIdx]) *
+    // Now that hour-length is 1, let's do something else
+    let hour = Math.floor(quanToD);
+    let min = Math.floor((quanToD - hour) * speeds[speedIdx] + 1e-9) *
         clockMinDiv[speedIdx];
     return Localization.format(getLoc(actionPanelOnTop ? 'dateTimeBottom' :
-        'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1, hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'), haxEnabled ? getLoc('hacks') : '');
+        'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1, hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'));
 };
 var getQuaternaryEntries = () => {
     switch (quatMode) {
@@ -6148,8 +6161,8 @@ let getExtraPotEquation = () => {
             g=${c.growth}/${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                 // @ts-expect-error
                 plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
-                '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{s},\\enspace\\pi =
-            ${c.profit}\\text{p}\\\\(1/1)\\end{array}`;
+                '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{${getLoc('hour')}},\\enspace
+            \\pi = ${c.profit}\\text{p}\\\\(1/1)\\end{array}`;
             break;
         case 3 /* ColonyModes.LIST */:
             result = '\\begin{array}{c}';
@@ -6171,9 +6184,7 @@ let createExtraPotMenu = () => {
         if (extraManager.colonies[0][0] && !extraManager.colonies[0][0].wet)
             return true;
         return false;
-    }, game.settings.theme == Theme.LIGHT ?
-        ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
-        ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png'));
+    }, waterImage);
     let extraWaterLabel = ui.createLatexLabel({
         row: 0, column: 1,
         // horizontalOptions: LayoutOptions.END,
@@ -6222,9 +6233,7 @@ let createExtraPotMenu = () => {
                     extraManager.queueAction(0, i, 0 /* Actions.HARVEST */);
             }
         }
-    }, false, () => true, game.settings.theme == Theme.LIGHT ?
-        ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
-        ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png'));
+    }, false, () => true, harvestImage);
     let extraHarvestLabel = ui.createLatexLabel({
         row: 0, column: 3,
         // horizontalOptions: LayoutOptions.END,
@@ -6249,9 +6258,7 @@ let createExtraPotMenu = () => {
         }
         else
             extraManager.queueAction(0, 0, 1 /* Actions.PRUNE */);
-    }, null, false, () => true, game.settings.theme == Theme.LIGHT ?
-        ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
-        ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png'));
+    }, null, false, () => true, pruneImage);
     let extraPruneLabel = ui.createLatexLabel({
         isVisible: () => {
             if (!extraManager.colonies[0][0] ||
@@ -6464,7 +6471,7 @@ let createBulkConfirmationMenu = (mgr, plot, id) => {
 };
 let createWorldMenu = () => {
     let speedLabel = ui.createLatexLabel({
-        text: Localization.format(getLoc('labelSpeed'), parseFloat(speeds[speedIdx].toFixed(2))),
+        text: Localization.format(getLoc('labelSpeed'), speeds[speedIdx]),
         row: 0, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
@@ -6475,7 +6482,7 @@ let createWorldMenu = () => {
         value: speedIdx,
         onValueChanged: () => {
             speedIdx = Math.round(speedSlider.value);
-            speedLabel.text = Localization.format(getLoc('labelSpeed'), parseFloat(speeds[speedIdx].toFixed(2)));
+            speedLabel.text = Localization.format(getLoc('labelSpeed'), speeds[speedIdx]);
         },
         onDragCompleted: () => {
             Sound.playClick();
