@@ -626,7 +626,7 @@ Here's a recipe to make some delicious calendula bread for your pleasures:`
 `by a sweet and slightly intoxicating flavour. Even my dog loves it from ` +
 `time to time.
 
-Life span: annual (6~8 weeks)
+Life span: annual (5~7 weeks)
 
 If you plan to harvest leaves, snip off the stem before it flowers. ` +
 `Otherwise, let the plant go into seed. The leaves will lose flavour, but ` +
@@ -805,10 +805,9 @@ $: aligns the turtle's up vector closest to vertical.
         chapters:
         {
             intro:
-            [
-                {
-                    title: `Lemma's Garden`,
-                    contents:
+            {
+                title: `Lemma's Garden`,
+                contents:
 `(The sky was dark.
 You were out there picking up dirt.)
 
@@ -821,10 +820,11 @@ Take this seed, till the soil,
 then we'll start in the morning.
 
 Tip: Tap on 'Upgrades' to acquire your first plot.`
-                },
-                {
-                    title: `Welcome to...`,
-                    contents:
+            },
+            sprout:
+            {
+                title: `Welcome to...`,
+                contents:
 `Hum. Splendid work!
 Can't even bear to look at this soil.
 
@@ -838,11 +838,10 @@ then watch it grow.
 Reach for my shelf if you get lost.
 I'll be back in just a little,
 so I can teach you about its growth.`
-                }
-            ],
+            },
             basil:
             {
-                title: `Corollary`,
+                title: `Restock at Corollary's`,
                 contents:
 `Sorry for letting you wait this long.
 I have a... friend, who supplies me with seeds.
@@ -858,7 +857,7 @@ That is for my old... students!`
             },
             notebook:
             {
-                title: `A notebook`,
+                title: `Notebook`,
                 contents:
 `As you gather enough pennies to keep the batches
 going, you decide to buy yourself a notebook.
@@ -873,9 +872,10 @@ Tip: Notebook is accessible at the bookshelf.`
                 title: `Inclement`,
                 contents:
 `'Maximum statements?'
-I hear ya.
-We made too many complaint statements this season.
-The floodplains hasn't been doing very well.
+I hear you.
+We had made too many complaints this season,
+and now the weather answers with its toll.
+The floodplains hasn't been doing very well anyway.
 It's too likely to get logged this season...
 
 Don't worry.
@@ -885,7 +885,6 @@ this is unlike any regular flood.
 Note: Your plots and settings have been wiped.
 I'm sorry. I can't find a way around this.
 Just deal with it as a 'gameplay mechanic'.
-Standalone Lemma's Garden, coming in Never.
 - propfeds`
             },
             nepo:
@@ -909,13 +908,13 @@ I need to do something.
         {
             debt:
             {
-                title: 'Student',
+                title: 'Studenthood',
                 desc: 'Reach negative pennies.'
             },
             immortal:
             {
                 title: 'Collective Experience',
-                desc: 'Toil for 200 years.'
+                desc: 'Mess around for 200 years.'
             }
         }
     }
@@ -3855,6 +3854,8 @@ class ColonyManager
     }
     performQueuedAction()
     {
+        if(!this.actionGangsta)
+            return;
         let c = this.colonies[this.actionGangsta[0]][this.actionGangsta[1]];
         let id = this.actionGangsta[2];
         if(!c)
@@ -5637,21 +5638,7 @@ var init = () =>
         switchPlant.isAvailable = false;
         switchPlant.isAutoBuyable = false;
     }
-    /* Switchback colony
-    Too late to look back.
-    */
-    /* Switch colony
-    Modulow
-    */
-    /* View colony
-    Essential in learning the game.
-    */
-    /* Notebook
-    Unlocks when acquiring Buy All.
-    */
-    /* Settings
-    World menu.
-    */
+
     /* Plot unlock
     Before you can plant any plants, you have to switch tab and unlock plot 0.
     */
@@ -5838,10 +5825,10 @@ var init = () =>
     // Story chapters
 
     let chapters = getLoc('chapters');
-    theory.createStoryChapter(0, chapters?.intro[0]?.title,
-    chapters?.intro[0]?.contents, () => true);
-    theory.createStoryChapter(-1, chapters?.intro[1]?.title,
-    chapters?.intro[1]?.contents, () => manager.colonies[0].length > 0);
+    theory.createStoryChapter(-1, chapters?.intro?.title,
+    chapters?.intro?.contents, () => true);
+    theory.createStoryChapter(0, chapters?.sprout?.title,
+    chapters?.sprout?.contents, () => selectedColony?.id == 'sprout');
 
     theory.createStoryChapter(1, chapters?.basil?.title,
     chapters?.basil?.contents, () => plantPerma.level > 1);
