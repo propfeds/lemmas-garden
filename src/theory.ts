@@ -2479,13 +2479,14 @@ class LSystem
         let sequence = colony.sequence;
         let params = colony.params;
         let level = task.level ?? 0;
-        let lineStart = false;
+        let lineStart = task.lineStart ?? false;
         if(!displayParams && !filter && !expand)
         {
             return {
                 start: 0,
-                level: level,
-                result: sequence
+                level,
+                result: sequence,
+                lineStart
             };
         }
         let filterSet = new Set(filter);
@@ -2497,8 +2498,9 @@ class LSystem
             {
                 return {
                     start: i,
-                    level: level,
-                    result: result
+                    level,
+                    result,
+                    lineStart
                 }
             }
 
@@ -2518,7 +2520,8 @@ class LSystem
                         lineStart = true;
                         break;
                     case ']':
-                        // lineStart = true;
+                        if(sequence[i + 1] != '[')
+                            lineStart = true;
                         break;
                 }
 
@@ -2533,22 +2536,21 @@ class LSystem
                 
                 switch(sequence[i + 1])
                 {
-                    case '[':
-                        // lineStart = true;
-                        break;
+                    // case '[':
+                    //     // lineStart = true;
+                    //     break;
                     case ']':
                         --level;
                         lineStart = true;
                         break;
-                    default:
-                        lineStart = true;
                 }
             }
         }
         return {
             start: 0,
-            level: level,
-            result: result
+            level,
+            result,
+            lineStart
         };
     }
     /**
