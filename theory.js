@@ -2041,6 +2041,8 @@ class LSystem {
                         --level;
                         lineStart = true;
                         break;
+                    default:
+                        lineStart = true;
                 }
             }
         }
@@ -2674,8 +2676,17 @@ class ColonyManager {
             return true;
         return false;
     }
-    water(colony) {
+    waterColony(colony) {
         if (!colony.wet) {
+            let amount = BigNumber.from(Math.min(colony.sequence.length, waterAmount * Math.max(colony.stage, 1)));
+            // @ts-expect-error
+            colony.energy += plantData[colony.id].growthCost * amount;
+            colony.wet = true;
+        }
+    }
+    water(plot, index) {
+        let colony = this.colonies[plot][index];
+        if (colony && !colony.wet) {
             let amount = BigNumber.from(Math.min(colony.sequence.length, waterAmount * Math.max(colony.stage, 1)));
             // @ts-expect-error
             colony.energy += plantData[colony.id].growthCost * amount;
@@ -2794,7 +2805,7 @@ class ColonyManager {
         this.linkParasites(plot);
         // Auto water
         if (autoWaterConfig[id]?.maxStage > c.stage)
-            this.water(c);
+            this.waterColony(c);
         // Change renderer plant
         // If there's no waitFor, then this is the main manager
         // Spaghetti code
@@ -2875,7 +2886,7 @@ class ColonyManager {
                 let action = this.actionQueue.
                     dequeue();
                 this.queueAction(...action);
-                this.performQueuedAction();
+                // this.performQueuedAction();
             }
             else if (this.gangsta)
                 this.evolve();
@@ -2980,8 +2991,8 @@ class ColonyManager {
         };
     }
     performQueuedAction() {
-        if (!this.actionGangsta)
-            return;
+        // if(!this.actionGangsta)
+        //     return;
         let c = this.colonies[this.actionGangsta[0]][this.actionGangsta[1]];
         let id = this.actionGangsta[2];
         if (!c) {
@@ -3272,7 +3283,7 @@ class ColonyManager {
         c.wet = false;
         // Auto water
         if (autoWaterConfig[c.id]?.maxStage > c.stage)
-            this.water(c);
+            this.waterColony(c);
         // Propagate
         let prop = plantData[c.id].propagation;
         if (prop && c.stage == prop.stage[c.propCnt]) {
@@ -4175,7 +4186,7 @@ const waterImage = game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png');
 const waterFrame = createScrollBarImageBtn({
     row: 0, column: 0,
-}, () => manager.water(selectedColony), () => manager.water(selectedColony), true, () => {
+}, () => manager.waterColony(selectedColony), () => manager.waterColony(selectedColony), true, () => {
     if (selectedColony && !selectedColony.wet)
         return true;
     return false;
@@ -6165,7 +6176,7 @@ let createExtraPotMenu = () => {
     // extraManager.colonies[0][0]
     let extraWaterFrame = createScrollBarImageBtn({
         row: 0, column: 0,
-    }, () => extraManager.water(extraManager.colonies[0][0]), () => extraManager.water(extraManager.colonies[0][0]), true, () => {
+    }, () => extraManager.water(0, 0), () => extraManager.water(0, 0), true, () => {
         if (extraManager.colonies[0][0] && !extraManager.colonies[0][0].wet)
             return true;
         return false;

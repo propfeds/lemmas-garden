@@ -24,13 +24,19 @@ Confirm that `Lifetime f(t)` is equal to $ee44000.9.
 
 Import the save.
 
-### 3. Install Lemma's Garden.
+### 3. Install the theory.
 
 Navigate to [`theory.js`](./theory.js) then click on `Raw`. You will be delivered to the source code of this theory. Copy the page's URL.
 
 Then, access the custom theory panel within Exponential Idle using the bottom arrows, until you reach a screen saying `Tap to select a custom theory`. Enter the menu, press the `+` sign and paste in the URL.
 
-### 4. Tap on 'Lemma's Garden' and start playing.
+### 4. Tap on it to start playing.
+
+Tips:
+- Seeds have exponentially scaling costs when you buy them. Try not to make a loss from your plant, by comparing its cost to the base profit times your publication multiplier.
+- Photosynthesis outscales growth once the peak (noon) photosynthetic rate exceeds two times the average growth rate.
+- Unlocked plants always require watering to grow. Hold off watering to keep the plant at the current stage.
+- The speed setting can be accessed through the Bookshelf if one finds the theory too slow.
 
 ## Screenshots
 
