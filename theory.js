@@ -4184,8 +4184,8 @@ let createHesitantSwitch = (params, callback, isToggled) => {
     return element;
 };
 const waterImage = game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png');
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.svg') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.svg');
 const waterFrame = createScrollBarImageBtn({
     row: 0, column: 0,
 }, () => manager.waterColony(selectedColony), () => manager.waterColony(selectedColony), true, () => {
@@ -4222,8 +4222,8 @@ const waterLabel = ui.createLatexLabel({
     textColor: Color.TEXT_MEDIUM
 });
 const harvestImage = game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png');
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.svg') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.svg');
 const harvestFrame = createScrollBarImageBtn({
     row: 0, column: 2,
 }, () => {
@@ -4255,8 +4255,8 @@ const harvestLabel = ui.createLatexLabel({
     textColor: Color.TEXT_MEDIUM
 });
 const pruneImage = game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png');
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.svg') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.svg');
 const pruneFrame = createScrollBarImageBtn({
     isVisible: () => {
         if (!selectedColony ||
@@ -4289,8 +4289,8 @@ const pruneLabel = ui.createLatexLabel({
     textColor: Color.TEXT_MEDIUM
 });
 const shelfImage = game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/white-book.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/white-book.png');
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/white-book.svg') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/white-book.svg');
 const mainMenuLabel = ui.createLatexLabel({
     row: 0, column: 1,
     verticalTextAlignment: TextAlignment.START,
