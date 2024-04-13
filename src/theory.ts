@@ -3374,7 +3374,6 @@ interface Colony
     profit?: BigNumber;
     diReserve: BigNumber;
     dgReserve: BigNumber;
-    ddReserve?: BigNumber;
 }
 
 interface Spawner
@@ -3606,8 +3605,8 @@ class ColonyManager
             diReserve: BigNumber.ZERO,
             dgReserve: BigNumber.ZERO
         };
-        if(plantData[id].dailyIncome)
-            c.ddReserve = BigNumber.ZERO;
+        // if(plantData[id].dailyIncome)
+        //     c.ddReserve = BigNumber.ZERO;
         if(plantData[id].propagation)
             c.propCnt = 0;
         let stats = this.calculateStats(c);
@@ -3633,8 +3632,8 @@ class ColonyManager
             c.growth += maxdg;
             // @ts-expect-error
             c.energy -= maxdg;
-            if(plantData[id].dailyIncome)
-                c.ddReserve = p.ddReserve;
+            // if(plantData[id].dailyIncome)
+            //     c.ddReserve = p.ddReserve;
 
             // if(plot == parent[0])
             //     this.colonies[plot].splice(parent[1] + 1, 0, c);
@@ -3736,7 +3735,7 @@ class ColonyManager
         }
         updateAvailability();
     }
-    growAll(di: BigNumber, dg: BigNumber, dd: BigNumber)
+    growAll(di: BigNumber, dg: BigNumber/*, dd: BigNumber*/)
     {
         if(!this.waitFor || !this.waitFor.busy)
         {
@@ -3776,11 +3775,11 @@ class ColonyManager
                         // @ts-expect-error
                         c.dgReserve += dg;
 
-                        if(plantData[c.id].dailyIncome)
-                        {
-                            // @ts-expect-error
-                            c.ddReserve += dd;
-                        }
+                        // if(plantData[c.id].dailyIncome)
+                        // {
+                        //     // @ts-expect-error
+                        //     c.ddReserve += dd;
+                        // }
                     }
                     else if(this.actionGangsta && this.actionGangsta[0] == i &&
                     this.actionGangsta[1] == j)
@@ -3790,11 +3789,11 @@ class ColonyManager
                         // @ts-expect-error
                         c.dgReserve += dg;
 
-                        if(plantData[c.id].dailyIncome)
-                        {
-                            // @ts-expect-error
-                            c.ddReserve += dd;
-                        }
+                        // if(plantData[c.id].dailyIncome)
+                        // {
+                        //     // @ts-expect-error
+                        //     c.ddReserve += dd;
+                        // }
                     }
                     else    // Normal growth
                     {
@@ -3830,12 +3829,12 @@ class ColonyManager
                             c.energy -= maxdg;
                         }
 
-                        if(plantData[c.id].dailyIncome)
-                        {
-                            // @ts-expect-error
-                            this.reap(c, dd + c.ddReserve);
-                            c.ddReserve = BigNumber.ZERO;
-                        }
+                        // if(plantData[c.id].dailyIncome)
+                        // {
+                        //     // @ts-expect-error
+                        //     this.reap(c, dd + c.ddReserve);
+                        //     c.ddReserve = BigNumber.ZERO;
+                        // }
                     }
                 }
             }
@@ -4386,7 +4385,6 @@ interface Plant
     requiresWater: boolean;
     growthRate: BigNumber;
     growthCost: BigNumber;
-    dailyIncome?: boolean;
     stagelyIncome?: BigNumber;
     propagation?:
     {
@@ -5947,9 +5945,9 @@ var tick = (elapsedTime: number, multiplier: number) =>
     manager.updateSpawners(days);
     let BNdi = BigNumber.from(di);
     let BNdg = BigNumber.from(dg);
-    let BNdd = BigNumber.from(dd);
-    manager.growAll(BNdi, BNdg, BNdd);
-    extraManager.growAll(BNdi, BNdg, BNdd);
+    // let BNdd = BigNumber.from(dd);
+    manager.growAll(BNdi, BNdg/*, BNdd*/);
+    extraManager.growAll(BNdi, BNdg/*, BNdd*/);
 
     if(!game.isCalculatingOfflineProgress)
     {
@@ -8750,8 +8748,8 @@ var setInternalState = (stateStr: string) =>
                     c.diReserve = BigNumber.ZERO;
                 if(!c.dgReserve)
                     c.dgReserve = BigNumber.ZERO;
-                if(plantData[c.id].dailyIncome && !c.ddReserve)
-                    c.ddReserve = BigNumber.ZERO;
+                // if(plantData[c.id].dailyIncome && !c.ddReserve)
+                //     c.ddReserve = BigNumber.ZERO;
             }
             if(!tmpLevels[i][c.id])
                 tmpLevels[i][c.id] = 0;
