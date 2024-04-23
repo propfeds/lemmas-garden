@@ -58,7 +58,7 @@ Welcome to Lemma's Garden, an idle botanical theory built on the workings of ` +
 }
 var authors = 'propfeds (a_spiralist)\n\nThanks to:\nProf. Nakamura, ' +
 'research supervisor\nThe six questionnaire takers\nSir Gilles\ngame-icons.net';
-var version = 0.23;
+var version = 0.25;
 
 // Numbers are often converted into 32-bit signed integers in JINT.
 const INT_MAX = 0x7fffffff;
@@ -78,7 +78,7 @@ const LOC_STRINGS =
 {
     en:
     {
-        versionName: `Version: 0.3 (Alpha), 'Grass Tidings'`,
+        versionName: `Version: 0.2.5, 'Grass Tidings'`,
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
@@ -163,7 +163,7 @@ harvesting it for the first time.`,
         extraPotEqPlaceholder:
         [
             '',
-            `Says a note on the bookshelf:
+            `Writes a note on the bookshelf:
 \\\\To my sister's best friend, for life
 \\\\You can always find shelter here
 \\\\don't you dare forget it.
@@ -1031,9 +1031,6 @@ let getActBarColumnDefs = (width: number): string[] =>
     return ['65*', '35*'];
 }
 
-let isColonyVisible = (c: Colony) => c.sequence.length > 1 ||
-trueSight.level > 0;
-
 /**
  * Returns the index of the last element smaller than or equal to target.
  * Array must be sorted ascending.
@@ -1136,6 +1133,11 @@ let purgeEmpty = (arr: string[]): string[] =>
     }
     return result;
 }
+
+let isColonyVisible = (colony: Colony) => colony.sequence.length > 1 ||
+trueSight.level > 0;
+
+let getLeechRate = (colony: Colony) => colony.params[0][0];
 
 const yearStartLookup = [0];
 const dandelionSchedule = [];
@@ -3808,7 +3810,7 @@ class ColonyManager
                             let hEnrg = h.energy * BigNumber.from(h.population);
                             // Leech rates = hardcoded: 1st param of 1st symbol
                             // @ts-expect-error
-                            let maxde = hEnrg.min(dg * c.params[0][0] *
+                            let maxde = hEnrg.min(dg * getLeechRate(c) *
                             // @ts-expect-error
                             BigNumber.from(c.population));
                             // @ts-expect-error
@@ -3974,7 +3976,7 @@ class ColonyManager
             let hEnrg = h.energy * BigNumber.from(h.population);
             // Leech rates = hardcoded: 1st param of 1st symbol
             // @ts-expect-error
-            let maxde = hEnrg.min(c.dgReserve * c.params[0][0] *
+            let maxde = hEnrg.min(c.dgReserve * getLeechRate(c) *
             // @ts-expect-error
             BigNumber.from(c.population));
             // @ts-expect-error
@@ -4204,7 +4206,7 @@ class ColonyManager
             let hEnrg = h.energy * BigNumber.from(h.population);
             // Leech rates = hardcoded: 1st param of 1st symbol
             // @ts-expect-error
-            let maxde = hEnrg.min(c.dgReserve * c.params[0][0] *
+            let maxde = hEnrg.min(c.dgReserve * getLeechRate(c) *
             // @ts-expect-error
             BigNumber.from(c.population));
             // @ts-expect-error
@@ -4736,31 +4738,31 @@ const plantData: {[key: string]: Plant} =
     },
     // ginger
     // sunflower
-    hopleek:
-    {
-        system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
-        maxStage: 20,
-        parasite: new Set(['sprout', 'basil']),
-        requiresWater: false,
-        growthRate: BigNumber.FIVE,
-        growthCost: BigNumber.TWO,
-        actions:
-        [
-            {}
-        ],
-        camera: (stage) => {
-            return {
-                scale: 8,
-                x: 0,
-                y: <number>saturate(stage / 4, 5, 9),
-                z: 0,
-            };
-        },
-        stroke: (stage) =>
-        {
-            return {};
-        }
-    },
+    // hopleek:
+    // {
+    //     system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
+    //     maxStage: 20,
+    //     parasite: new Set(['sprout', 'basil']),
+    //     requiresWater: false,
+    //     growthRate: BigNumber.FIVE,
+    //     growthCost: BigNumber.TWO,
+    //     actions:
+    //     [
+    //         {}
+    //     ],
+    //     camera: (stage) => {
+    //         return {
+    //             scale: 8,
+    //             x: 0,
+    //             y: <number>saturate(stage / 4, 5, 9),
+    //             z: 0,
+    //         };
+    //     },
+    //     stroke: (stage) =>
+    //     {
+    //         return {};
+    //     }
+    // },
     broomrape:
     {
         system: new LSystem('B(0.125, timer)',
@@ -4835,30 +4837,30 @@ const plantData: {[key: string]: Plant} =
         },
         colour: 'brown'
     },
-    dandelion:
-    {
-        system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
-        maxStage: 20,
-        requiresWater: false,
-        growthRate: BigNumber.FIVE,
-        growthCost: BigNumber.TWO,
-        actions:
-        [
-            {}
-        ],
-        camera: (stage) => {
-            return {
-                scale: 8,
-                x: 0,
-                y: <number>saturate(stage / 4, 5, 9),
-                z: 0,
-            };
-        },
-        stroke: (stage) =>
-        {
-            return {};
-        }
-    },
+    // dandelion:
+    // {
+    //     system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
+    //     maxStage: 20,
+    //     requiresWater: false,
+    //     growthRate: BigNumber.FIVE,
+    //     growthCost: BigNumber.TWO,
+    //     actions:
+    //     [
+    //         {}
+    //     ],
+    //     camera: (stage) => {
+    //         return {
+    //             scale: 8,
+    //             x: 0,
+    //             y: <number>saturate(stage / 4, 5, 9),
+    //             z: 0,
+    //         };
+    //     },
+    //     stroke: (stage) =>
+    //     {
+    //         return {};
+    //     }
+    // },
     arrow:   // Arrow weed (test)
     {
         cost: new FirstFreeCost(new ExponentialCost(1, 1)),
