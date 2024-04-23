@@ -1,3 +1,11 @@
+import { Achievement } from "./Achievement";
+import { AchievementCategory } from "./AchievementCategory";
+import { BigNumber } from "./BigNumber";
+import { Cost } from "./Costs";
+import { Currency } from "./Currency";
+import { StoryChapter } from "./StoryChapter";
+import { Upgrade } from "./Upgrades";
+
 /**
  * Holds a single row of the list of values that are
  * displayed on the right of the equation.
@@ -5,11 +13,11 @@
 export class QuaternaryEntry {
     /** @constructor
      * @param {String} name - Left side of the equality sign
-     * @param {String} value - Right side of the equality sign
+     * @param {any} value - Right side of the equality sign
      */
-    constructor(name: string, value: string);
+    constructor(name: string, value: any);
     name: string;
-    value: unknown;
+    value: any;
 }
 /**
  * Properties of a theory.
@@ -348,10 +356,3 @@ export class Theory {
  * @type {Theory}
  */
 export const theory: Theory;
-import { Currency } from "./Currency";
-import { Upgrade } from "./Upgrades";
-import { BigNumber } from "./BigNumber";
-import { Achievement } from "./Achievement";
-import { StoryChapter } from "./StoryChapter";
-import { Cost } from "./Costs";
-import { AchievementCategory } from "./AchievementCategory";

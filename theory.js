@@ -1,46 +1,50 @@
 import { BigNumber } from './api/BigNumber';
 import { CompositeCost, ConstantCost, ExponentialCost, FirstFreeCost, FreeCost } from './api/Costs';
+import { game } from './api/Game';
 import { Localization } from './api/Localization';
+import { MathExpression } from './api/MathExpression';
+import { profilers } from './api/Profiler';
+import { Theme } from './api/Settings';
+import { Sound } from './api/Sound';
 import { QuaternaryEntry, theory } from './api/Theory';
-import { ImageSource } from './api/ui/properties/ImageSource';
-import { LayoutOptions } from './api/ui/properties/LayoutOptions';
-import { TextAlignment } from './api/ui/properties/TextAlignment';
-import { Thickness } from './api/ui/properties/Thickness';
-import { Vector3 } from './api/Vector3';
 import { Utils, log } from './api/Utils';
+import { Vector3 } from './api/Vector3';
 import { ui } from './api/ui/UI';
 import { Aspect } from './api/ui/properties/Aspect';
 import { ClearButtonVisibility } from './api/ui/properties/ClearButtonVisibility';
 import { Color } from './api/ui/properties/Color';
 import { FontFamily } from './api/ui/properties/FontFamily';
+import { ImageSource } from './api/ui/properties/ImageSource';
 import { Keyboard } from './api/ui/properties/Keyboard';
+import { LayoutOptions } from './api/ui/properties/LayoutOptions';
 import { LineBreakMode } from './api/ui/properties/LineBreakMode';
-import { TouchType } from './api/ui/properties/TouchType';
-import { MathExpression } from './api/MathExpression';
-import { Theme } from './api/Settings';
-import { Sound } from './api/Sound';
-import { game } from './api/Game';
+import { ScrollOrientation } from './api/ui/properties/ScrollOrientation';
 import { StackOrientation } from './api/ui/properties/StackOrientation';
-import { profilers } from './api/Profiler';
+import { TextAlignment } from './api/ui/properties/TextAlignment';
+import { Thickness } from './api/ui/properties/Thickness';
+import { TouchType } from './api/ui/properties/TouchType';
 var id = 'lemmas_garden';
 var getName = (language) => {
     const names = {
-        en: `Lemma's Garden`,
+        en: `Lemma's Garden (perch)`,
+        ja: `レンマ苑`
     };
     return names[language] ?? names.en;
 };
 var getDescription = (language) => {
     const descs = {
-        en: `Last night, Lemma told you to sweep the rubbles and till her old plot.
+        en: `Last night, Lemma swept away the fallen leaves on her old garden.
 You are her first student in a long while.
 
 Welcome to Lemma's Garden, an idle botanical theory built on the workings of ` +
-            `Lindenmayer systems.`,
+            `Lindenmayer systems. Reminisce the story of Lemma, a retired teacher, as ` +
+            `she rambles about things already long passed.`,
     };
     return descs[language] ?? descs.en;
 };
-var authors = 'propfeds\n\nThanks to:\ngame-icons.net, for the icons';
-var version = 0.22;
+var authors = 'propfeds (a_spiralist)\n\nThanks to:\nProf. Nakamura, ' +
+    'research supervisor\nThe six questionnaire takers\nSir Gilles\ngame-icons.net';
+var version = 0.25;
 // Numbers are often converted into 32-bit signed integers in JINT.
 const INT_MAX = 0x7fffffff;
 const INT_MIN = -0x80000000;
@@ -56,37 +60,47 @@ const NORMALISE_QUATERNIONS = false;
 const MENU_LANG = Localization.language;
 const LOC_STRINGS = {
     en: {
-        versionName: `Version: 0.2.2, 'Less Unhinged'`,
+        versionName: `Version: 0.2.5, 'Grass Tidings'`,
         wip: 'Work in Progress',
         currencyTax: 'p (tax)',
-        pubTax: 'Tax on publish\\colon',
+        pubTax: 'Publishing fee \\&\\ taxes\\colon',
         btnView: 'View L-system',
+        btnViewAction: 'View Action L-system',
+        btnAlmanac: 'World of Plants',
+        btnAlmanacNoEntry: '(Unavailable)',
         btnVar: 'Variables',
         btnSave: 'Save',
-        btnReset: 'Reset Graphs',
+        btnReset: 'Clear Graphs',
         btnRedraw: 'Redraw',
         btnPrev: 'Prev.',
         btnNext: 'Next',
         btnContents: 'Table of\nContents',
         btnPage: 'p. {0}',
-        actionConfirmDialogue: `You are about to perform a {0} on\\\\
-{3} (plot {1}-{2}).\\\\\n\n\\\\{4}`,
+        actionConfirm: `You are about to perform a {0} on\\\\
+{4}.\\\\(plot {1}, {2})\\\\{5}\\\\\n\n\\\\{6}`,
+        bulkActionConfirm: `You are about to perform a {0} on all plants in ` +
+            `plot {1}.\\\\\n\n\\\\{2}`,
         labelSave: 'Last saved: {0}s',
         labelSkip: 'Skip tutorial',
         labelWater: 'Water',
+        labelWaterUrgent: 'Water!',
         labelActions: ['Harvest', 'Prune'],
         labelFilter: 'Filter: ',
         labelParams: 'Parameters: ',
+        labelIndent: 'Indent: ',
+        labelExpand: 'Expand brackets: ',
         labelAxiom: 'Axiom: ',
         labelAngle: 'Turning angle (°): ',
         labelRules: `Production rules: {0}\\\\Every stage, each symbol in
-the plant's sequence chooses one rule to evolve depending on its conditions.`,
+the plant's sequence chooses one rule to evolve. Rules are checked from top to
+bottom.`,
         labelIgnored: 'Turtle-ignored: ',
         labelCtxIgnored: 'Context-ignored: ',
         labelTropism: 'Tropism (gravity): ',
         labelSeed: 'Random seed: ',
-        labelModels: `Model specifications: {0}\\\\Models define how each
-symbol is drawn depending on its parameters.`,
+        labelModels: `Model specifications: {0}\\\\Models define how each symbol
+is drawn, with similar logic to production rules. If no model is specified, a
+straight line will be drawn.`,
         menuVariables: 'Defined Variables',
         labelVars: 'Variables: {0}',
         plotTitle: `\\text{{Plot }}{{{0}}}`,
@@ -105,22 +119,49 @@ symbol is drawn depending on its parameters.`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
         lockedPlot: `\\text{Untilled soil.}`,
+        permaExtraPot: `Borrow Lemma's flower pot`,
+        permaExtraPotInfo: `Holds one plant, seeds free of charge, pest-proof`,
         permaNote: `Notebook \\&\\ 'Buy All' button`,
-        permaNoteInfo: `Allows management of colony sizes (non-propagated)`,
+        permaNoteInfo: 'Allows management of colony sizes',
         menuNote: 'Notebook',
-        permaSettings: 'Theory settings',
-        permaSettingsInfo: `Decorate your teacher's garden`,
-        labelPlants: 'Plants',
-        labelMaxLevel: 'Max. size',
-        labelHarvestStage: 'Harvest stage',
+        labelSpecies: 'Species',
+        labelMaxLevel: 'Maximum level',
+        labelNoteDesc: `The species' upgrade levels shall not go beyond these
+limits.`,
+        menuAutoWater: 'Watering schedules',
+        labelMaxStage: 'Water until',
+        labelAutoWaterDesc: `Scheduling is unlocked for a species after 
+harvesting it for the first time.`,
+        menuExtraPot: 'Sheltered pot',
+        labelPlantPot: 'Shelter plant in pot: ',
+        labelTransferPot: 'Transfer to plot (stg. 20/max required): ',
+        extraPotEqPlaceholder: [
+            '',
+            `Writes a note on the bookshelf:
+\\\\To my sister's best friend, for life
+\\\\You can always find shelter here
+\\\\don't you dare forget it.
+\\\\Dorian`,
+            `Etched on the pot's side:
+\\\\For Miss Ruddles' class,
+\\\\With love of course!
+\\\\C.`,
+            `The pot is adorned with pearly grooves,
+\\\\reminiscent of a vast, misting lake.`
+        ],
         colony: `{0} of {1}, stage {2}`,
-        colonyWMaxStg: `{0} of {1}, stage {2}/{3}`,
-        colonyProg: '{0} of {1}, stg. {2} ({3}\\%)',
-        colonyStats: `Energy\\colon\\enspace {0} +{1}/s\\\\
-Growth\\colon\\enspace {2}/{3} +{4}/s\\\\
-Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
-        dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}\\\\{5}',
-        dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}\\\\{5}',
+        colonyWithMaxStg: `{0} of {1}, stage {2}/{3}`,
+        colonyProg: `{0} of {1}, stg. {2} ({3}\\%)`,
+        colonyNoPop: `{1}, stg. {2} ({3}%)`,
+        colonyNoPopEsc: `{1}, stg. {2} ({3}\\%)`,
+        invisibleColony: `\\text{Tilled soil.}`,
+        colonyStats: `\\text{{Energy\\colon\\enspace {0} +{1}/hr}}\\\\
+\\text{{Growth\\colon\\enspace {2}/{3} +{4}/hr}}\\\\
+\\text{{Base profit\\colon\\enspace {5}p}}\\\\
+\\text{{({6}/{7}) {8}}}`,
+        hour: 'hr',
+        dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}',
+        dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}',
         hacks: 'Hax',
         status: {
             evolve: 'Growing...',
@@ -136,7 +177,7 @@ Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
         viewColonyInfo: 'Displays details about the colony',
         switchColony: 'Switch colony ({0}/{1})',
         switchColonyInfo: 'Cycles through the list of colonies',
-        labelSpeed: 'Game speed: {0}x',
+        labelSpeed: 'Game speed: 1/{0}',
         labelGM3D: '3D illustration: ',
         labelActionConfirm: 'Confirmation dialogue: ',
         lineGraphModes: [
@@ -159,139 +200,257 @@ Profit\\colon\\enspace {5}p\\\\({6}/{7}) {8}`,
             'Plot title: Cursive'
         ],
         quatModes: [
+            'Account: Off',
             'Account: Expected revenue',
             'Account: Colonies',
             'Account: Performance (latest/avg)',
             'Account: Performance (min/max)'
         ],
+        camModes: [
+            'Camera: Static',
+            'Camera: Follow (Linear)',
+            'Camera: Follow (Squared)'
+        ],
         plants: {
+            sprout: {
+                name: 'Pea sprout',
+                nameShort: 's',
+                info: `Tastes nice, innit? (\\(~\\)10 days)`,
+                LsDetails: `A(r, t): apex (stem bud) providing r energy/hr. Has
+t stages left until it spurts.\\\\F(p): segment of length p.
+Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/hr.`,
+                actions: [
+                    `Harvest returns profit as the sum of all F lengths.`
+                ],
+                narrations: [
+                    {
+                        index: [0, 1, 4, 5, 8, 12],
+                        0: `(Why is this seed called an axiom? What is the
+second parameter for?\\\\I must wait for her return.)`,
+                        1: `I am back! Rule number... one:\\\\The seed begins to
+crack, and there's a 'timer' on it until something happens.`,
+                        4: `Rule number 1 fails, so rule number 2
+triggers:\\\\A little stem rises, and there's a tiny pair of leaves on it.`,
+                        5: `Rules 1, 3, and 4, all at the same time.`,
+                        8: `The stem rises again, and with it, a new pair of
+leaves.\\\\At the same time, the first segment and leaves reach their limits.`,
+                        12: `You've made it. Welcome to class.\\\\Plant a few
+more, then I'll get you something new.`
+                    }
+                ]
+            },
             calendula: {
                 name: 'Calendula',
                 nameShort: 'C',
-                info: 'A classic flower to start the month.',
-                LsDetails: `A(r, t): apex (stem shoot) providing r energy/s. Has
+                info: 'The classic flower to start a month. (\\(~\\)7 weeks)',
+                LsDetails: `A(r, t): apex (stem bud) providing r energy/hr. Has
 t stages left until it splits.\\\\F(l, lim): internode of length l, growing up
-to lim.\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0, when
-it would turn into K.\\\\K(p): flower of size p.\\\\L(r, lim): leaf providing r
-energy/s, growing up to lim. \\\\—\\\\Harvest returns profit as the sum of all K
-sizes.`,
-                stages: {
-                    index: [
-                        0,
-                        5, 10,
-                        15, 19,
-                        21,
-                        23, 26, 27, 28, 30, 31,
-                        35, 39, 40
-                    ],
-                    0: 'A seedling in its warm slumber.',
-                    5: 'A little stem has just risen.',
-                    10: `The second pair of leaves appears. See that for this
-cultivar, each pair of leaves is rotated to 90° against the previous. Others
-might generate leaves in a spiral around the stem.`,
-                    15: 'The third pair of leaves appears.',
-                    19: `The stem has split in two. It will start to flower
+to lim.\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0,
+when it turns into K.\\\\K(p): flower of size p. Provides p pennies on harvest.
+\\\\L(r, lim): leaf providing r energy/hr, growing up to lim.`,
+                actions: [
+                    `Harvest returns profit as the sum of all K sizes.`
+                ],
+                narrations: [
+                    {
+                        index: [0, 5, 10, 15, 19, 21, 23, 26, 27, 28, 30, 31,
+                            35, 39, 40],
+                        0: 'A seed, curling over in its warm slumber.',
+                        5: 'A little stem has just risen.',
+                        10: `The second pair of leaves appears. See that for
+this cultivar, each pair of leaves is rotated to 90° against the previous.
+Others might generate leaves in a spiral around the stem.`,
+                        15: 'The third pair of leaves appears.',
+                        19: `The stem has split in two. It will start to flower
 soon.`,
-                    21: `On the flower stem, little leaves will start to
-spawn in spiral around it. The spinning angle is approximately 137.508°,
-known as the golden angle.`,
-                    23: 'Our first flower bud has risen.',
-                    26: 'Wait for it...',
-                    27: 'A second flower bud appears!',
-                    28: 'The third and final flower appears.',
-                    30: 'My wife used to munch on these flowers, raw.',
-                    31: `Try it!\\\\Naw, only teasing you ;). Sell them later
-for a little profit.`,
-                    35: 'The first flower matures.',
-                    39: 'The second flower matures.',
-                    40: 'All flowers have reached maturity.',
-                }
+                        21: `On the flower stem, little leaves will start to
+spawn in spiral around it. The spinning angle is approximately 137.508°, also
+called by Mister Fibonacci as the golden angle.`,
+                        23: 'Our first flower bud has risen.',
+                        26: 'Wait for it...',
+                        27: 'A second flower bud appears!',
+                        28: 'The third and final flower appears.',
+                        30: `My w... sister-in-law, she really liked munching on
+these flowers raw. Try it.`,
+                        31: `Try it!\\\\Naw, only teasing you ;). Keep your
+saliva away from my little profit.`,
+                        35: 'The first flower matures.',
+                        39: 'The second flower matures.',
+                        40: 'All flowers have reached maturity.',
+                    }
+                ]
             },
             basil: {
                 name: 'Basil',
-                nameShort: 'B',
-                info: 'A fast growing herb that requires a bit of care.',
-                LsDetails: `A(r, t): apex (stem shoot).\\\\B: base, used for
-communications.\\\\F(l, lim): internode.\\\\I(t): shortened stem. t stages left
-until it splits.\\\\K(s, t): flower of size s. Grows another flower until t
-reaches 0.\\\\L(p, lim, s): leaf. s denotes whether a signal has been received.
-\\\\S(type): signal (type 0 travels down, type 1 travels up).\\\\—\\\\Harvest
-returns profit as the sum of all L and K sizes (first parameter).\\\\Prune cuts
-off all A and K (also cuts geometry near K).`,
-                stages: {
-                    index: [
-                        0, 6, 10, 12, 14, 16, 18, 20, 22,
-                        25, 26
-                    ],
-                    0: 'A seedling in its sweet slumber.',
-                    6: 'The first pair of leaves pops up. A stem, as well.',
-                    10: 'The second pair of leaves appears.',
-                    12: 'Little leaves start to grow over the first node.',
-                    14: 'The third pair of leaves appears.',
-                    16: 'Little leaves now grow over the second node.',
-                    18: 'This rhythm will repeat for a while.',
-                    20: `I'll show you what to do when it flowers, soon.`,
-                    22: `It's about to flower. You can nip the stem now if you
-don't feel confident.`,
-                    25: `The first flower will appear soon.`,
-                    26: `If the flower's there, imagine it's sending a signal
-from top to bottom, all the way to basil base. Then, basil base will send
-another one back to the leaves, telling them to go so very bitter.`,
-                }
+                nameShort: 'Ba',
+                info: `A fragrant herb requiring a bit of care. (6\\(
+~\\)8 weeks)`,
+                LsDetails: `A(r, t): apex (stem bud).\\\\B: base, used for
+communications.\\\\F(l, lim): internode.\\\\I(t): side stem. t stages left
+until it advances.\\\\K(s, t): flower of size s. Grows another flower until t
+reaches 0. Provides s pennies on harvest.\\\\L(p, lim, s): leaf. s denotes
+whether a signal has been received. Provides p pennies on harvest.\\\\S(type):
+signal (type 0 travels down, type 1 travels up).`,
+                actions: [
+                    `Harvest returns profit as the sum of all L and K sizes
+(first parameter).`,
+                    `Prune cuts off all A symbols.`
+                ],
+                narrations: [
+                    // Track 0: un-pruned or pruned late
+                    {
+                        index: [0, 6, 10, 14, 18, 22, 26, 27, 31, 32, 35],
+                        0: 'A seed taking its sweet slumber.',
+                        6: `The first pair of leaves pops up on the stem. A side
+stem too.`,
+                        10: 'The second leaf pair appears, along wth a stem.',
+                        14: `The third pair of leaves appears. This rhythm will
+repeat for a while`,
+                        18: `I'll show you what to do when it's about to bloom,
+soon.`,
+                        22: `It's about to bloom. You can stay up watching
+flowers later, or snip the bud, if you don't want your leaves bitter.`,
+                        26: `The plant blooms. The flower sends a signal down.
+\\\\Rules 12 to 15 govern signal transport.`,
+                        27: `Rules 12 and 14:\\\\The signal will travel until it
+hits the base.`,
+                        31: 'The signal touches base.',
+                        32: 'Rule 15: Basil base relays the signal upward.',
+                        35: `Rule 10: The first leaves receive the signal from
+below. Let us unfold:\\\\
+Bitter leaf, set us free,\\\\
+as I whisper unto thee.\\\\
+Flitting pollen, set me free,\\\\
+as my mistress makes a tea,\\\\
+out of me.`,
+                    },
+                    // Track 1: well pruned
+                    {
+                        name: 'well pruned',
+                        index: [22],
+                        22: `All leaves saved. Now watch the side stems grow.`,
+                    },
+                    // Track 2: pruned
+                    {
+                        name: 'pruned',
+                        index: [0, 6, 10, 14, 18],
+                        0: `A seed taking its sweet slumber. It shall never wake
+up. Bye bye.`,
+                        6: `Pruning at this point nets you fairly little.`,
+                        10: `This point saves a few more leaves, at least.`,
+                        14: `Pruning here can secure some more of the leaves.`,
+                        18: `Pruning at this point can net you even more.`,
+                    }
+                ]
             },
             campion: {
                 name: 'Rose campion',
                 nameShort: 'R',
-                info: 'A great sight for your garden. Provides daily income.',
-                LsDetails: `A(r, t): apex (stem shoot).\\\\F(l, t): internode of
+                info: `A silvery shrub, passively providing income per ` +
+                    `stage. (\\(~\\)32 weeks)`,
+                LsDetails: `A(r, t): apex (stem bud).\\\\F(l, t): internode of
 length l. t stages until it stops growing.\\\\K(p, t): flower of size p. t
-stages left until it disappears.\\\\L(s): leaf.\\\\O(s): fruit of size s.
-Decorative.\\\\—\\\\Harvest returns profit as the sum of all K sizes
-(first parameter).`,
-                stages: {
-                    index: [
-                        0, 6, 9,
-                        10, 14,
-                        19,
-                        22, 27
-                    ],
-                    0: 'A seedling basking in its own dazing lullaby.',
-                    6: 'A flower bud already?',
-                    9: `Most gardeners are early birds. Now, why are you still
-counting pennies in the middle of the night?`,
-                    10: 'Anyway, new stem rises from a side shoot.',
-                    14: `New stems have risen. This pattern will repeat
-periodically.`,
-                    19: `You see the first fruit on that stem?\\\\Too late for
-munch.`,
-                    22: `Go to sleep. Was my campion sedative not good enough?`,
-                    27: `A fruit falls off. Did you know that campion is a good
-self-seeder?`
-                }
+stages left until it disappears. Provides p pennies on harvest.\\\\L(s): leaf.
+\\\\O(s): fruit of size s.`,
+                actions: [
+                    `Harvest returns profit as the sum of all K sizes
+(first parameter).`
+                ],
+                narrations: [
+                    {
+                        index: [0, 6, 10, 12, 14, 18, 19, 22, 27],
+                        0: 'A seed basking in its own dazing lullaby.',
+                        6: 'A flower bud already?',
+                        10: 'New stems rise forth from a bud.',
+                        12: `A reminder, gardeners need to be early birds. Now, 
+why are you still up counting pennies?\\\\Look at the light. This lamp's wick
+is, in fact, from our own campion leaves. I don't sell them.\\\\I don't want to
+sell most of the flowers I plant. So... so if you ever needed to know if all I
+ever cared about was crowns and riches...\\\\Are you... did you just pass out?`,
+                        14: `New stems have risen. This pattern will repeat
+periodically. It grows like a... fractal?\\\\What is a graftal- who wrote that
+document? Oh, of course they'd be making that up.`,
+                        18: `New stems have risen.\\\\Oh no. Perhaps luminaries
+were right all along. Small campion, big campion. Lena surrenders!`,
+                        19: `Too late to munch on thy flowers, for the first 
+fruit...\\\\cometh.`,
+                        22: `Go to sleep. Was my campion sedative not good
+enough?`,
+                        27: `A fruit just fell off.\\\\Campion is a good self
+seeder. Watch for the new one coming right near ya.`
+                    }
+                ]
+            },
+            broomrape: {
+                name: 'Broomrape',
+                nameShort: 'Br',
+                // No info because can't be bought
+                LsDetails: `B(r, t): base, providing r energy/hr.\\\\F(l, lim):
+internode of length l. Provides l pennies on harvest.\\\\I(t): stem head
+providing no energy. Spawns flowers for t turns.\\\\K(s): flower of size s.
+Provides s pennies on harvest.\\\\O(s): fruit of size s.`,
+                actions: [
+                    `Harvest returns profit as the sum of all K and F sizes
+(first parameter).`
+                ],
+                narrations: [
+                    {
+                        index: [0, 31, 32, 36, 40, 44, 47, 48, 50, 95],
+                        0: `A curled up sleepy-head. It'll only grow if it can
+establish a link with one of its favourite species.`,
+                        31: `Rule number 4: The striga's head peeks above the
+ground, seeking a vantage point.`,
+                        32: `The base has grown a stem above it, so rule 1
+triggers.\\\\At the same time, the head will grow a new flower every turn,
+according to rule number 5.`,
+                        36: `Yes, it is a weed, and I know it hurts your
+daisies. But as long as it's not one of those bloody bunnies, I want you to
+continue keeping it around. And keep watching it. It's not everyday that a
+parasite graces your garden!`,
+                        40: `What do I do with it after harvest?\\\\'Forgotten
+by most, it carries great culinary value, and can be prepared in ways akin to
+that of asparagus'?\\\\No, this pretend 'ancient cynomorion' I'd be well off
+selling as diarrhoea medicine.`,
+                        44: `The head stops growing. Flowers have also been
+producing seeds for a while now.`,
+                        47: `Rule number 2 produced a \\%\\ symbol on the base.
+It signifies that the branch above it will fall away soon.`,
+                        48: `The wind violently shook, and there went the seeds!
+Can you spot where they landed?`,
+                        50: `Most broomrape varieties would end here after
+seeding. This variety, let's just say it's very much establishing a good link
+with one of its favourite species!`,
+                        95: `The wind violently shook, and there went the seeds!
+Can you spot where they landed this time?`
+                    }
+                ]
             },
             arrow: {
                 name: '(Test) Arrow weed',
-                nameShort: 'A',
+                nameShort: 'Ar',
                 info: 'Not balanced for regular play.',
                 LsDetails: `The symbol A represents a rising shoot (apex), ` +
                     `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
                     `F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
                     `kills the colony.`,
-                stages: {
-                    index: [0, 1, 2, 4],
-                    0: 'The first shoot rises.\\\\Already harvestable.',
-                    1: 'The shoot splits in three.\\\\The stem lengthens.',
-                    2: 'The shoots continue to divide.',
-                    4: `What do you expect? It\'s a fractal. Arrow weed is the
-friend of all mathematicians.`
-                }
+                narrations: [
+                    {
+                        index: [0, 1, 2, 4],
+                        0: 'The first shoot rises.\\\\Already harvestable.',
+                        1: 'The shoot splits in three.\\\\The stem lengthens.',
+                        2: 'The shoots continue to divide.',
+                        4: `What do you expect? It\'s a fractal. Arrow weed is
+friend to all mathematicians.`
+                    }
+                ]
             },
         },
-        plantStats: `({0}) {1}\\\\—\\\\Photosynthesis ` +
-            `rate: {3}/s (noon)\\\\Growth rate: {4}/s\\\\Growth cost: {5} × {6} symbols` +
-            `\\\\—\\\\Sequence:`,
-        noCommentary: 'No commentary.',
+        plantStats: `({0}) {1}\\\\—\\\\Photosynthetic rate: {2}/hr (noon)
+\\\\Growth rate: {3}/hr\\\\Growth cost: {4} × {5} symbols\\\\—\\\\Sequence:`,
+        narrationTrack: '{0}, {1}',
+        noCommentary: 'No narrations.',
         noLsDetails: 'No explanations.',
+        noActions: 'No actions available.',
         permaShelf: 'Bookshelf',
         permaShelfInfo: 'Access instructions and other tools',
         menuToC: 'Table of Contents',
@@ -385,11 +544,10 @@ Mind the medicinal definition of herbs, however! Not all herbaceous plants ` +
 The 'pot' in its name should also suggest it's uses as a cooking herb in ` +
                     `stews and soups too.
 
-Life span: annual
-Propagation: At life cycle's end, spread 1/3 of the current population onto ` +
-                    `the same plot.
+Life span: annual (~7 weeks)
+Propagation: At life cycle's end, spread 1/3 population onto the same plot.
 
-Here's a recipe to make some delicious calendula bread for your pleasures too:`
+Here's a recipe to make some delicious calendula bread for your pleasures:`
             },
             basil: {
                 title: 'Basil',
@@ -398,12 +556,12 @@ Here's a recipe to make some delicious calendula bread for your pleasures too:`
                     `by a sweet and slightly intoxicating flavour. Even my dog loves it from ` +
                     `time to time.
 
-Life span: annual
+Life span: annual (5~7 weeks)
 
-If you don't feel safe, snip off the stem before it flowers. Otherwise, let ` +
-                    `the plant go into the end of its life cycle. The leaves will lose flavour, ` +
-                    `but you will then be able to witness a fascinating chain reaction resulting ` +
-                    `from the communications between the plant's organs.`
+If you plan to harvest leaves, snip off the stem before it flowers. ` +
+                    `Otherwise, let the plant go into seed. The leaves will lose flavour, but ` +
+                    `you will then be able to witness the fascinating communication signals ` +
+                    `between the plant's organs. And the flowers do sell for good pennies.`
             },
             campion: {
                 title: 'Rose campion',
@@ -413,15 +571,14 @@ If you don't feel safe, snip off the stem before it flowers. Otherwise, let ` +
 Rose campion can be used as a sedative, or for wound treatments, or wicks ` +
                     `for a lamp, which gave it the name of 'lamp flower'.
 
+Life span: biennial (~32 weeks)
+Propagation: Late in its life cycle, spread 1/2 population onto the same plot.
+Passively provides income per stage equal to its current profit.
+
 Occasionally, visitors and artists, generous donors, they would come and ` +
                     `toss a few pennies at your doorstep, as gratitude to keep the gardens ` +
                     `running. Well, mostly birds and bees paying for their hearty meals, but ` +
-                    `there is the occasional human too.
-
-Life span: biennial
-Propagation: In the latter half of its life cycle, spread 1/2 of the current ` +
-                    `population onto the same plot.
-Passively provides income per stage equal to its current profit.`
+                    `there is the occasional human too.`
             }
         },
         manualTitle: 'Lindenmayer Systems',
@@ -465,11 +622,13 @@ Not for sale`
                 title: 'Lindenmayer systems: A primer',
                 contents: `Developed in 1968 by biologist Aristid Lindenmayer, an L-system is a formal ` +
                     `grammar that describes the growth of a sequence (string). It is often used ` +
-                    `to model plants and draw fractal figures by dividing their growth into stages.
+                    `to model plants and fractal figures for its ability to construct complex ` +
+                    `objects out of simple rules.
 
 Every L-system starts with a sequence called the axiom. From the axiom, the ` +
-                    `sequence grows according to a set of production rules that describe how ` +
-                    `each symbol (character) in the sequence would be rewritten in the next stage.
+                    `sequence grows according to a set of production rules. These rules describe ` +
+                    `how each symbol (character) of the sequence shall be rewritten in the next ` +
+                    `stage.
 Each rule is represented in the form of:
 {symbol} = {derivation(s)}
 
@@ -521,28 +680,29 @@ A(x) < B(y) > C(z) : x+y+z>10 = E((x+y)/2)F(z*2)
 ** Ranges from 0 to 1. When omitted, the chance is assumed to be 1 (100%).`
             },
             symbols: {
-                title: 'Appendix: Common symbols',
-                contents: `A: apex (stem shoot). Can photo-synthesise.
+                title: 'Appendix: Common organ symbols',
+                contents: `A: apex (stem shoot). Can photosynthesise.
 B: base. Often used to receive and send signals.
 I: alternate stem. May transform into a new branch, or a flower.
 K: flower. Looks good.
-L: leaf. Can photo-synthesise.
+L: leaf. Can photosynthesise.
+O: fruit. Tastes good and may drop seed.
 S: signal. Used to communicate between organs.`
             },
             turtleSymbols: {
                 title: 'Appendix: Geometric symbols',
-                contents: `F(l): moves forward and draw a line of length l.
-Defaults to length 1 when omitted.
-+(n), -(n): perform yaw rotation by n degrees.
-Defaults to the angle specified by the L-system when omitted.
+                contents: `F(l): moves forward and draw a line of length l. Defaults to length 1 when ` +
+                    `omitted.
++(n), -(n): perform yaw rotation by n degrees. Defaults to the angle ` +
+                    `specified by the L-system when omitted.
 &(n), ^(n): perform pitch rotation by n degrees.
 \\(n), /(n): perform roll rotation by n degrees.
 
 |: reverses direction.
-T(n): applies tropism (gravity) with a weight of n.
-Defaults to the tropism specified by the L-system when omitted.
-T(n, x, y, z): applies tropism along a custom axis.
-$: aligns the up vector closest to vertical.
+T(n): applies tropism (gravity) with a weight of n. Defaults to the tropism ` +
+                    `specified by the L-system when omitted.
+T(n, x, y, z): applies tropism towards a custom vector.
+$: aligns the turtle's up vector closest to vertical.
 
 [: pushes turtle position & rotation onto a stack.
 ]: pops the stack's topmost element onto the turtle.
@@ -550,64 +710,77 @@ $: aligns the up vector closest to vertical.
 
 {: initiates polygon drawing mode.
 .: sets a polygon vertex.
-}: ends the polygon drawing mode.
-
-~: declares a symbol's model.`
+}: ends the polygon drawing mode.`
             },
         },
         chapters: {
-            intro: [
-                {
-                    title: `Lemma's Garden`,
-                    contents: `Not one of my students, are you?
-Surprised to see somebody visit this late,
-let alone *urge* me to let her plant on my ground.
+            intro: {
+                title: `Lemma's Garden`,
+                contents: `(The sky was dark.
+You were out there picking up dirt.)
 
-(Hum. This is not fine.)
-Hum.
-Well, then, welcome to... class.
-Go till that plot, we'll start in the morning.
+You there. Why are you picking up dirt?
+Not one of my old students, are you?
+(points lantern) You were not in my class,
+so I can only spare you a corner... here.
 
-Tip: Tap on 'Upgrades' to access permanent upgrades.`
-                },
-                {
-                    title: `Welcome to...`,
-                    contents: `Hum.
-Can't even bear to look at this soil...
-You have lots of training to do, still.
+Take this seed, till the soil,
+then we'll start in the morning.
 
-Take one of my seeds, for now.
-And if you ever get lost, *go* peek at my bookshelf.`
-                }
-            ],
+Tip: Tap on 'Upgrades' to acquire your first plot.`
+            },
+            sprout: {
+                title: `Welcome to...`,
+                contents: `Hum. Splendid work!
+Can't even bear to look at this soil.
+
+Luckily, this sprout won't die,
+even if later you'd stub your toe over it.
+
+But, neither would it thrive without you.
+Lend it a few drops when it needs it,
+then watch it grow.
+
+Reach for my shelf if you get lost.
+I'll be back in just a little,
+so I can teach you about its growth.`
+            },
             basil: {
-                title: `Corollary`,
+                title: `Restock at Corollary's`,
                 contents: `Sorry for letting you wait this long.
-I have a friend who... supplies me with seeds.
-Not for you, but for my old students.
-It's a bit exorbitant, but reliable, I hope.
+I have a... friend, who supplies me with seeds.
+It's a bit exorbitant, but still reliable, I hope.
+
+(scribbles)
 
 ...She didn't return until today. Apologies.
-Wee bit sick of that calendula?`
+Wee bit sick of that marigold soup?
+
+No, don't touch the other packet.
+That is for my old... students!`
             },
             notebook: {
-                title: `A notebook`,
+                title: `Notebook`,
                 contents: `As you gather enough pennies to keep the batches
 going, you decide to buy yourself a notebook.
 
 This will help you keep track of your plantations.
+Better than pretending to buy 10 seeds, at least.
 
-(Notebook is accessible at the bookshelf.)`
+Tip: Notebook is accessible at the bookshelf.`
             },
             flood: {
-                title: `Maximum statements?`,
-                contents: `I hear ya.
-The floodplains hadn't been doing very well.
-It's very likely to get logged this season...
+                title: `Inclement`,
+                contents: `'Maximum statements?'
+I hear you.
+We had made too many complaints this season,
+and now the weather answers with its toll.
+The floodplains hasn't been doing very well anyway.
+It's too likely to get logged this season...
 
 Don't worry.
-Try not to let your plants spread too much,
-because, this is unlike any regular flood.
+Try not to let your bushes spread too much,
+this is unlike any regular flood.
 
 Note: Your plots and settings have been wiped.
 I'm sorry. I can't find a way around this.
@@ -626,6 +799,16 @@ I do not condone you letting her abuse the economy.
 Not without giving something back for the community.
 I need to do something.
 - Lena`
+            }
+        },
+        achievements: {
+            debt: {
+                title: 'Studenthood',
+                desc: 'Reach negative pennies.'
+            },
+            immortal: {
+                title: 'Collective Experience',
+                desc: 'Mess around for 200 years.'
             }
         }
     }
@@ -696,21 +879,61 @@ let getSmallBtnSize = (width) => {
 let getProgBarSize = (width) => {
     return getSmallBtnSize(width) / 2;
 };
+let getNavColumnDefs = (width) => {
+    // if(width >= 1080)
+    //     return 80;
+    if (width >= 540) // 25%
+        return ['30*', '90*', '30*', '50*'];
+    if (width >= 450) // 30%
+        return ['28*', '84*', '28*', '60*'];
+    // 35%?
+    return ['25*', '75*', '25*', '75*'];
+};
+let getActBarColumnDefs = (width) => {
+    // if(width >= 1080)
+    //     return 80;
+    if (width >= 540) // 25%
+        return ['75*', '25*'];
+    if (width >= 450) // 30%
+        return ['70*', '30*'];
+    // 35%?
+    return ['65*', '35*'];
+};
 /**
- * Returns the index of the first smaller/equal element than target.
+ * Returns the index of the last element smaller than or equal to target.
+ * Array must be sorted ascending.
  * @param {number[]} arr the array being searched.
  * @param {number} target the value to search for.
  * @returns {number}
  */
-let binarySearch = (arr, target) => {
+let binarySearchLast = (arr, target) => {
     let l = 0;
     let r = arr.length - 1;
     while (l < r) {
-        let m = Math.ceil((l + r) / 2);
+        let m = l + Math.ceil((r - l) / 2);
         if (arr[m] <= target)
             l = m;
         else
             r = m - 1;
+    }
+    return l;
+};
+/**
+ * Returns the index of the first element larger than target. Array must be
+ * sorted ascending.
+ * @param {number[]} arr the array being searched.
+ * @param {number} target the value to search for.
+ * @returns {number}
+ */
+let binarySearchNext = (arr, target) => {
+    let l = 0;
+    let r = arr.length - 1;
+    while (l < r) {
+        let m = l + Math.floor((r - l) / 2);
+        if (arr[m] <= target)
+            l = m + 1;
+        else
+            r = m;
     }
     return l;
 };
@@ -761,12 +984,45 @@ let purgeEmpty = (arr) => {
     }
     return result;
 };
+let isColonyVisible = (colony) => colony.sequence.length > 1 ||
+    trueSight.level > 0;
+let getLeechRate = (colony) => colony.params[0][0];
 const yearStartLookup = [0];
+const dandelionSchedule = [];
+const broomrapeSchedule = [];
+const hopleekSchedule = [];
 for (let i = 1; i <= 400; ++i) {
     let leap = !(i % 4) && (!!(i % 100) || !(i % 400));
     let offset = leap ? 366 : 365;
     yearStartLookup[i] = yearStartLookup[i - 1] + offset;
+    if (leap)
+        hopleekSchedule.push(yearStartLookup[i - 1] + 60);
+    let b = i % 4;
+    if (b == 1 || b == 3) // Year 2, 4, 6, 8, 10
+        broomrapeSchedule.push(yearStartLookup[i] + 105);
+    // else if(b == 3) // Year 4, 8, 12
+    //     broomrapeSchedule.push(yearStartLookup[i] + 364);
+    dandelionSchedule.push(yearStartLookup[i] + 91);
 }
+const dandelionSpawner = {
+    id: 'dandelion',
+    schedule: dandelionSchedule,
+    population: (index) => 2 + gameRNG.nextInt % 2,
+    plot: () => gameRNG.nextInt % nofPlots
+};
+const broomrapeSpawner = {
+    id: 'broomrape',
+    schedule: broomrapeSchedule,
+    population: (index) => Math.min(index + 1, 5),
+    plot: () => 0
+};
+const fibonacci = [1, 2, 3, 5, 8, 13];
+const hopleekSpawner = {
+    id: 'hopleek',
+    schedule: hopleekSchedule,
+    population: (index) => fibonacci[Math.min(index, 5)],
+    plot: () => nofPlots - 1 - gameRNG.nextInt % 2
+};
 /**
  * What else do you expect?
  */
@@ -811,13 +1067,14 @@ class Queue {
  * Represents an instance of the Xorshift RNG.
  */
 class Xorshift {
-    constructor(seed = 0) {
+    constructor(seed = 1, aux = {}) {
         this.x = seed;
-        this.y = 0;
-        this.z = 0;
-        this.w = 0;
-        for (let i = 0; i < 64; ++i)
-            this.nextInt;
+        this.y = aux.p1 ?? 0;
+        this.z = aux.p2 ?? 0;
+        this.w = aux.p3 ?? 0;
+        if (!Object.keys(aux).length)
+            for (let i = 0; i < 64; ++i)
+                this.nextInt;
     }
     /**
      * Returns a random integer within [0, 2^31) probably.
@@ -869,6 +1126,16 @@ class Xorshift {
      */
     choice(array) {
         return array[this.nextRange(0, array.length)];
+    }
+    toJSON() {
+        return {
+            seed: this.x,
+            aux: {
+                p1: this.y,
+                p2: this.z,
+                p3: this.w
+            }
+        };
     }
 }
 /**
@@ -1026,7 +1293,7 @@ class Quaternion {
         let dp = src.x * dst.x + src.y * dst.y +
             src.z * dst.z;
         let rotAxis;
-        if (dp < -1 + 1e-8) {
+        if (dp < -1 + 1e-9) {
             /* Edge case
             If the two vectors are in opposite directions, just reverse.
             */
@@ -1627,6 +1894,10 @@ class LSystem {
         if (this.models.has(symbol)) {
             let tmpRules = this.models.get(symbol);
             for (let j = 0; j < tmpRules.length; ++j) {
+                // Param count check
+                let count = params ? params.length : 0;
+                if (tmpRules[j].count[2] != count)
+                    continue;
                 let tmpParamMap = (v) => this.varGetter(v) ??
                     tmpRules[j].paramMap(v, null, null, params);
                 // Next up is the condition
@@ -1657,7 +1928,7 @@ class LSystem {
                  {
                     // Models can be drawn any time, thus, the RNG should be
                     // separate from actual rule processing.
-                    let roll = globalRNG.nextFloat;
+                    let roll = modelRNG.nextFloat;
                     let chanceSum = 0;
                     let choice = -1;
                     for (let k = 0; k < tmpRules[j].derivations.length; ++k) {
@@ -1708,24 +1979,27 @@ class LSystem {
     /**
      * Reconstructs the string representation of a sequence.
      * @param {Colony} colony the plant colony.
-     * @param {string} filter the filter.
-     * @param {boolean} displayParams whether to display parameters.
-     * @param {number} indentation the number of spaces to indent.
+     * @param {ColonyViewEntry} settings the settings.
      * @param {Task} task the current task.
      * @returns {Task}
      */
-    reconstruct(colony, filter = '', displayParams = true, indentation = 4, task = {}) {
+    reconstruct(colony, settings, task = {}) {
+        let filter = settings.filter ?? '';
+        let displayParams = settings.params ?? true;
+        let expand = settings.expand ?? true;
+        let indentation = settings.indentation ?? 8;
         if (indentation < 0)
             indentation = -indentation;
         let sequence = colony.sequence;
         let params = colony.params;
-        let level = 0;
-        let lineStart = false;
-        if (!displayParams && !filter) {
+        let level = task.level ?? 0;
+        let lineStart = task.lineStart ?? false;
+        if (!displayParams && !filter && !expand) {
             return {
                 start: 0,
-                level: level,
-                result: sequence
+                level,
+                result: sequence,
+                lineStart
             };
         }
         let filterSet = new Set(filter);
@@ -1735,11 +2009,12 @@ class LSystem {
             if (i - task.start > MAX_CHARS_PER_TICK) {
                 return {
                     start: i,
-                    level: level,
-                    result: result
+                    level,
+                    result,
+                    lineStart
                 };
             }
-            if (displayParams && lineStart) {
+            if (expand && lineStart) {
                 result += `\n${' '.repeat(indentation * Math.max(0, level))}`;
                 lineStart = false;
             }
@@ -1751,7 +2026,8 @@ class LSystem {
                         lineStart = true;
                         break;
                     case ']':
-                        lineStart = true;
+                        if (sequence[i + 1] != '[')
+                            lineStart = true;
                         break;
                 }
                 result += sequence[i];
@@ -1762,9 +2038,9 @@ class LSystem {
                     result += `(${paramStrings.join(', ')})`;
                 }
                 switch (sequence[i + 1]) {
-                    case '[':
-                        lineStart = true;
-                        break;
+                    // case '[':
+                    //     // lineStart = true;
+                    //     break;
                     case ']':
                         --level;
                         lineStart = true;
@@ -1774,8 +2050,9 @@ class LSystem {
         }
         return {
             start: 0,
-            level: level,
-            result: result
+            level,
+            result,
+            lineStart
         };
     }
     /**
@@ -1812,7 +2089,7 @@ class Renderer {
         this.cameraMode = camera.mode ?? 0;
         this.followFactor = camera.followFactor ?? 0.15;
         this.camCentre = new Vector3(camera.x ?? 0, camera.y ?? 0, camera.z ?? 0);
-        this.upright = camera.upright ?? false;
+        this.upright = camera.upright ?? true;
         this.lastCamera = new Vector3(0, 0, 0);
         this.lastCamVel = new Vector3(0, 0, 0);
         this.tickLength = stroke.tickLength ?? 1;
@@ -1881,25 +2158,25 @@ class Renderer {
         this.system = plantData[colony.id].system;
         this.configure(colony.sequence, colony.params, plantData[colony.id].camera(colony.stage), plantData[colony.id].stroke(colony.stage));
     }
-    configure(sequence, params, camera = {}, stroke = {}) {
-        this.figureScale = camera.scale || 1;
-        this.cameraMode = camera.mode ?? 0;
-        this.followFactor = camera.followFactor ?? 0.15;
-        this.camCentre = new Vector3(camera.x ?? 0, camera.y ?? 0, camera.z ?? 0);
-        this.upright = camera.upright ?? false;
-        this.tickLength = stroke.tickLength ?? 1;
-        this.initDelay = stroke.initDelay ?? 0;
+    configure(sequence = null, params = null, camera = {}, stroke = {}, redraw = true) {
+        this.figureScale = camera.scale || this.figureScale;
+        this.cameraMode = camera.mode ?? this.cameraMode;
+        this.followFactor = camera.followFactor ?? this.followFactor;
+        this.camCentre = new Vector3(camera.x ?? this.camCentre.x, camera.y ?? this.camCentre.y, camera.z ?? this.camCentre.z);
+        this.upright = camera.upright ?? this.upright;
+        this.tickLength = stroke.tickLength ?? this.tickLength;
+        this.initDelay = stroke.initDelay ?? this.initDelay;
         // Loop mode is always 0
         // Whether to reset graph on hitting reset button is a game setting
-        this.loadModels = stroke.loadModels ?? true;
-        this.quickDraw = stroke.quickDraw ?? false;
-        this.quickBacktrack = stroke.quickBacktrack ?? false;
-        this.backtrackTail = stroke.backtrackTail ?? true;
-        this.hesitateApex = stroke.hesitateApex ?? true;
-        this.hesitateFork = stroke.hesitateFork ?? true;
-        this.sequence = sequence;
-        this.params = params;
-        this.redrawing = true;
+        this.loadModels = stroke.loadModels ?? this.loadModels;
+        this.quickDraw = stroke.quickDraw ?? this.quickDraw;
+        this.quickBacktrack = stroke.quickBacktrack ?? this.quickBacktrack;
+        this.backtrackTail = stroke.backtrackTail ?? this.backtrackTail;
+        this.hesitateApex = stroke.hesitateApex ?? this.hesitateApex;
+        this.hesitateFork = stroke.hesitateFork ?? this.hesitateFork;
+        this.sequence = sequence ?? this.sequence;
+        this.params = params ?? this.params;
+        this.redrawing = redraw;
     }
     /**
      * Moves the cursor forward.
@@ -1934,7 +2211,10 @@ class Renderer {
                 return;
             }
             if (this.models.length > 0) {
-                // Unreadable pile of shit
+                /*
+                Unreadable pile of crap, but essentially same as the section
+                below.
+                */
                 for (; this.mdi[this.mdi.length - 1] <
                     this.models[this.models.length - 1].length; ++this.mdi[this.mdi.length - 1]) {
                     switch (this.models[this.models.length - 1][this.mdi[this.mdi.length - 1]]) {
@@ -2312,7 +2592,7 @@ class Renderer {
     get camera() {
         let newCamera;
         switch (this.cameraMode) {
-            case 1:
+            case 2 /* CameraModes.QUADRATIC */:
                 // I accidentally discovered Bézier curves unknowingly.
                 // @ts-expect-error
                 let dist = this.centre - this.lastCamera;
@@ -2324,7 +2604,16 @@ class Renderer {
                 this.lastCamVel = newCamera - this.lastCamera;
                 this.lastCamera = newCamera;
                 return newCamera;
-            case 0:
+            case 1 /* CameraModes.LINEAR */:
+                // @ts-expect-error
+                newCamera = this.centre * this.followFactor +
+                    // @ts-expect-error
+                    this.lastCamera * (1 - this.followFactor);
+                // @ts-expect-error
+                this.lastCamVel = newCamera - this.lastCamera;
+                this.lastCamera = newCamera;
+                return newCamera;
+            case 0 /* CameraModes.STATIC */:
                 return this.centre;
         }
     }
@@ -2333,9 +2622,10 @@ class Renderer {
  * This is not ECS, I'm not good enough to understand ECS.
 */
 class ColonyManager {
-    constructor(object = {}, length, width) {
+    constructor(object = {}, length, width, waitFor = null) {
         this.length = length;
         this.width = width;
+        this.waitFor = waitFor;
         this.colonies = object.colonies ??
             Array.from({ length: this.length }, (_) => []);
         // Everyone gangsta until a colony starts evolving
@@ -2368,6 +2658,7 @@ class ColonyManager {
                 start: 0
             };
         // this.restTick = 0;
+        this.spawnerStates = [];
     }
     toJSON() {
         return {
@@ -2388,95 +2679,162 @@ class ColonyManager {
             return true;
         return false;
     }
-    water(colony) {
-        if ((colony.nextWater ?? 0) <= time) {
+    waterColony(colony) {
+        if (!colony.wet) {
+            let amount = BigNumber.from(Math.min(colony.sequence.length, waterAmount * Math.max(colony.stage, 1)));
             // @ts-expect-error
-            colony.energy += plantData[colony.id].growthCost *
-                // @ts-expect-error
-                BigNumber.from(colony.stage).max(waterAmount);
-            colony.nextWater = time + plantData[colony.id].waterCD;
+            colony.energy += plantData[colony.id].growthCost * amount;
+            colony.wet = true;
         }
     }
-    reap(colony, multiplier = BigNumber.ONE) {
+    water(plot, index) {
+        let colony = this.colonies[plot][index];
+        if (colony && !colony.wet) {
+            let amount = BigNumber.from(Math.min(colony.sequence.length, waterAmount * Math.max(colony.stage, 1)));
+            // @ts-expect-error
+            colony.energy += plantData[colony.id].growthCost * amount;
+            colony.wet = true;
+        }
+    }
+    reap(colony, multiplier = colony.profit) {
         if (multiplier.isZero)
             return;
         // @ts-expect-error
-        currency.value += colony.profit * BigNumber.from(colony.population) *
+        currency.value += BigNumber.from(colony.population) * multiplier *
             // @ts-expect-error
-            multiplier * theory.publicationMultiplier;
+            theory.publicationMultiplier;
     }
-    addColony(plot, id, population, spread = null) {
+    registerSpawner(s) {
+        let state = {
+            spawner: s,
+            index: binarySearchNext(s.schedule, days)
+        };
+        this.spawnerStates.push(state);
+    }
+    updateSpawners(day) {
+        for (let i = 0; i < this.spawnerStates.length; ++i) {
+            let sp = this.spawnerStates[i];
+            while (day >= sp.spawner.schedule[sp.index]) {
+                let plot = sp.spawner.plot();
+                let pop = sp.spawner.population(sp.index);
+                this.addColony(plot, sp.spawner.id, pop);
+                ++sp.index;
+            }
+        }
+    }
+    linkParasites(plot) {
+        for (let i = 0; i < this.colonies[plot].length; ++i) {
+            let l = this.colonies[plot][i];
+            if (plantData[l.id].parasite) {
+                l.host = undefined;
+                for (let j = 0; j < this.colonies[plot].length; ++j) {
+                    let h = this.colonies[plot][j];
+                    if (plantData[l.id].parasite.has(h.id)) {
+                        l.host = j;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    addColony(plot, id, population, parent = null) {
+        if (!plantData[id])
+            return null;
         if (population <= 0)
-            return;
-        if (spread === null) {
+            return null;
+        // Grouping colonies (if stage 0)
+        if (parent === null) {
             for (let i = 0; i < this.colonies[plot].length; ++i) {
                 let groupCandidate = this.colonies[plot][i];
                 if (groupCandidate.id == id && !groupCandidate.propagated &&
                     !groupCandidate.stage) {
                     groupCandidate.population += population;
                     theory.invalidateQuaternaryValues();
-                    return;
+                    return groupCandidate;
                 }
             }
         }
         if (this.colonies[plot].length >= this.width) {
-            if (spread === null)
+            if (parent === null)
                 plants[plot][id]?.refund?.(population);
-            return;
+            return null;
         }
         let c = {
             id: id,
             population: population,
-            propagated: spread === null ? false : true,
+            propagated: parent === null ? false : true,
             sequence: plantData[id].system.axiom,
             params: plantData[id].system.axiomParams,
             stage: 0,
-            nextWater: 0,
+            narrationTrack: 0,
+            wet: false,
             energy: BigNumber.ZERO,
             growth: BigNumber.ZERO,
             diReserve: BigNumber.ZERO,
             dgReserve: BigNumber.ZERO
         };
-        if (plantData[c.id].dailyIncome)
-            c.ddReserve = BigNumber.ZERO;
+        // if(plantData[id].dailyIncome)
+        //     c.ddReserve = BigNumber.ZERO;
+        if (plantData[id].propagation)
+            c.propCnt = 0;
         let stats = this.calculateStats(c);
         c.synthRate = stats.synthRate;
         c.profit = stats.profit;
-        if (spread === null)
-            this.colonies[plot].push(c);
-        else {
-            // Inheriting parent's reserve
-            let parent = this.colonies[plot][spread];
+        // Insert colony into array. If there are null coordinates provided,
+        // spawn a propagated colony.
+        // if(parent === null)
+        //     this.colonies[plot].push(c);
+        if (parent && parent[0] !== null && parent[1] !== null) {
+            // Inherit parent's reserve
+            let p = this.colonies[parent[0]][parent[1]];
             // @ts-expect-error
-            c.energy += parent.diReserve * c.synthRate;
+            c.energy += p.diReserve * c.synthRate;
             // @ts-expect-error
-            let maxdg = c.energy.min(parent.dgReserve *
+            let maxdg = c.energy.min(p.dgReserve *
                 // @ts-expect-error
-                plantData[c.id].growthRate);
+                plantData[id].growthRate);
             // @ts-expect-error
             c.growth += maxdg;
             // @ts-expect-error
             c.energy -= maxdg;
-            if (plantData[c.id].dailyIncome)
-                c.ddReserve = parent.ddReserve;
-            this.colonies[plot].splice(spread + 1, 0, c);
+            // if(plantData[id].dailyIncome)
+            //     c.ddReserve = p.ddReserve;
+            // if(plot == parent[0])
+            //     this.colonies[plot].splice(parent[1] + 1, 0, c);
+            // else
         }
-        if (plot == plotIdx && colonyIdx[plot] == this.colonies[plot].length - 1)
-            renderer.colony = c;
+        this.colonies[plot].push(c);
+        // Establish parasitic links
+        this.linkParasites(plot);
+        // Auto water
+        if (autoWaterConfig[id]?.maxStage > c.stage)
+            this.waterColony(c);
+        // Change renderer plant
+        // If there's no waitFor, then this is the main manager
+        // Spaghetti code
+        if (!this.waitFor && plot == plotIdx) {
+            let prevColony = selectedColony;
+            selectedColony = this.colonies[plotIdx][slotIdx];
+            if (prevColony !== selectedColony)
+                renderer.colony = selectedColony;
+        }
         theory.invalidateQuaternaryValues();
         updateAvailability();
+        return c;
     }
     killColony(plot, index, id) {
         let c = this.colonies[plot][index];
         if (!c)
             return;
-        if (!c.propagated && plantUnlocks.includes(c.id))
+        // Reset levels & unlock autowatering
+        if (!c.propagated && plantUnlocks.includes(c.id)) {
             plants[plot][c.id].level -= Math.min(plants[plot][c.id].level, c.population);
-        if (index == this.colonies[plot].length - 1 && plot == plotIdx) {
-            let len = this.colonies[plotIdx].length;
-            colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) % len;
-            selectedColony = this.colonies[plotIdx][colonyIdx[plotIdx]];
-            renderer.colony = selectedColony;
+            if (!autoWaterConfig[c.id]) {
+                autoWaterConfig[c.id] =
+                    {
+                        maxStage: 0
+                    };
+            }
         }
         if (this.gangsta && plot == this.gangsta[0]) {
             if (this.gangsta[1] > index)
@@ -2498,19 +2856,44 @@ class ColonyManager {
             }
         }
         this.colonies[plot].splice(index, 1);
-        if (plot == plotIdx && !this.colonies[plot].length)
-            renderer.colony = null;
+        // Re-establish parasitic links
+        this.linkParasites(plot);
+        // waitFor is spaghetti code
+        if (!this.waitFor && plot == plotIdx) {
+            let len = manager.colonies[plotIdx].length;
+            slotIdx = Math.min(slotIdx, len - 1);
+            slotIdx = Math.max(slotIdx, 0);
+            if (len > 1) {
+                let i = slotIdx;
+                while (manager.colonies[plotIdx][slotIdx] &&
+                    !isColonyVisible(manager.colonies[plotIdx][slotIdx]))
+                    --slotIdx;
+                if (slotIdx < 0)
+                    slotIdx = i;
+                while (manager.colonies[plotIdx][slotIdx] &&
+                    !isColonyVisible(manager.colonies[plotIdx][slotIdx]))
+                    ++slotIdx;
+                if (slotIdx > len - 1)
+                    slotIdx = i;
+            }
+            selectedColony = this.colonies[plotIdx][slotIdx];
+            renderer.colony = selectedColony;
+        }
         updateAvailability();
     }
-    growAll(di, dg, dd) {
-        if (this.actionGangsta)
-            this.continueAction();
-        else if (this.actionQueue.length) {
-            let action = this.actionQueue.dequeue();
-            this.performAction(...action);
+    growAll(di, dg /*, dd: BigNumber*/) {
+        if (!this.waitFor || !this.waitFor.busy) {
+            if (this.actionGangsta)
+                this.performQueuedAction();
+            else if (this.actionQueue.length) {
+                let action = this.actionQueue.
+                    dequeue();
+                this.queueAction(...action);
+                // this.performQueuedAction();
+            }
+            else if (this.gangsta)
+                this.evolve();
         }
-        else if (this.gangsta)
-            this.evolve();
         perfs[1 /* Profilers.MANAGER */].exec(() => {
             for (let i = 0; i < this.colonies.length; ++i) {
                 for (let j = 0; j < this.colonies[i].length; ++j) {
@@ -2520,17 +2903,19 @@ class ColonyManager {
                     // @ts-expect-error
                     if (notMature && c.growth >= plantData[c.id].growthCost *
                         // @ts-expect-error
-                        BigNumber.from(c.sequence.length)) {
+                        BigNumber.from(c.sequence.length) &&
+                        (c.wet || !plantData[c.id].requiresWater)) {
                         if (!this.gangsta)
                             this.gangsta = [i, j];
                         // @ts-expect-error
                         c.diReserve += di;
                         // @ts-expect-error
                         c.dgReserve += dg;
-                        if (plantData[c.id].dailyIncome) {
-                            // @ts-expect-error
-                            c.ddReserve += dd;
-                        }
+                        // if(plantData[c.id].dailyIncome)
+                        // {
+                        //     // @ts-expect-error
+                        //     c.ddReserve += dd;
+                        // }
                     }
                     else if (this.actionGangsta && this.actionGangsta[0] == i &&
                         this.actionGangsta[1] == j) {
@@ -2538,15 +2923,31 @@ class ColonyManager {
                         c.diReserve += di;
                         // @ts-expect-error
                         c.dgReserve += dg;
-                        if (plantData[c.id].dailyIncome) {
-                            // @ts-expect-error
-                            c.ddReserve += dd;
-                        }
+                        // if(plantData[c.id].dailyIncome)
+                        // {
+                        //     // @ts-expect-error
+                        //     c.ddReserve += dd;
+                        // }
                     }
                     else // Normal growth
                      {
                         // @ts-expect-error
                         c.energy += di * c.synthRate;
+                        if (plantData[c.id].parasite &&
+                            typeof c.host !== 'undefined') {
+                            let h = this.colonies[i][c.host];
+                            // @ts-expect-error
+                            let hEnrg = h.energy * BigNumber.from(h.population);
+                            // Leech rates = hardcoded: 1st param of 1st symbol
+                            // @ts-expect-error
+                            let maxde = hEnrg.min(dg * getLeechRate(c) *
+                                // @ts-expect-error
+                                BigNumber.from(c.population));
+                            // @ts-expect-error
+                            h.energy -= maxde / h.population;
+                            // @ts-expect-error
+                            c.energy += maxde / c.population;
+                        }
                         if (notMature) {
                             // @ts-expect-error
                             let maxdg = c.energy.min(dg *
@@ -2557,11 +2958,12 @@ class ColonyManager {
                             // @ts-expect-error
                             c.energy -= maxdg;
                         }
-                        if (plantData[c.id].dailyIncome) {
-                            // @ts-expect-error
-                            this.reap(c, dd + c.ddReserve);
-                            c.ddReserve = BigNumber.ZERO;
-                        }
+                        // if(plantData[c.id].dailyIncome)
+                        // {
+                        //     // @ts-expect-error
+                        //     this.reap(c, dd + c.ddReserve);
+                        //     c.ddReserve = BigNumber.ZERO;
+                        // }
                     }
                 }
             }
@@ -2585,7 +2987,7 @@ class ColonyManager {
             }
             if (SYNTHABLE_SYMBOLS.has(sequence[i]) && params[i])
                 synthRate += params[i][0];
-            if (harvestable.has(sequence[i]) && params[i])
+            if (harvestable?.has(sequence[i]) && params[i])
                 profit += params[i][0];
         }
         return {
@@ -2594,7 +2996,9 @@ class ColonyManager {
             profit: profit
         };
     }
-    continueAction() {
+    performQueuedAction() {
+        // if(!this.actionGangsta)
+        //     return;
         let c = this.colonies[this.actionGangsta[0]][this.actionGangsta[1]];
         let id = this.actionGangsta[2];
         if (!c) {
@@ -2652,17 +3056,38 @@ class ColonyManager {
             return;
         }
         if (id == 0) // Harvest specific
-            this.reap(c);
+            // @ts-expect-error
+            this.reap(c, c.profit - this.actionCalcTask.profit);
         // Assign new stats
         c.synthRate = this.actionCalcTask.synthRate;
         c.profit = this.actionCalcTask.profit;
         c.sequence = this.actionDeriveTask.derivation;
         c.params = this.actionDeriveTask.parameters;
-        let notMature = c.stage < (plantData[c.id].maxStage ?? INT_MAX);
+        let maxStage = plantData[c.id].maxStage ?? INT_MAX;
+        // Don't mess with stage, it will fuck up narrations
+        // c.stage = Math.min(c.stage + 1, maxStage);
+        if (!c.actionsPerformed)
+            c.actionsPerformed = 0;
+        ++c.actionsPerformed;
         // Empty reserves
         // @ts-expect-error
         c.energy += c.diReserve * c.synthRate;
-        if (notMature) {
+        if (plantData[c.id].parasite &&
+            typeof c.host !== 'undefined') {
+            let h = this.colonies[this.actionGangsta[0]][c.host];
+            // @ts-expect-error
+            let hEnrg = h.energy * BigNumber.from(h.population);
+            // Leech rates = hardcoded: 1st param of 1st symbol
+            // @ts-expect-error
+            let maxde = hEnrg.min(c.dgReserve * getLeechRate(c) *
+                // @ts-expect-error
+                BigNumber.from(c.population));
+            // @ts-expect-error
+            h.energy -= maxde / h.population;
+            // @ts-expect-error
+            c.energy += maxde / c.population;
+        }
+        if (c.stage < maxStage) {
             // @ts-expect-error
             let maxdg = c.energy.min(c.dgReserve * plantData[c.id].growthRate);
             // @ts-expect-error
@@ -2672,6 +3097,11 @@ class ColonyManager {
         }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
+        c.wet = false;
+        // Change narrative track if possible
+        let trackSwitch = plantData[c.id].actions[id].switchNarration;
+        if (trackSwitch)
+            c.narrationTrack = trackSwitch(c.stage, c.narrationTrack);
         this.actionAncestreeTask =
             {
                 start: 0
@@ -2700,14 +3130,15 @@ class ColonyManager {
                     start: 0
                 };
         }
-        if (this.actionGangsta[0] == plotIdx &&
-            this.actionGangsta[1] == colonyIdx[plotIdx])
+        // waitFor is spaghetti code
+        if (!this.waitFor && this.actionGangsta[0] == plotIdx &&
+            this.actionGangsta[1] == slotIdx)
             renderer.colony = c;
         this.actionGangsta = null;
         theory.invalidateSecondaryEquation();
         theory.invalidateQuaternaryValues();
     }
-    performAction(plot, index, id) {
+    queueAction(plot, index, id) {
         let c = this.colonies[plot][index];
         if (!c || !plantData[c.id].actions[id])
             return;
@@ -2767,6 +3198,13 @@ class ColonyManager {
             this.gangsta = null;
             return;
         }
+        // Prevent spamming actions
+        let maxStage = plantData[c.id].maxStage ?? INT_MAX;
+        // if(c.stage >= maxStage)
+        // {
+        //     this.gangsta = null;
+        //     return;
+        // }
         // Ancestree, derive and calc stats
         if (!('ancestors' in this.ancestreeTask) || this.ancestreeTask.start) {
             perfs[2 /* Profilers.LS_ANCESTREE */].exec(() => {
@@ -2806,27 +3244,41 @@ class ColonyManager {
         c.growth -= plantData[c.id].growthCost *
             // @ts-expect-error
             BigNumber.from(c.sequence.length);
-        if (!c.synthRate.isZero)
-            // @ts-expect-error
-            c.diReserve += c.growth / c.synthRate;
-        if (!plantData[c.id].growthRate.isZero)
-            // @ts-expect-error
-            c.dgReserve += c.growth / plantData[c.id].growthRate;
-        c.growth = BigNumber.ZERO;
+        // if(!c.synthRate.isZero)
+        // {
+        //     // @ts-expect-error
+        //     c.diReserve += c.growth / c.synthRate;
+        //     // @ts-expect-error
+        //     c.energy -= c.growth;
+        // }
         // Assign new stage's stats
         c.sequence = this.deriveTask.derivation;
         c.params = this.deriveTask.parameters;
         c.synthRate = this.calcTask.synthRate;
         if (plantData[c.id].stagelyIncome)
-            this.reap(c, plantData[c.id].stagelyIncome);
+            // @ts-expect-error
+            this.reap(c, plantData[c.id].stagelyIncome * c.profit);
         c.profit = this.calcTask.profit;
         ++c.stage;
-        let maxStage = plantData[c.id].maxStage ?? INT_MAX;
-        let notMature = c.stage < maxStage;
         // Empty reserves
         // @ts-expect-error
         c.energy += c.diReserve * c.synthRate;
-        if (notMature) {
+        if (plantData[c.id].parasite &&
+            typeof c.host !== 'undefined') {
+            let h = this.colonies[this.gangsta[0]][c.host];
+            // @ts-expect-error
+            let hEnrg = h.energy * BigNumber.from(h.population);
+            // Leech rates = hardcoded: 1st param of 1st symbol
+            // @ts-expect-error
+            let maxde = hEnrg.min(c.dgReserve * getLeechRate(c) *
+                // @ts-expect-error
+                BigNumber.from(c.population));
+            // @ts-expect-error
+            h.energy -= maxde / h.population;
+            // @ts-expect-error
+            c.energy += maxde / c.population;
+        }
+        if (c.stage < maxStage) {
             // @ts-expect-error
             let maxdg = c.energy.min(c.dgReserve * plantData[c.id].growthRate);
             // @ts-expect-error
@@ -2834,13 +3286,18 @@ class ColonyManager {
             // @ts-expect-error
             c.energy -= maxdg;
         }
+        c.wet = false;
+        // Auto water
+        if (autoWaterConfig[c.id]?.maxStage > c.stage)
+            this.waterColony(c);
         // Propagate
         let prop = plantData[c.id].propagation;
-        if (prop && c.stage === (prop.stage ?? maxStage)) {
-            let pop = Math.round(c.population * prop.rate);
+        if (prop && c.stage == prop.stage[c.propCnt]) {
+            let pop = Math.round(c.population * prop.rate[c.propCnt]);
             let target = this.findVacantPlot(this.gangsta[0], prop.priority);
             if (target !== null)
-                this.addColony(target, prop.id ?? c.id, pop, this.gangsta[1]);
+                this.addColony(target, prop.id ?? c.id, pop, this.gangsta);
+            ++c.propCnt;
         }
         c.diReserve = BigNumber.ZERO;
         c.dgReserve = BigNumber.ZERO;
@@ -2856,7 +3313,9 @@ class ColonyManager {
             {
                 start: 0
             };
-        if (this.gangsta[0] == plotIdx && this.gangsta[1] == colonyIdx[plotIdx])
+        // waitFor is spaghetti code
+        if (!this.waitFor && this.gangsta[0] == plotIdx &&
+            this.gangsta[1] == slotIdx)
             renderer.colony = c;
         this.gangsta = null;
         theory.invalidateSecondaryEquation();
@@ -2865,20 +3324,24 @@ class ColonyManager {
     }
 }
 class Book {
-    constructor(title, pages) {
+    constructor(title, key, pages) {
         this.title = title;
+        this.key = key;
         this.pages = pages;
         this.tableofContents = [];
-        for (let i = 0; i < pages.length; ++i)
+        this.pageLookup = {};
+        for (let i = 0; i < pages.length; ++i) {
             if (pages[i].pinned)
                 this.tableofContents.push(i);
+            if (pages[i].systemID)
+                this.pageLookup[pages[i].systemID] = i;
+        }
     }
 }
-const almanac = new Book(getLoc('almanacTitle'), [
+const almanac = new Book(getLoc('almanacTitle'), 'almanac', [
     {
         ...getLoc('almanac').cover,
-        horizontalAlignment: TextAlignment.CENTER,
-        pinned: true
+        horizontalAlignment: TextAlignment.CENTER
     },
     {
         ...getLoc('almanac').prep,
@@ -2906,7 +3369,7 @@ const almanac = new Book(getLoc('almanacTitle'), [
         systemID: 'campion'
     },
 ]);
-const LsManual = new Book(getLoc('manualTitle'), [
+const LsManual = new Book(getLoc('manualTitle'), 'manual', [
     {
         ...getLoc('manual').cover,
         horizontalAlignment: TextAlignment.CENTER
@@ -2931,26 +3394,28 @@ const LsManual = new Book(getLoc('manualTitle'), [
         ...getLoc('manual').turtleSymbols,
         pinned: true
     },
-    getLoc('manual').note,
+    // getLoc('manual').note,
 ]);
 // Balance parameters
-const dayLength = 120;
+const dayLength = 24;
 const halfDayLength = dayLength / 2;
 const quarterDayLength = halfDayLength / 2;
-const hourLength = dayLength / 24;
+// const hourLength = dayLength / 24;
 const nofPlots = 6;
-const maxColoniesPerPlot = 4;
-const waterAmount = BigNumber.ONE;
-const plotCosts = new FirstFreeCost(new ExponentialCost(800, Math.log2(120)));
-const plantUnlocks = ['calendula', 'basil', 'campion'];
-const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2100), new ConstantCost(145000));
+const maxColoniesPerPlot = 5;
+const waterAmount = 1 / 2;
+const transferMinStage = 20;
+const plotCosts = new FirstFreeCost(new ExponentialCost(600, Math.log2(80)));
+const plantUnlocks = ['sprout', 'calendula', 'basil', 'campion'];
+const plantUnlockCosts = new CompositeCost(1, new ConstantCost(1), new CompositeCost(1, new ConstantCost(1500), new ConstantCost(44000)));
 const permaCosts = [
-    BigNumber.from(27),
-    BigNumber.from(3600),
+    BigNumber.from(15),
+    BigNumber.from(180),
+    BigNumber.from(2100),
     BigNumber.from(1e45)
 ];
 const taxRate = BigNumber.from(.12);
-const tauRate = BigNumber.TWO;
+const tauRate = BigNumber.ONE;
 const pubCoef = BigNumber.from(2 / 3);
 // @ts-expect-error
 const pubExp = BigNumber.from(.15) / tauRate;
@@ -2959,29 +3424,65 @@ var getPublicationMultiplier = (tau) => pubCoef *
     // @ts-expect-error
     tau.max(BigNumber.ONE).pow(pubExp *
         // @ts-expect-error
-        tau.max(BigNumber.ONE).log().max(BigNumber.ONE).log());
+        (BigNumber.TWO * (tau + BigNumber.ONE).log() + BigNumber.ONE).log());
 var getPublicationMultiplierFormula = (symbol) => `\\frac{2}{3}\\times
-{${symbol}}^{${pubExp.toString(3)}\\times\\ln({\\ln{${symbol}})}}`;
+{${symbol}}^{${pubExp.toString(2)}\\times h},\\quad
+h=\\ln{(2\\ln{(${symbol}+1)}+1)}`;
 const plantData = {
+    sprout: {
+        cost: new FirstFreeCost(new ExponentialCost(0.25, 1)),
+        system: new LSystem('\\A(0.1, 3)', [
+            'A(r, t): t>0 = A(r+0.1, t-1)',
+            'A(r, t) = F(0.05)[-&L(0.1)][-^L(0.1)]/(137.508)A(r, 3)',
+            'F(p): p<FMaxSize = F(p+0.05)',
+            'L(r): r<LMaxSize = L(r+0.1)'
+        ], 45, 0, 'A', '+-&^/\\T', 0, {
+            'FMaxSize': '0.25',
+            'LMaxSize': '0.5'
+        }, [
+            '~> L(s) = {F(s/20)T(0.8*s)[\\(90-96*s)&F(s/30).&(30)F(s/15).^(60)F(s/15).^(30)F(s/15).^(30)F(s/15).^(30)F(s/30).][F(s/5)..].[/(90-96*s)^F(s/30).^(30)F(s/15).&(60)F(s/15).&(30)F(s/15).&(30)F(s/15).&(30)F(s/30).][F(s/5)..]}',
+        ]),
+        maxStage: 12,
+        requiresWater: true,
+        growthRate: BigNumber.from(1.5),
+        growthCost: BigNumber.from(0.6),
+        actions: [
+            {
+                symbols: new Set('F')
+            }
+        ],
+        camera: (stage) => {
+            return {
+                scale: 1,
+                x: 0,
+                y: 0.625,
+                z: 0,
+            };
+        },
+        stroke: (stage) => {
+            return {};
+        }
+    },
     calendula: {
-        system: new LSystem('-(3)A(0.06, 4)', [
-            'A(r, t): t<=0 && r>=flowerThreshold = F(0.78, 2.1)K(0)',
-            'A(r, t): r>=flowerThreshold = [&A(r-0.15, 2)][^I(3)]',
-            'A(r, t): t>0 = A(r+0.06, t-1)',
-            'A(r, t) = F(0.12, 0.6)T[-L(0.06, maxLeafSize-r/4)]/(180)[-L(0.06, maxLeafSize-r/4)]/(90)A(r, 4)',
-            'I(t): t>0 = F(0.24, 0.84)T[-L(0.06, maxLeafSize/3)]/(137.508)I(t-1)',
+        cost: new ExponentialCost(1, Math.log2(3)),
+        system: new LSystem('-(3)A(0.3, 4)', [
+            'A(r, t): t<=0 && r>=AThreshold = F(0.78, 2.1)K(0)',
+            'A(r, t): r>=AThreshold = [&A(r-0.75, 2)][^I(3)]',
+            'A(r, t): t>0 = A(r+0.3, t-1)',
+            'A(r, t) = F(0.12, 0.6)T[-L(0.3, LMaxSize)]/(180)[-L(0.3, LMaxSize)]/(90)A(r, 4)',
+            'I(t): t>0 = F(0.24, 0.84)T[-L(0.3, LMaxSize/3)]/(137.508)I(t-1)',
             'I(t) = F(0.48, 1.44)K(0)',
-            'K(p): p<maxFlowerSize = K(p+0.25)',
-            'L(r, lim): r<lim = L(r+0.02, lim)',
+            'K(p): p<KMaxSize = K(p+0.25)',
+            'L(r, lim): r<lim = L(r+0.1, lim)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 15, 0, 'AI', '', -0.2, {
-            'flowerThreshold': '0.96',
-            'maxFlowerSize': '3',
-            'maxLeafSize': '0.72 - 1e-9'
+            'AThreshold': '4.8 - 1e-9',
+            'KMaxSize': '3',
+            'LMaxSize': '3.6'
         }, [
-            '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/10+0.1)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)]}',
-            '~> K(p): p<1.5 = {[w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)]F(p/10+0.1)[k(p/4, p*18)k(p/4, p*18)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p/4, p*18-3)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-6)k(p*0.23, p*18-6)k(p*0.24, p*18-6)k(p*0.24, p*18-9)k(p*0.23, p*18-15)][o(p*0.22, p*17.5)]}',
-            '~> K(p) = {[w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)]F(p/10+0.1)[k(1.5/4, p*18)k(1.5/4, p*18)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5/4, p*18-3)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.23, p*18-6)k(1.5*0.24, p*18-6)k(1.5*0.24, p*18-9)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-15)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.23, p*18-18)k(1.5*0.24, p*18-15)][o(1.5/4, p*22.5)o(1.5*0.22, p*17.5)o(1.5*0.18, p*10)]}',
+            '~> K(p): p<1 = {[w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)w(p/5, 42)]F(p/10+0.1)[k(p*0.225, p*18)k(p*0.225, p*18)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.21, p*18-6)k(p*0.21, p*18-6)]}',
+            '~> K(p): p<1.5 = {[w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)w(0.2, 42)]F(p/10+0.1)[k(p*0.225, p*18)k(p*0.225, p*18)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.225, p*18-3)k(p*0.21, p*18-6)k(p*0.21, p*18-6)k(p*0.21, p*18-6)k(p*0.2, p*18-6)k(p*0.21, p*18-6)k(p*0.21, p*18-9)k(p*0.2, p*18-15)][o(p*0.2252, p*17.5)]}',
+            '~> K(p) = {[w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)w(0.25, 42)]F(p/10+0.1)[k(1.5*0.225, p*18)k(1.5*0.225, p*18)k(1.5*0.225, p*18-3)k(1.5*0.225, p*18-3)k(1.5*0.225, p*18-3)k(1.5*0.225, p*18-3)k(1.5*0.21, p*18-6)k(1.5*0.21, p*18-6)k(1.5*0.21, p*18-6)k(1.5*0.2, p*18-6)k(1.5*0.21, p*18-6)k(1.5*0.21, p*18-9)k(1.5*0.2, p*18-15)k(1.5*0.2, p*18-15)k(1.5*0.2, p*18-15)k(1.5*0.2, p*18-18)k(1.5*0.2, p*18-18)k(1.5*0.2, p*18-18)k(1.5*0.2, p*18-18)k(1.5*0.2, p*18-18)k(1.5*0.21, p*18-15)][o(1.5/4, p*22.5)o(1.5*0.22, p*17.5)o(1.5*0.18, p*10)]}',
             '~> w(p, a): p<0.1 = [--(a)F(0.2).+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)+++(a)F(0.2).^+(a)F(0.2).]/[--(a)F(0.2)[+++(a)F(0.2).].]',
             '~> w(p, a): p<0.2 = [--(a)F(0.2).+++F(0.2).^+F(0.2).]/[--(a)F(0.2)+++F(0.2).^+F(0.2).]/[--(a)F(0.2)+++F(0.2).^+F(0.2).]/[--(a)F(0.2)[+++F(0.2).].]',
             '~> w(p, a): p<0.25 = [--(a)F(p).++F(p).^F(p).]/[--(a)F(p)++F(p).^F(p).]/[--(a)F(p)++F(p).^F(p).]/[--(a)F(p)[++F(p).].]',
@@ -2989,17 +3490,17 @@ const plantData = {
             '~> k(p, a): p<0.3 = [---(a)F(p/2).+^F(p*2).+&F(p).][---(a)F(p/2)[+&F(p*2)[+^F(p).].].]/(137.508)',
             '~> k(p, a) = [---(a)F(p/2).+^F(p*2).&F(p).][---(a)F(p/2)[+&F(p*2)[^F(p).].].]/(137.508)',
             '~> o(p, a) = [-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]//[-(a)F(p).]',
-            '~> L(p, lim): p<=maxLeafSize/4 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].].[^F(p).F(p).^-F(p).&&-F(p).&F(p).][F(p)[-F(p)[F(p)[-F(p)[F(p)[-F(p).].].].].].]}',
-            '~> L(p, lim): p<=maxLeafSize/3 = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&-F(p).][F(p)[-F(p)[F(p)[-F(p)[-F(p)..].].].].]}',
-            '~> L(p, lim) = {T(4*p^2)[&F(p).F(p).&-F(p).^^-F(p).^--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].].[^F(p).F(p).^-F(p).&&-F(p).&--F(p).][F(p)[-F(p)[F(p)[-F(p)[--F(p)..].].].].]}'
+            '~> L(p, lim): p<=LMaxSize/4 = {T(0.16*p^2)[&F(p/5).F(p/5).&-F(p/5).^^-F(p/5).^F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[F(p/5)[-F(p/5).].].].].].].[^F(p/5).F(p/5).^-F(p/5).&&-F(p/5).&F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[F(p/5)[-F(p/5).].].].].].]}',
+            '~> L(p, lim): p<=LMaxSize/3 = {T(0.16*p^2)[&F(p/5).F(p/5).&-F(p/5).^^-F(p/5).^-F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[-F(p/5)..].].].].].[^F(p/5).F(p/5).^-F(p/5).&&-F(p/5).&-F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[-F(p/5)..].].].].]}',
+            '~> L(p, lim) = {T(0.16*p^2)[&F(p/5).F(p/5).&-F(p/5).^^-F(p/5).^--F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[--F(p/5)..].].].].].[^F(p/5).F(p/5).^-F(p/5).&&-F(p/5).&--F(p/5).][F(p/5)[-F(p/5)[F(p/5)[-F(p/5)[--F(p/5)..].].].].]}'
         ]),
         maxStage: 40,
-        cost: new FirstFreeCost(new ExponentialCost(1, Math.log2(3))),
-        growthRate: BigNumber.from(1.5),
+        requiresWater: true,
+        growthRate: BigNumber.from(7.5),
         growthCost: BigNumber.from(2.5),
-        waterCD: 3 * dayLength,
         propagation: {
-            rate: 1 / 3,
+            stage: [40],
+            rate: [1 / 3],
             priority: 'c'
         },
         actions: [
@@ -3023,51 +3524,49 @@ const plantData = {
                 scale: 6,
                 x: 0,
                 y: saturate(stage / 4, 3.75, 5),
-                Z: 0,
-                upright: true
+                z: 0,
             };
         },
         stroke: (stage) => {
-            return {
-                tickLength: 1,
-            };
-        }
+            return {};
+        },
+        colour: 'orange'
     },
     basil: {
-        system: new LSystem('/(90)BA(0.06, 5)', [
-            'A(r, t): r>=flowerThreshold = S(0)F(0.24, 0.96)K(0.02, 8)',
-            'A(r, t): t>0 = A(r+0.06, t-1)',
-            'A(r, t) = F(0.12, 1.44)[&[I(5)]T(0.2)L(0.06, min(r+0.12, maxLeafSize), 0)]/(180)[&L(0.06, min(r+0.12, maxLeafSize), 0)]/(90)A(r-0.06, 3)',
+        cost: new ExponentialCost(7.5, 2),
+        system: new LSystem('/(90)BA(0.2, 5)', [
+            'A(r, t): r>=AThreshold = S(0)F(0.24, 0.96)K(0.03, 8)',
+            'A(r, t): t>0 = A(r+0.4, t-1)',
+            'A(r, t) = F(0.12, 1.44)[&[I(5)]T(0.2)L(0.12, min(r+0.12, LMaxSize), 0)]/(180)[&L(0.12, min(r+0.12, LMaxSize), 0)]/(90)A(r-0.4, 3)',
             'S(type) < I(t): type>=1 = S(type)',
             'I(t): t>0 = I(t-1)',
-            'I(t) = /(90)F(0.12, 0.72)T[&L(0.03, maxLeafSize/2, 0)]/(180)[&L(0.03, maxLeafSize/2, 0)]I(11)',
-            'K(s, t): t>0 = K(s+0.02, 0)/(90)F(0.12, 0.72)K(0.02, t-1)',
-            'K(s, t): s<maxFlowerSize = K(s+0.02, t)',
-            'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
+            'I(t) = /(90)F(0.12, 0.72)T[&L(0.06, LMaxSize/2, 0)]/(180)[&L(0.06, LMaxSize/2, 0)]I(9)',
+            'K(s, t): t>0 = K(s+0.03, 0)/(90)F(0.12, 0.72)K(0.03, t-1)',
+            'K(s, t): s<KMaxSize = K(s+0.03, t)',
+            'L(p, lim, s): s<1 && p<lim = L(p+0.06, lim, s)',
             'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
-            'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
+            'L(p, lim, s): s>=1 && p>0.12 = L(p-0.12, lim, s)',
             'F(l, lim) > S(type): type<=0 = S(type)F(l, lim)',
             'S(type) < F(l, lim): type>=1 = F(l, lim)S(type)',
             'S(type) =',
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
         ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
-            'flowerThreshold': '0.96',
-            'maxLeafSize': '0.6',
-            'maxFlowerSize': '0.3'
+            'AThreshold': '6.2',
+            'LMaxSize': '1.2',
+            'KMaxSize': '0.45'
         }, [
-            '~> K(t) = {[k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))//k(min(0.6, t*4))]}',
+            '~> K(s, t) = {[k(min(0.6, s*2))//k(min(0.6, s*2))//k(min(0.6, s*2))//k(min(0.6, s*2))//k(min(0.6, s*2))//k(min(0.6, s*2))]}',
             '~> k(size): size<0.36 = [+++&F(size/2).[^^--F(size/2).]][+++^F(size/2).]',
             '~> k(size): size<0.48 = [++F(size/3).++[&F(size/3).][--F(size/3)[+F(size/6).].].[^F(size/3).][--F(size/3)[+F(size/6).].].[--&F(size/3).^^-F(size/3).][--^F(size/3).].]',
             '~> k(size) = [++F(size/3).++[&F(size/3).&F(size/4).][--F(size/3)[-F(size/6).].]..[^F(size/3).^F(size/4).][--F(size/3)[-F(size/6).].]..[-F(size/2).]..[F(size/3).-F(size/3).].]',
-            '~> L(p, lim, s): s<1 = {T(p*0.9)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
-            '~> L(p, lim, s) = {T(lim*1.2)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}'
+            '~> L(p, lim, s): s<1 = {T(p*0.45)F(sqrt(p/2)).[-(48)F(p/2).+F(p/2).+&F(p/2).+F(p/2).][F(p/2)[&F(p/2)[F(p/2)[^F(p/2).].].].].[+(48)F(p/2).-F(p/2).-&F(p/2).-F(p/2).][F(p/2)[&F(p/2)[F(p/2)[^F(p/2).].].].]}',
+            '~> L(p, lim, s) = {T(lim*0.6)F(sqrt(lim/2)).[--F(lim/2).+&F(lim/2).+&F(lim/2).+F(lim/2)..][F(lim/2)[&F(lim/2)[&F(lim/2)[&F(lim/2).].].].].[++F(lim/2).-&F(lim/2).-&F(lim/2).-F(lim/2)..][F(lim/2)[&F(lim/2)[&F(lim/2)[&F(lim/2).].].].]}'
         ]),
-        maxStage: 48,
-        cost: new ExponentialCost(5, 1),
-        growthRate: BigNumber.TWO,
-        growthCost: BigNumber.TWO,
-        waterCD: 2 * dayLength,
+        maxStage: 50,
+        requiresWater: true,
+        growthRate: BigNumber.from(8),
+        growthCost: BigNumber.from(1),
         actions: [
             {
                 symbols: new Set('KL'),
@@ -3075,11 +3574,17 @@ const plantData = {
             },
             {
                 system: new LSystem('', [
-                    'F(l, lim) > K(s, t) =',
-                    'K(s, t) < /(a) =',
-                    'K(s, t) =',
                     'A(r, t) ='
-                ], 30, 0, '', '')
+                ], 30, 0, '', ''),
+                switchNarration: (stage, track) => {
+                    if (track)
+                        return track;
+                    if (stage >= 26)
+                        return 0; // normal track
+                    if (stage >= 22)
+                        return 1; // well pruned
+                    return 2; // poorly pruned
+                }
             }
         ],
         decimals: {
@@ -3097,48 +3602,46 @@ const plantData = {
                 scale: 8,
                 x: 0,
                 y: saturate(stage / 4, 5, 7),
-                Z: 0,
-                upright: true
+                z: 0,
             };
         },
         stroke: (stage) => {
-            return {
-                tickLength: 1
-            };
-        }
+            return {};
+        },
+        colour: 'green'
     },
     campion: {
-        system: new LSystem('/(45)&(5)A(0.1, 5)', [
-            'A(r, t): t>0 = A(r+0.05, t-1)',
-            'A(r, t) = F(0.4, 20)T[&L(0.025)][/(180)&L(0.025)][F(0.4, 10)K(0.125, 0)][^$A(r-0.2, 7)][&$A(r-0.1, 3)]',
+        cost: new ExponentialCost(2000, Math.log2(5)),
+        system: new LSystem('/(45)&(5)A(0.5, 5)', [
+            'A(r, t): t>0 = A(r+0.25, t-1)',
+            'A(r, t) = F(0.4, 20)T[&L(0.125)][/(180)&L(0.125)][F(0.4, 10)K(0.125, 0)][^$A(r-1, 7)][&$A(r-0.5, 3)]',
             'K(p, t): t<2 = K(p*1.1, t+1)',
             'K(p, t): t<3 = K(0.1875, t+1)',
             'K(p, t): t<12 = K(1.35*p-0.8*p^2, t+1)',
             'K(p, t) = O(1)',
-            'L(s): s<maxLeafSize = L(s+0.025)',
+            'L(s): s<LMaxSize = L(s+0.125)',
             'O(s): s>0.5 = O(s*0.9)',
             'O(s) =',
             'F(l, t): t>0 = F(l+0.4, t-1)'
         ], 31, 0, 'A', '', -0.6, {
-            'maxLeafSize': '0.625'
+            'LMaxSize': '3'
         }, [
-            '~> K(p, t): t<3 = {[+(90)b(p*4)b(p*4)b(p*4)b(p*4)b(p*4)]}',
             '~> b(s) = -[^-F(s).][--F(s*2)..][&-F(s).]+^(72)',
-            '~> K(p, t) = {[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]}',
             '~> c(s) = +F(s).-F(s).-F(s).+',
+            '~> K(p, t): t<3 = {[+(90)b(p*4)b(p*4)b(p*4)b(p*4)b(p*4)]}',
+            '~> K(p, t) = {[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]/(72)[c(p*2)-(p*200)k(6*p^2+0.4*p+0.1)]}',
             '~> k(s) = [^(40)F(s/2).&(10)F(s/2).&F(s/4).][F(s/2)-(10)F(s).][&(40)F(s/2)[^(10)F(s/2)[^F(s/4).].].].',
-            '~> L(s) = {T(s*0.5)F(sqrt(s)).[-(48)F(s*2).+F(s*2).+&F(s*2).+F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].].[+(48)F(s*2).-F(s*2).-&F(s*2).-F(s*2).][F(s*2)[&F(s*2)[F(s*2)[^F(s*2).].].].]}',
+            '~> L(s) = {T(s*0.1)F(sqrt(s/5)).[-(48)F(s*0.4).+F(s*0.4).+&F(s*0.4).+F(s*0.4).][F(s*0.4)[&F(s*0.4)[F(s*0.4)[^F(s*0.4).].].].].[+(48)F(s*0.4).-F(s*0.4).-&F(s*0.4).-F(s*0.4).][F(s*0.4)[&F(s*0.4)[F(s*0.4)[^F(s*0.4).].].].]}',
             '~> O(s) = {[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].]./(72)[+(10)c(s).[-(75)F(s).].].}'
         ]),
         maxStage: 29,
-        cost: new ExponentialCost(2000, Math.log2(5)),
-        growthRate: BigNumber.from(2.75),
+        requiresWater: true,
+        growthRate: BigNumber.from(13.75),
         growthCost: BigNumber.TEN,
-        waterCD: 5 * dayLength,
         stagelyIncome: BigNumber.ONE,
         propagation: {
-            stage: 27,
-            rate: 1 / 2,
+            stage: [27],
+            rate: [1 / 2],
             priority: 'c'
         },
         actions: [
@@ -3160,26 +3663,140 @@ const plantData = {
                 scale: 12,
                 x: 0,
                 y: saturate(stage, 7.5, 22.5),
-                Z: 0,
-                upright: true
+                z: 0,
             };
         },
         stroke: (stage) => {
-            return {
-                tickLength: 1
-            };
-        }
+            return {};
+        },
+        colour: 'magenta'
     },
+    // ginger
+    // sunflower
+    // hopleek:
+    // {
+    //     system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
+    //     maxStage: 20,
+    //     parasite: new Set(['sprout', 'basil']),
+    //     requiresWater: false,
+    //     growthRate: BigNumber.FIVE,
+    //     growthCost: BigNumber.TWO,
+    //     actions:
+    //     [
+    //         {}
+    //     ],
+    //     camera: (stage) => {
+    //         return {
+    //             scale: 8,
+    //             x: 0,
+    //             y: <number>saturate(stage / 4, 5, 9),
+    //             z: 0,
+    //         };
+    //     },
+    //     stroke: (stage) =>
+    //     {
+    //         return {};
+    //     }
+    // },
+    broomrape: {
+        system: new LSystem('B(0.125, timer)', [
+            // Invisibility regenerates when the shoots go up
+            'B(r, t) > F(l, lim): t<timer = B(1.15*r-0.0012*r^2, t+2)',
+            // Cheekily goes back to hiding
+            'B(r, t) > F(l, lim) = B(0.125, t)%',
+            'B(r, t): t>0 = B(1.15*r-0.0012*r^2, t-1)',
+            'B(r, t) = B(r, t)F(0.15, 0.9)I(12)',
+            'I(t): t>0 = F(0.05, 0.3)[-K(0)]/(137.508)I(t-1)',
+            'K(s): s<KMaxSize = K(s+0.5)',
+            'K(s) = O(0.2)',
+            'O(s): s>OMinSize = O(s-0.05)',
+            'F(l, lim): l<lim = F(l+0.05, lim)',
+        ], 30, 0, 'B', '+-&^/\\T', 0, {
+            'timer': '30',
+            'KMaxSize': '4.5',
+            'OMinSize': '0.05 + 1e-9'
+        }, [
+            // Stem
+            '~> I(t) = F(0.2)[aaaa]',
+            '~> a = {[-F(0.2).+(45)F(0.2).][F(0.45).][+F(0.2)[-(45)F(0.2).].]}/(90)',
+            // Flower lips: down, up, left, right
+            '~> K(s) = {[T((s-2)/10)F(0.05)d(sqrt(s+0.5)/20)u(sqrt(s+0.5)/20)l(sqrt(s+0.5)/20)r(sqrt(s+0.5)/20)]}',
+            '~> d(s) = [-(45)F(s).+[&(45)F(s).^(45)F(s*2).-F(s*3)..][F(s*3)-F(s*2).][^(45)F(s)[&(45)F(s*2)[-F(s*3)..].].].]',
+            '~> u(s) = [+F(s*1.5).-[&(45)F(s).^(45)F(s*2).-(45)F(s*4)..][F(s*3)-(45)F(s*3).][^(45)F(s)[&(45)F(s*2)[-(45)F(s*4)..].].].]',
+            '~> l(s) = [-(15)&(45)F(s).^(45)[-(45)F(s).+(45)F(s*3).-&(15)F(s*2)..][F(s*3)&F(s*2).][+(45)F(s*2)[-(45)F(s*2)[-&(15)F(s*3)..].].].]',
+            '~> r(s) = [-(15)^(45)F(s).&(45)[-(45)F(s).+(45)F(s*3).-^(15)F(s*2)..][F(s*3)^F(s*2).][+(45)F(s*2)[-(45)F(s*2)[-^(15)F(s*3)..].].].]',
+            '~> O(s) = T((2.5-s)/5)K(4.25+s)'
+        ]),
+        maxStage: 140,
+        parasite: new Set([
+            'sprout',
+            'calendula',
+            'sunflower',
+            'dandelion',
+            'clover'
+        ]),
+        requiresWater: false,
+        growthRate: BigNumber.from(30),
+        growthCost: BigNumber.from(15),
+        propagation: {
+            stage: [48, 95],
+            rate: [0.6, 0.6],
+            priority: 'm'
+        },
+        actions: [
+            {
+                symbols: new Set('KF')
+            }
+        ],
+        camera: (stage) => {
+            let m = (stage - 1) % 47;
+            m = Math.max(m - 35, 0);
+            return {
+                scale: 4,
+                x: 0,
+                y: 2.5 + m / 5,
+                z: 0,
+            };
+        },
+        stroke: (stage) => {
+            return {};
+        },
+        colour: 'brown'
+    },
+    // dandelion:
+    // {
+    //     system: new LSystem('B(0.05)', ['A(r) = FA(r)', 'B(r) = B(r+0.05)']),
+    //     maxStage: 20,
+    //     requiresWater: false,
+    //     growthRate: BigNumber.FIVE,
+    //     growthCost: BigNumber.TWO,
+    //     actions:
+    //     [
+    //         {}
+    //     ],
+    //     camera: (stage) => {
+    //         return {
+    //             scale: 8,
+    //             x: 0,
+    //             y: <number>saturate(stage / 4, 5, 9),
+    //             z: 0,
+    //         };
+    //     },
+    //     stroke: (stage) =>
+    //     {
+    //         return {};
+    //     }
+    // },
     arrow: // Arrow weed (test)
     {
+        cost: new FirstFreeCost(new ExponentialCost(1, 1)),
         system: new LSystem('A(1)', [
             'F(l)=F(l*2)',
             'A(t)=F(1)[+A(t/2)][-A(t/2)]F(1)A(t)'
         ], 30),
-        cost: new FirstFreeCost(new ExponentialCost(1, 1)),
+        requiresWater: true,
         growthRate: BigNumber.ONE,
         growthCost: BigNumber.from(45),
-        waterCD: 1 * dayLength,
         actions: [
             {
                 symbols: new Set('A')
@@ -3199,7 +3816,7 @@ const plantData = {
                 // followFactor: 0.15,
                 x: 2 ** stage,
                 y: 0,
-                Z: 0,
+                z: 0,
                 upright: false
             };
         },
@@ -3218,6 +3835,7 @@ const plantData = {
     },
     brasil: // Old basil
     {
+        cost: new ExponentialCost(1, 1),
         system: new LSystem('BA(0.18, 0)', [
             'A(r, t): r>=flowerThreshold = K(0)',
             'A(r, t): t<3 = A(r+0.06, t+1)',
@@ -3248,10 +3866,9 @@ const plantData = {
             '~> L(p, lim, s) = {\\(90)T(lim)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}'
         ]),
         maxStage: 54,
-        cost: new ExponentialCost(1, 1),
+        requiresWater: false,
         growthRate: BigNumber.TWO,
         growthCost: BigNumber.THREE,
-        waterCD: 9 * 60,
         actions: [
             {
                 symbols: new Set('L')
@@ -3274,18 +3891,18 @@ const plantData = {
                 scale: 8,
                 x: 0,
                 y: saturate(stage / 4, 5, 9),
-                Z: 0,
+                z: 0,
                 upright: true
             };
         },
         stroke: (stage) => {
-            return {
-                tickLength: 1
-            };
+            return {};
         }
     },
 };
 const plantIDLookup = {
+    sprout: 0,
+    0: 'sprout',
     calendula: 1,
     1: 'calendula',
     basil: 2,
@@ -3298,9 +3915,9 @@ const plantIDLookup = {
     brasil: 9002,
     9002: 'brasil'
 };
-const speeds = [1, 1.25, 5 / 3];
-const speedAdjDayLengths = speeds.map(x => dayLength / x);
-const clockMinDiv = [12, 15, 20];
+const speeds = [5, 4, 3, 2, 1];
+const speedAdjDayLengths = speeds.map(x => dayLength * x);
+const clockMinDiv = [12, 15, 20, 30, 60];
 let haxEnabled = false;
 let time = 0;
 let lastSave = 0;
@@ -3311,24 +3928,27 @@ let growthCoord = 0;
 let insolationIntegral = 0;
 let growthIntegral = 0;
 let plotIdx = 0;
-let colonyIdx = new Array(nofPlots).fill(0);
+let slotIdx = 0;
 let plantIdx = new Array(nofPlots).fill(0);
+let extraPotPlantIdx = 0;
 let selectedColony = null;
 let finishedTutorial = false;
 let actuallyPlanting = true;
-let speedIdx = 1;
+let speedIdx = 2;
 let graphMode2D = 1 /* LineGraphModes.INSOLATION */;
 let graphMode3D = true;
 let colonyMode = 1 /* ColonyModes.VERBOSE */;
 let fancyPlotTitle = false;
 let actionPanelOnTop = false;
 let actionConfirm = true;
-let quatMode = 0 /* QuaternaryModes.PROFITS */;
+let quatMode = 1 /* QuaternaryModes.PROFITS */;
+let cameraMode = 0 /* CameraModes.STATIC */;
 let colonyViewConfig = {};
 let shelfPages = {
     almanac: 0,
     manual: 0
 };
+let autoWaterConfig = {};
 let notebook = {};
 let tmpCurrency;
 let tmpLevels;
@@ -3338,8 +3958,10 @@ const xUpQuat = new Quaternion(0, 1, 0, 0);
 const yUpQuat = new Quaternion(0, 0, 1, 0);
 const zUpQuat = new Quaternion(0, 0, 0, 1);
 let manager = new ColonyManager({}, nofPlots, maxColoniesPerPlot);
+let extraManager = new ColonyManager({}, 1, 1, manager);
 let renderer = new Renderer(new LSystem(), '', []);
-let globalRNG = new Xorshift(Date.now());
+let gameRNG = new Xorshift(1752);
+let modelRNG = new Xorshift(Date.now());
 let quaternaryEntries = [
     new QuaternaryEntry('p_1', null),
     new QuaternaryEntry('p_2', null),
@@ -3360,13 +3982,14 @@ let perfNames = [
 ];
 let perfs = perfNames.map(element => profilers.get(element[0]));
 let perfQuaternaryEntries = perfNames.map(element => new QuaternaryEntry(element[1], null));
-let createImageFrameBtn = (params, callback, image) => {
+let createImageBtn = (params, callback, isAvailable, image) => {
     let triggerable = true;
+    let borderColor = () => isAvailable() ? Color.BORDER : Color.TRANSPARENT;
     let frame = ui.createFrame({
         cornerRadius: 1,
         margin: new Thickness(2),
         padding: new Thickness(1),
-        hasShadow: true,
+        hasShadow: isAvailable,
         heightRequest: getImageSize(ui.screenWidth),
         widthRequest: getImageSize(ui.screenWidth),
         content: ui.createImage({
@@ -3374,7 +3997,7 @@ let createImageFrameBtn = (params, callback, image) => {
             aspect: Aspect.ASPECT_FIT,
             useTint: false
         }),
-        borderColor: Color.BORDER,
+        borderColor,
         ...params
     });
     frame.onTouched = (e) => {
@@ -3383,9 +4006,9 @@ let createImageFrameBtn = (params, callback, image) => {
             // frame.hasShadow = false;
         }
         else if (e.type.isReleased()) {
-            frame.borderColor = Color.BORDER;
+            frame.borderColor = borderColor;
             // frame.hasShadow = true;
-            if (triggerable) {
+            if (triggerable && isAvailable()) {
                 Sound.playClick();
                 callback();
             }
@@ -3394,15 +4017,85 @@ let createImageFrameBtn = (params, callback, image) => {
         }
         else if (e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
             e.x > frame.width || e.y > frame.height)) {
-            frame.borderColor = Color.BORDER;
+            frame.borderColor = borderColor;
             // frame.hasShadow = true;
             triggerable = false;
         }
     };
     return frame;
 };
-let createLabelFrameBtn = (params, callback, text, fontSize = 14) => {
+let createScrollBarImageBtn = (params, callback, heldCallback = null, repeatable = false, isAvailable, image) => {
+    const bound = getImageSize(ui.screenWidth);
+    let held = false;
     let triggerable = true;
+    let origx = null;
+    let origy = null;
+    let borderColor = () => isAvailable() ? Color.BORDER : Color.TRANSPARENT;
+    let frame = ui.createFrame({
+        cornerRadius: 1,
+        margin: new Thickness(2),
+        padding: new Thickness(1),
+        hasShadow: isAvailable,
+        heightRequest: getImageSize(ui.screenWidth),
+        widthRequest: getImageSize(ui.screenWidth),
+        content: ui.createImage({
+            source: image,
+            aspect: Aspect.ASPECT_FIT,
+            useTint: () => {
+                if (heldCallback && repeatable && held)
+                    heldCallback();
+                return false;
+            }
+        }),
+        borderColor,
+        ...params
+    });
+    frame.onTouched = (e) => {
+        if (e.type == TouchType.PRESSED) {
+            frame.borderColor = Color.TRANSPARENT;
+            if (origx == null) {
+                origx = e.x;
+                origy = e.y;
+            }
+        }
+        else if (e.type == TouchType.LONGPRESS) {
+            // frame.borderColor = borderColor;
+            if (heldCallback &&
+                !(Math.abs(e.x - origx) > bound || Math.abs(e.y - origy) > bound)) {
+                Sound.playClick();
+                heldCallback();
+                held = true;
+                // Prevent further callback
+                triggerable = false;
+            }
+        }
+        else if (e.type.isReleased()) {
+            frame.borderColor = borderColor;
+            if (triggerable && isAvailable() && !(Math.abs(e.x - origx) > bound
+                || Math.abs(e.y - origy) > bound)) {
+                Sound.playClick();
+                callback();
+            }
+            else {
+                triggerable = true;
+            }
+            held = false;
+            origx = null;
+            origy = null;
+        }
+        else if (e.type == TouchType.MOVED && (Math.abs(e.x - origx) > bound ||
+            Math.abs(e.y - origy) > bound)) {
+            frame.borderColor = borderColor;
+            held = false;
+            triggerable = false;
+        }
+    };
+    return frame;
+};
+let createLabelBtn = (params, callback, isAvailable, text, fontSize = 14) => {
+    let triggerable = true;
+    let textColor = () => isAvailable() ? Color.TEXT : Color.TEXT_MEDIUM;
+    let borderColor = () => isAvailable() ? Color.BORDER : Color.TRANSPARENT;
     let frame = ui.createFrame({
         cornerRadius: 1,
         // padding: new Thickness(10, 2),
@@ -3411,10 +4104,10 @@ let createLabelFrameBtn = (params, callback, text, fontSize = 14) => {
             text,
             horizontalTextAlignment: TextAlignment.CENTER,
             verticalTextAlignment: TextAlignment.CENTER,
-            textColor: Color.TEXT,
+            textColor,
             fontSize
         }),
-        borderColor: Color.BORDER,
+        borderColor,
         ...params
     });
     frame.onTouched = (e) => {
@@ -3423,9 +4116,9 @@ let createLabelFrameBtn = (params, callback, text, fontSize = 14) => {
             frame.content.textColor = Color.TEXT_MEDIUM;
         }
         else if (e.type.isReleased()) {
-            frame.borderColor = Color.BORDER;
-            frame.content.textColor = Color.TEXT;
-            if (triggerable) {
+            frame.borderColor = borderColor;
+            frame.content.textColor = textColor;
+            if (triggerable && isAvailable()) {
                 Sound.playClick();
                 callback();
             }
@@ -3434,8 +4127,44 @@ let createLabelFrameBtn = (params, callback, text, fontSize = 14) => {
         }
         else if (e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
             e.x > frame.width || e.y > frame.height)) {
-            frame.borderColor = Color.BORDER;
-            frame.content.textColor = Color.TEXT;
+            frame.borderColor = borderColor;
+            frame.content.textColor = textColor;
+            triggerable = false;
+        }
+    };
+    return frame;
+};
+let createNakedLabelBtn = (params, callback, isAvailable, text, fontSize = 14) => {
+    let triggerable = true;
+    let frame = ui.createGrid({
+        children: [
+            ui.createLatexLabel({
+                isVisible: isAvailable,
+                text,
+                horizontalTextAlignment: TextAlignment.CENTER,
+                verticalTextAlignment: TextAlignment.CENTER,
+                textColor: Color.TEXT,
+                fontSize
+            }),
+        ],
+        ...params
+    });
+    frame.onTouched = (e) => {
+        if (e.type == TouchType.PRESSED) {
+            frame.children[0].textColor = Color.TEXT_MEDIUM;
+        }
+        else if (e.type.isReleased()) {
+            frame.children[0].textColor = Color.TEXT;
+            if (triggerable && isAvailable()) {
+                Sound.playClick();
+                callback();
+            }
+            else
+                triggerable = true;
+        }
+        else if (e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
+            e.x > frame.width || e.y > frame.height)) {
+            frame.children[0].textColor = Color.TEXT;
             triggerable = false;
         }
     };
@@ -3464,65 +4193,69 @@ let createHesitantSwitch = (params, callback, isToggled) => {
     });
     return element;
 };
-// const actionsLabel = ui.createLatexLabel
-// ({
-//     isVisible: () => currentColony ? true : false,
-//     column: 0,
-//     horizontalOptions: LayoutOptions.END,
-//     verticalOptions: LayoutOptions.START,
-//     margin: new Thickness(0, 14, 80, 0),
-//     text: getLoc('labelActions'),
-//     fontSize: 10,
-//     textColor: () => Color.fromHex(eq2Colour.get(game.settings.theme))
-// });
-const waterFrame = createImageFrameBtn({
-    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
-    row: 0, column: 0,
-}, () => manager.water(selectedColony), game.settings.theme == Theme.LIGHT ?
+const waterImage = game.settings.theme == Theme.LIGHT ?
     ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png'));
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png');
+const waterFrame = createScrollBarImageBtn({
+    row: 0, column: 0,
+}, () => manager.waterColony(selectedColony), () => manager.waterColony(selectedColony), true, () => {
+    if (selectedColony && !selectedColony.wet)
+        return true;
+    return false;
+}, waterImage);
 const waterLabel = ui.createLatexLabel({
-    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 1,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9, 1, 9),
     text: () => {
-        let remainingCD = (selectedColony?.nextWater ?? 0) - time;
-        if (remainingCD <= 0)
-            return getLoc('labelWater');
-        remainingCD /= speeds[speedIdx];
-        let minutes = Math.floor(remainingCD / 60);
-        let seconds = Math.floor(remainingCD - minutes * 60);
-        let CDTimeString;
-        if (minutes >= 60) {
-            let hours = Math.floor(minutes / 60);
-            minutes -= hours * 60;
-            CDTimeString = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toFixed(0).padStart(2, '0')}`;
+        let c = selectedColony;
+        if (!c)
+            return '';
+        // @ts-expect-error
+        let threshold = plantData[c.id].growthCost *
+            // @ts-expect-error
+            BigNumber.from(c.sequence.length);
+        if (!c.wet) {
+            if (c.growth >= threshold)
+                return getLoc('labelWaterUrgent');
+            // @ts-expect-error
+            else if (c.growth >= threshold / BigNumber.TWO)
+                return getLoc('labelWater');
+            else
+                return '';
         }
-        else {
-            CDTimeString = `${minutes.toString()}:${seconds.toFixed(0).padStart(2, '0')}`;
-        }
-        return CDTimeString;
+        else
+            return '';
     },
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const harvestFrame = createImageFrameBtn({
-    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
+const harvestImage = game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png');
+const harvestFrame = createScrollBarImageBtn({
     row: 0, column: 2,
 }, () => {
     if (actionConfirm) {
-        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 0 /* Actions.HARVEST */);
+        let menu = createConfirmationMenu(manager, plotIdx, slotIdx, 0 /* Actions.HARVEST */);
         menu.show();
     }
     else
-        manager.performAction(plotIdx, colonyIdx[plotIdx], 0 /* Actions.HARVEST */);
-}, game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png'));
+        manager.queueAction(plotIdx, slotIdx, 0 /* Actions.HARVEST */);
+}, () => {
+    if (actionConfirm) {
+        let menu = createBulkConfirmationMenu(manager, plotIdx, 0 /* Actions.HARVEST */);
+        menu.show();
+    }
+    else {
+        for (let i = manager.colonies[plotIdx].length - 1; i >= 0; --i) {
+            if (isColonyVisible(manager.colonies[plotIdx][i]))
+                manager.queueAction(plotIdx, i, 0 /* Actions.HARVEST */);
+        }
+    }
+}, false, () => true, harvestImage);
 const harvestLabel = ui.createLatexLabel({
-    // isVisible: () => selectedColony?.profit > BigNumber.ZERO,
     row: 0, column: 3,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
@@ -3531,7 +4264,10 @@ const harvestLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const pruneFrame = createImageFrameBtn({
+const pruneImage = game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png');
+const pruneFrame = createScrollBarImageBtn({
     isVisible: () => {
         if (!selectedColony ||
             !plantData[selectedColony.id].actions[1 /* Actions.PRUNE */])
@@ -3541,14 +4277,12 @@ const pruneFrame = createImageFrameBtn({
     row: 0, column: 4,
 }, () => {
     if (actionConfirm) {
-        let menu = createConfirmationMenu(plotIdx, colonyIdx[plotIdx], 1 /* Actions.PRUNE */);
+        let menu = createConfirmationMenu(manager, plotIdx, slotIdx, 1 /* Actions.PRUNE */);
         menu.show();
     }
     else
-        manager.performAction(plotIdx, colonyIdx[plotIdx], 1 /* Actions.PRUNE */);
-}, game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png'));
+        manager.queueAction(plotIdx, slotIdx, 1 /* Actions.PRUNE */);
+}, null, false, () => true, pruneImage);
 const pruneLabel = ui.createLatexLabel({
     isVisible: () => {
         if (!selectedColony ||
@@ -3560,68 +4294,30 @@ const pruneLabel = ui.createLatexLabel({
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9, 1, 9),
-    text: getLoc('labelActions')[1],
+    text: getLoc('labelActions')[1 /* Actions.PRUNE */],
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-// const mutateFrame = createFramedButton
-// ({
-//     row: 0, column: 4,
-// }, 2, () => log('Mootation!'),
-// game.settings.theme == Theme.LIGHT ?
-// ImageSource.THEORY :
-// ImageSource.THEORY);
-// const mutateLabel = ui.createLatexLabel
-// ({
-//     row: 0, column: 5,
-//     // horizontalOptions: LayoutOptions.END,
-//     verticalTextAlignment: TextAlignment.START,
-//     margin: new Thickness(0, 9, 1, 9),
-//     text: 'Mutate',
-//     fontSize: 10,
-//     textColor: Color.TEXT_MEDIUM
-// });
-const settingsLabel = ui.createLatexLabel({
+const shelfImage = game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/white-book.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/white-book.png');
+const mainMenuLabel = ui.createLatexLabel({
     row: 0, column: 1,
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9),
     text: () => {
-        let dt = (time - lastSave) / speeds[speedIdx];
+        let dt = (time - lastSave) * speeds[speedIdx];
         if (dt < 30)
-            return Localization.get('SettingsPopupTitle');
+            return getLoc('permaShelf');
         return Localization.format(getLoc('labelSave'), Math.floor(dt));
     },
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const settingsFrame = createImageFrameBtn({
+const mainMenuFrame = createImageBtn({
     row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
-}, () => createWorldMenu().show(), game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/spoted-flower.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/spoted-flower.png'));
-// const skipLabel = ui.createLatexLabel
-// ({
-//     row: 1, column: 1,
-//     isVisible: !finishedTutorial,
-//     verticalTextAlignment: TextAlignment.START,
-//     margin: new Thickness(0, 9),
-//     text: getLoc('labelSkip'),
-//     fontSize: 10,
-//     textColor: Color.TEXT_MEDIUM
-// });
-// const skipFrame = createFramedButton
-// ({
-//     row: 1, column: 0,
-//     isVisible: !finishedTutorial,
-//     horizontalOptions: LayoutOptions.START
-// }, 2, () =>
-// {
-//     plotPerma.buy(1);
-//     updateAvailability();
-// }, game.settings.theme == Theme.LIGHT ?
-// ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/shiny-apple.png') :
-// ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/shiny-apple.png'));
+}, () => createShelfMenu().show(), () => true, shelfImage);
 var controlStack = ui.createStackLayout({
     isVisible: false,
     margin: new Thickness(6, 0, 6, 6),
@@ -3636,17 +4332,17 @@ var controlStack = ui.createStackLayout({
     ]
 });
 var switchPlant;
-// var viewColony: Upgrade;
-// var switchColony: Upgrade;
-// var switchbackColony: Upgrade;
 var plants = Array.from({ length: nofPlots }, (_) => { return {}; });
-var shelfPerma;
 var plotPerma;
 var plantPerma;
+var extraPotPerma;
+var beehivePerma;
 var freePenny;
 var pauseGame;
+var trueSight;
 var warpTick;
 var warpDay;
+var warpWeek;
 var warpYear;
 var warpZero;
 var currency;
@@ -3714,95 +4410,6 @@ var init = () => {
         switchPlant.isAvailable = false;
         switchPlant.isAutoBuyable = false;
     }
-    /* Switchback colony
-    Too late to look back.
-    */
-    // {
-    //     switchbackColony = theory.createUpgrade(-3, currency, new FreeCost);
-    //     switchbackColony.getDescription = () => Localization.format(
-    //     getLoc('switchColony'), colonyIdx[plotIdx] + 1,
-    //     manager.colonies[plotIdx].length);
-    //     switchbackColony.info = getLoc('switchColonyInfo');
-    //     switchbackColony.bought = (_) =>
-    //     {
-    //         switchbackColony.level = 0;
-    //         let len = manager.colonies[plotIdx].length;
-    //         if(len < 2)
-    //             return;
-    //         colonyIdx[plotIdx] = (colonyIdx[plotIdx] - 1 + len) % len;
-    //         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    //         renderer.colony = selectedColony;
-    //     };
-    //     switchbackColony.isAvailable = false;
-    // }
-    /* Switch colony
-    Modulow
-    */
-    // {
-    //     switchColony = theory.createUpgrade(-2, currency, new FreeCost);
-    //     switchColony.getDescription = () => Localization.format(
-    //     getLoc('switchColony'), colonyIdx[plotIdx] + 1,
-    //     manager.colonies[plotIdx].length);
-    //     switchColony.info = getLoc('switchColonyInfo');
-    //     switchColony.bought = (_) =>
-    //     {
-    //         switchColony.level = 0;
-    //         let len = manager.colonies[plotIdx].length;
-    //         if(len < 2)
-    //             return;
-    //         colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) % len;
-    //         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    //         renderer.colony = selectedColony;
-    //     };
-    //     switchColony.isAvailable = false;
-    // }
-    /* View colony
-    Essential in learning the game.
-    */
-    // {
-    //     viewColony = theory.createUpgrade(-4, currency, new FreeCost);
-    //     viewColony.description = getLoc('viewColony');
-    //     viewColony.info = getLoc('viewColonyInfo');
-    //     viewColony.bought = (_) =>
-    //     {
-    //         viewColony.level = 0;
-    //         selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    //         if(!selectedColony)
-    //             return;
-    //         let seqMenu = createColonyViewMenu(selectedColony);
-    //         seqMenu.show();
-    //     };
-    //     viewColony.isAvailable = false;
-    // }
-    /* Notebook
-    Unlocks when acquiring Buy All.
-    */
-    {
-        shelfPerma = theory.createPermanentUpgrade(10, currency, new FreeCost);
-        shelfPerma.description = getLoc('permaShelf');
-        shelfPerma.info = getLoc('permaShelfInfo');
-        shelfPerma.bought = (_) => {
-            shelfPerma.level = 0;
-            let menu = createShelfMenu();
-            menu.show();
-        };
-        shelfPerma.isAvailable = false;
-    }
-    /* Settings
-    World menu.
-    */
-    // {
-    //     settingsPerma = theory.createPermanentUpgrade(9000, currency,
-    //     new FreeCost);
-    //     settingsPerma.description = getLoc('permaSettings');
-    //     settingsPerma.info = getLoc('permaSettingsInfo');
-    //     settingsPerma.bought = (_) =>
-    //     {
-    //         settingsPerma.level = 0;
-    //         let settingsMenu = createWorldMenu();
-    //         settingsMenu.show();
-    //     }
-    // }
     /* Plot unlock
     Before you can plant any plants, you have to switch tab and unlock plot 0.
     */
@@ -3850,10 +4457,26 @@ var init = () => {
     }
     theory.createPublicationUpgrade(1, currency, permaCosts[0]);
     theory.publicationUpgrade.bought = (_) => theory.invalidateQuaternaryValues();
-    theory.createBuyAllUpgrade(2, currency, permaCosts[1]);
+    {
+        extraPotPerma = theory.createPermanentUpgrade(3, currency, new ConstantCost(permaCosts[1]));
+        extraPotPerma.description = getLoc('permaExtraPot');
+        extraPotPerma.info = getLoc('permaExtraPotInfo');
+        extraPotPerma.maxLevel = 1;
+    }
+    theory.createBuyAllUpgrade(2, currency, permaCosts[2]);
     theory.buyAllUpgrade.description = getLoc('permaNote');
     theory.buyAllUpgrade.info = getLoc('permaNoteInfo');
-    // theory.createAutoBuyerUpgrade(3, currency, permaCosts[2]);
+    /* Free penny
+    For testing purposes
+    */
+    {
+        freePenny = theory.createPermanentUpgrade(9001, currency, new FreeCost);
+        freePenny.description = 'Get 1 penny for free';
+        freePenny.info = 'Yields 1 penny';
+        // @ts-expect-error
+        freePenny.bought = (_) => currency.value += BigNumber.ONE;
+        freePenny.isAvailable = haxEnabled;
+    }
     /* Pause
     For testing purposes
     */
@@ -3871,18 +4494,21 @@ var init = () => {
         };
         pauseGame.isAvailable = haxEnabled;
     }
-    /* Free penny
+    /* Truesight
     For testing purposes
     */
     {
-        freePenny = theory.createPermanentUpgrade(9001, currency, new FreeCost);
-        freePenny.description = 'Get 1 penny for free';
-        freePenny.info = 'Yields 1 penny';
-        // @ts-expect-error
-        freePenny.bought = (_) => currency.value += BigNumber.ONE;
-        freePenny.isAvailable = haxEnabled;
+        trueSight = theory.createPermanentUpgrade(9007, currency, new FreeCost);
+        let descs = [`Light Luminary's lamp`, `Extinguish Luminary's lamp`];
+        trueSight.getDescription = () => descs[trueSight.level];
+        trueSight.info = 'Reveals colonies hidden underground';
+        trueSight.bought = (_) => {
+            trueSight.level &= 1;
+            theory.invalidateQuaternaryValues();
+        };
+        trueSight.isAvailable = haxEnabled;
     }
-    /* Warp tick
+    /* Warp forward
     For testing purposes
     */
     {
@@ -3891,28 +4517,23 @@ var init = () => {
         warpTick.info = 'Warps forward by a tick';
         warpTick.bought = (_) => tick(0.1, 1);
         warpTick.isAvailable = haxEnabled;
-    }
-    /* Warp one
-    For testing purposes
-    */
-    {
         warpDay = theory.createPermanentUpgrade(9003, currency, new FreeCost);
         warpDay.description = 'Warp day';
         warpDay.info = 'Warps forward by a day';
-        warpDay.bought = (_) => tick(dayLength / speeds[speedIdx], 1);
+        warpDay.bought = (_) => tick(dayLength * speeds[speedIdx], 1);
         warpDay.isAvailable = haxEnabled;
-    }
-    /* Warp year
-    For testing purposes
-    */
-    {
+        warpWeek = theory.createPermanentUpgrade(9008, currency, new FreeCost);
+        warpWeek.description = 'Warp week';
+        warpWeek.info = 'Warps forward by a week';
+        warpWeek.bought = (_) => tick(dayLength * 7 * speeds[speedIdx], 1);
+        warpWeek.isAvailable = haxEnabled;
         warpYear = theory.createPermanentUpgrade(9005, currency, new FreeCost);
         warpYear.description = 'Warp year';
         warpYear.info = 'Warps forward by 365 days';
-        warpYear.bought = (_) => tick(dayLength * 365 / speeds[speedIdx], 1);
+        warpYear.bought = (_) => tick(dayLength * 365 * speeds[speedIdx], 1);
         warpYear.isAvailable = haxEnabled;
     }
-    /* Warp zero
+    /* Reset time
     For testing purposes
     */
     {
@@ -3931,36 +4552,36 @@ var init = () => {
         };
         warpZero.isAvailable = haxEnabled;
     }
-    // To do: challenge plot (-1)
     // Next: milestones
+    // Story chapters
     let chapters = getLoc('chapters');
-    theory.createStoryChapter(0, chapters?.intro[0]?.title, chapters?.intro[0]?.contents, () => true);
-    theory.createStoryChapter(-1, chapters?.intro[1]?.title, chapters?.intro[1]?.contents, () => plotPerma.level > 0);
-    theory.createStoryChapter(1, chapters?.basil?.title, chapters?.basil?.contents, () => plantPerma.level > 0);
+    theory.createStoryChapter(-1, chapters?.intro?.title, chapters?.intro?.contents, () => true);
+    theory.createStoryChapter(0, chapters?.sprout?.title, chapters?.sprout?.contents, () => selectedColony?.id == 'sprout');
+    theory.createStoryChapter(1, chapters?.basil?.title, chapters?.basil?.contents, () => plantPerma.level > 1);
     theory.createStoryChapter(2, chapters?.notebook?.title, chapters?.notebook?.contents, () => theory.buyAllUpgrade.level > 0);
     theory.createStoryChapter(3, chapters?.flood?.title, chapters?.flood?.contents, () => theory.tau >= BigNumber.TEN && time < 10);
     let fifteen = BigNumber.from(1e15).pow(tauRate);
     theory.createStoryChapter(4, chapters?.nepo?.title, chapters?.nepo?.contents, () => theory.tau >= fifteen);
+    // Achievements
+    let achievements = getLoc('achievements');
+    theory.createAchievement(0, null, achievements?.debt?.title, achievements?.debt?.desc, () => currency.value < BigNumber.ZERO);
+    theory.createAchievement(1, null, achievements?.immortal?.title, achievements?.immortal?.desc, () => years >= 200);
     theory.primaryEquationHeight = 30;
     theory.primaryEquationScale = 0.96;
-    theory.secondaryEquationHeight = 105;
+    theory.secondaryEquationHeight = 111;
 };
 var updateAvailability = () => {
     perfs[5 /* Profilers.AVAILABILITY */].exec(() => {
         let x = plotIdx;
-        let y = colonyIdx;
+        let y = slotIdx;
         let p = plantIdx;
         if (!finishedTutorial) {
             finishedTutorial = plotPerma.level > 0;
-            shelfPerma.isAvailable = finishedTutorial;
         }
         else {
-            shelfPerma.isAvailable = true;
-            switchPlant.isAvailable = !plants[x][plantUnlocks[p[x]]].level &&
-                plantPerma.level > 0;
+            switchPlant.isAvailable = x < plotPerma.level &&
+                !plants[x][plantUnlocks[p[x]]].level && plantPerma.level > 0;
             controlStack.isVisible = true;
-            // skipLabel.isVisible = !finishedTutorial;
-            // skipFrame.isVisible = !finishedTutorial;
         }
         for (let i = 0; i < plotPerma.level; ++i) {
             for (let j = 0; j < plantUnlocks.length; ++j)
@@ -3985,7 +4606,7 @@ var updateAvailability = () => {
 var tick = (elapsedTime, multiplier) => {
     let dd, di, dg;
     perfs[0 /* Profilers.TICK */].exec(() => {
-        let dt = elapsedTime * speeds[speedIdx];
+        let dt = elapsedTime / speeds[speedIdx];
         time += dt;
         // https://www.desmos.com/calculator/pfku4nopgy
         // insolation = max(0, -cos(x*pi/72))
@@ -4007,20 +4628,25 @@ var tick = (elapsedTime, multiplier) => {
         dg = newGI - growthIntegral;
         growthIntegral = newGI;
     });
-    manager.growAll(BigNumber.from(di), BigNumber.from(dg), BigNumber.from(dd));
+    manager.updateSpawners(days);
+    let BNdi = BigNumber.from(di);
+    let BNdg = BigNumber.from(dg);
+    // let BNdd = BigNumber.from(dd);
+    manager.growAll(BNdi, BNdg /*, BNdd*/);
+    extraManager.growAll(BNdi, BNdg /*, BNdd*/);
     if (!game.isCalculatingOfflineProgress) {
         let timeCos = Math.cos(time * Math.PI / halfDayLength);
         insolationCoord = Math.max(0, -timeCos);
         growthCoord = timeCos / 2 + 1;
         switch (quatMode) {
-            case 2 /* QuaternaryModes.PERFORMANCE */:
-            case 3 /* QuaternaryModes.PERFORMANCE_MINMAX */:
+            case 3 /* QuaternaryModes.PERFORMANCE */:
+            case 4 /* QuaternaryModes.PERFORMANCE_MINMAX */:
                 theory.invalidateQuaternaryValues();
                 break;
         }
         // floatingWipLabel.rotateTo(-3 - Math.cos(time * Math.PI / 6) * 12,
         // 180, Easing.LINEAR);
-        managerLoadingInd.isRunning = manager.busy;
+        managerLoadingInd.isRunning = manager.busy || extraManager.busy;
     }
     theory.invalidateSecondaryEquation();
     // theory.invalidateTertiaryEquation();
@@ -4031,16 +4657,82 @@ let managerLoadingInd = ui.createActivityIndicator({
     verticalOptions: LayoutOptions.END,
     heightRequest: getImageSize(ui.screenWidth),
     widthRequest: getImageSize(ui.screenWidth),
-    isRunning: manager.busy
+    isRunning: manager.busy || extraManager.busy
 });
+// Go to previous slot
+let canGTPS = () => slotIdx > 0;
+let GTPS = () => {
+    let i = slotIdx;
+    do
+        --slotIdx;
+    while (manager.colonies[plotIdx][slotIdx] &&
+        !isColonyVisible(manager.colonies[plotIdx][slotIdx]));
+    if (slotIdx < 0)
+        slotIdx = i;
+    selectedColony = manager.colonies[plotIdx][slotIdx];
+    renderer.colony = selectedColony;
+    theory.invalidateQuaternaryValues();
+};
+// Go to next slot
+let canGTNS = () => slotIdx < manager.colonies[plotIdx].length - 1;
+let GTNS = () => {
+    let i = slotIdx;
+    do
+        ++slotIdx;
+    while (manager.colonies[plotIdx][slotIdx] &&
+        !isColonyVisible(manager.colonies[plotIdx][slotIdx]));
+    if (slotIdx > manager.colonies[plotIdx].length - 1)
+        slotIdx = i;
+    selectedColony = manager.colonies[plotIdx][slotIdx];
+    renderer.colony = selectedColony;
+    theory.invalidateQuaternaryValues();
+};
 var getEquationOverlay = () => {
     let result = ui.createGrid({
-        // rowDefinitions: ['1*', '1*'],
-        // columnDefinitions: ['68*', '32*'],
         inputTransparent: true,
         cascadeInputTransparent: false,
         children: [
             // floatingWipLabel,
+            ui.createLabel({
+                isVisible: haxEnabled,
+                horizontalOptions: LayoutOptions.END,
+                verticalOptions: LayoutOptions.START,
+                text: getLoc('hacks')
+            }),
+            ui.createGrid({
+                row: 0, column: 0,
+                columnDefinitions: ['1*', '4*', '1*'],
+                rowDefinitions: ['1*', '2*', '1*'],
+                verticalOptions: LayoutOptions.FILL,
+                inputTransparent: true,
+                cascadeInputTransparent: false,
+                children: [
+                    // ui.createBox({row: 0, column: 0}),
+                    // ui.createBox({row: 1, column: 1}),
+                    // ui.createBox({row: 2, column: 2}),
+                    // ui.createBox({row: 1, column: 3}),
+                    createNakedLabelBtn({
+                        row: 1, column: 0,
+                        verticalOptions: LayoutOptions.FILL,
+                    }, GTPS, canGTPS, '←'),
+                    // createNakedLabelBtn
+                    // ({
+                    //     row: 1, column: 1,
+                    //     verticalOptions: LayoutOptions.FILL
+                    // }, () =>
+                    // {
+                    //     selectedColony = manager.colonies[plotIdx][slotIdx];
+                    //     if(!selectedColony)
+                    //         return;
+                    //     let seqMenu = createColonyViewMenu(selectedColony);
+                    //     seqMenu.show();
+                    // }, () => manager.colonies[plotIdx].length > 0, ''),
+                    createNakedLabelBtn({
+                        row: 1, column: 2,
+                        verticalOptions: LayoutOptions.FILL
+                    }, GTNS, canGTNS, '→'),
+                ]
+            }),
             managerLoadingInd,
             ui.createLatexLabel({
                 row: 0, column: 0,
@@ -4067,47 +4759,47 @@ var getEquationOverlay = () => {
                 inputTransparent: true,
                 cascadeInputTransparent: false,
                 children: [
-                    settingsFrame,
-                    settingsLabel,
-                    // skipFrame,
-                    // skipLabel
+                    mainMenuFrame,
+                    mainMenuLabel,
                 ]
             }),
             ui.createGrid({
                 row: 0, column: 0,
-                columnDefinitions: ['68*', '32*'],
+                rowDefinitions: ['auto'],
+                columnDefinitions: getActBarColumnDefs(ui.screenWidth),
                 verticalOptions: () => actionPanelOnTop ?
                     LayoutOptions.START : LayoutOptions.END,
                 inputTransparent: true,
                 cascadeInputTransparent: false,
                 children: [
-                    ui.createGrid({
-                        isVisible: () => manager.colonies[plotIdx].length > 0,
+                    ui.createScrollView({
                         row: 0, column: 0,
-                        margin: new Thickness(4),
-                        horizontalOptions: LayoutOptions.START,
-                        // verticalOptions: LayoutOptions.END,
-                        columnDefinitions: [
-                            'auto', 'auto',
-                            'auto', 'auto',
-                            'auto', 'auto'
-                        ],
-                        inputTransparent: true,
-                        cascadeInputTransparent: false,
-                        children: [
-                            waterFrame,
-                            waterLabel,
-                            harvestFrame,
-                            harvestLabel,
-                            pruneFrame,
-                            pruneLabel,
-                            // mutateFrame,
-                            // mutateLabel
-                        ]
+                        orientation: ScrollOrientation.BOTH,
+                        content: ui.createGrid({
+                            isVisible: () => /*plotIdx < plotPerma.level &&*/ manager.colonies[plotIdx].length > 0,
+                            row: 0, column: 0,
+                            margin: new Thickness(4),
+                            horizontalOptions: LayoutOptions.START,
+                            // verticalOptions: LayoutOptions.END,
+                            columnDefinitions: [
+                                'auto', 'auto',
+                                'auto', 'auto',
+                                'auto', 'auto'
+                            ],
+                            inputTransparent: true,
+                            cascadeInputTransparent: false,
+                            children: [
+                                waterFrame,
+                                waterLabel,
+                                harvestFrame,
+                                harvestLabel,
+                                pruneFrame,
+                                pruneLabel,
+                            ]
+                        }),
                     }),
-                    // actionsLabel,
                 ]
-            })
+            }),
         ]
     });
     return result;
@@ -4115,7 +4807,16 @@ var getEquationOverlay = () => {
 var getCurrencyBarDelegate = () => {
     let tauLabel = ui.createLatexLabel({
         row: 0, column: 0,
-        text: () => Utils.getMath(`${theory.tau}${theory.latexSymbol}`),
+        text: () => {
+            if (theory.publicationUpgrade.level && theory.canPublish) {
+                // @ts-expect-error
+                taxCurrency.value = getCurrencyFromTau(theory.tau)[0] * taxRate;
+                return Utils.getMath(`${theory.tau}${theory.latexSymbol}
+                \\enspace (${taxCurrency.symbol} =
+                ${taxCurrency.value}\\text{${currency.symbol}})`);
+            }
+            return Utils.getMath(`${theory.tau}${theory.latexSymbol}`);
+        },
         heightRequest: getImageSize(ui.screenWidth),
         // margin: new Thickness(0, 2, 0, 0),
         fontSize: 12,
@@ -4124,56 +4825,83 @@ var getCurrencyBarDelegate = () => {
     });
     let pennyLabel = ui.createLatexLabel({
         row: 0, column: 1,
-        text: () => {
-            if (theory.publicationUpgrade.level && theory.canPublish) {
-                // @ts-expect-error
-                taxCurrency.value = getCurrencyFromTau(theory.tau)[0] * taxRate;
-                return Utils.getMath(`${currency.value}
-                \\text{${currency.symbol}}\\enspace (${taxCurrency.symbol} =
-                ${taxCurrency.value}\\text{${currency.symbol}})`);
-            }
-            return Utils.getMath(`${currency.value}\\text{${currency.symbol}}`);
-        },
+        text: () => Utils.getMath(`${currency.value}\\text{p}`),
         heightRequest: getImageSize(ui.screenWidth),
         // margin: new Thickness(0, 2, 0, 0),
         fontSize: 12,
         horizontalTextAlignment: TextAlignment.CENTER,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let examineBtn = createLabelFrameBtn({
+    let examineBtn = createLabelBtn({
         row: 0, column: 1,
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
-        selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+        selectedColony = manager.colonies[plotIdx][slotIdx];
         if (!selectedColony)
             return;
         let seqMenu = createColonyViewMenu(selectedColony);
         seqMenu.show();
-    }, getLoc('viewColony'), 12);
-    let switchbackBtn = createLabelFrameBtn({
+    }, () => manager.colonies[plotIdx].length > 0, getLoc('viewColony'), 12);
+    let plotUpBtn = createLabelBtn({
         column: 0,
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
+        --plotIdx;
         let len = manager.colonies[plotIdx].length;
-        if (len)
-            colonyIdx[plotIdx] = (colonyIdx[plotIdx] - 1 + len) % len;
+        slotIdx = Math.min(slotIdx, len - 1);
+        slotIdx = Math.max(slotIdx, 0);
+        if (len > 1) {
+            let i = slotIdx;
+            while (manager.colonies[plotIdx][slotIdx] &&
+                !isColonyVisible(manager.colonies[plotIdx][slotIdx]))
+                --slotIdx;
+            if (slotIdx < 0)
+                slotIdx = i;
+            while (manager.colonies[plotIdx][slotIdx] &&
+                !isColonyVisible(manager.colonies[plotIdx][slotIdx]))
+                ++slotIdx;
+            if (slotIdx > len - 1)
+                slotIdx = i;
+        }
         else
-            colonyIdx[plotIdx] = 0;
-        selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+            slotIdx = 0;
+        selectedColony = manager.colonies[plotIdx][slotIdx];
         renderer.colony = selectedColony;
-    }, '↑');
-    let switchBtn = createLabelFrameBtn({
+        theory.invalidatePrimaryEquation();
+        theory.invalidateSecondaryEquation();
+        theory.invalidateQuaternaryValues();
+        updateAvailability();
+    }, () => plotIdx > 0, '↑');
+    let plotDownBtn = createLabelBtn({
         column: 1,
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () => {
+        ++plotIdx;
         let len = manager.colonies[plotIdx].length;
-        if (len)
-            colonyIdx[plotIdx] = (colonyIdx[plotIdx] + 1) % len;
+        slotIdx = Math.min(slotIdx, len - 1);
+        slotIdx = Math.max(slotIdx, 0);
+        if (len > 1) {
+            let i = slotIdx;
+            while (manager.colonies[plotIdx][slotIdx] &&
+                !isColonyVisible(manager.colonies[plotIdx][slotIdx]))
+                --slotIdx;
+            if (slotIdx < 0)
+                slotIdx = i;
+            while (manager.colonies[plotIdx][slotIdx] &&
+                !isColonyVisible(manager.colonies[plotIdx][slotIdx]))
+                ++slotIdx;
+            if (slotIdx > len - 1)
+                slotIdx = i;
+        }
         else
-            colonyIdx[plotIdx] = 0;
-        selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+            slotIdx = 0;
+        selectedColony = manager.colonies[plotIdx][slotIdx];
         renderer.colony = selectedColony;
-    }, '↓');
+        theory.invalidatePrimaryEquation();
+        theory.invalidateSecondaryEquation();
+        theory.invalidateQuaternaryValues();
+        updateAvailability();
+    }, () => plotIdx < manager.length - 1, '↓');
     controlStack.children[0].children =
         [
             examineBtn,
@@ -4183,8 +4911,8 @@ var getCurrencyBarDelegate = () => {
                 columnSpacing: 7,
                 columnDefinitions: ['50*', '50*'],
                 children: [
-                    switchbackBtn,
-                    switchBtn
+                    plotUpBtn,
+                    plotDownBtn
                 ]
             })
         ];
@@ -4192,7 +4920,8 @@ var getCurrencyBarDelegate = () => {
         margin: new Thickness(6, 3, 6, 0),
         horizontalOptions: LayoutOptions.CENTER,
         columnDefinitions: ['auto', 'auto'],
-        columnSpacing: getBtnSize(ui.screenWidth),
+        columnSpacing: () => getBtnSize(ui.screenWidth) *
+            (2 - theory.publicationUpgrade.level * Number(theory.canPublish)),
         children: [tauLabel, pennyLabel]
     });
     return ui.createStackLayout({
@@ -4201,70 +4930,103 @@ var getCurrencyBarDelegate = () => {
 };
 /**
  * Returns the colony title for representation.
+ * Interface coming soon?
  */
-let getColonyTitleString = (colony, prog = false, maxStage = false, escapeHash = false) => Localization.format(getLoc(prog ? 'colonyProg' : (maxStage ? 'colonyWMaxStg' :
-    'colony')), colony.propagated ? `+${colony.population}` : colony.population, getLoc('plants')[colony.id]?.name ?? `${escapeHash ? '\\' : ''}#${colony.id}`, 
-// @ts-expect-error
-colony.stage, prog ? colony.growth * BigNumber.HUNDRED /
-    // @ts-expect-error
-    (plantData[colony.id].growthCost * BigNumber.from(colony.sequence.length)) :
-    plantData[colony.id].maxStage ?? '∞');
+let getColonyTitleString = (colony, options = {}) => {
+    let format = getLoc(options.prog ? 'colonyProg' : options.maxStage ?
+        'colonyWithMaxStg' : options.noPop ?
+        (options.escape ? 'colonyNoPopEsc' : 'colonyNoPop') : 'colony');
+    let pop = colony.propagated ? `+${colony.population}` : colony.population;
+    let name = getLoc('plants')[colony.id]?.name ??
+        `${options.escape ? '\\' : ''}#${colony.id}`;
+    let colour = plantData[colony.id].colour;
+    if (options.colour && colour)
+        name = `\\color{${colour}}{${name}}`;
+    let arg3 = (options.prog || options.noPop) ? // @ts-expect-error
+        colony.growth * BigNumber.HUNDRED /
+            // @ts-expect-error
+            (plantData[colony.id].growthCost * BigNumber.from(colony.sequence.length)) :
+        plantData[colony.id].maxStage ?? '∞';
+    return Localization.format(format, pop, name, colony.stage, arg3);
+};
 var getPrimaryEquation = () => {
+    if (colonyMode == 0 /* ColonyModes.OFF */)
+        return '';
     return Localization.format(getLoc(fancyPlotTitle ? 'plotTitleF' :
         'plotTitle'), plotIdx + 1);
 };
 var getSecondaryEquation = () => {
-    if (!plotPerma.level)
-        return getLoc('lockedPlot');
-    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
     let c = selectedColony;
-    if (!c) {
-        let taxInfo = `\\text{${getLoc('pubTax')}}\\\\
-        T_{\\text{p}}=${taxRate}\\times\\max\\text{p}`;
-        let tauInfo = `${theory.latexSymbol}=\\max\\text{p}^
-        ${tauRate.toString(0)}`;
-        return `\\begin{array}{c}${tauInfo}\\\\\\\\${taxInfo}\\end{array}`;
+    if (!c || !isColonyVisible(c)) {
+        if (plotIdx < plotPerma.level) {
+            let taxInfo = `\\text{${getLoc('pubTax')}}\\\\
+            T_{\\text{p}}=${taxRate}\\times ${theory.latexSymbol}`;
+            let tauInfo = `${theory.latexSymbol}=\\max\\text{p}`;
+            return `\\begin{array}{c}${taxInfo}\\\\\\\\${tauInfo}\\end{array}`;
+        }
+        // let plotCost = plotCosts.getCost(plotIdx);
+        // if(plotCost.isZero)
+        return getLoc('lockedPlot');
+        // return `\\begin{array}{c}${getLoc('lockedPlot')}\\\\
+        // (${plotCost}\\text{p})\\end{array}`;
     }
     let result;
     perfs[7 /* Profilers.EQ_2 */].exec(() => {
         switch (colonyMode) {
             case 1 /* ColonyModes.VERBOSE */:
+                // if(!isColonyVisible(c))
+                // {
+                //     result = getLoc('invisibleColony');
+                //     break;
+                // }
                 let status = (manager.gangsta &&
                     manager.gangsta[0] == plotIdx &&
-                    manager.gangsta[1] == colonyIdx[plotIdx]) ?
+                    manager.gangsta[1] == slotIdx) ?
                     getLoc('status').evolve : (manager.actionGangsta &&
                     manager.actionGangsta[0] == plotIdx &&
-                    manager.actionGangsta[1] == colonyIdx[plotIdx]) ?
+                    manager.actionGangsta[1] == slotIdx) ?
                     getLoc('status').actions[manager.actionGangsta[2]] : '';
-                result = `\\text{${getColonyTitleString(c)}\\\\
-                ${Localization.format(getLoc('colonyStats'), 
+                result = `\\begin{array}{c}\\text{${getColonyTitleString(c, { colour: true })}}
+                \\\\${Localization.format(getLoc('colonyStats'), 
                 // @ts-expect-error
-                c.energy, c.synthRate * BigNumber.from(insolationCoord), c.growth, 
-                // @ts-expect-error
-                plantData[c.id].growthCost * BigNumber.from(c.sequence.length), 
-                // @ts-expect-error
-                plantData[c.id].growthRate * BigNumber.from(growthCoord), c.profit, colonyIdx[plotIdx] + 1, manager.colonies[plotIdx].length, status)}}`;
+                c.energy, c.synthRate * BigNumber.from(insolationCoord), c.growth, c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+                    // @ts-expect-error
+                    plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
+                    '∞', c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+                    // @ts-expect-error
+                    plantData[c.id].growthRate * BigNumber.from(growthCoord) :
+                    BigNumber.ZERO, c.profit, slotIdx + 1, manager.colonies[plotIdx].length, status)}\\end{array}`;
                 break;
             case 2 /* ColonyModes.SIMPLE */:
-                result = `\\text{${getColonyTitleString(c)}}\\\\E=${c.energy},
-                \\enspace g=${c.growth}/${ // @ts-expect-error
-                plantData[c.id].growthCost * BigNumber.from(c.sequence.length)}
-                \\\\P=${c.synthRate}/\\text{s},\\enspace\\pi =${c.profit}
-                \\text{p}\\\\(${colonyIdx[plotIdx] + 1}/${manager.colonies[plotIdx].length})\\\\`;
+                // if(!isColonyVisible(c))
+                // {
+                //     result = getLoc('invisibleColony');
+                //     break;
+                // }
+                result = `\\begin{array}{c}\\text{${getColonyTitleString(c, { colour: true })}}\\\\E=${c.energy},\\enspace g=${c.growth}/
+                ${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+                    // @ts-expect-error
+                    plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
+                    '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{${getLoc('hour')}},
+                \\enspace\\pi = ${c.profit}\\text{p}\\\\(${slotIdx + 1}/
+                ${manager.colonies[plotIdx].length})\\\\\\end{array}`;
                 break;
             case 3 /* ColonyModes.LIST */:
-                result = '\\text{';
-                for (let i = 0; i < colonyIdx[plotIdx]; ++i) {
+                result = '\\begin{array}{c}';
+                for (let i = 0; i < slotIdx; ++i) {
                     let d = manager.colonies[plotIdx][i];
-                    result += `${getColonyTitleString(d, true)}\\\\`;
+                    if (isColonyVisible(d))
+                        result += `\\text{${getColonyTitleString(d, { prog: true, colour: true })}}\\\\`;
                 }
-                result += `\\underline{${getColonyTitleString(c, true)}}}\\\\
-                \\text{`;
-                for (let i = colonyIdx[plotIdx] + 1; i < manager.colonies[plotIdx].length; ++i) {
+                let cStr = isColonyVisible(c) ? getColonyTitleString(c, { prog: true, colour: true }) : getLoc('invisibleColony');
+                result += `\\text{\\underline{${cStr}}}\\\\`;
+                for (let i = slotIdx + 1; i < manager.colonies[plotIdx].length; ++i) {
                     let d = manager.colonies[plotIdx][i];
-                    result += `${getColonyTitleString(d, true)}\\\\`;
+                    if (isColonyVisible(d))
+                        result += `\\text{${getColonyTitleString(d, { prog: true, colour: true })}}\\\\`;
                 }
-                result += `}E=${c.energy},\\enspace\\pi =${c.profit}\\text{p}`;
+                result += `E=${c.energy},\\enspace\\pi =${c.profit}\\text{p}
+                \\end{array}`;
                 break;
             default:
                 result = '';
@@ -4280,55 +5042,79 @@ let getTimeString = () => {
     let resolution = speedAdjDayLengths[speedIdx];
     let quantum = dayLength / resolution;
     let quanToD = Math.floor(timeofDay / quantum) * quantum;
-    let hour = Math.floor(quanToD / hourLength);
-    let min = Math.floor((quanToD % hourLength) / speeds[speedIdx]) *
+    // Now that hour-length is 1, let's do something else
+    let hour = Math.floor(quanToD);
+    let min = Math.floor((quanToD - hour) * speeds[speedIdx] + 1e-9) *
         clockMinDiv[speedIdx];
     return Localization.format(getLoc(actionPanelOnTop ? 'dateTimeBottom' :
-        'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1, hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'), haxEnabled ? getLoc('hacks') : '');
+        'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1, hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'));
 };
 var getQuaternaryEntries = () => {
     switch (quatMode) {
-        case 2 /* QuaternaryModes.PERFORMANCE */:
+        case 3 /* QuaternaryModes.PERFORMANCE */:
             for (let i = 0; i < perfs.length; ++i) {
                 let m1 = getCoordString(perfs[i].latest * 1000);
                 let m2 = getCoordString(perfs[i].mean * 1000);
                 perfQuaternaryEntries[i].value = `${m1}/${m2}`;
             }
             return perfQuaternaryEntries;
-        case 3 /* QuaternaryModes.PERFORMANCE_MINMAX */:
+        case 4 /* QuaternaryModes.PERFORMANCE_MINMAX */:
             for (let i = 0; i < perfs.length; ++i) {
                 let m1 = getCoordString(perfs[i].min * 1000);
                 let m2 = getCoordString(perfs[i].max * 1000);
                 perfQuaternaryEntries[i].value = `${m1}/${m2}`;
             }
             return perfQuaternaryEntries;
-        case 0 /* QuaternaryModes.PROFITS */:
+        case 1 /* QuaternaryModes.PROFITS */:
             if (!plotPerma.level)
                 return quaternaryEntries.slice(0, 1);
             for (let i = 0; i < plotPerma.level; ++i) {
+                // if(i >= plotPerma.level && !manager.colonies[i].length)
+                // {
+                //     quaternaryEntries[i].value = null;
+                //     continue;
+                // }
                 let sum = BigNumber.ZERO;
                 for (let j = 0; j < manager.colonies[i].length; ++j) {
                     let c = manager.colonies[i][j];
                     // @ts-expect-error
-                    sum += c.profit * BigNumber.from(c.population);
+                    sum += c.profit * BigNumber.from(c.population) *
+                        // @ts-expect-error
+                        theory.publicationMultiplier;
                 }
-                // @ts-expect-error
-                quaternaryEntries[i].value = sum * theory.publicationMultiplier;
+                quaternaryEntries[i].value = sum; //`${sum}p`;
             }
             break;
-        case 1 /* QuaternaryModes.BOARD */:
+        case 2 /* QuaternaryModes.BOARD */:
             if (!plotPerma.level)
                 return quaternaryEntries.slice(0, 1);
             for (let i = 0; i < plotPerma.level; ++i) {
+                // if(i >= plotPerma.level && !manager.colonies[i].length)
+                // {
+                //     quaternaryEntries[i].value = null;
+                //     continue;
+                // }
                 let column = '';
                 for (let j = 0; j < manager.colonies[i].length; ++j) {
                     let c = manager.colonies[i][j];
-                    let plantName = getLoc('plants')[c.id]?.nameShort ?? '#';
-                    column += `${plantName}${getSubscript(c.stage)}`;
+                    let cStr;
+                    if (isColonyVisible(c)) {
+                        let plantName = getLoc('plants')[c.id]?.nameShort ??
+                            '#';
+                        cStr = `${plantName}${getSubscript(c.stage)}`;
+                        if (i == plotIdx && j == slotIdx)
+                            column += `(${cStr})`;
+                        else
+                            column += cStr;
+                    }
+                    // else
+                    //     cStr = '   ';
                 }
                 quaternaryEntries[i].value = column;
             }
             break;
+        default:
+            return [];
     }
     return quaternaryEntries; //.slice(0, plotPerma.level);
 };
@@ -4340,7 +5126,8 @@ let createVariableMenu = (variables) => {
         varEntries.push(ui.createEntry({
             row: i,
             column: 0,
-            text: variables[i][0]
+            text: variables[i][0],
+            fontSize: 14,
         }));
         varEntries.push(ui.createLatexLabel({
             text: '=',
@@ -4353,6 +5140,7 @@ let createVariableMenu = (variables) => {
             row: i,
             column: 2,
             text: variables[i][1],
+            fontSize: 14,
             horizontalTextAlignment: TextAlignment.END
         }));
     }
@@ -4395,13 +5183,16 @@ let createVariableMenu = (variables) => {
     });
     return menu;
 };
-let createSystemMenu = (id) => {
-    let values = plantData[id].system.toJSON();
+let createSystemMenu = (id, action = null) => {
+    let system = action ? plantData[id].actions[action].system :
+        plantData[id].system;
+    let values = system.toJSON();
     let tmpAxiom = values.axiom;
     let axiomEntry = ui.createEntry({
         text: tmpAxiom,
         row: 0,
-        column: 1
+        column: 1,
+        fontSize: 14,
     });
     let tmpVars = Object.entries(values.variables);
     let varButton = ui.createButton({
@@ -4415,23 +5206,32 @@ let createSystemMenu = (id) => {
             varMenu.show();
         }
     });
-    let tmpRules = [];
-    for (let i = 0; i < values.rules.length; ++i)
-        tmpRules[i] = values.rules[i];
+    let tmpRules = values.rules;
+    // for(let i = 0; i < values.rules.length; ++i)
+    //     tmpRules[i] = values.rules[i];
     let ruleEntries = [];
     for (let i = 0; i < tmpRules.length; ++i) {
+        ruleEntries.push(ui.createLabel({
+            row: i, column: 0,
+            horizontalOptions: LayoutOptions.END,
+            verticalOptions: LayoutOptions.CENTER,
+            text: String(i + 1),
+            fontSize: 14
+        }));
         ruleEntries.push(ui.createEntry({
-            row: i,
-            text: tmpRules[i]
+            row: i, column: 1,
+            text: tmpRules[i],
+            fontSize: 14,
         }));
     }
     let rulesLabel = ui.createLatexLabel({
-        text: Localization.format(getLoc('labelRules'), ruleEntries.length),
+        text: Localization.format(getLoc('labelRules'), tmpRules.length),
         verticalTextAlignment: TextAlignment.CENTER,
         margin: new Thickness(0, 6),
         // heightRequest: getSmallBtnSize(ui.screenWidth)
     });
     let ruleStack = ui.createGrid({
+        columnDefinitions: ['auto', 'auto'],
         children: ruleEntries
     });
     // let tmpModels = [];
@@ -4443,7 +5243,8 @@ let createSystemMenu = (id) => {
     //     modelEntries.push(ui.createEntry
     //     ({
     //         row: i,
-    //         text: tmpModels[i]
+    //         text: tmpModels[i],
+    //         fontSize: 14,
     //     }));
     // }
     // let modelsLabel = ui.createLatexLabel
@@ -4462,6 +5263,7 @@ let createSystemMenu = (id) => {
         text: tmpIgnore,
         row: 0,
         column: 1,
+        fontSize: 14,
         horizontalTextAlignment: TextAlignment.END
     });
     let tmpCI = values.ctxIgnoreList ?? '';
@@ -4469,6 +5271,7 @@ let createSystemMenu = (id) => {
         text: tmpCI,
         row: 1,
         column: 1,
+        fontSize: 14,
         horizontalTextAlignment: TextAlignment.END
     });
     let tmpAngle = values.turnAngle ?? '0';
@@ -4476,6 +5279,7 @@ let createSystemMenu = (id) => {
         text: tmpAngle.toString(),
         row: 2,
         column: 1,
+        fontSize: 14,
         horizontalTextAlignment: TextAlignment.END
     });
     let tmpTropism = values.tropism ?? '0';
@@ -4483,6 +5287,7 @@ let createSystemMenu = (id) => {
         text: tmpTropism.toString(),
         row: 3,
         column: 1,
+        fontSize: 14,
         horizontalTextAlignment: TextAlignment.END
     });
     /*
@@ -4508,11 +5313,18 @@ let createSystemMenu = (id) => {
         keyboard: Keyboard.NUMERIC,
         row: 4,
         column: 1,
+        fontSize: 14,
         horizontalTextAlignment: TextAlignment.END
     });
     */
+    let LsExplanations = action ? getLoc('plants')[id]?.actions[action] :
+        `${getLoc('plants')[id]?.LsDetails ?? getLoc('noLsDetails')}\\\\—
+    \\\\${getLoc('plants')[id]?.actions?.join('\\\\') ?? getLoc('noActions')}`;
+    let plantTitle = getLoc('plants')[id]?.name ?? `#${id}`;
+    let LsTitle = action ? `${plantTitle} - ${getLoc('labelActions')[action]}` :
+        plantTitle;
     let menu = ui.createPopup({
-        title: getLoc('plants')[id]?.name ?? `#${id}`,
+        title: LsTitle,
         isPeekable: true,
         content: ui.createStackLayout({
             children: [
@@ -4521,8 +5333,7 @@ let createSystemMenu = (id) => {
                     content: ui.createStackLayout({
                         children: [
                             ui.createLatexLabel({
-                                text: getLoc('plants')[id]?.LsDetails ??
-                                    getLoc('noLsDetails'),
+                                text: LsExplanations,
                                 margin: new Thickness(0, 6),
                                 horizontalTextAlignment: TextAlignment.START,
                                 verticalTextAlignment: TextAlignment.CENTER
@@ -4573,12 +5384,8 @@ let createSystemMenu = (id) => {
                                         verticalTextAlignment: TextAlignment.CENTER
                                     }),
                                     tropismEntry,
-                                    // seedLabel,
-                                    // seedEntry
                                 ]
                             }),
-                            // modelsLabel,
-                            // modelStack
                         ]
                     })
                 }),
@@ -4603,15 +5410,22 @@ let createColonyViewMenu = (colony) => {
         colonyViewConfig[colony.id] =
             {
                 filter: '',
-                params: true
+                params: true,
+                expand: true,
+                indentation: 8
             };
+    }
+    else if (!colonyViewConfig[colony.id].expand) {
+        colonyViewConfig[colony.id].expand = true;
+        colonyViewConfig[colony.id].indentation = 8;
     }
     let reconstructionTask = {
         start: 0
     };
     let filterEntry = ui.createEntry({
-        column: 1,
+        row: 0, column: 1,
         text: colonyViewConfig[colony.id].filter,
+        fontSize: 14,
         clearButtonVisibility: ClearButtonVisibility.WHILE_EDITING,
         onTextChanged: (ot, nt) => {
             colonyViewConfig[colony.id].filter = nt;
@@ -4622,7 +5436,7 @@ let createColonyViewMenu = (colony) => {
         }
     });
     let paramSwitch = createHesitantSwitch({
-        column: 3,
+        row: 0, column: 3,
     }, () => {
         colonyViewConfig[colony.id].params =
             !colonyViewConfig[colony.id].params;
@@ -4634,37 +5448,66 @@ let createColonyViewMenu = (colony) => {
                 start: 0
             };
     }, colonyViewConfig[colony.id].params);
+    let indentEntry = ui.createEntry({
+        row: 1, column: 1,
+        text: colonyViewConfig[colony.id].indentation.toString(),
+        keyboard: Keyboard.NUMERIC,
+        fontSize: 14,
+        onTextChanged: (ot, nt) => {
+            colonyViewConfig[colony.id].indentation = parseInt(nt) ?? 0;
+            if (isNaN(colonyViewConfig[colony.id].indentation))
+                colonyViewConfig[colony.id].indentation = 0;
+            reconstructionTask =
+                {
+                    start: 0
+                };
+        }
+    });
+    let expandSwitch = createHesitantSwitch({
+        row: 1, column: 3,
+    }, () => {
+        colonyViewConfig[colony.id].expand =
+            !colonyViewConfig[colony.id].expand;
+        expandSwitch.isToggled = colonyViewConfig[colony.id].expand;
+        reconstructionTask =
+            {
+                start: 0
+            };
+    }, colonyViewConfig[colony.id].expand);
     let updateReconstruction = () => {
-        if (manager.busy)
+        if (manager.busy || extraManager.busy)
             return reconstructionTask.result;
         if (!('result' in reconstructionTask) || reconstructionTask.start) {
-            reconstructionTask = plantData[colony.id].system.reconstruct(colony, colonyViewConfig[colony.id].filter, colonyViewConfig[colony.id].params, 4, reconstructionTask);
+            reconstructionTask = plantData[colony.id].system.reconstruct(colony, colonyViewConfig[colony.id], reconstructionTask);
         }
         return reconstructionTask.result;
     };
-    let tmpTitle = getColonyTitleString(colony, false, true);
+    let tmpTitle = getColonyTitleString(colony, { maxStage: true });
     let tmpStage = colony.stage;
     let cmtStage = -1;
+    let track;
     let updateCommentary = () => {
-        let stages = getLoc('plants')[colony.id]?.stages;
-        if (!stages || !stages.index || colony.stage < stages.index[0])
+        track = getLoc('plants')[colony.id]?.narrations?.[colony.narrationTrack ?? 0];
+        if (!track || !track.index || colony.stage < track.index[0])
             return getLoc('noCommentary');
-        if (stages[colony.stage])
+        if (track[colony.stage])
             cmtStage = colony.stage;
         else
-            cmtStage = stages.index[binarySearch(stages.index, colony.stage)];
-        return stages[cmtStage];
+            cmtStage = track.index[binarySearchLast(track.index, colony.stage)];
+        return track[cmtStage];
     };
     let tmpCmt = updateCommentary();
     let plantStats = ui.createLatexLabel({
-        text: Localization.format(getLoc('plantStats'), cmtStage, tmpCmt, plantData[colony.id].maxStage ?? '∞', colony.synthRate, plantData[colony.id].growthRate, plantData[colony.id].growthCost, colony.sequence.length),
+        text: Localization.format(getLoc('plantStats'), track?.name ?
+            Localization.format(getLoc('narrationTrack'), cmtStage, track.name) :
+            cmtStage, tmpCmt, colony.synthRate, plantData[colony.id].growthRate, plantData[colony.id].growthCost, colony.sequence.length),
         margin: new Thickness(0, 6),
         horizontalTextAlignment: TextAlignment.START,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let pageContents = ui.createLabel({
         fontFamily: FontFamily.CMU_REGULAR,
-        fontSize: 16,
+        fontSize: 14,
         text: () => updateReconstruction(),
         lineBreakMode: LineBreakMode.CHARACTER_WRAP
     });
@@ -4677,12 +5520,17 @@ let createColonyViewMenu = (colony) => {
             statsMenu.show();
         }
     });
-    let closeButton = ui.createButton({
-        text: Localization.get('GenPopupClose'),
+    let almanacButton = ui.createButton({
+        text: colony.id in almanac.pageLookup ? getLoc('btnAlmanac') :
+            getLoc('btnAlmanacNoEntry'),
         row: 0, column: 1,
         onClicked: () => {
+            if (!(colony.id in almanac.pageLookup))
+                return;
             Sound.playClick();
-            menu.hide();
+            shelfPages.almanac = almanac.pageLookup[colony.id];
+            let menu = createBookMenu(almanac);
+            menu.show();
         }
     });
     let menu = ui.createPopup({
@@ -4692,9 +5540,9 @@ let createColonyViewMenu = (colony) => {
                 Menu title and commentary are updated dynamically without
                 the player having to close and re-open.
                 */
-                tmpTitle = getColonyTitleString(colony, false, true);
+                tmpTitle = getColonyTitleString(colony, { maxStage: true });
                 tmpCmt = updateCommentary();
-                plantStats.text = Localization.format(getLoc('plantStats'), cmtStage, tmpCmt, plantData[colony.id].maxStage ?? '∞', colony.synthRate, plantData[colony.id].growthRate, plantData[colony.id].growthCost, colony.sequence.length);
+                plantStats.text = Localization.format(getLoc('plantStats'), track?.name ? Localization.format(getLoc('narrationTrack'), cmtStage, track.name) : cmtStage, tmpCmt, colony.synthRate, plantData[colony.id].growthRate, plantData[colony.id].growthCost, colony.sequence.length);
                 tmpStage = colony.stage;
                 reconstructionTask =
                     {
@@ -4709,7 +5557,7 @@ let createColonyViewMenu = (colony) => {
                 plantStats,
                 ui.createFrame({
                     padding: new Thickness(8, 6),
-                    heightRequest: ui.screenHeight * 0.18,
+                    heightRequest: ui.screenHeight * 0.2,
                     content: ui.createScrollView({
                         content: ui.createStackLayout({
                             children: [
@@ -4723,22 +5571,35 @@ let createColonyViewMenu = (colony) => {
                     margin: new Thickness(0)
                 }),
                 ui.createGrid({
-                    minimumHeightRequest: getSmallBtnSize(ui.screenWidth),
+                    // minimumHeightRequest: getSmallBtnSize(ui.screenWidth),
                     columnDefinitions: ['20*', '30*', '35*', '15*'],
                     children: [
                         ui.createLatexLabel({
                             text: getLoc('labelFilter'),
-                            column: 0,
+                            row: 0, column: 0,
                             verticalTextAlignment: TextAlignment.CENTER
                         }),
                         filterEntry,
                         ui.createLatexLabel({
                             text: getLoc('labelParams'),
-                            column: 2,
+                            row: 0, column: 2,
                             horizontalOptions: LayoutOptions.END,
                             verticalTextAlignment: TextAlignment.CENTER
                         }),
-                        paramSwitch
+                        paramSwitch,
+                        ui.createLatexLabel({
+                            text: getLoc('labelIndent'),
+                            row: 1, column: 0,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        }),
+                        indentEntry,
+                        ui.createLatexLabel({
+                            text: getLoc('labelExpand'),
+                            row: 1, column: 2,
+                            horizontalOptions: LayoutOptions.END,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        }),
+                        expandSwitch
                     ]
                 }),
                 ui.createBox({
@@ -4750,7 +5611,7 @@ let createColonyViewMenu = (colony) => {
                     columnDefinitions: ['50*', '50*'],
                     children: [
                         viewButton,
-                        closeButton
+                        almanacButton
                     ]
                 })
             ]
@@ -4758,11 +5619,13 @@ let createColonyViewMenu = (colony) => {
     });
     return menu;
 };
-let createBookMenu = (book, key) => {
+let createBookMenu = (book) => {
     let title = book.title;
+    let key = book.key;
     let pages = book.pages;
     let tableofContents = book.tableofContents;
     let pageTitle = ui.createLatexLabel({
+        row: 0, column: 0,
         text: pages[shelfPages[key]].title,
         margin: new Thickness(0, 4),
         heightRequest: getProgBarSize(ui.screenWidth),
@@ -4771,7 +5634,7 @@ let createBookMenu = (book, key) => {
     });
     let pageContents = ui.createLabel({
         fontFamily: FontFamily.CMU_REGULAR,
-        fontSize: 16,
+        fontSize: 14,
         text: pages[shelfPages[key]].contents,
         horizontalTextAlignment: pages[shelfPages[key]].horizontalAlignment ??
             TextAlignment.START,
@@ -4782,7 +5645,8 @@ let createBookMenu = (book, key) => {
         row: 0,
         column: 1,
         text: 'source' in pages[shelfPages[key]] ?
-            pages[shelfPages[key]].source : ''
+            pages[shelfPages[key]].source : '',
+        fontSize: 14,
     });
     let sourceGrid = ui.createGrid({
         isVisible: 'source' in pages[shelfPages[key]],
@@ -4810,10 +5674,11 @@ let createBookMenu = (book, key) => {
         }
     });
     let viewButton = ui.createButton({
+        row: 0, column: 1,
+        padding: new Thickness(8, 0),
+        heightRequest: getSmallBtnSize(ui.screenWidth),
         text: getLoc('btnView'),
-        row: 0,
-        column: 1,
-        isVisible: 'systemID' in pages[shelfPages[key]],
+        isVisible: () => 'systemID' in pages[shelfPages[key]],
         onClicked: () => {
             Sound.playClick();
             let menu = createSystemMenu(pages[shelfPages[key]].systemID);
@@ -4824,7 +5689,6 @@ let createBookMenu = (book, key) => {
         text: getLoc('btnContents'),
         row: 0,
         column: 1,
-        isVisible: !('systemID' in pages[shelfPages[key]]),
         onClicked: () => {
             Sound.playClick();
             TOCMenu.show();
@@ -4856,7 +5720,6 @@ let createBookMenu = (book, key) => {
         prevButton.isVisible = shelfPages[key] > 0;
         nextButton.isVisible = shelfPages[key] < pages.length - 1;
         viewButton.isVisible = 'systemID' in pages[shelfPages[key]];
-        tocButton.isVisible = !('systemID' in pages[shelfPages[key]]);
     };
     let getContentsTable = () => {
         let children = [];
@@ -4896,7 +5759,15 @@ let createBookMenu = (book, key) => {
         isPeekable: true,
         content: ui.createStackLayout({
             children: [
-                pageTitle,
+                ui.createGrid({
+                    horizontalOptions: LayoutOptions.CENTER,
+                    columnDefinitions: ['auto', 'auto'],
+                    columnSpacing: 8,
+                    children: [
+                        pageTitle,
+                        viewButton,
+                    ]
+                }),
                 ui.createFrame({
                     padding: new Thickness(8, 6),
                     heightRequest: ui.screenHeight * 0.36,
@@ -4917,11 +5788,129 @@ let createBookMenu = (book, key) => {
                     columnDefinitions: ['30*', '40*', '30*'],
                     children: [
                         prevButton,
-                        viewButton,
                         tocButton,
                         nextButton
                     ]
                 })
+            ]
+        })
+    });
+    return menu;
+};
+let createWaterMenu = () => {
+    let plantLabels = [];
+    let maxStageEntries = [];
+    // let harvestEntries = [];
+    for (let i = 0; i <= plantPerma.level; ++i) {
+        if (autoWaterConfig[plantUnlocks[i]]) {
+            plantLabels.push(ui.createLatexLabel({
+                text: getLoc('plants')[plantUnlocks[i]].name,
+                row: i, column: 0,
+                verticalTextAlignment: TextAlignment.CENTER
+            }));
+            let tmpEntry = ui.createEntry({
+                column: 0,
+                text: autoWaterConfig[plantUnlocks[i]].maxStage == INT_MAX ?
+                    '∞' : autoWaterConfig[plantUnlocks[i]].maxStage?.toString() ??
+                    '?',
+                fontSize: 14,
+                keyboard: Keyboard.NUMERIC,
+                horizontalTextAlignment: TextAlignment.END,
+                onTextChanged: (ot, nt) => {
+                    let tmpML = parseInt(nt) ?? INT_MAX;
+                    if (isNaN(tmpML))
+                        tmpML = INT_MAX;
+                    autoWaterConfig[plantUnlocks[i]].maxStage = tmpML;
+                }
+            });
+            let tmpMinusBtn = ui.createButton({
+                column: 1,
+                text: '–',
+                onClicked: () => {
+                    Sound.playClick();
+                    let l = autoWaterConfig[plantUnlocks[i]].maxStage;
+                    if (l > 0 && l < INT_MAX)
+                        tmpEntry.text = (l - 1).toString();
+                    else
+                        tmpEntry.text = '∞';
+                }
+            });
+            let tmpPlusBtn = ui.createButton({
+                column: 2,
+                text: '+',
+                onClicked: () => {
+                    Sound.playClick();
+                    let l = autoWaterConfig[plantUnlocks[i]].maxStage;
+                    if (l < INT_MAX)
+                        tmpEntry.text = (l + 1).toString();
+                    else
+                        tmpEntry.text = '0';
+                }
+            });
+            let tmpGrid = ui.createGrid({
+                row: i, column: 1,
+                columnDefinitions: ['2*', '1*', '1*'],
+                children: [
+                    tmpEntry,
+                    tmpMinusBtn,
+                    tmpPlusBtn
+                ]
+            });
+            maxStageEntries.push(tmpGrid);
+        }
+    }
+    let noteGrid = ui.createGrid({
+        columnDefinitions: ['1*', '1*'],
+        children: [...plantLabels, ...maxStageEntries]
+    });
+    let menu = ui.createPopup({
+        isPeekable: true,
+        title: getLoc('menuAutoWater'),
+        content: ui.createStackLayout({
+            children: [
+                ui.createGrid({
+                    heightRequest: getImageSize(ui.screenWidth),
+                    columnDefinitions: ['1*', '1*'],
+                    children: [
+                        ui.createLatexLabel({
+                            text: getLoc('labelSpecies'),
+                            row: 0, column: 0,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        }),
+                        ui.createLatexLabel({
+                            text: getLoc('labelMaxStage'),
+                            row: 0, column: 1,
+                            horizontalOptions: LayoutOptions.CENTER,
+                            verticalTextAlignment: TextAlignment.CENTER
+                        })
+                    ]
+                }),
+                ui.createBox({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                ui.createScrollView({
+                    content: noteGrid
+                }),
+                ui.createBox({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                ui.createLatexLabel({
+                    text: getLoc('labelAutoWaterDesc'),
+                    fontSize: 12,
+                    margin: new Thickness(0, 0, 0, 4),
+                    // heightRequest: getProgBarSize(ui.screenWidth),
+                    horizontalTextAlignment: TextAlignment.CENTER,
+                    verticalTextAlignment: TextAlignment.CENTER
+                }),
+                ui.createButton({
+                    text: Localization.get('GenPopupClose'),
+                    onClicked: () => {
+                        Sound.playClick();
+                        menu.hide();
+                    }
+                }),
             ]
         })
     });
@@ -4948,6 +5937,7 @@ let createNotebookMenu = () => {
             column: 0,
             text: notebook[plantUnlocks[i]].maxLevel == INT_MAX ? '∞' :
                 notebook[plantUnlocks[i]].maxLevel?.toString() ?? '?',
+            fontSize: 14,
             keyboard: Keyboard.NUMERIC,
             horizontalTextAlignment: TextAlignment.END,
             onTextChanged: (ot, nt) => {
@@ -4993,7 +5983,6 @@ let createNotebookMenu = () => {
             ]
         });
         maxLevelEntries.push(tmpGrid);
-        // TODO: Create harvest entry
     }
     let noteGrid = ui.createGrid({
         columnDefinitions: theory.isAutoBuyerAvailable ? ['40*', '30*', '30*'] :
@@ -5006,40 +5995,40 @@ let createNotebookMenu = () => {
         content: ui.createStackLayout({
             children: [
                 ui.createGrid({
-                    heightRequest: theory.isAutoBuyerAvailable ?
-                        getSmallBtnSize(ui.screenWidth) :
-                        getImageSize(ui.screenWidth),
-                    columnDefinitions: theory.isAutoBuyerAvailable ?
-                        ['40*', '30*', '30*'] : ['70*', '30*'],
+                    heightRequest: getImageSize(ui.screenWidth),
+                    columnDefinitions: ['1*', '1*'],
                     children: [
                         ui.createLatexLabel({
-                            text: getLoc('labelPlants'),
+                            text: getLoc('labelSpecies'),
                             row: 0, column: 0,
                             verticalTextAlignment: TextAlignment.CENTER
                         }),
                         ui.createLatexLabel({
                             text: getLoc('labelMaxLevel'),
                             row: 0, column: 1,
-                            horizontalOptions: LayoutOptions.END,
-                            verticalTextAlignment: TextAlignment.CENTER
-                        }),
-                        ui.createLatexLabel({
-                            isVisible: theory.isAutoBuyerAvailable,
-                            text: getLoc('labelHarvestStage'),
-                            row: 0, column: 2,
                             horizontalOptions: LayoutOptions.CENTER,
                             verticalTextAlignment: TextAlignment.CENTER
-                        })
+                        }),
                     ]
                 }),
                 ui.createBox({
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
                 }),
-                noteGrid,
+                ui.createScrollView({
+                    content: noteGrid
+                }),
                 ui.createBox({
                     heightRequest: 1,
                     margin: new Thickness(0, 6)
+                }),
+                ui.createLatexLabel({
+                    text: getLoc('labelNoteDesc'),
+                    fontSize: 12,
+                    margin: new Thickness(0, 0, 0, 4),
+                    // heightRequest: getProgBarSize(ui.screenWidth),
+                    horizontalTextAlignment: TextAlignment.CENTER,
+                    verticalTextAlignment: TextAlignment.CENTER
                 }),
                 ui.createButton({
                     text: Localization.get('GenPopupClose'),
@@ -5060,61 +6049,416 @@ let createShelfMenu = () => {
         content: ui.createStackLayout({
             children: [
                 ui.createButton({
-                    text: almanac.title,
-                    onClicked: () => {
-                        Sound.playClick();
-                        let menu = createBookMenu(almanac, 'almanac');
-                        menu.show();
-                    }
-                }),
-                ui.createButton({
                     text: LsManual.title,
                     onClicked: () => {
                         Sound.playClick();
-                        let menu = createBookMenu(LsManual, 'manual');
+                        let menu = createBookMenu(LsManual);
                         menu.show();
                     }
                 }),
                 ui.createButton({
-                    isVisible: theory.isBuyAllAvailable,
-                    text: getLoc('menuNote'),
+                    text: almanac.title,
                     onClicked: () => {
                         Sound.playClick();
-                        let menu = createNotebookMenu();
+                        let menu = createBookMenu(almanac);
                         menu.show();
                     }
                 }),
+                ui.createBox({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                ui.createGrid({
+                    rowDefinitions: ['auto', 'auto'],
+                    // columnDefinitions: ['auto', 'auto'],
+                    children: [
+                        ui.createButton({
+                            row: 0, column: 0,
+                            text: getLoc('menuAutoWater'),
+                            onClicked: () => {
+                                Sound.playClick();
+                                let menu = createWaterMenu();
+                                menu.show();
+                            }
+                        }),
+                        ui.createButton({
+                            row: 0, column: 1,
+                            isVisible: extraPotPerma.level > 0,
+                            text: () => {
+                                if (extraManager.colonies[0].length) {
+                                    return getColonyTitleString(extraManager.colonies[0][0], { noPop: true });
+                                }
+                                return getLoc('menuExtraPot');
+                            },
+                            onClicked: () => {
+                                Sound.playClick();
+                                let menu = createExtraPotMenu();
+                                menu.show();
+                            }
+                        }),
+                        ui.createButton({
+                            row: 1, column: 0,
+                            isVisible: theory.isBuyAllAvailable,
+                            text: getLoc('menuNote'),
+                            onClicked: () => {
+                                Sound.playClick();
+                                let menu = createNotebookMenu();
+                                menu.show();
+                            }
+                        }),
+                        // Beehive
+                    ]
+                }),
+                ui.createBox({
+                    heightRequest: 1,
+                    margin: new Thickness(0, 6)
+                }),
+                ui.createButton({
+                    text: Localization.get('SettingsPopupTitle'),
+                    onClicked: () => {
+                        Sound.playClick();
+                        let menu = createWorldMenu();
+                        menu.show();
+                    }
+                }),
+                ui.createLatexLabel({
+                    text: getLoc('versionName'),
+                    fontSize: 12,
+                    margin: new Thickness(0, 4, 0, 0),
+                    horizontalOptions: LayoutOptions.CENTER,
+                    horizontalTextAlignment: TextAlignment.CENTER,
+                    verticalTextAlignment: TextAlignment.CENTER
+                })
             ]
         })
     });
     return menu;
 };
-let createConfirmationMenu = (plot, index, id) => {
-    let c = manager.colonies[plot][index];
+let getExtraPotEquation = () => {
+    let result;
+    let c = extraManager.colonies[0][0];
+    switch (colonyMode) {
+        case 1 /* ColonyModes.VERBOSE */:
+            // if(!isColonyVisible(c))
+            // {
+            //     result = getLoc('invisibleColony');
+            //     break;
+            // }
+            let status = extraManager.gangsta ?
+                getLoc('status').evolve : extraManager.actionGangsta ?
+                getLoc('status').actions[extraManager.actionGangsta[2]] : '';
+            result = `\\begin{array}{c}\\text{${getColonyTitleString(c, { noPop: true, escape: true, colour: true })}}
+            \\\\${Localization.format(getLoc('colonyStats'), 
+            // @ts-expect-error
+            c.energy, c.synthRate * BigNumber.from(insolationCoord), c.growth, c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+                // @ts-expect-error
+                plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
+                '∞', c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+                // @ts-expect-error
+                plantData[c.id].growthRate * BigNumber.from(growthCoord) :
+                BigNumber.ZERO, c.profit, 1, 1, status)}\\end{array}`;
+            break;
+        case 2 /* ColonyModes.SIMPLE */:
+            // if(!isColonyVisible(c))
+            // {
+            //     result = getLoc('invisibleColony');
+            //     break;
+            // }
+            result = `\\begin{array}{c}\\text{${getColonyTitleString(c, { noPop: true, escape: true, colour: true })}}\\\\E=${c.energy},
+            \\enspace
+            g=${c.growth}/${c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
+                // @ts-expect-error
+                plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
+                '∞'}\\\\\\dot{E}=${c.synthRate}/\\text{${getLoc('hour')}},\\enspace
+            \\pi = ${c.profit}\\text{p}\\\\(1/1)\\end{array}`;
+            break;
+        case 3 /* ColonyModes.LIST */:
+            result = '\\begin{array}{c}';
+            let cStr = isColonyVisible(c) ? getColonyTitleString(c, { noPop: true, escape: true, colour: true }) :
+                getLoc('invisibleColony');
+            result += `\\text{\\underline{${cStr}}}\\\\
+            E=${c.energy},\\enspace\\pi =${c.profit}\\text{p}\\end{array}`;
+            break;
+        default:
+            result = '';
+    }
+    return Utils.getMath(result);
+};
+let createExtraPotMenu = () => {
+    // extraManager.colonies[0][0]
+    let extraWaterFrame = createScrollBarImageBtn({
+        row: 0, column: 0,
+    }, () => extraManager.water(0, 0), () => extraManager.water(0, 0), true, () => {
+        if (extraManager.colonies[0][0] && !extraManager.colonies[0][0].wet)
+            return true;
+        return false;
+    }, waterImage);
+    let extraWaterLabel = ui.createLatexLabel({
+        row: 0, column: 1,
+        // horizontalOptions: LayoutOptions.END,
+        verticalTextAlignment: TextAlignment.START,
+        margin: new Thickness(0, 9, 1, 9),
+        text: () => {
+            let c = extraManager.colonies[0][0];
+            if (!c)
+                return '';
+            // @ts-expect-error
+            let threshold = plantData[c.id].growthCost *
+                // @ts-expect-error
+                BigNumber.from(c.sequence.length);
+            if (!c.wet) {
+                if (c.growth >= threshold)
+                    return getLoc('labelWaterUrgent');
+                // @ts-expect-error
+                else if (c.growth >= threshold / BigNumber.TWO)
+                    return getLoc('labelWater');
+                else
+                    return '';
+            }
+            else
+                return '';
+        },
+        fontSize: 10,
+        textColor: Color.TEXT_MEDIUM
+    });
+    let extraHarvestFrame = createScrollBarImageBtn({
+        row: 0, column: 2,
+    }, () => {
+        if (actionConfirm) {
+            let menu = createConfirmationMenu(extraManager, 0, 0, 0 /* Actions.HARVEST */);
+            menu.show();
+        }
+        else
+            extraManager.queueAction(0, 0, 0 /* Actions.HARVEST */);
+    }, () => {
+        if (actionConfirm) {
+            let menu = createBulkConfirmationMenu(extraManager, 0, 0 /* Actions.HARVEST */);
+            menu.show();
+        }
+        else {
+            for (let i = extraManager.colonies[0].length - 1; i >= 0; --i) {
+                if (isColonyVisible(extraManager.colonies[0][i]))
+                    extraManager.queueAction(0, i, 0 /* Actions.HARVEST */);
+            }
+        }
+    }, false, () => true, harvestImage);
+    let extraHarvestLabel = ui.createLatexLabel({
+        row: 0, column: 3,
+        // horizontalOptions: LayoutOptions.END,
+        verticalTextAlignment: TextAlignment.START,
+        margin: new Thickness(0, 9, 1, 9),
+        text: getLoc('labelActions')[0 /* Actions.HARVEST */],
+        fontSize: 10,
+        textColor: Color.TEXT_MEDIUM
+    });
+    let extraPruneFrame = createScrollBarImageBtn({
+        isVisible: () => {
+            if (!extraManager.colonies[0][0] ||
+                !plantData[extraManager.colonies[0][0].id].actions[1 /* Actions.PRUNE */])
+                return false;
+            return true;
+        },
+        row: 0, column: 4,
+    }, () => {
+        if (actionConfirm) {
+            let menu = createConfirmationMenu(extraManager, 0, 0, 1 /* Actions.PRUNE */);
+            menu.show();
+        }
+        else
+            extraManager.queueAction(0, 0, 1 /* Actions.PRUNE */);
+    }, null, false, () => true, pruneImage);
+    let extraPruneLabel = ui.createLatexLabel({
+        isVisible: () => {
+            if (!extraManager.colonies[0][0] ||
+                !plantData[extraManager.colonies[0][0].id].actions[1 /* Actions.PRUNE */])
+                return false;
+            return true;
+        },
+        row: 0, column: 5,
+        // horizontalOptions: LayoutOptions.END,
+        verticalTextAlignment: TextAlignment.START,
+        margin: new Thickness(0, 9, 1, 9),
+        text: getLoc('labelActions')[1 /* Actions.PRUNE */],
+        fontSize: 10,
+        textColor: Color.TEXT_MEDIUM
+    });
+    // Plant pot
+    let plantLabel = ui.createLatexLabel({
+        isVisible: () => !extraManager.colonies[0].length,
+        text: getLoc('labelPlantPot'),
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let plantGrid = ui.createGrid({
+        isVisible: () => !extraManager.colonies[0].length,
+        columnDefinitions: ['85*', '15*'],
+        children: [
+            ui.createButton({
+                column: 0,
+                text: () => getLoc('plants')[plantUnlocks[extraPotPlantIdx]].name,
+                onClicked: () => {
+                    Sound.playClick();
+                    extraManager.addColony(0, plantUnlocks[extraPotPlantIdx], 1, [null, null]);
+                }
+            }),
+            ui.createButton({
+                column: 1,
+                text: '►',
+                onClicked: () => {
+                    Sound.playClick();
+                    extraPotPlantIdx = (extraPotPlantIdx + 1) %
+                        (plantPerma.level + 1);
+                }
+            })
+        ]
+    });
+    // Transfer
+    // Wait, people can spam transfer to get unlimited plants...
+    // Should transfer have a fee, or require stage 20 (or maxStage for peas)?
+    let transferLabel = ui.createLatexLabel({
+        isVisible: () => extraManager.colonies[0].length > 0,
+        text: getLoc('labelTransferPot'),
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let transferBtns = [];
+    for (let i = 0; i < plotPerma.level; ++i) {
+        transferBtns.push(ui.createButton({
+            column: i,
+            text: (i + 1).toString(),
+            onClicked: () => {
+                Sound.playClick();
+                let c = extraManager.colonies[0][0];
+                if (c && c.stage >= Math.min(plantData[c.id].maxStage, transferMinStage) && manager.colonies[i].length < manager.width) {
+                    manager.colonies[i].push(c);
+                    extraManager.killColony(0, 0);
+                }
+            }
+        }));
+    }
+    let transferGrid = ui.createGrid({
+        isVisible: () => extraManager.colonies[0].length > 0,
+        children: transferBtns
+    });
+    let menu = ui.createPopup({
+        isPeekable: true,
+        title: getLoc('menuExtraPot'),
+        content: ui.createStackLayout({
+            children: [
+                ui.createLatexLabel({
+                    text: () => {
+                        if (extraManager.colonies[0].length)
+                            return getExtraPotEquation();
+                        return getLoc('extraPotEqPlaceholder')[colonyMode];
+                    },
+                    horizontalTextAlignment: TextAlignment.CENTER
+                }),
+                ui.createScrollView({
+                    row: 0, column: 0,
+                    orientation: ScrollOrientation.BOTH,
+                    content: ui.createGrid({
+                        isVisible: () => extraManager.colonies[0].length > 0,
+                        margin: new Thickness(4),
+                        horizontalOptions: LayoutOptions.START,
+                        // verticalOptions: LayoutOptions.END,
+                        columnDefinitions: [
+                            'auto', 'auto',
+                            'auto', 'auto',
+                            'auto', 'auto'
+                        ],
+                        inputTransparent: true,
+                        cascadeInputTransparent: false,
+                        children: [
+                            extraWaterFrame,
+                            extraWaterLabel,
+                            extraHarvestFrame,
+                            extraHarvestLabel,
+                            extraPruneFrame,
+                            extraPruneLabel,
+                        ]
+                    }),
+                }),
+                plantLabel,
+                plantGrid,
+                transferLabel,
+                transferGrid
+            ]
+        })
+    });
+    return menu;
+};
+let createConfirmationMenu = (mgr, plot, index, id) => {
+    let c = mgr.colonies[plot][index];
     let menu = ui.createPopup({
         // isPeekable: true,
         title: Localization.get('GenPopupConfirm'),
         content: ui.createStackLayout({
             children: [
                 ui.createLatexLabel({
-                    text: Localization.format(getLoc('actionConfirmDialogue'), getLoc('labelActions')[id], plot + 1, index + 1, getColonyTitleString(c, false, false, true), Localization.get('GenPopupContinue')),
+                    text: Localization.format(getLoc('actionConfirm'), getLoc('labelActions')[id], plot + 1, index + 1, mgr.colonies[plot].length, getColonyTitleString(c, { escape: true }), getLoc('plants')[c.id]?.actions?.[id] ?? '', Localization.get('GenPopupContinue')),
                     horizontalTextAlignment: TextAlignment.CENTER,
                     margin: new Thickness(0, 15)
                 }),
-                // ui.createBox
-                // ({
-                //     heightRequest: 1,
-                //     margin: new Thickness(0, 6)
-                // }),
+                ui.createButton({
+                    isVisible: plantData[c.id].actions[id].system ? true :
+                        false,
+                    text: getLoc('btnViewAction'),
+                    onClicked: () => {
+                        Sound.playClick();
+                        let menu = createSystemMenu(c.id, id);
+                        menu.show();
+                    }
+                }),
                 ui.createGrid({
                     columnDefinitions: ['1*', '1*'],
+                    // minimumHeightRequest: getBtnSize(ui.screenWidth),
                     children: [
                         ui.createButton({
                             column: 0,
                             text: Localization.get('GenPopupYes'),
                             onClicked: () => {
                                 Sound.playClick();
-                                manager.performAction(plot, index, id);
+                                mgr.queueAction(plot, index, id);
+                                menu.hide();
+                            }
+                        }),
+                        ui.createButton({
+                            column: 1,
+                            text: Localization.get('GenPopupNo'),
+                            onClicked: () => {
+                                Sound.playClick();
+                                menu.hide();
+                            }
+                        }),
+                    ]
+                })
+            ]
+        })
+    });
+    return menu;
+};
+let createBulkConfirmationMenu = (mgr, plot, id) => {
+    let menu = ui.createPopup({
+        // isPeekable: true,
+        title: Localization.get('GenPopupConfirm'),
+        content: ui.createStackLayout({
+            children: [
+                ui.createLatexLabel({
+                    text: Localization.format(getLoc('bulkActionConfirm'), getLoc('labelActions')[id], plot + 1, Localization.get('GenPopupContinue')),
+                    horizontalTextAlignment: TextAlignment.CENTER,
+                    margin: new Thickness(0, 15)
+                }),
+                ui.createGrid({
+                    columnDefinitions: ['1*', '1*'],
+                    // minimumHeightRequest: getBtnSize(ui.screenWidth),
+                    children: [
+                        ui.createButton({
+                            column: 0,
+                            text: Localization.get('GenPopupYes'),
+                            onClicked: () => {
+                                Sound.playClick();
+                                for (let i = mgr.colonies[plot].length - 1; i >= 0; --i) {
+                                    if (isColonyVisible(mgr.colonies[plot][i]))
+                                        mgr.queueAction(plot, i, id);
+                                }
                                 menu.hide();
                             }
                         }),
@@ -5135,7 +6479,7 @@ let createConfirmationMenu = (plot, index, id) => {
 };
 let createWorldMenu = () => {
     let speedLabel = ui.createLatexLabel({
-        text: Localization.format(getLoc('labelSpeed'), parseFloat(speeds[speedIdx].toFixed(2))),
+        text: Localization.format(getLoc('labelSpeed'), speeds[speedIdx]),
         row: 0, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
@@ -5146,7 +6490,7 @@ let createWorldMenu = () => {
         value: speedIdx,
         onValueChanged: () => {
             speedIdx = Math.round(speedSlider.value);
-            speedLabel.text = Localization.format(getLoc('labelSpeed'), parseFloat(speeds[speedIdx].toFixed(2)));
+            speedLabel.text = Localization.format(getLoc('labelSpeed'), speeds[speedIdx]);
         },
         onDragCompleted: () => {
             Sound.playClick();
@@ -5160,6 +6504,7 @@ let createWorldMenu = () => {
     });
     let GM3Button = ui.createButton({
         column: 1,
+        heightRequest: getSmallBtnSize(ui.screenWidth),
         text: getLoc('btnRedraw'),
         onClicked: () => {
             Sound.playClick();
@@ -5201,23 +6546,24 @@ let createWorldMenu = () => {
             // GM2Slider.value = graphMode2D;
         }
     });
-    let CMLabel = ui.createLatexLabel({
+    let CVMLabel = ui.createLatexLabel({
         text: getLoc('colonyModes')[colonyMode],
         row: 4, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let CMSlider = ui.createSlider({
+    let CVMSlider = ui.createSlider({
         row: 4, column: 1,
         minimum: -0.25,
         maximum: 4 /* ColonyModes._SIZE */ - 0.75,
         value: colonyMode,
         onValueChanged: () => {
-            colonyMode = Math.round(CMSlider.value);
-            CMLabel.text = getLoc('colonyModes')[colonyMode];
+            colonyMode = Math.round(CVMSlider.value);
+            CVMLabel.text = getLoc('colonyModes')[colonyMode];
         },
         onDragCompleted: () => {
             Sound.playClick();
             // CMSlider.value = colonyMode;
+            theory.invalidatePrimaryEquation();
         }
     });
     let APLabel = ui.createLatexLabel({
@@ -5270,7 +6616,8 @@ let createWorldMenu = () => {
     let QBSlider = ui.createSlider({
         row: 5, column: 1,
         minimum: -0.25,
-        maximum: 4 /* QuaternaryModes._SIZE */ - 0.75,
+        maximum: haxEnabled ? 5 /* QuaternaryModes._SIZE */ - 0.75 :
+            5 /* QuaternaryModes._SIZE */ - 2.75,
         value: quatMode,
         onValueChanged: () => {
             quatMode = Math.round(QBSlider.value);
@@ -5279,6 +6626,26 @@ let createWorldMenu = () => {
         onDragCompleted: () => {
             Sound.playClick();
             // QBSlider.value = quatMode;
+            theory.invalidateQuaternaryValues();
+        }
+    });
+    let CMLabel = ui.createLatexLabel({
+        text: getLoc('camModes')[cameraMode],
+        row: 8, column: 0,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let CMSlider = ui.createSlider({
+        row: 8, column: 1,
+        minimum: -0.25,
+        maximum: 3 /* CameraModes._SIZE */ - 0.75,
+        value: cameraMode,
+        onValueChanged: () => {
+            cameraMode = Math.round(CMSlider.value);
+            CMLabel.text = getLoc('camModes')[cameraMode];
+        },
+        onDragCompleted: () => {
+            Sound.playClick();
+            renderer.configure(null, null, { mode: cameraMode }, {}, false);
             theory.invalidateQuaternaryValues();
         }
     });
@@ -5303,8 +6670,8 @@ let createWorldMenu = () => {
                         GM3Switch,
                         GM2Label,
                         GM2Slider,
-                        CMLabel,
-                        CMSlider,
+                        CVMLabel,
+                        CVMSlider,
                         APLabel,
                         APSwitch,
                         PTLabel,
@@ -5314,15 +6681,10 @@ let createWorldMenu = () => {
                         QBLabel,
                         QBSlider,
                         speedLabel,
-                        speedSlider
+                        speedSlider,
+                        CMLabel,
+                        CMSlider
                     ]
-                }),
-                ui.createLatexLabel({
-                    text: getLoc('versionName'),
-                    horizontalOptions: LayoutOptions.CENTER,
-                    horizontalTextAlignment: TextAlignment.CENTER,
-                    verticalTextAlignment: TextAlignment.CENTER,
-                    fontSize: 12
                 }),
                 ui.createBox({
                     heightRequest: 1,
@@ -5391,42 +6753,15 @@ var postPublish = () => {
 var canResetStage = () => false;
 var getResetStageMessage = () => getLoc('resetRenderer');
 var resetStage = () => renderer.reset(true);
-var canGoToPreviousStage = () => plotPerma.level > 0 && plotIdx > 0;
-var goToPreviousStage = () => {
-    --plotIdx;
-    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    if (selectedColony)
-        renderer.colony = selectedColony;
-    theory.invalidatePrimaryEquation();
-    theory.invalidateSecondaryEquation();
-    updateAvailability();
-};
-var canGoToNextStage = () => plotIdx < plotPerma.level - 1;
-var goToNextStage = () => {
-    ++plotIdx;
-    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
-    if (selectedColony)
-        renderer.colony = selectedColony;
-    theory.invalidatePrimaryEquation();
-    theory.invalidateSecondaryEquation();
-    updateAvailability();
-};
+// go to prev next stage
 // Copied from the ol Oiler's Formula
 let bigStringify = (_, val) => {
-    try {
-        if (val instanceof BigNumber)
-            return 'BigNumber' + val.toBase64String();
-    }
-    catch { }
-    ;
-    return val;
+    return val && val.hasOwnProperty('toBase64String') ?
+        ('BigNumber' + val.toBase64String()) : val;
 };
 let unBigStringify = (_, val) => {
-    if (val && typeof val === 'string') {
-        if (val.startsWith('BigNumber'))
-            return BigNumber.fromBase64String(val.substring(9));
-    }
-    return val;
+    return (val && typeof val === 'string' && val.startsWith('BigNumber')) ?
+        BigNumber.fromBase64String(val.substring(9)) : val;
 };
 var getInternalState = () => {
     // if(manager.busy)
@@ -5437,10 +6772,12 @@ var getInternalState = () => {
         haxEnabled,
         time,
         plotIdx,
-        colonyIdx,
+        slotIdx,
         plantIdx,
+        extraPotPlantIdx,
         finishedTutorial,
         manager,
+        extraManager,
         settings: {
             speedIdx,
             graphMode2D,
@@ -5449,11 +6786,14 @@ var getInternalState = () => {
             fancyPlotTitle,
             actionPanelOnTop,
             actionConfirm,
-            quatMode
+            quatMode,
+            cameraMode
         },
         colonyViewConfig,
         shelfPages,
-        notebook
+        autoWaterConfig,
+        notebook,
+        gameRNG
     }, bigStringify);
 };
 var setInternalState = (stateStr) => {
@@ -5468,8 +6808,10 @@ var setInternalState = (stateStr) => {
             pauseGame.isAvailable = haxEnabled;
             if (pauseGame.level)
                 theory.pause();
+            trueSight.isAvailable = haxEnabled;
             warpTick.isAvailable = haxEnabled;
             warpDay.isAvailable = haxEnabled;
+            warpWeek.isAvailable = haxEnabled;
             warpYear.isAvailable = haxEnabled;
             warpZero.isAvailable = haxEnabled;
         }
@@ -5477,7 +6819,7 @@ var setInternalState = (stateStr) => {
             time = state.time ?? time;
             let cycles = time / dayLength;
             days = Math.floor(cycles);
-            years = binarySearch(yearStartLookup, days);
+            years = binarySearchLast(yearStartLookup, days);
             let phase = saturate(cycles - days - 0.25, 0, 0.5);
             insolationIntegral = days * dayLength / Math.PI - halfDayLength *
                 (Math.cos(phase * 2 * Math.PI) - 1) / Math.PI;
@@ -5486,11 +6828,14 @@ var setInternalState = (stateStr) => {
             lastSave = time;
         }
         plotIdx = state.plotIdx ?? plotIdx;
-        colonyIdx = state.colonyIdx ?? colonyIdx;
+        slotIdx = state.slotIdx ?? slotIdx;
         plantIdx = state.plantIdx ?? plantIdx;
+        extraPotPlantIdx = state.extraPotPlantIdx ?? extraPotPlantIdx;
         finishedTutorial = state.finishedTutorial ?? finishedTutorial;
         manager = new ColonyManager(state.manager, nofPlots, maxColoniesPerPlot)
             ?? manager;
+        extraManager = new ColonyManager(state.extraManager, 1, 1, manager) ??
+            extraManager;
         if (v < 0.105) {
             for (let i = 0; i < manager.length; ++i)
                 for (let j = 0; j < manager.colonies[i].length; ++j)
@@ -5518,11 +6863,19 @@ var setInternalState = (stateStr) => {
             actionConfirm = state.settings.actionConfirm ?? actionConfirm;
             quatMode = state.settings.quatMode ??
                 Number(state.settings.quatBoard ?? quatMode);
+            cameraMode = state.settings.cameraMode ?? cameraMode;
+            renderer.configure(null, null, { mode: cameraMode }, {}, false);
         }
         colonyViewConfig = state.colonyViewConfig ?? colonyViewConfig;
         shelfPages = state.shelfPages ?? shelfPages;
+        autoWaterConfig = state.autoWaterConfig ?? autoWaterConfig;
         notebook = state.notebook ?? notebook;
+        gameRNG = state.gameRNG ?
+            new Xorshift(state.gameRNG.seed, state.gameRNG.aux) : gameRNG;
     }
+    manager.registerSpawner(dandelionSpawner);
+    manager.registerSpawner(broomrapeSpawner);
+    manager.registerSpawner(hopleekSpawner);
     actuallyPlanting = false;
     tmpLevels = Array.from({ length: nofPlots }, (_) => { return {}; });
     for (let i = 0; i < nofPlots; ++i) {
@@ -5533,8 +6886,8 @@ var setInternalState = (stateStr) => {
                     c.diReserve = BigNumber.ZERO;
                 if (!c.dgReserve)
                     c.dgReserve = BigNumber.ZERO;
-                if (plantData[c.id].dailyIncome && !c.ddReserve)
-                    c.ddReserve = BigNumber.ZERO;
+                // if(plantData[c.id].dailyIncome && !c.ddReserve)
+                //     c.ddReserve = BigNumber.ZERO;
             }
             if (!tmpLevels[i][c.id])
                 tmpLevels[i][c.id] = 0;
@@ -5543,16 +6896,10 @@ var setInternalState = (stateStr) => {
         }
         for (let j = 0; j < plantUnlocks.length; ++j) {
             plants[i][plantUnlocks[j]].level = tmpLevels[i][plantUnlocks[j]];
-            // if(theory.isBuyAllAvailable && notebook[plantUnlocks[j]])
-            // {
-            //     plants[i][plantUnlocks[j]].maxLevel = Math.max(
-            //     notebook[plantUnlocks[j]].maxLevel,
-            //     plants[i][plantUnlocks[j]].level);
-            // }
         }
     }
     actuallyPlanting = true;
-    selectedColony = manager.colonies[plotIdx][colonyIdx[plotIdx]];
+    selectedColony = manager.colonies[plotIdx][slotIdx];
     if (selectedColony)
         renderer.colony = selectedColony;
     theory.invalidatePrimaryEquation();
@@ -5572,7 +6919,7 @@ var get2DGraphValue = () => {
     }
 };
 var get3DGraphPoint = () => {
-    if (graphMode3D && !manager.busy) {
+    if (graphMode3D && !manager.busy && !extraManager.busy) {
         perfs[6 /* Profilers.RENDERER */].exec(() => {
             renderer.draw();
         });

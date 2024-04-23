@@ -4,9 +4,9 @@
   - [Research](#research)
   - [Compost bin](#compost-bin)
   - [v0.3: Invasion](#v03-invasion)
-  - [v0.2: Education edition](#v02-education-edition)
+  - [v0.2: Wet](#v02-wet)
   - [v0.1: Slumber Seeds](#v01-slumber-seeds)
-  - [v0: Completed](#v0-completed)
+  - [v0: Axiom](#v0-axiom)
 
 ## Research
 
@@ -21,31 +21,24 @@
 - [ ] Are single-player games [that weak?](https://www.sciencedirect.com/science/article/abs/pii/S0360131522002214)
   - Hold on, collaborative and social interactions. Discord! Reddit!
 
-- [ ] Research notes
-  - Two players share progress with each other daily
-  - Some players understand the profit puzzle for calendula, some don't
-  - Players enjoy watching plants grow idly
-  - Some players can't get pruning basil
-  - Some players mistake max stage with max profit
-  - Many players are cautious about purchasing expensive items, which isn't the 
-  case usually for other theories
+Since the number of questionnaires is not so large, qualitative evaluation instead of quantitative evaluation is acceptable at least at this point. The aims of the game, such as "incorporates the mechanics of L-systems in order to provide an interesting learning experience" or "provide ways to enhance players' arithmetic skills and strategic thinking" etc, are described ex. at the beginning of "2. Methods", so you will examine the degree to which they have been achieved or not, item by item.
 
-- Let's think about it. A plant that takes 80 minutes to grow, and you have to
-do nothing. Do you feel like it could be more interesting?
+to the idea of a simple plant before calendula: that's a good idea
+the concept of l-systems is the growing sequence and such
+maybe make a first plant that features just the (a -> b, b -> ab) sequence and then add the orientation and conditions later on in its life
+
+basically it only focuses on plant growth instead of the actual l-systems , which I find a bit lacking
+you have to dig really deep to find the underlying systems behind the plants
 
 ## Compost bin
+
+- [ ] Get rid of daily income in the code
+  - Unless there's a use for it
 
 - [ ] Unlock conditions for each page in Lemma's book
 
 - [ ] Tag various stuffs with readonly
-- [x] Enums
-- [x] Use toJSON() for classes
 - [ ] Change getLoc() to just assign loc folder at start and access a property
-
-- [ ] Simple solitary flower
-  - Tulip?
-  - Buttercup
-  - No need, Cally is already easy to play
 
 - [ ] Colour schemes?
 - [ ] Timer function to measure growth
@@ -54,78 +47,191 @@ do nothing. Do you feel like it could be more interesting?
 - [ ] Gangsta should actually store the colony reference?
   - Internal state unfriendly
 
-- [ ] Autobuy upgrade unlocks harvest automation config
-  - Only unlocks in a future update (classmates!)
-  - Hard to implement since there's more to LG than when to harvest
-
 - [ ] Different aspect ratios hav different graph bounds
-
-- [ ] Newspapers
-- [ ] Add a Pruned commentary track
-  - 2 lazy
 
 - [ ] Compost
   - Has STAGES?
   - Supply energy
     - Don't we already have so many things that give energy
 
+- [ ] Bundle time and coordinates into the manager class
+  - [ ] Following LT's method, could also bundle the plant upgrades too
+
 - [ ] Ask Uni of Calgary about how to make Ls easier to understand
   - Provide context: making a game about the logical aspects of Ls
+  - [x] Initial email
 
-- [ ] Bulk watering when holding button
-  - Waters everything on 1 plot, not the entire garden
-  - NO bulk harvest or prune.
+- [x] Change /sec indicators to /hr (in-game) and display 5x the value
+  - Counter-argument: all parameters display /sec
+  - [x] Test basil balance
+
+- [ ] Popup title gets truncated on iOS if it exceeds 1 line
+
+- [ ] Autobuy upgrade unlocks harvest automation config
+  - Only unlocks in a future update (classmates!)
+  - Hard to implement since there's more to LG than when to harvest
+
+- [ ] Apex models for plants
+  - [ ] Pea
+  - [ ] Calendula
+  - [ ] Basil
+  - [ ] Campion
+  - [ ] Hopleek
+  - [x] Broomrape
+  - [ ] Ginger
+  - [ ] Sunflower
 
 ## v0.3: Invasion
 
-- [ ] Universal income upgrades
+- [x] Move references from loc strings to the Book class
+- [ ] Add reference to Param LSR
+- [x] Test book icon
+- [x] Add almanac access button to view menu
+- [x] Move 'view Ls' button on book menu to top side near title
+- [x] Make the column spacing x1.5 if there's no tax and make it branchless
+- [x] On confirmation dialogue, have the action described (like in L-s menu)
+- [x] Dynamical system inaccuracies
+  - [ ] Parasites sometimes eat after their hosts, resulting in loss of energy
+  - [x] basil is pruned at stg 0 (synth rate is 0), plant can only grow when watering. Watering should give multiples of 2 energy, but when evolving, some of the energy is truncated.
+- [x] Let all plots be viewable before unlocking
+  - [x] Display price before unlocking
+  - [ ] Can players perform actions in locked plots?
+- [ ] Capitalise plant names (Rose Campion instead of campion)?
+- [x] Button to display action L-systems
+- [x] Sequence view nesting is broken
+
+- [ ] Address Lemma's attitude
+  - Early game should be the time when a lot of help is needed, don't neglect your student
+  - [ ] Narration revamp
+    - Lemma should also know about L-systems and tell students what rule is being enacted
+    - [x] Narration tracks (as an integer)
+      - [ ] Should they have string keys instead?
+    - [ ] Calendula
+    - [x] Basil
+      - [x] Only need narrations for context rules
+      - [x] Basil pruned track
+      - [x] Basil unpruned track
+    - [ ] Campion
+  - [ ] Lessons
+    - [ ] L0: Ls?
+    - [ ] L1: Parametric Ls (resource accumulation)
+    - [ ] L2: Parametric Ls (Number of parameters)
+    - [ ] L3: Context Ls
+    - [ ] L4: Connections to fractals
+
+- [x] Parasites
+  - [x] Rate: for now, hardcode to be param #0 of symbol #0
+  - [x] Searching: for now, hardcode target to be the in the same plot
+  - [x] Dislodge and re-establish all links every time a colony is killed or spawned?
+    - [x] Do a sweeping scan for all links in the same plot in addColony and killColony
+
+- [x] Extra pot
+  - [x] Make pot manager wait until main manager finishes processing
+- [ ] Beehives
+
+- [x] Pre-calendula plant:
+  - [x] Pea or mung sprout
+    - [x] Narration
+  - [ ] Simple solitary flower
+    - Tulip? But tulip is much more fancier...
+    - Buttercup
+
+- [ ] Calendula
+  - [ ] Flower transforms into seed pod with lower profit
+    - Turns `K(9)` into `K(9-1.5, 0)` (to avoid further interactions) and add seed pod
+  - [ ] Singular inflorescence
+  - [x] Lower pub cost to 15p
+
+- [ ] Basil
+  - [ ] Reversible leaf decay when pruning?
+  - [ ] Align the vibes of basil & campion to make it feel smoother
+  - [ ] Two types of leaf: 2 params and 3 params
+  - [ ] Two types of signal: 0 and 1 params
+  - [x] Rewrite instructions to encourage blooming
+    - Stg 24: 'It's about to bloom soon. Cutting the bud now or watching flowers later, it's up to you.'
+    - Separate stg 26 and 27 description for basil, and only stg 27 has the signal explanation
+  - [x] Add a Pruned commentary track
+
+- [x] Rose campion
+  - [ ] Replace with normal rose in standalone game
+    - [ ] No profit per stage
+  - [ ] Shrub form
+  - [ ] Lower leaf size limit
+  - [ ] Why does it have 3 symbols on stage 1?
+    - Remove the & after adding shrub form
+  - [ ] Make the flowers' incomes easier to calculate
+  - [ ] Standalone game: spread to nearby plot instead of same plot
+  - [x] Nerf spreading rate to 1/2 or sth?
+  - [ ] Make it easy to calculate profit sum
+  - [x] Change the propagation stage since fruit only starts generating at 19?
+  - [x] Income per evolution instead of night
+  - [x] Double growth cost
+  - [ ] Flower turns into fruit faster
+  - [x] Fruit falls off
+  - [x] Add a parameter to adjust stagely income multiplier (1/2x for now?)
+  - [x] Passive income
+  - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
+  - [x] Extend rose campion seed period by a few stages
+  - [x] Dialogue:
+  'Oh no. Maybe luminaries were right all along. Small campion, big campion,...'
+
+- [ ] Dandelion
+  - Spawn on random plot
+    - [x] Implement RNG engine
 
 - [ ] Hopleek
   - Biting is on evolution queue instead of action?
   - [x] Leap years calculation
     - [ ] 400-year cycle wrapping
-  - [ ] Hopleek schedule
-  - [ ] Repelled by rose campions and sunflowers
+  - [x] Hopleek schedule
+  - [ ] Move every stage
+  - [ ] Repelled by?
+    - [ ] rose campions and sunflowers?
+    - [ ] calendula and basil?
+    - [ ] nothing.
 
-- [ ] Broomrape
+- [x] Broomrape
+  - [x] Schedule
+    - Once per 2 years? Doesn't it make broomrape faster than hopleek?
+  - [x] Propagation method
+  - [x] Models
+    - [ ] Calyxes
+    - [ ] Flowers opening
+    - [ ] Fruits droop more
+  - [x] Narrations
+  - [ ] Get into people's shoes
 
 - [ ] Ginger
+  - [ ] How to not make leaves slow down too much
+  - [ ] Pruning kills all leaves and the upper body
+  - [ ] Harvest spawns a new node? Probably not
 
 - [ ] Sunflower
 
-- [ ] Align the vibes of basil & campion to make it feel smoother
+- [ ] Universal income upgrades
+- [ ] Newspapers
 
-- [x] Rose campion as first bush plant
-  - [x] Nerf spreading rate to 1/2 or sth?
-  - [ ] Make it easy to calculate profit sum
-  - [ ] Change the propagation stage since fruit only starts generating at 19?
-  - [ ] Maximum statements
-  - [ ] Death? Propagation?
-  - [ ] Shrub form?
-  - [ ] Halve leaf synth
-  - [x] Income per evolution instead of night
-  - [ ] Double growth cost
-  - [ ] Flower turns into fruit faster
-  - [x] Fruit falls off
-  - [ ] Loading SLOW
-  - [ ] Add a parameter to adjust stagely income multiplier (1/2x for now?)
-  - [x] Passive income
-  - [x] Nerf growth cost from 4 to 5? Stage 21 is so fast, how about 28?
-  - [x] Extend rose campion seed period by a few stages
+- [x] Watering
+  - [ ] Instead of putting watering on a cooldown, make it a coefficient curve or slope that either deducts or increases energy based on the last time the plant was watered. This will communicate the effects of overwatering better?
+  - [ ] Auto-watering: unlocks with classmates
+  - [ ] Bulk watering when holding button
+    - Waters everything on 1 plot, not the entire garden
+    - NO bulk harvest or prune.
+  - [x] Make watering required for every stage, else the plant won't evolve.
+    - [x] Timing: only make it available after half of the growth has been filled?
+    - [x] Auto-watering: unlocks for free (right away, or maybe after the next plant has been unlocked) with configurable stage. That means you have likely understood this plant's growth.
+    - Some plants don't need watering to evolve, such as grasses.
+    - [ ] Plants start at negative stage so watering won't give too much energy?
+
+## v0.2: Wet
+
+- [x] Enums
+- [x] Use toJSON() for classes
 
 - [x] Button that skips tutorial for iOS players
-- [ ] Dedicated save file for playtesting
-- [ ] Replace 'view L-system' button with almanac access
+- [x] Dedicated save file for playtesting
 - [x] Rework singular upgrade logic
   - Turn switch plant into regular upgrade
-
-- [ ] Change /sec indicators to /hr (in-game) and display 5x the value
-  - Counter-argument: all parameters display /sec
-
-## v0.2: Education edition
-
-- Calendula
-  - [x] Nerf spread rate to 1/3? Sum equals 1.5 making the pub mult coefficient 2 instead of 1.8
 
 - [x] Explain plant mechanics in Lemma's book: energy, growth
 - [x] Explain symbols without parameters in Ls book
@@ -157,8 +263,6 @@ do nothing. Do you feel like it could be more interesting?
     - [x] Add dynamic directions (`m` for min, `M` for max)
   - Spreaded colonies syntax: +1 of Rose campion
   - [x] Propagated colonies inherit the di and dg reserves
-  - [ ] Hey, can you imagine an ash tree propagating a MISTLETOE?
-    - Mistletoe also eats nutrients like hopleek
 
 - [x] Watering
   - Absurd cooldown like 10 minutes (6 days)
@@ -168,11 +272,12 @@ do nothing. Do you feel like it could be more interesting?
   - [x] Extend each species to accomodate for watering change
     - [x] Opportunity to standardise countdown params
   - [x] Lemma book entry
-  - [ ] Auto-watering
-    - Unlocks with classmates
 
 - [x] Colony view params are initially off
-- [ ] Notebook shows next cost
+- [x] Notebook shows next cost
+
+- Calendula
+  - [x] Nerf spread rate to 1/3? Sum equals 1.5 making the pub mult coefficient 2 instead of 1.8
 
 - [x] Basil
   - [x] Signal type 1 kills I?
@@ -229,7 +334,7 @@ displayed on screen
   - [x] If stage lower than first leaf, give the usual intro (move that inside
   the stages object)
 
-## v0: Completed
+## v0: Axiom
 
 - [x] Make at least 2 plants
   - [x] Idleable plant: calendula

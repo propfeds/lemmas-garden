@@ -1,3 +1,13 @@
+import { Achievement } from "./Achievement";
+import { Automation } from "./Automation";
+import { BigNumber } from "./BigNumber";
+import { BuyAmounts } from "./BuyAmounts";
+import { Settings } from "./Settings";
+import { Statistics } from "./Statistics";
+import { StoryChapter } from "./StoryChapter";
+import { Theory } from "./Theory";
+import { Upgrade, Variable } from "./Upgrades";
+
 /**
  * Properties of the game.
  */
@@ -165,10 +175,10 @@ export class Game {
      * @returns {StoryChapter[]} List of all story chapters
      */
     get storyChapters(): StoryChapter[];
-    // /**
-    //  * @returns {Story} Story chapters
-    //  */
-    // get story(): Story;
+    /**
+     * @returns {StoryChapter[]} Story chapters
+     */
+    get story(): StoryChapter[];
     /**
      * @returns {Automation} Automation features
      */
@@ -232,13 +242,3 @@ export class Game {
  * @type {Game}
  */
 export const game: Game;
-import { Theory } from "./Theory";
-import { BigNumber } from "./BigNumber";
-import { Variable } from "./Upgrades";
-import { Upgrade } from "./Upgrades";
-import { Achievement } from "./Achievement";
-import { StoryChapter } from "./StoryChapter";
-import { Automation } from "./Automation";
-import { BuyAmounts } from "./BuyAmounts";
-import { Statistics } from "./Statistics";
-import { Settings } from "./Settings";

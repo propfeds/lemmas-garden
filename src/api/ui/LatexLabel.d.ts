@@ -1,3 +1,8 @@
+import { View } from "./View";
+import { Color } from "./properties/Color";
+import { TextAlignment } from "./properties/TextAlignment";
+import { Thickness } from "./properties/Thickness";
+
 /**
  * LaTeX label view
  * Reference: https://github.com/verybadcat/CSharpMath
@@ -49,7 +54,3 @@ export class LatexLabel extends View {
      */
     public verticalTextAlignment: TextAlignment;
 }
-import { TextAlignment } from "./properties/TextAlignment";
-import { Thickness } from "./properties/Thickness";
-import { Color } from "./properties/Color";import { View } from "./View";
-

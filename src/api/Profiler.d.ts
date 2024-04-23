@@ -62,6 +62,10 @@ export class Profilers {
      * @return {Profiler} The new or existing profiler
      */
     get(name: string): Profiler;
+    /**
+     * @returns {number} The number executed statements toward the max statement count (100K)
+     */
+    get statementCount(): number;
 }
 /**
  * Instance of Profilers.

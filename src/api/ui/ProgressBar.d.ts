@@ -1,3 +1,7 @@
+import { View } from "./View";
+import { Color } from "./properties/Color";
+import { Easing } from "./properties/Easing";
+
 /**
  * Progress bar view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.progressbar
@@ -20,6 +24,3 @@ export class ProgressBar extends View {
      */
     progressTo(value: number, length: number, easing?: Easing): any;
 }
-import { View } from "./View";
-import { Color } from "./properties/Color";
-import { Easing } from "./properties/Easing";

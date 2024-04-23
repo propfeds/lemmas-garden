@@ -1,3 +1,7 @@
+import { ScrollBarVisibility } from "./properties/ScrollBarVisibility";
+import { ScrollOrientation } from "./properties/ScrollOrientation";
+import { View } from "./View";
+
 /**
  * Scroll area view
  * Reference: https://docs.microsoft.com/en-us/dotnet/api/xamarin.forms.scrollview
@@ -37,6 +41,3 @@ export class ScrollView extends View {
      */
     get scrollY(): number;
 }
-import { ScrollBarVisibility } from "./properties/ScrollBarVisibility";
-import { ScrollOrientation } from "./properties/ScrollOrientation";
-import { View } from "./View";

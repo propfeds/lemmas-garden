@@ -1,26 +1,53 @@
 # Lemma's Garden
 
-> Last night, Lemma didn't sweep away the rubbles on her old garden.
+> Last night, Lemma swept away the leaves and rubbles on her old garden.
 > 
-> You did. You are her first student in a long while.
+> You are her first student in a long while.
 
-Welcome to Lemma's Garden, an idle gardening game built on the grammar of
-Lindenmayer systems.
-
-Reminisce the story of Lemma and her late partner as she rambles about how much
-she wants to refuse supporting your study with her tight budget. Crap.
+Welcome to Lemma's Garden, an idle botanical theory built on the workings of Lindenmayer systems. Reminisce the story of Lemma, a retired teacher, and her late partner, as she rambles about things already long passed.
 
 ## Installation
 
-Navigate to [`theory.js`](./theory.js) then click on `Raw`. You will be
-delivered to the raw code page of this theory. Copy the page's URL.
+### 1. Install the Exponential Idle application.
 
-Then, access the custom theory panel within the game (unlocked after finishing
-T9, the last theory) then enter the picking menu. Press the `+` symbol and
-paste the URL in.
+Links: [Android](https://play.google.com/store/apps/details?id=com.conicgames.exponentialidle), [iOS](https://apps.apple.com/us/app/exponential-idle/id1538487382).
+
+### 2. Acquire a dedicated save file for custom theories.
+
+This step is only for first-time players of Exponential Idle.
+
+Navigate to [`save.txt`](./save.txt) then click on `Raw`. You will be delivered to the dedicated save file. Copy the entire body of text.
+
+Launch Exponential Idle, head to `Settings > Import/Export` and click on `Import from Clipboard`.
+
+Confirm that `Lifetime f(t)` is equal to $ee44000.9.
+
+Import the save.
+
+### 3. Install the theory.
+
+Navigate to [`theory.js`](./theory.js) then click on `Raw`. You will be delivered to the source code of this theory. Copy the page's URL.
+
+Then, access the custom theory panel within Exponential Idle using the bottom arrows, until you reach a screen saying `Tap to select a custom theory`. Enter the menu, press the `+` sign and paste in the URL.
+
+### 4. Tap on it to start playing.
+
+Tips:
+- Seeds have exponentially scaling costs when you buy them. Try not to make a loss from your plant, by comparing its cost to the base profit times your publication multiplier.
+- Photosynthesis outscales growth once the peak (noon) photosynthetic rate exceeds two times the average growth rate.
+- Unlocked plants always require watering to grow. Hold off watering to keep the plant at the current stage.
+- The speed setting can be accessed through the Bookshelf if one finds the theory too slow.
 
 ## Screenshots
 
-![ss](screenshots/01.png "Purple calendula alarm.")
+<img src="screenshots/pea_small.gif" alt="Pea sprout" height="50%" width="50%">
 
-> Purple calendula alarm.
+> Pea sprout.
+
+<img src="screenshots/03.png" alt="Basil, meet bloom" height="50%" width="50%">
+
+> Basil, meet bloom.
+
+<img src="screenshots/02.png" alt="Colony management" height="50%" width="50%">
+
+> Colony management.
