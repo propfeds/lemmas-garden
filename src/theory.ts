@@ -5136,7 +5136,7 @@ isAvailable: () => boolean, image: ImageSource): Frame =>
         ({
             source: image,
             aspect: Aspect.ASPECT_FIT,
-            useTint: false
+            useTint: true
         }),
         borderColor,
         ...params
@@ -5197,7 +5197,7 @@ isAvailable: () => boolean, image: ImageSource): Frame =>
             {
                 if(heldCallback && repeatable && held)
                     heldCallback();
-                return false;
+                return true;
             }
         }),
         borderColor,

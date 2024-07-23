@@ -32,6 +32,9 @@ you have to dig really deep to find the underlying systems behind the plants
 
 ## Compost bin
 
+- [ ] People's general perception of the game
+  - They thought it'd be more about L-systems, than about plants as of currently
+
 - [ ] Get rid of daily income in the code
   - Unless there's a use for it
 
@@ -64,6 +67,8 @@ you have to dig really deep to find the underlying systems behind the plants
 - [x] Change /sec indicators to /hr (in-game) and display 5x the value
   - Counter-argument: all parameters display /sec
   - [x] Test basil balance
+
+- [ ] Name the alphabet section 'Anatomy'? Glossary?
 
 - [ ] Popup title gets truncated on iOS if it exceeds 1 line
 
@@ -112,6 +117,7 @@ you have to dig really deep to find the underlying systems behind the plants
       - [x] Basil pruned track
       - [x] Basil unpruned track
     - [ ] Campion
+    - [ ] Broomrape narration repeats
   - [ ] Lessons
     - [ ] L0: Ls?
     - [ ] L1: Parametric Ls (resource accumulation)
@@ -139,6 +145,8 @@ you have to dig really deep to find the underlying systems behind the plants
 - [ ] Calendula
   - [ ] Flower transforms into seed pod with lower profit
     - Turns `K(9)` into `K(9-1.5, 0)` (to avoid further interactions) and add seed pod
+    - Or slowly decays into from `K(9, 6)` to `K(6, 0)`.
+    - Or just to `7.5` to make calculations easier?
   - [ ] Singular inflorescence
   - [x] Lower pub cost to 15p
 
