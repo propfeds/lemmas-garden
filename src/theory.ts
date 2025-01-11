@@ -1,5 +1,5 @@
 import { BigNumber } from './api/BigNumber';
-import { CompositeCost, ConstantCost, Cost, ExponentialCost, FirstFreeCost, FreeCost } from './api/Costs';
+import { CompositeCost, ConstantCost, Cost, ExponentialCost, FirstFreeCost, FreeCost, LinearCost } from './api/Costs';
 import { Currency } from './api/Currency';
 import { game } from './api/Game';
 import { Localization } from './api/Localization';
@@ -35,7 +35,7 @@ var getName = (language: string): string =>
 {
     const names =
     {
-        en: `Lemma's Garden (perch)`,
+        en: `Lemma's Garden`,
         ja: `レンマ苑`
     };
 
@@ -46,19 +46,23 @@ var getDescription = (language: string): string =>
     const descs =
     {
         en:
-`Last night, Lemma swept away the fallen leaves on her old garden.
+`Last night, she swept away the fallen leaves on her old garden.
 You are her first student in a long while.
 
 Welcome to Lemma's Garden, an idle botanical theory built on the workings of ` +
-`Lindenmayer systems. Reminisce the story of Lemma, a retired teacher, as ` +
-`she rambles about things already long passed.`,
+`Lindenmayer systems. Reminisce the story of a retired teacher as she ` +
+`rambles about things long passed.`,
     };
 
     return descs[language] ?? descs.en;
 }
-var authors = 'propfeds (a_spiralist)\n\nThanks to:\nProf. Nakamura, ' +
-'research supervisor\nThe six questionnaire takers\nSir Gilles\ngame-icons.net';
-var version = 0.25;
+var authors = 'prop (Minh)\n\n' +
+'Thanks to:\n' +
+'Prof. Nakamura, my research supervisor\n' +
+'The six questionnaire takers\n' +
+'Sir Gilles\n' +
+'game-icons.net';
+var version = 0.26;
 
 // Numbers are often converted into 32-bit signed integers in JINT.
 const INT_MAX = 0x7fffffff;
@@ -78,7 +82,7 @@ const LOC_STRINGS =
 {
     en:
     {
-        versionName: `Version: 0.2.5, 'Grass Tidings'`,
+        versionName: `Version: 0.2.6`,
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
@@ -86,7 +90,7 @@ const LOC_STRINGS =
 
         btnView: 'View L-system',
         btnViewAction: 'View Action L-system',
-        btnAlmanac: 'World of Plants',
+        btnAlmanac: 'Almanac',
         btnAlmanacNoEntry: '(Unavailable)',
         btnVar: 'Variables',
         btnSave: 'Save',
@@ -143,7 +147,7 @@ straight line will be drawn.`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
         lockedPlot: `\\text{Untilled soil.}`,
-        permaExtraPot: `Borrow Lemma's flower pot`,
+        permaExtraPot: `Borrow Miss Ruddles' flower pot`,
         permaExtraPotInfo: `Holds one plant, seeds free of charge, pest-proof`,
         permaNote: `Notebook \\&\\ 'Buy All' button`,
         permaNoteInfo: 'Allows management of colony sizes',
@@ -209,6 +213,7 @@ harvesting it for the first time.`,
         switchColonyInfo: 'Cycles through the list of colonies',
 
         labelSpeed: 'Game speed: 1/{0}',
+        labelSpeedUpg: 'Game speed: 1/{0} → 1/{1}',
         labelGM3D: '3D illustration: ',
         labelActionConfirm: 'Confirmation dialogue: ',
         lineGraphModes:
@@ -422,7 +427,7 @@ ever cared about was crowns and riches...\\\\Are you... did you just pass out?`,
 periodically. It grows like a... fractal?\\\\What is a graftal- who wrote that
 document? Oh, of course they'd be making that up.`,
                         18: `New stems have risen.\\\\Oh no. Perhaps luminaries
-were right all along. Small campion, big campion. Lena surrenders!`,
+were right all along. Small campion, big campion. I surrender!`,
                         19: `Too late to munch on thy flowers, for the first 
 fruit...\\\\cometh.`,
                         22: `Go to sleep. Was my campion sedative not good
@@ -514,24 +519,22 @@ friend to all mathematicians.`
         labelSource: 'Reference: ',
         bookTitleFormat: '{0} ({1}/{2})',
 
-        almanacTitle: `Lemma's World of Plants`,
+        almanacTitle: `Plants of the Lemma's Garden`,
         almanac:
         {
             cover:
             {
                 title: 'Title Cover',
                 contents:
-`Lemma's World of Plants
-An Introduction to Botany for Students
-4th Edition (draft)
-
+`Plants of the Lemma's Garden
+An Introduction to Symbolic Botany for Students
+(draft)
 
 🌾🌻🌿
+~«❈»~
 
-
-
-Lena Ruddles
-Illustrations by Madeline H. Ruddles
+Léa Simon-Ruddles
+Illustrations by M. H. Ruddles
 
 Tau Publishing`
             },
@@ -679,7 +682,7 @@ On a side note, I am delighted of the fact he does not think the wrinkled ` +
 `dissecting the manuscript, I shall contemplate handing it to Ellen, ` +
 `although, frankly speaking, it is unlikely anyone would believe me.
 
-- Lena`
+- Léa`
             },
             cover:
             {
@@ -694,7 +697,7 @@ A User's Guide
 
 
 
-propfeds
+T. M.
 Not for sale`
             },
             intro:
@@ -807,18 +810,20 @@ $: aligns the turtle's up vector closest to vertical.
         {
             intro:
             {
-                title: `Lemma's Garden`,
+                title: `The Lemma's Garden`,
                 contents:
-`(The sky was dark.
-You were out there picking up dirt.)
+`(It is midnight.
+You are trying to fetch a sketch book
+that your old teacher had confiscated.)
 
-You there. Why are you picking up dirt?
-Not one of my old students, are you?
-(points lantern) You were not in my class,
-so I can only spare you a corner... here.
+You there. What are you doing in my garden?
+Not one of my students, are you?
+(points lantern) Wait, is that you, Ivy?
+If that is really you, returned and well recovered,
+could you help me with a small proposition?
 
-Take this seed, till the soil,
-then we'll start in the morning.
+Take this seed, and till the soil.
+We will start tomorrow morning.
 
 Tip: Tap on 'Upgrades' to acquire your first plot.`
             },
@@ -842,7 +847,7 @@ so I can teach you about its growth.`
             },
             basil:
             {
-                title: `Restock at Corollary's`,
+                title: `Restock at Corollary Strait`,
                 contents:
 `Sorry for letting you wait this long.
 I have a... friend, who supplies me with seeds.
@@ -850,11 +855,11 @@ It's a bit exorbitant, but still reliable, I hope.
 
 (scribbles)
 
-...She didn't return until today. Apologies.
+...His shop didn't reopen until today. Apologies.
 Wee bit sick of that marigold soup?
 
 No, don't touch the other packet.
-That is for my old... students!`
+That is for my... future students!`
             },
             notebook:
             {
@@ -886,7 +891,7 @@ this is unlike any regular flood.
 Note: Your plots and settings have been wiped.
 I'm sorry. I can't find a way around this.
 Just deal with it as a 'gameplay mechanic'.
-- propfeds`
+- prop`
             },
             nepo:
             {
@@ -895,13 +900,11 @@ Just deal with it as a 'gameplay mechanic'.
 `You are going easy on my student.
 What were you thinking? Super-exponential revenues?
 Either you get accused of nepotism, or I of bribery.
-And suddenly the next fortnight, she'd be cornering
-the market.
+Then suddenly the next fortnight, the inspectors
+would be all cornering the garden.
 
-I do not condone you letting her abuse the economy.
-Not without giving something back for the community.
-I need to do something.
-- Lena`
+We need to do something about this.
+- Léa`
             }
         },
 
@@ -4462,6 +4465,10 @@ var getPublicationMultiplierFormula = (symbol: string) => `\\frac{2}{3}\\times
 {${symbol}}^{${pubExp.toString(2)}\\times h},\\quad
 h=\\ln{(2\\ln{(${symbol}+1)}+1)}`;
 
+const milestoneCost = new LinearCost(BigNumber.from(1.5),
+// @ts-expect-error
+BigNumber.from(2.5) * tauRate);
+
 const plantData: {[key: string]: Plant} =
 {
     sprout:
@@ -5019,7 +5026,6 @@ let selectedColony: Colony = null;
 let finishedTutorial = false;
 let actuallyPlanting = true;
 
-let speedIdx = 2;
 const enum LineGraphModes
 {
     OFF,
@@ -5136,7 +5142,7 @@ isAvailable: () => boolean, image: ImageSource): Frame =>
         ({
             source: image,
             aspect: Aspect.ASPECT_FIT,
-            useTint: false
+            useTint: true
         }),
         borderColor,
         ...params
@@ -5197,7 +5203,7 @@ isAvailable: () => boolean, image: ImageSource): Frame =>
             {
                 if(heldCallback && repeatable && held)
                     heldCallback();
-                return false;
+                return true;
             }
         }),
         borderColor,
@@ -5354,38 +5360,22 @@ isAvailable: () => boolean, text: string, fontSize: number = 14): Grid =>
     return frame;
 }
 
-let createHesitantSwitch = (params: {[x: string]: any}, callback: () => void,
-isToggled: boolean | (() => boolean)) =>
+const icons: {[x: string]: ImageSource} =
 {
-    let triggerable = true;
-    let element = ui.createSwitch
-    ({
-        horizontalOptions: LayoutOptions.CENTER,
-        onColor: Color.BORDER,
-        isToggled,
-        onTouched: (e: TouchEvent) =>
-        {
-            if(e.type.isReleased())
-            {
-                if(triggerable)
-                {
-                    Sound.playClick();
-                    callback();
-                }
-                else
-                    triggerable = true;
-            }
-            else if(e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
-            e.x > element.width || e.y > element.height))
-                triggerable = false;
-        },
-        ...params
-    });
-    return element;
-}
-const waterImage = game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png');
+    water: game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/dark/drop.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/light/drop.png'),
+    harvest: game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/dark/cornucopia.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/light/cornucopia.png'),
+    prune: game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/dark/hair-strands.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/light/hair-strands.png'),
+    shelf: game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/dark/white-book.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/light/white-book.png')
+};
+
 const waterFrame = createScrollBarImageBtn
 ({
     row: 0, column: 0,
@@ -5396,7 +5386,7 @@ const waterFrame = createScrollBarImageBtn
     if(selectedColony && !selectedColony.wet)
         return true;
     return false;
-}, waterImage);
+}, icons.water);
 const waterLabel = ui.createLatexLabel
 ({
     row: 0, column: 1,
@@ -5429,9 +5419,6 @@ const waterLabel = ui.createLatexLabel
     textColor: Color.TEXT_MEDIUM
 });
 
-const harvestImage = game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png');
 const harvestFrame = createScrollBarImageBtn
 ({
     row: 0, column: 2,
@@ -5462,7 +5449,7 @@ const harvestFrame = createScrollBarImageBtn
         }
     }
 }, false,
-() => true, harvestImage);
+() => true, icons.harvest);
 const harvestLabel = ui.createLatexLabel
 ({
     row: 0, column: 3,
@@ -5474,9 +5461,6 @@ const harvestLabel = ui.createLatexLabel
     textColor: Color.TEXT_MEDIUM
 });
 
-const pruneImage = game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png');
 const pruneFrame = createScrollBarImageBtn
 ({
     isVisible: () =>
@@ -5498,7 +5482,7 @@ const pruneFrame = createScrollBarImageBtn
     else
         manager.queueAction(plotIdx, slotIdx, Actions.PRUNE);
 },
-null, false, () => true, pruneImage);
+null, false, () => true, icons.prune);
 const pruneLabel = ui.createLatexLabel
 ({
     isVisible: () =>
@@ -5517,9 +5501,6 @@ const pruneLabel = ui.createLatexLabel
     textColor: Color.TEXT_MEDIUM
 });
 
-const shelfImage = game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/white-book.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/white-book.png');
 const mainMenuLabel = ui.createLatexLabel
 ({
     row: 0, column: 1,
@@ -5527,7 +5508,7 @@ const mainMenuLabel = ui.createLatexLabel
     margin: new Thickness(0, 9),
     text: () =>
     {
-        let dt = (time - lastSave) * speeds[speedIdx];
+        let dt = (time - lastSave) * speeds[speedMs?.level ?? 0];
         if(dt < 30)
             return getLoc('permaShelf');
         return Localization.format(getLoc('labelSave'), Math.floor(dt));
@@ -5540,7 +5521,7 @@ const mainMenuFrame = createImageBtn
     row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
 },
-() => createShelfMenu().show(), () => true, shelfImage);
+() => createShelfMenu().show(), () => true, icons.shelf);
 
 var controlStack = ui.createStackLayout
 ({
@@ -5567,6 +5548,8 @@ var plotPerma: Upgrade;
 var plantPerma: Upgrade;
 var extraPotPerma: Upgrade;
 var beehivePerma: Upgrade;
+
+var speedMs: Upgrade;
 
 var freePenny: Upgrade;
 var pauseGame: Upgrade;
@@ -5801,21 +5784,21 @@ var init = () =>
         new FreeCost);
         warpDay.description = 'Warp day';
         warpDay.info = 'Warps forward by a day';
-        warpDay.bought = (_) => tick(dayLength * speeds[speedIdx], 1);
+        warpDay.bought = (_) => tick(dayLength * speeds[speedMs.level], 1);
         warpDay.isAvailable = haxEnabled;
 
         warpWeek = theory.createPermanentUpgrade(9008, currency,
         new FreeCost);
         warpWeek.description = 'Warp week';
         warpWeek.info = 'Warps forward by a week';
-        warpWeek.bought = (_) => tick(dayLength * 7 * speeds[speedIdx], 1);
+        warpWeek.bought = (_) => tick(dayLength * 7 * speeds[speedMs.level], 1);
         warpWeek.isAvailable = haxEnabled;
 
         warpYear = theory.createPermanentUpgrade(9005, currency,
         new FreeCost);
         warpYear.description = 'Warp year';
         warpYear.info = 'Warps forward by 365 days';
-        warpYear.bought = (_) => tick(dayLength * 365 * speeds[speedIdx], 1);
+        warpYear.bought = (_) => tick(dayLength * 365 * speeds[speedMs.level], 1);
         warpYear.isAvailable = haxEnabled;
     }
     /* Reset time
@@ -5841,7 +5824,20 @@ var init = () =>
         warpZero.isAvailable = haxEnabled;
     }
 
-    // Next: milestones
+    // Milestones
+    theory.setMilestoneCost(milestoneCost);
+
+    /* c1 exponent
+    Standard exponent upgrade.
+    */
+    {
+        speedMs = theory.createMilestoneUpgrade(0, speeds.length - 1);
+        speedMs.getDescription = (_) => Localization.format(
+        getLoc('labelSpeed'), speeds[speedMs.level]);
+        speedMs.getInfo = (amount) => Localization.format(
+        getLoc('labelSpeedUpg'), speeds[speedMs.level],
+        speeds[Math.min(speedMs.maxLevel, speedMs.level + amount)]);
+    }
 
     // Story chapters
 
@@ -5856,7 +5852,8 @@ var init = () =>
     theory.createStoryChapter(2, chapters?.notebook?.title,
     chapters?.notebook?.contents, () => theory.buyAllUpgrade.level > 0);
     theory.createStoryChapter(3, chapters?.flood?.title,
-    chapters?.flood?.contents, () => theory.tau >= BigNumber.TEN && time < 10);
+    chapters?.flood?.contents, () => theory.tau >= BigNumber.ONE &&
+    time < 5);
 
     let fifteen = BigNumber.from(1e15).pow(tauRate);
     theory.createStoryChapter(4, chapters?.nepo?.title,
@@ -5922,7 +5919,7 @@ var tick = (elapsedTime: number, multiplier: number) =>
     let dd: number, di: number, dg: number;
     perfs[Profilers.TICK].exec(() =>
     {
-        let dt = elapsedTime / speeds[speedIdx];
+        let dt = elapsedTime / speeds[speedMs.level];
         time += dt;
         // https://www.desmos.com/calculator/pfku4nopgy
         // insolation = max(0, -cos(x*pi/72))
@@ -6445,13 +6442,13 @@ let getTimeString = () =>
     let weeks = Math.floor(dayofYear / 7);
     let timeofDay = time % dayLength;
     // timeofDay is within [0, dayLength).
-    let resolution = speedAdjDayLengths[speedIdx];
+    let resolution = speedAdjDayLengths[speedMs.level];
     let quantum = dayLength / resolution;
     let quanToD = Math.floor(timeofDay / quantum) * quantum;
     // Now that hour-length is 1, let's do something else
     let hour = Math.floor(quanToD);
-    let min = Math.floor((quanToD - hour) * speeds[speedIdx] + 1e-9) *
-    clockMinDiv[speedIdx];
+    let min = Math.floor((quanToD - hour) * speeds[speedMs.level] + 1e-9) *
+    clockMinDiv[speedMs.level];
 
     return Localization.format(getLoc(actionPanelOnTop ? 'dateTimeBottom' :
     'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1,
@@ -6924,21 +6921,22 @@ let createColonyViewMenu = (colony: Colony) =>
             };
         }
     });
-    let paramSwitch = createHesitantSwitch
+    let paramSwitch = ui.createSwitch
     ({
         row: 0, column: 3,
-    }, () =>
-    {
-        colonyViewConfig[colony.id].params =
-        !colonyViewConfig[colony.id].params;
-        paramSwitch.isToggled = colonyViewConfig[colony.id].params;
-        // paramSwitch.isToggled = !paramSwitch.isToggled;
-        // colonyViewConfig[colony.id].params = paramSwitch.isToggled;
-        reconstructionTask =
+        horizontalOptions: LayoutOptions.CENTER,
+        isToggled: colonyViewConfig[colony.id].params,
+        opacity: () => colonyViewConfig[colony.id].params ? 1 : 0.5,
+        onToggled: () =>
         {
-            start: 0
-        };
-    }, colonyViewConfig[colony.id].params);
+            Sound.playClick();
+            colonyViewConfig[colony.id].params = paramSwitch.isToggled;
+            reconstructionTask =
+            {
+                start: 0
+            };
+        }
+    });
 
     let indentEntry = ui.createEntry
     ({
@@ -6957,19 +6955,22 @@ let createColonyViewMenu = (colony: Colony) =>
             };
         }
     });
-    let expandSwitch = createHesitantSwitch
+    let expandSwitch = ui.createSwitch
     ({
         row: 1, column: 3,
-    }, () =>
-    {
-        colonyViewConfig[colony.id].expand =
-        !colonyViewConfig[colony.id].expand;
-        expandSwitch.isToggled = colonyViewConfig[colony.id].expand;
-        reconstructionTask =
+        horizontalOptions: LayoutOptions.CENTER,
+        isToggled: colonyViewConfig[colony.id].expand,
+        opacity: () => colonyViewConfig[colony.id].expand ? 1 : 0.5,
+        onToggled: () =>
         {
-            start: 0
-        };
-    }, colonyViewConfig[colony.id].expand);
+            Sound.playClick();
+            colonyViewConfig[colony.id].expand = expandSwitch.isToggled;
+            reconstructionTask =
+            {
+                start: 0
+            };
+        }
+    });
 
     let updateReconstruction = () =>
     {
@@ -7867,7 +7868,7 @@ let createExtraPotMenu = () =>
         if(extraManager.colonies[0][0] && !extraManager.colonies[0][0].wet)
             return true;
         return false;
-    }, waterImage);
+    }, icons.water);
     let extraWaterLabel = ui.createLatexLabel
     ({
         row: 0, column: 1,
@@ -7931,7 +7932,7 @@ let createExtraPotMenu = () =>
             }
         }
     }, false,
-    () => true, harvestImage);
+    () => true, icons.harvest);
     let extraHarvestLabel = ui.createLatexLabel
     ({
         row: 0, column: 3,
@@ -7964,7 +7965,7 @@ let createExtraPotMenu = () =>
         else
             extraManager.queueAction(0, 0, Actions.PRUNE);
     },
-    null, false, () => true, pruneImage);
+    null, false, () => true, icons.prune);
     let extraPruneLabel = ui.createLatexLabel
     ({
         isVisible: () =>
@@ -8246,30 +8247,29 @@ plot: number, id: number) =>
 
 let createWorldMenu = () =>
 {
-    let speedLabel = ui.createLatexLabel
-    ({
-        text: Localization.format(getLoc('labelSpeed'), speeds[speedIdx]),
-        row: 0, column: 0,
-        verticalTextAlignment: TextAlignment.CENTER
-    });
-    let speedSlider = ui.createSlider
-    ({
-        row: 0, column: 1,
-        minimum: -0.25,
-        maximum: speeds.length - 0.75,
-        value: speedIdx,
-        onValueChanged: () =>
-        {
-            speedIdx = Math.round(speedSlider.value);
-            speedLabel.text = Localization.format(getLoc('labelSpeed'),
-            speeds[speedIdx]);
-        },
-        onDragCompleted: () =>
-        {
-            Sound.playClick();
-            // speedSlider.value = speedIdx;
-        }
-    });
+    // let speedLabel = ui.createLatexLabel
+    // ({
+    //     text: Localization.format(getLoc('labelSpeed'), speeds[speedMs.level]),
+    //     row: 0, column: 0,
+    //     verticalTextAlignment: TextAlignment.CENTER
+    // });
+    // let speedSlider = ui.createSlider
+    // ({
+    //     row: 0, column: 1,
+    //     minimum: -0.25,
+    //     maximum: speeds.length - 0.75,
+    //     value: speedMs.level,
+    //     onValueChanged: () =>
+    //     {
+    //         speedMs.level = Math.round(speedSlider.value);
+    //         speedLabel.text = Localization.format(getLoc('labelSpeed'),
+    //         speeds[speedMs.level]);
+    //     },
+    //     onDragCompleted: () =>
+    //     {
+    //         Sound.playClick();
+    //     }
+    // });
     let GM3Label = ui.createLatexLabel
     ({
         column: 0,
@@ -8289,7 +8289,7 @@ let createWorldMenu = () =>
     });
     let GM3Grid = ui.createGrid
     ({
-        row: 7, column: 0,
+        row: 6, column: 0,
         columnDefinitions: ['73*', '60*', '7*'],
         children:
         [
@@ -8297,25 +8297,27 @@ let createWorldMenu = () =>
             GM3Button
         ]
     });
-    let GM3Switch = createHesitantSwitch
+    let GM3Switch = ui.createSwitch
     ({
-        row: 7, column: 1
-    }, () =>
-    {
-        graphMode3D = !graphMode3D;
-        GM3Switch.isToggled = graphMode3D;
-        // GM3Switch.isToggled = !GM3Switch.isToggled;
-        // graphMode3D = GM3Switch.isToggled;
-    }, graphMode3D);
+        row: 6, column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        isToggled: graphMode3D,
+        opacity: () => graphMode3D ? 1 : 0.5,
+        onToggled: () =>
+        {
+            Sound.playClick();
+            graphMode3D = GM3Switch.isToggled;
+        }
+    });
     let GM2Label = ui.createLatexLabel
     ({
         text: getLoc('lineGraphModes')[graphMode2D],
-        row: 6, column: 0,
+        row: 5, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM2Slider = ui.createSlider
     ({
-        row: 6, column: 1,
+        row: 5, column: 1,
         minimum: -0.25,
         maximum: LineGraphModes._SIZE - 0.75,
         value: graphMode2D,
@@ -8333,12 +8335,12 @@ let createWorldMenu = () =>
     let CVMLabel = ui.createLatexLabel
     ({
         text: getLoc('colonyModes')[colonyMode],
-        row: 4, column: 0,
+        row: 3, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let CVMSlider = ui.createSlider
     ({
-        row: 4, column: 1,
+        row: 3, column: 1,
         minimum: -0.25,
         maximum: ColonyModes._SIZE - 0.75,
         value: colonyMode,
@@ -8357,63 +8359,69 @@ let createWorldMenu = () =>
     let APLabel = ui.createLatexLabel
     ({
         text: getLoc('actionPanelModes')[Number(actionPanelOnTop)],
-        row: 3, column: 0,
-        verticalTextAlignment: TextAlignment.CENTER
-    });
-    let APSwitch = createHesitantSwitch
-    ({
-        row: 3, column: 1
-    }, () =>
-    {
-        actionPanelOnTop = !actionPanelOnTop;
-        APSwitch.isToggled = actionPanelOnTop;
-        // APSwitch.isToggled = !APSwitch.isToggled;
-        // actionPanelOnTop = APSwitch.isToggled;
-        APLabel.text = getLoc('actionPanelModes')[Number(actionPanelOnTop)];
-    }, actionPanelOnTop);
-    let PTLabel = ui.createLatexLabel
-    ({
-        text: getLoc('plotTitleModes')[Number(fancyPlotTitle)],
         row: 2, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let PTSwitch = createHesitantSwitch
+    let APSwitch = ui.createSwitch
     ({
-        row: 2, column: 1
-    }, () =>
-    {
-        fancyPlotTitle = !fancyPlotTitle;
-        PTSwitch.isToggled = fancyPlotTitle;
-        // PTSwitch.isToggled = !PTSwitch.isToggled;
-        // fancyPlotTitle = PTSwitch.isToggled;
-        PTLabel.text = getLoc('plotTitleModes')[Number(fancyPlotTitle)];
-        theory.invalidatePrimaryEquation();
-    }, fancyPlotTitle);
-    let ACLabel = ui.createLatexLabel
+        row: 2, column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        isToggled: actionPanelOnTop,
+        opacity: () => actionPanelOnTop ? 1 : 0.5,
+        onToggled: () =>
+        {
+            Sound.playClick();
+            actionPanelOnTop = APSwitch.isToggled;
+            APLabel.text = getLoc('actionPanelModes')[Number(actionPanelOnTop)];
+        }
+    });
+    let PTLabel = ui.createLatexLabel
     ({
-        text: getLoc('labelActionConfirm'),
+        text: getLoc('plotTitleModes')[Number(fancyPlotTitle)],
         row: 1, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let ACSwitch = createHesitantSwitch
+    let PTSwitch = ui.createSwitch
     ({
-        row: 1, column: 1
-    }, () =>
-    {           
-        actionConfirm = !actionConfirm;
-        ACSwitch.isToggled = actionConfirm;
-        // ACSwitch.isToggled = !ACSwitch.isToggled;
-        // actionConfirm = ACSwitch.isToggled;
-    }, actionConfirm);
+        row: 1, column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        isToggled: fancyPlotTitle,
+        opacity: () => fancyPlotTitle ? 1 : 0.5,
+        onToggled: () =>
+        {
+            Sound.playClick();
+            fancyPlotTitle = PTSwitch.isToggled;
+            PTLabel.text = getLoc('plotTitleModes')[Number(fancyPlotTitle)];
+            theory.invalidatePrimaryEquation();
+        }
+    });
+    let ACLabel = ui.createLatexLabel
+    ({
+        text: getLoc('labelActionConfirm'),
+        row: 0, column: 0,
+        verticalTextAlignment: TextAlignment.CENTER
+    });
+    let ACSwitch = ui.createSwitch
+    ({
+        row: 0, column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        isToggled: actionConfirm,
+        opacity: () => actionConfirm ? 1 : 0.5,
+        onToggled: () =>
+        {
+            Sound.playClick();
+            actionConfirm = ACSwitch.isToggled;
+        }
+    });
     let QBLabel = ui.createLatexLabel
     ({
         text: getLoc('quatModes')[quatMode],
-        row: 5, column: 0,
+        row: 4, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let QBSlider = ui.createSlider
     ({
-        row: 5, column: 1,
+        row: 4, column: 1,
         minimum: -0.25,
         maximum: haxEnabled ? QuaternaryModes._SIZE - 0.75 :
         QuaternaryModes._SIZE - 2.75,
@@ -8433,12 +8441,12 @@ let createWorldMenu = () =>
     let CMLabel = ui.createLatexLabel
     ({
         text: getLoc('camModes')[cameraMode],
-        row: 8, column: 0,
+        row: 7, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let CMSlider = ui.createSlider
     ({
-        row: 8, column: 1,
+        row: 7, column: 1,
         minimum: -0.25,
         maximum: CameraModes._SIZE - 0.75,
         value: cameraMode,
@@ -8492,8 +8500,8 @@ let createWorldMenu = () =>
                         ACSwitch,
                         QBLabel,
                         QBSlider,
-                        speedLabel,
-                        speedSlider,
+                        // speedLabel,
+                        // speedSlider,
                         CMLabel,
                         CMSlider
                     ]
@@ -8623,7 +8631,6 @@ var getInternalState = () =>
         extraManager,
         settings:
         {
-            speedIdx,
             graphMode2D,
             graphMode3D,
             colonyMode,
@@ -8711,7 +8718,6 @@ var setInternalState = (stateStr: string) =>
         }
         else if('settings' in state)
         {
-            speedIdx = state.settings.speedIdx ?? speedIdx;
             graphMode2D = state.settings.graphMode2D ?? graphMode2D;
             graphMode3D = state.settings.graphMode3D ?? graphMode3D;
             colonyMode = state.settings.colonyMode ?? colonyMode;
@@ -8733,9 +8739,9 @@ var setInternalState = (stateStr: string) =>
         gameRNG = state.gameRNG ?
         new Xorshift(state.gameRNG.seed, state.gameRNG.aux) : gameRNG;
     }
-    manager.registerSpawner(dandelionSpawner);
+    // manager.registerSpawner(dandelionSpawner);
     manager.registerSpawner(broomrapeSpawner);
-    manager.registerSpawner(hopleekSpawner);
+    // manager.registerSpawner(hopleekSpawner);
 
     actuallyPlanting = false;
     tmpLevels = Array.from({length: nofPlots}, (_) => {return {};});
