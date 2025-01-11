@@ -35,7 +35,7 @@ var getName = (language: string): string =>
 {
     const names =
     {
-        en: `Lemma's Garden (perch)`,
+        en: `Lemma's Garden`,
         ja: `レンマ苑`
     };
 
@@ -46,19 +46,23 @@ var getDescription = (language: string): string =>
     const descs =
     {
         en:
-`Last night, Lemma swept away the fallen leaves on her old garden.
+`Last night, she swept away the fallen leaves on her old garden.
 You are her first student in a long while.
 
 Welcome to Lemma's Garden, an idle botanical theory built on the workings of ` +
-`Lindenmayer systems. Reminisce the story of Lemma, a retired teacher, as ` +
-`she rambles about things already long passed.`,
+`Lindenmayer systems. Reminisce the story of a retired teacher as she ` +
+`rambles about things long passed.`,
     };
 
     return descs[language] ?? descs.en;
 }
-var authors = 'propfeds (a_spiralist)\n\nThanks to:\nProf. Nakamura, ' +
-'research supervisor\nThe six questionnaire takers\nSir Gilles\ngame-icons.net';
-var version = 0.25;
+var authors = 'prop (Minh)\n\n' +
+'Thanks to:\n' +
+'Prof. Nakamura, my research supervisor\n' +
+'The six questionnaire takers\n' +
+'Sir Gilles\n' +
+'game-icons.net';
+var version = 0.26;
 
 // Numbers are often converted into 32-bit signed integers in JINT.
 const INT_MAX = 0x7fffffff;
@@ -78,7 +82,7 @@ const LOC_STRINGS =
 {
     en:
     {
-        versionName: `Version: 0.2.5, 'Grass Tidings'`,
+        versionName: `Version: 0.2.6`,
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
@@ -86,7 +90,7 @@ const LOC_STRINGS =
 
         btnView: 'View L-system',
         btnViewAction: 'View Action L-system',
-        btnAlmanac: 'World of Plants',
+        btnAlmanac: 'Almanac',
         btnAlmanacNoEntry: '(Unavailable)',
         btnVar: 'Variables',
         btnSave: 'Save',
@@ -143,7 +147,7 @@ straight line will be drawn.`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
         lockedPlot: `\\text{Untilled soil.}`,
-        permaExtraPot: `Borrow Lemma's flower pot`,
+        permaExtraPot: `Borrow Léa's flower pot`,
         permaExtraPotInfo: `Holds one plant, seeds free of charge, pest-proof`,
         permaNote: `Notebook \\&\\ 'Buy All' button`,
         permaNoteInfo: 'Allows management of colony sizes',
@@ -422,7 +426,7 @@ ever cared about was crowns and riches...\\\\Are you... did you just pass out?`,
 periodically. It grows like a... fractal?\\\\What is a graftal- who wrote that
 document? Oh, of course they'd be making that up.`,
                         18: `New stems have risen.\\\\Oh no. Perhaps luminaries
-were right all along. Small campion, big campion. Lena surrenders!`,
+were right all along. Small campion, big campion. I surrender!`,
                         19: `Too late to munch on thy flowers, for the first 
 fruit...\\\\cometh.`,
                         22: `Go to sleep. Was my campion sedative not good
@@ -514,24 +518,24 @@ friend to all mathematicians.`
         labelSource: 'Reference: ',
         bookTitleFormat: '{0} ({1}/{2})',
 
-        almanacTitle: `Lemma's World of Plants`,
+        almanacTitle: `Plants of the Lemma's Garden`,
         almanac:
         {
             cover:
             {
                 title: 'Title Cover',
                 contents:
-`Lemma's World of Plants
-An Introduction to Botany for Students
-4th Edition (draft)
+`Plants of the Lemma's Garden
+An Introduction to Symbolic Botany for Students
+(draft version)
 
-
+-o-
 🌾🌻🌿
+-o-
 
 
-
-Lena Ruddles
-Illustrations by Madeline H. Ruddles
+Léa Simon-Ruddles
+Illustrations by M. H. Ruddles
 
 Tau Publishing`
             },
@@ -679,7 +683,7 @@ On a side note, I am delighted of the fact he does not think the wrinkled ` +
 `dissecting the manuscript, I shall contemplate handing it to Ellen, ` +
 `although, frankly speaking, it is unlikely anyone would believe me.
 
-- Lena`
+- Léa`
             },
             cover:
             {
@@ -694,7 +698,7 @@ A User's Guide
 
 
 
-propfeds
+T. M.
 Not for sale`
             },
             intro:
@@ -807,18 +811,20 @@ $: aligns the turtle's up vector closest to vertical.
         {
             intro:
             {
-                title: `Lemma's Garden`,
+                title: `The Lemma's Garden`,
                 contents:
-`(The sky was dark.
-You were out there picking up dirt.)
+`(It is midnight.
+You are trying to fetch a sketch book
+that your old teacher had confiscated.)
 
-You there. Why are you picking up dirt?
+You there. What are you doing in my garden?
 Not one of my old students, are you?
-(points lantern) You were not in my class,
-so I can only spare you a corner... here.
+(points lantern) Wait, is that you, Ivy?
+If that is really you, returned and well recovered,
+could you help me with a small proposition?
 
-Take this seed, till the soil,
-then we'll start in the morning.
+Take this seed, and till the soil.
+We will start from today's morning.
 
 Tip: Tap on 'Upgrades' to acquire your first plot.`
             },
@@ -886,7 +892,7 @@ this is unlike any regular flood.
 Note: Your plots and settings have been wiped.
 I'm sorry. I can't find a way around this.
 Just deal with it as a 'gameplay mechanic'.
-- propfeds`
+- prop`
             },
             nepo:
             {
@@ -895,13 +901,11 @@ Just deal with it as a 'gameplay mechanic'.
 `You are going easy on my student.
 What were you thinking? Super-exponential revenues?
 Either you get accused of nepotism, or I of bribery.
-And suddenly the next fortnight, she'd be cornering
-the market.
+Then suddenly the next fortnight, the inspectors
+would be all cornering the garden.
 
-I do not condone you letting her abuse the economy.
-Not without giving something back for the community.
-I need to do something.
-- Lena`
+We need to do something about this.
+- Léa`
             }
         },
 
@@ -5357,17 +5361,17 @@ isAvailable: () => boolean, text: string, fontSize: number = 14): Grid =>
 const icons: {[x: string]: ImageSource} =
 {
     water: game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png'),
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/dark/drop.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/light/drop.png'),
     harvest: game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png'),
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/dark/cornucopia.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/light/cornucopia.png'),
     prune: game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png'),
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/dark/hair-strands.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/light/hair-strands.png'),
     shelf: game.settings.theme == Theme.LIGHT ?
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/white-book.png') :
-    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/white-book.png')
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/dark/white-book.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/light/white-book.png')
 };
 
 const waterFrame = createScrollBarImageBtn
@@ -8720,9 +8724,9 @@ var setInternalState = (stateStr: string) =>
         gameRNG = state.gameRNG ?
         new Xorshift(state.gameRNG.seed, state.gameRNG.aux) : gameRNG;
     }
-    manager.registerSpawner(dandelionSpawner);
+    // manager.registerSpawner(dandelionSpawner);
     manager.registerSpawner(broomrapeSpawner);
-    manager.registerSpawner(hopleekSpawner);
+    // manager.registerSpawner(hopleekSpawner);
 
     actuallyPlanting = false;
     tmpLevels = Array.from({length: nofPlots}, (_) => {return {};});
