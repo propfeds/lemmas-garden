@@ -5354,38 +5354,22 @@ isAvailable: () => boolean, text: string, fontSize: number = 14): Grid =>
     return frame;
 }
 
-let createHesitantSwitch = (params: {[x: string]: any}, callback: () => void,
-isToggled: boolean | (() => boolean)) =>
+const icons: {[x: string]: ImageSource} =
 {
-    let triggerable = true;
-    let element = ui.createSwitch
-    ({
-        horizontalOptions: LayoutOptions.CENTER,
-        onColor: Color.BORDER,
-        isToggled,
-        onTouched: (e: TouchEvent) =>
-        {
-            if(e.type.isReleased())
-            {
-                if(triggerable)
-                {
-                    Sound.playClick();
-                    callback();
-                }
-                else
-                    triggerable = true;
-            }
-            else if(e.type == TouchType.MOVED && (e.x < 0 || e.y < 0 ||
-            e.x > element.width || e.y > element.height))
-                triggerable = false;
-        },
-        ...params
-    });
-    return element;
-}
-const waterImage = game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png');
+    water: game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/drop.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/drop.png'),
+    harvest: game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png'),
+    prune: game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png'),
+    shelf: game.settings.theme == Theme.LIGHT ?
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/white-book.png') :
+    ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/white-book.png')
+};
+
 const waterFrame = createScrollBarImageBtn
 ({
     row: 0, column: 0,
@@ -5396,7 +5380,7 @@ const waterFrame = createScrollBarImageBtn
     if(selectedColony && !selectedColony.wet)
         return true;
     return false;
-}, waterImage);
+}, icons.water);
 const waterLabel = ui.createLatexLabel
 ({
     row: 0, column: 1,
@@ -5429,9 +5413,6 @@ const waterLabel = ui.createLatexLabel
     textColor: Color.TEXT_MEDIUM
 });
 
-const harvestImage = game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/cornucopia.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/cornucopia.png');
 const harvestFrame = createScrollBarImageBtn
 ({
     row: 0, column: 2,
@@ -5462,7 +5443,7 @@ const harvestFrame = createScrollBarImageBtn
         }
     }
 }, false,
-() => true, harvestImage);
+() => true, icons.harvest);
 const harvestLabel = ui.createLatexLabel
 ({
     row: 0, column: 3,
@@ -5474,9 +5455,6 @@ const harvestLabel = ui.createLatexLabel
     textColor: Color.TEXT_MEDIUM
 });
 
-const pruneImage = game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/hair-strands.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/hair-strands.png');
 const pruneFrame = createScrollBarImageBtn
 ({
     isVisible: () =>
@@ -5498,7 +5476,7 @@ const pruneFrame = createScrollBarImageBtn
     else
         manager.queueAction(plotIdx, slotIdx, Actions.PRUNE);
 },
-null, false, () => true, pruneImage);
+null, false, () => true, icons.prune);
 const pruneLabel = ui.createLatexLabel
 ({
     isVisible: () =>
@@ -5517,9 +5495,6 @@ const pruneLabel = ui.createLatexLabel
     textColor: Color.TEXT_MEDIUM
 });
 
-const shelfImage = game.settings.theme == Theme.LIGHT ?
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/dark/white-book.png') :
-ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/perch/src/icons/light/white-book.png');
 const mainMenuLabel = ui.createLatexLabel
 ({
     row: 0, column: 1,
@@ -5540,7 +5515,7 @@ const mainMenuFrame = createImageBtn
     row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
 },
-() => createShelfMenu().show(), () => true, shelfImage);
+() => createShelfMenu().show(), () => true, icons.shelf);
 
 var controlStack = ui.createStackLayout
 ({
@@ -6924,21 +6899,22 @@ let createColonyViewMenu = (colony: Colony) =>
             };
         }
     });
-    let paramSwitch = createHesitantSwitch
+    let paramSwitch = ui.createSwitch
     ({
         row: 0, column: 3,
-    }, () =>
-    {
-        colonyViewConfig[colony.id].params =
-        !colonyViewConfig[colony.id].params;
-        paramSwitch.isToggled = colonyViewConfig[colony.id].params;
-        // paramSwitch.isToggled = !paramSwitch.isToggled;
-        // colonyViewConfig[colony.id].params = paramSwitch.isToggled;
-        reconstructionTask =
+        horizontalOptions: LayoutOptions.CENTER,
+        isToggled: colonyViewConfig[colony.id].params,
+        opacity: () => colonyViewConfig[colony.id].params ? 1 : 0.5,
+        onToggled: () =>
         {
-            start: 0
-        };
-    }, colonyViewConfig[colony.id].params);
+            Sound.playClick();
+            colonyViewConfig[colony.id].params = paramSwitch.isToggled;
+            reconstructionTask =
+            {
+                start: 0
+            };
+        }
+    });
 
     let indentEntry = ui.createEntry
     ({
@@ -6957,19 +6933,22 @@ let createColonyViewMenu = (colony: Colony) =>
             };
         }
     });
-    let expandSwitch = createHesitantSwitch
+    let expandSwitch = ui.createSwitch
     ({
         row: 1, column: 3,
-    }, () =>
-    {
-        colonyViewConfig[colony.id].expand =
-        !colonyViewConfig[colony.id].expand;
-        expandSwitch.isToggled = colonyViewConfig[colony.id].expand;
-        reconstructionTask =
+        horizontalOptions: LayoutOptions.CENTER,
+        isToggled: colonyViewConfig[colony.id].expand,
+        opacity: () => colonyViewConfig[colony.id].expand ? 1 : 0.5,
+        onToggled: () =>
         {
-            start: 0
-        };
-    }, colonyViewConfig[colony.id].expand);
+            Sound.playClick();
+            colonyViewConfig[colony.id].expand = expandSwitch.isToggled;
+            reconstructionTask =
+            {
+                start: 0
+            };
+        }
+    });
 
     let updateReconstruction = () =>
     {
@@ -7867,7 +7846,7 @@ let createExtraPotMenu = () =>
         if(extraManager.colonies[0][0] && !extraManager.colonies[0][0].wet)
             return true;
         return false;
-    }, waterImage);
+    }, icons.water);
     let extraWaterLabel = ui.createLatexLabel
     ({
         row: 0, column: 1,
@@ -7931,7 +7910,7 @@ let createExtraPotMenu = () =>
             }
         }
     }, false,
-    () => true, harvestImage);
+    () => true, icons.harvest);
     let extraHarvestLabel = ui.createLatexLabel
     ({
         row: 0, column: 3,
@@ -7964,7 +7943,7 @@ let createExtraPotMenu = () =>
         else
             extraManager.queueAction(0, 0, Actions.PRUNE);
     },
-    null, false, () => true, pruneImage);
+    null, false, () => true, icons.prune);
     let extraPruneLabel = ui.createLatexLabel
     ({
         isVisible: () =>
@@ -8297,16 +8276,18 @@ let createWorldMenu = () =>
             GM3Button
         ]
     });
-    let GM3Switch = createHesitantSwitch
+    let GM3Switch = ui.createSwitch
     ({
-        row: 7, column: 1
-    }, () =>
-    {
-        graphMode3D = !graphMode3D;
-        GM3Switch.isToggled = graphMode3D;
-        // GM3Switch.isToggled = !GM3Switch.isToggled;
-        // graphMode3D = GM3Switch.isToggled;
-    }, graphMode3D);
+        row: 7, column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        isToggled: graphMode3D,
+        opacity: () => graphMode3D ? 1 : 0.5,
+        onToggled: () =>
+        {
+            Sound.playClick();
+            graphMode3D = GM3Switch.isToggled;
+        }
+    });
     let GM2Label = ui.createLatexLabel
     ({
         text: getLoc('lineGraphModes')[graphMode2D],
@@ -8360,51 +8341,57 @@ let createWorldMenu = () =>
         row: 3, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let APSwitch = createHesitantSwitch
+    let APSwitch = ui.createSwitch
     ({
-        row: 3, column: 1
-    }, () =>
-    {
-        actionPanelOnTop = !actionPanelOnTop;
-        APSwitch.isToggled = actionPanelOnTop;
-        // APSwitch.isToggled = !APSwitch.isToggled;
-        // actionPanelOnTop = APSwitch.isToggled;
-        APLabel.text = getLoc('actionPanelModes')[Number(actionPanelOnTop)];
-    }, actionPanelOnTop);
+        row: 3, column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        isToggled: actionPanelOnTop,
+        opacity: () => actionPanelOnTop ? 1 : 0.5,
+        onToggled: () =>
+        {
+            Sound.playClick();
+            actionPanelOnTop = APSwitch.isToggled;
+            APLabel.text = getLoc('actionPanelModes')[Number(actionPanelOnTop)];
+        }
+    });
     let PTLabel = ui.createLatexLabel
     ({
         text: getLoc('plotTitleModes')[Number(fancyPlotTitle)],
         row: 2, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let PTSwitch = createHesitantSwitch
+    let PTSwitch = ui.createSwitch
     ({
-        row: 2, column: 1
-    }, () =>
-    {
-        fancyPlotTitle = !fancyPlotTitle;
-        PTSwitch.isToggled = fancyPlotTitle;
-        // PTSwitch.isToggled = !PTSwitch.isToggled;
-        // fancyPlotTitle = PTSwitch.isToggled;
-        PTLabel.text = getLoc('plotTitleModes')[Number(fancyPlotTitle)];
-        theory.invalidatePrimaryEquation();
-    }, fancyPlotTitle);
+        row: 2, column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        isToggled: fancyPlotTitle,
+        opacity: () => fancyPlotTitle ? 1 : 0.5,
+        onToggled: () =>
+        {
+            Sound.playClick();
+            fancyPlotTitle = PTSwitch.isToggled;
+            PTLabel.text = getLoc('plotTitleModes')[Number(fancyPlotTitle)];
+            theory.invalidatePrimaryEquation();
+        }
+    });
     let ACLabel = ui.createLatexLabel
     ({
         text: getLoc('labelActionConfirm'),
         row: 1, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
-    let ACSwitch = createHesitantSwitch
+    let ACSwitch = ui.createSwitch
     ({
-        row: 1, column: 1
-    }, () =>
-    {           
-        actionConfirm = !actionConfirm;
-        ACSwitch.isToggled = actionConfirm;
-        // ACSwitch.isToggled = !ACSwitch.isToggled;
-        // actionConfirm = ACSwitch.isToggled;
-    }, actionConfirm);
+        row: 1, column: 1,
+        horizontalOptions: LayoutOptions.CENTER,
+        isToggled: actionConfirm,
+        opacity: () => actionConfirm ? 1 : 0.5,
+        onToggled: () =>
+        {
+            Sound.playClick();
+            actionConfirm = ACSwitch.isToggled;
+        }
+    });
     let QBLabel = ui.createLatexLabel
     ({
         text: getLoc('quatModes')[quatMode],
