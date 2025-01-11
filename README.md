@@ -1,10 +1,10 @@
 # Lemma's Garden
 
-> Last night, Lemma swept away the leaves and rubbles on her old garden.
-> 
+> Last night, she swept away the fallen leaves on her old garden.
+>
 > You are her first student in a long while.
 
-Welcome to Lemma's Garden, an idle botanical theory built on the workings of Lindenmayer systems. Reminisce the story of Lemma, a retired teacher, and her late partner, as she rambles about things already long passed.
+Welcome to Lemma's Garden, an idle botanical theory built on the workings of Lindenmayer systems. Reminisce the story of a retired teacher as she rambles about things long passed.
 
 ## Installation
 
