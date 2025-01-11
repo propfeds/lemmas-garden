@@ -4465,8 +4465,9 @@ var getPublicationMultiplierFormula = (symbol: string) => `\\frac{2}{3}\\times
 {${symbol}}^{${pubExp.toString(2)}\\times h},\\quad
 h=\\ln{(2\\ln{(${symbol}+1)}+1)}`;
 
+const milestoneCost = new LinearCost(BigNumber.from(1.5),
 // @ts-expect-error
-const milestoneCost = new LinearCost(0, BigNumber.THREE * tauRate);
+BigNumber.from(2.5) * tauRate);
 
 const plantData: {[key: string]: Plant} =
 {
@@ -5851,7 +5852,8 @@ var init = () =>
     theory.createStoryChapter(2, chapters?.notebook?.title,
     chapters?.notebook?.contents, () => theory.buyAllUpgrade.level > 0);
     theory.createStoryChapter(3, chapters?.flood?.title,
-    chapters?.flood?.contents, () => theory.tau >= BigNumber.TEN && time < 10);
+    chapters?.flood?.contents, () => theory.tau >= BigNumber.ONE &&
+    time < 5);
 
     let fifteen = BigNumber.from(1e15).pow(tauRate);
     theory.createStoryChapter(4, chapters?.nepo?.title,

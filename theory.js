@@ -3431,8 +3431,9 @@ var getPublicationMultiplier = (tau) => pubCoef *
 var getPublicationMultiplierFormula = (symbol) => `\\frac{2}{3}\\times
 {${symbol}}^{${pubExp.toString(2)}\\times h},\\quad
 h=\\ln{(2\\ln{(${symbol}+1)}+1)}`;
+const milestoneCost = new LinearCost(BigNumber.from(1.5), 
 // @ts-expect-error
-const milestoneCost = new LinearCost(0, BigNumber.THREE * tauRate);
+BigNumber.from(2.5) * tauRate);
 const plantData = {
     sprout: {
         cost: new FirstFreeCost(new ExponentialCost(0.25, 1)),
@@ -4552,7 +4553,8 @@ var init = () => {
     theory.createStoryChapter(0, chapters?.sprout?.title, chapters?.sprout?.contents, () => selectedColony?.id == 'sprout');
     theory.createStoryChapter(1, chapters?.basil?.title, chapters?.basil?.contents, () => plantPerma.level > 1);
     theory.createStoryChapter(2, chapters?.notebook?.title, chapters?.notebook?.contents, () => theory.buyAllUpgrade.level > 0);
-    theory.createStoryChapter(3, chapters?.flood?.title, chapters?.flood?.contents, () => theory.tau >= BigNumber.TEN && time < 10);
+    theory.createStoryChapter(3, chapters?.flood?.title, chapters?.flood?.contents, () => theory.tau >= BigNumber.ONE &&
+        time < 5);
     let fifteen = BigNumber.from(1e15).pow(tauRate);
     theory.createStoryChapter(4, chapters?.nepo?.title, chapters?.nepo?.contents, () => theory.tau >= fifteen);
     // Achievements
