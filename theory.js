@@ -1,5 +1,5 @@
 import { BigNumber } from './api/BigNumber';
-import { CompositeCost, ConstantCost, ExponentialCost, FirstFreeCost, FreeCost } from './api/Costs';
+import { CompositeCost, ConstantCost, ExponentialCost, FirstFreeCost, FreeCost, LinearCost } from './api/Costs';
 import { game } from './api/Game';
 import { Localization } from './api/Localization';
 import { MathExpression } from './api/MathExpression';
@@ -123,7 +123,7 @@ straight line will be drawn.`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
         lockedPlot: `\\text{Untilled soil.}`,
-        permaExtraPot: `Borrow Léa's flower pot`,
+        permaExtraPot: `Borrow Miss Ruddles' flower pot`,
         permaExtraPotInfo: `Holds one plant, seeds free of charge, pest-proof`,
         permaNote: `Notebook \\&\\ 'Buy All' button`,
         permaNoteInfo: 'Allows management of colony sizes',
@@ -182,6 +182,7 @@ harvesting it for the first time.`,
         switchColony: 'Switch colony ({0}/{1})',
         switchColonyInfo: 'Cycles through the list of colonies',
         labelSpeed: 'Game speed: 1/{0}',
+        labelSpeedUpg: 'Game speed: 1/{0} → 1/{1}',
         labelGM3D: '3D illustration: ',
         labelActionConfirm: 'Confirmation dialogue: ',
         lineGraphModes: [
@@ -466,12 +467,10 @@ friend to all mathematicians.`
                 title: 'Title Cover',
                 contents: `Plants of the Lemma's Garden
 An Introduction to Symbolic Botany for Students
-(draft version)
+(draft)
 
--o-
 🌾🌻🌿
--o-
-
+~«❈»~
 
 Léa Simon-Ruddles
 Illustrations by M. H. Ruddles
@@ -725,13 +724,13 @@ You are trying to fetch a sketch book
 that your old teacher had confiscated.)
 
 You there. What are you doing in my garden?
-Not one of my old students, are you?
+Not one of my students, are you?
 (points lantern) Wait, is that you, Ivy?
 If that is really you, returned and well recovered,
 could you help me with a small proposition?
 
 Take this seed, and till the soil.
-We will start from today's morning.
+We will start tomorrow morning.
 
 Tip: Tap on 'Upgrades' to acquire your first plot.`
             },
@@ -752,18 +751,18 @@ I'll be back in just a little,
 so I can teach you about its growth.`
             },
             basil: {
-                title: `Restock at Corollary's`,
+                title: `Restock at Corollary Strait`,
                 contents: `Sorry for letting you wait this long.
 I have a... friend, who supplies me with seeds.
 It's a bit exorbitant, but still reliable, I hope.
 
 (scribbles)
 
-...She didn't return until today. Apologies.
+...His shop didn't reopen until today. Apologies.
 Wee bit sick of that marigold soup?
 
 No, don't touch the other packet.
-That is for my old... students!`
+That is for my... future students!`
             },
             notebook: {
                 title: `Notebook`,
@@ -3432,6 +3431,8 @@ var getPublicationMultiplier = (tau) => pubCoef *
 var getPublicationMultiplierFormula = (symbol) => `\\frac{2}{3}\\times
 {${symbol}}^{${pubExp.toString(2)}\\times h},\\quad
 h=\\ln{(2\\ln{(${symbol}+1)}+1)}`;
+// @ts-expect-error
+const milestoneCost = new LinearCost(0, BigNumber.THREE * tauRate);
 const plantData = {
     sprout: {
         cost: new FirstFreeCost(new ExponentialCost(0.25, 1)),
@@ -3938,7 +3939,6 @@ let extraPotPlantIdx = 0;
 let selectedColony = null;
 let finishedTutorial = false;
 let actuallyPlanting = true;
-let speedIdx = 2;
 let graphMode2D = 1 /* LineGraphModes.INSOLATION */;
 let graphMode3D = true;
 let colonyMode = 1 /* ColonyModes.VERBOSE */;
@@ -4289,7 +4289,7 @@ const mainMenuLabel = ui.createLatexLabel({
     verticalTextAlignment: TextAlignment.START,
     margin: new Thickness(0, 9),
     text: () => {
-        let dt = (time - lastSave) * speeds[speedIdx];
+        let dt = (time - lastSave) * speeds[speedMs?.level ?? 0];
         if (dt < 30)
             return getLoc('permaShelf');
         return Localization.format(getLoc('labelSave'), Math.floor(dt));
@@ -4320,6 +4320,7 @@ var plotPerma;
 var plantPerma;
 var extraPotPerma;
 var beehivePerma;
+var speedMs;
 var freePenny;
 var pauseGame;
 var trueSight;
@@ -4503,17 +4504,17 @@ var init = () => {
         warpDay = theory.createPermanentUpgrade(9003, currency, new FreeCost);
         warpDay.description = 'Warp day';
         warpDay.info = 'Warps forward by a day';
-        warpDay.bought = (_) => tick(dayLength * speeds[speedIdx], 1);
+        warpDay.bought = (_) => tick(dayLength * speeds[speedMs.level], 1);
         warpDay.isAvailable = haxEnabled;
         warpWeek = theory.createPermanentUpgrade(9008, currency, new FreeCost);
         warpWeek.description = 'Warp week';
         warpWeek.info = 'Warps forward by a week';
-        warpWeek.bought = (_) => tick(dayLength * 7 * speeds[speedIdx], 1);
+        warpWeek.bought = (_) => tick(dayLength * 7 * speeds[speedMs.level], 1);
         warpWeek.isAvailable = haxEnabled;
         warpYear = theory.createPermanentUpgrade(9005, currency, new FreeCost);
         warpYear.description = 'Warp year';
         warpYear.info = 'Warps forward by 365 days';
-        warpYear.bought = (_) => tick(dayLength * 365 * speeds[speedIdx], 1);
+        warpYear.bought = (_) => tick(dayLength * 365 * speeds[speedMs.level], 1);
         warpYear.isAvailable = haxEnabled;
     }
     /* Reset time
@@ -4535,7 +4536,16 @@ var init = () => {
         };
         warpZero.isAvailable = haxEnabled;
     }
-    // Next: milestones
+    // Milestones
+    theory.setMilestoneCost(milestoneCost);
+    /* c1 exponent
+    Standard exponent upgrade.
+    */
+    {
+        speedMs = theory.createMilestoneUpgrade(0, speeds.length - 1);
+        speedMs.getDescription = (_) => Localization.format(getLoc('labelSpeed'), speeds[speedMs.level]);
+        speedMs.getInfo = (amount) => Localization.format(getLoc('labelSpeedUpg'), speeds[speedMs.level], speeds[Math.min(speedMs.maxLevel, speedMs.level + amount)]);
+    }
     // Story chapters
     let chapters = getLoc('chapters');
     theory.createStoryChapter(-1, chapters?.intro?.title, chapters?.intro?.contents, () => true);
@@ -4589,7 +4599,7 @@ var updateAvailability = () => {
 var tick = (elapsedTime, multiplier) => {
     let dd, di, dg;
     perfs[0 /* Profilers.TICK */].exec(() => {
-        let dt = elapsedTime / speeds[speedIdx];
+        let dt = elapsedTime / speeds[speedMs.level];
         time += dt;
         // https://www.desmos.com/calculator/pfku4nopgy
         // insolation = max(0, -cos(x*pi/72))
@@ -5022,13 +5032,13 @@ let getTimeString = () => {
     let weeks = Math.floor(dayofYear / 7);
     let timeofDay = time % dayLength;
     // timeofDay is within [0, dayLength).
-    let resolution = speedAdjDayLengths[speedIdx];
+    let resolution = speedAdjDayLengths[speedMs.level];
     let quantum = dayLength / resolution;
     let quanToD = Math.floor(timeofDay / quantum) * quantum;
     // Now that hour-length is 1, let's do something else
     let hour = Math.floor(quanToD);
-    let min = Math.floor((quanToD - hour) * speeds[speedIdx] + 1e-9) *
-        clockMinDiv[speedIdx];
+    let min = Math.floor((quanToD - hour) * speeds[speedMs.level] + 1e-9) *
+        clockMinDiv[speedMs.level];
     return Localization.format(getLoc(actionPanelOnTop ? 'dateTimeBottom' :
         'dateTime'), years + 1, weeks + 1, dayofYear - weeks * 7 + 1, hour.toString().padStart(2, '0'), min.toString().padStart(2, '0'));
 };
@@ -6465,25 +6475,29 @@ let createBulkConfirmationMenu = (mgr, plot, id) => {
     return menu;
 };
 let createWorldMenu = () => {
-    let speedLabel = ui.createLatexLabel({
-        text: Localization.format(getLoc('labelSpeed'), speeds[speedIdx]),
-        row: 0, column: 0,
-        verticalTextAlignment: TextAlignment.CENTER
-    });
-    let speedSlider = ui.createSlider({
-        row: 0, column: 1,
-        minimum: -0.25,
-        maximum: speeds.length - 0.75,
-        value: speedIdx,
-        onValueChanged: () => {
-            speedIdx = Math.round(speedSlider.value);
-            speedLabel.text = Localization.format(getLoc('labelSpeed'), speeds[speedIdx]);
-        },
-        onDragCompleted: () => {
-            Sound.playClick();
-            // speedSlider.value = speedIdx;
-        }
-    });
+    // let speedLabel = ui.createLatexLabel
+    // ({
+    //     text: Localization.format(getLoc('labelSpeed'), speeds[speedMs.level]),
+    //     row: 0, column: 0,
+    //     verticalTextAlignment: TextAlignment.CENTER
+    // });
+    // let speedSlider = ui.createSlider
+    // ({
+    //     row: 0, column: 1,
+    //     minimum: -0.25,
+    //     maximum: speeds.length - 0.75,
+    //     value: speedMs.level,
+    //     onValueChanged: () =>
+    //     {
+    //         speedMs.level = Math.round(speedSlider.value);
+    //         speedLabel.text = Localization.format(getLoc('labelSpeed'),
+    //         speeds[speedMs.level]);
+    //     },
+    //     onDragCompleted: () =>
+    //     {
+    //         Sound.playClick();
+    //     }
+    // });
     let GM3Label = ui.createLatexLabel({
         column: 0,
         text: getLoc('labelGM3D'),
@@ -6499,7 +6513,7 @@ let createWorldMenu = () => {
         }
     });
     let GM3Grid = ui.createGrid({
-        row: 7, column: 0,
+        row: 6, column: 0,
         columnDefinitions: ['73*', '60*', '7*'],
         children: [
             GM3Label,
@@ -6507,7 +6521,7 @@ let createWorldMenu = () => {
         ]
     });
     let GM3Switch = ui.createSwitch({
-        row: 7, column: 1,
+        row: 6, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         isToggled: graphMode3D,
         opacity: () => graphMode3D ? 1 : 0.5,
@@ -6518,11 +6532,11 @@ let createWorldMenu = () => {
     });
     let GM2Label = ui.createLatexLabel({
         text: getLoc('lineGraphModes')[graphMode2D],
-        row: 6, column: 0,
+        row: 5, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let GM2Slider = ui.createSlider({
-        row: 6, column: 1,
+        row: 5, column: 1,
         minimum: -0.25,
         maximum: 3 /* LineGraphModes._SIZE */ - 0.75,
         value: graphMode2D,
@@ -6537,11 +6551,11 @@ let createWorldMenu = () => {
     });
     let CVMLabel = ui.createLatexLabel({
         text: getLoc('colonyModes')[colonyMode],
-        row: 4, column: 0,
+        row: 3, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let CVMSlider = ui.createSlider({
-        row: 4, column: 1,
+        row: 3, column: 1,
         minimum: -0.25,
         maximum: 4 /* ColonyModes._SIZE */ - 0.75,
         value: colonyMode,
@@ -6557,11 +6571,11 @@ let createWorldMenu = () => {
     });
     let APLabel = ui.createLatexLabel({
         text: getLoc('actionPanelModes')[Number(actionPanelOnTop)],
-        row: 3, column: 0,
+        row: 2, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let APSwitch = ui.createSwitch({
-        row: 3, column: 1,
+        row: 2, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         isToggled: actionPanelOnTop,
         opacity: () => actionPanelOnTop ? 1 : 0.5,
@@ -6573,11 +6587,11 @@ let createWorldMenu = () => {
     });
     let PTLabel = ui.createLatexLabel({
         text: getLoc('plotTitleModes')[Number(fancyPlotTitle)],
-        row: 2, column: 0,
+        row: 1, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let PTSwitch = ui.createSwitch({
-        row: 2, column: 1,
+        row: 1, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         isToggled: fancyPlotTitle,
         opacity: () => fancyPlotTitle ? 1 : 0.5,
@@ -6590,11 +6604,11 @@ let createWorldMenu = () => {
     });
     let ACLabel = ui.createLatexLabel({
         text: getLoc('labelActionConfirm'),
-        row: 1, column: 0,
+        row: 0, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let ACSwitch = ui.createSwitch({
-        row: 1, column: 1,
+        row: 0, column: 1,
         horizontalOptions: LayoutOptions.CENTER,
         isToggled: actionConfirm,
         opacity: () => actionConfirm ? 1 : 0.5,
@@ -6605,11 +6619,11 @@ let createWorldMenu = () => {
     });
     let QBLabel = ui.createLatexLabel({
         text: getLoc('quatModes')[quatMode],
-        row: 5, column: 0,
+        row: 4, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let QBSlider = ui.createSlider({
-        row: 5, column: 1,
+        row: 4, column: 1,
         minimum: -0.25,
         maximum: haxEnabled ? 5 /* QuaternaryModes._SIZE */ - 0.75 :
             5 /* QuaternaryModes._SIZE */ - 2.75,
@@ -6626,11 +6640,11 @@ let createWorldMenu = () => {
     });
     let CMLabel = ui.createLatexLabel({
         text: getLoc('camModes')[cameraMode],
-        row: 8, column: 0,
+        row: 7, column: 0,
         verticalTextAlignment: TextAlignment.CENTER
     });
     let CMSlider = ui.createSlider({
-        row: 8, column: 1,
+        row: 7, column: 1,
         minimum: -0.25,
         maximum: 3 /* CameraModes._SIZE */ - 0.75,
         value: cameraMode,
@@ -6675,8 +6689,8 @@ let createWorldMenu = () => {
                         ACSwitch,
                         QBLabel,
                         QBSlider,
-                        speedLabel,
-                        speedSlider,
+                        // speedLabel,
+                        // speedSlider,
                         CMLabel,
                         CMSlider
                     ]
@@ -6774,7 +6788,6 @@ var getInternalState = () => {
         manager,
         extraManager,
         settings: {
-            speedIdx,
             graphMode2D,
             graphMode3D,
             colonyMode,
@@ -6848,7 +6861,6 @@ var setInternalState = (stateStr) => {
             quatMode = state.quatMode ?? quatMode;
         }
         else if ('settings' in state) {
-            speedIdx = state.settings.speedIdx ?? speedIdx;
             graphMode2D = state.settings.graphMode2D ?? graphMode2D;
             graphMode3D = state.settings.graphMode3D ?? graphMode3D;
             colonyMode = state.settings.colonyMode ?? colonyMode;
