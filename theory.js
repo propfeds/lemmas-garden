@@ -138,7 +138,7 @@ limits.`,
 harvesting it for the first time.`,
         menuExtraPot: 'Sheltered pot',
         labelPlantPot: 'Shelter plant in pot: ',
-        labelTransferPot: 'Transfer to plot (stg. 20/max required): ',
+        labelTransferPot: 'Transfer to plot (stg. {0} required): ',
         extraPotEqPlaceholder: [
             '',
             `Writes a note on the bookshelf:
@@ -3407,12 +3407,12 @@ const quarterDayLength = halfDayLength / 2;
 const nofPlots = 6;
 const maxColoniesPerPlot = 5;
 const waterAmount = 1 / 2;
-const transferMinStage = 20;
+const transferMinStage = 15;
 const plotCosts = new FirstFreeCost(new ExponentialCost(600, Math.log2(80)));
 const plantUnlocks = ['sprout', 'calendula', 'basil', 'campion'];
-const plantUnlockCosts = new CompositeCost(1, new ConstantCost(1), new CompositeCost(1, new ConstantCost(1500), new ConstantCost(44000)));
+const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2), new CompositeCost(1, new ConstantCost(1500), new ConstantCost(44000)));
 const permaCosts = [
-    BigNumber.from(15),
+    BigNumber.from(9),
     BigNumber.from(180),
     BigNumber.from(2100),
     BigNumber.from(1e45)
@@ -3448,7 +3448,7 @@ const plantData = {
         }, [
             '~> L(s) = {F(s/20)T(0.8*s)[\\(90-96*s)&F(s/30).&(30)F(s/15).^(60)F(s/15).^(30)F(s/15).^(30)F(s/15).^(30)F(s/30).][F(s/5)..].[/(90-96*s)^F(s/30).^(30)F(s/15).&(60)F(s/15).&(30)F(s/15).&(30)F(s/15).&(30)F(s/30).][F(s/5)..]}',
         ]),
-        maxStage: 12,
+        maxStage: 15,
         requiresWater: true,
         growthRate: BigNumber.from(1.5),
         growthCost: BigNumber.from(0.6),
@@ -6311,11 +6311,10 @@ let createExtraPotMenu = () => {
         ]
     });
     // Transfer
-    // Wait, people can spam transfer to get unlimited plants...
-    // Should transfer have a fee, or require stage 20 (or maxStage for peas)?
+    // Requires stage 15
     let transferLabel = ui.createLatexLabel({
         isVisible: () => extraManager.colonies[0].length > 0,
-        text: getLoc('labelTransferPot'),
+        text: Localization.format(getLoc('labelTransferPot', transferMinStage.toString())),
         verticalTextAlignment: TextAlignment.CENTER
     });
     let transferBtns = [];
@@ -6326,7 +6325,8 @@ let createExtraPotMenu = () => {
             onClicked: () => {
                 Sound.playClick();
                 let c = extraManager.colonies[0][0];
-                if (c && c.stage >= Math.min(plantData[c.id].maxStage, transferMinStage) && manager.colonies[i].length < manager.width) {
+                if (c && c.stage >= transferMinStage &&
+                    manager.colonies[i].length < manager.width) {
                     manager.colonies[i].push(c);
                     extraManager.killColony(0, 0);
                 }
