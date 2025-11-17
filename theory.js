@@ -220,7 +220,7 @@ harvesting it for the first time.`,
             sprout: {
                 name: 'Pea sprout',
                 nameShort: 's',
-                info: `Tastes nice, innit? (\\(~\\)10 days)`,
+                info: `Tastes nice, innit?`,
                 LsDetails: `A(r, t): apex (stem bud) providing r energy/hr. Has
 t stages left until it spurts.\\\\F(p): segment of length p.
 Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/hr.`,
@@ -247,7 +247,7 @@ more, then I'll get you something new.`
             calendula: {
                 name: 'Calendula',
                 nameShort: 'C',
-                info: 'The classic flower to start a month. (\\(~\\)7 weeks)',
+                info: 'The flower to start a month.',
                 LsDetails: `A(r, t): apex (stem bud) providing r energy/hr. Has
 t stages left until it splits.\\\\F(l, lim): internode of length l, growing up
 to lim.\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0,
@@ -288,8 +288,8 @@ saliva away from my little profit.`,
             basil: {
                 name: 'Basil',
                 nameShort: 'Ba',
-                info: `A fragrant herb requiring a bit of care. (6\\(
-~\\)8 weeks)`,
+                info: `A fragrant, quick-growing herb, requiring a bit of ` +
+                    `care.`,
                 LsDetails: `A(r, t): apex (stem bud).\\\\B: base, used for
 communications.\\\\F(l, lim): internode.\\\\I(t): side stem. t stages left
 until it advances.\\\\K(s, t): flower of size s. Grows another flower until t
@@ -351,8 +351,8 @@ up. Bye bye.`,
             campion: {
                 name: 'Rose campion',
                 nameShort: 'R',
-                info: `A silvery shrub, passively providing income per ` +
-                    `stage. (\\(~\\)32 weeks)`,
+                info: `A silvery shrub, passively providing coins every time ` +
+                    `it grows.`,
                 LsDetails: `A(r, t): apex (stem bud).\\\\F(l, t): internode of
 length l. t stages until it stops growing.\\\\K(p, t): flower of size p. t
 stages left until it disappears. Provides p pennies on harvest.\\\\L(s): leaf.
@@ -466,8 +466,8 @@ friend to all mathematicians.`
             cover: {
                 title: 'Title Cover',
                 contents: `Plants of the Lemma's Garden
-An Introduction to Symbolic Botany for Students
-(draft)
+An Introduction to Symbolic Botany
+1st Edition
 
 🌾🌻🌿
 ~«❈»~
@@ -475,11 +475,12 @@ An Introduction to Symbolic Botany for Students
 Léa Simon-Ruddles
 Illustrations by M. H. Ruddles
 
-Tau Publishing`
+Draft!
+(submit to Tau by Friday)`
             },
             prep: {
                 title: 'Preparations!',
-                contents: `First, let's decide on your seeds.
+                contents: `Before we start, let's decide on your seeds.
 I recommend any supplier that can provide consistent seeds in terms of ` +
                     `growth time, which would be perfect for setting up experiments. However, ` +
                     `such suppliers can be a bit expensive, so it's best to buy them in small ` +
