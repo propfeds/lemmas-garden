@@ -3617,7 +3617,7 @@ const plantData = {
         colour: 'green'
     },
     campion: {
-        cost: new ExponentialCost(2000, Math.log2(5)),
+        cost: new ExponentialCost(2000, Math.log2(10)),
         system: new LSystem('/(45)&(5)A(0.5, 5)', [
             'A(r, t): t>0 = A(r+0.25, t-1)',
             'A(r, t) = F(0.4, 20)T[&L(0.125)][/(180)&L(0.125)][F(0.4, 10)K(0.125, 0)][^$A(r-1, 7)][&$A(r-0.5, 3)]',
@@ -3642,7 +3642,7 @@ const plantData = {
         ]),
         maxStage: 29,
         requiresWater: true,
-        growthRate: BigNumber.from(13.75),
+        growthRate: BigNumber.from(13.5),
         growthCost: BigNumber.TEN,
         stagelyIncome: BigNumber.ONE,
         propagation: {
