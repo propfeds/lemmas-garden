@@ -1,8 +1,8 @@
 # Lemma's Garden
 
-> Last night, she swept away the fallen leaves on her old garden.
+> Last night, Léa had swept away the long-fallen leaves, the dead rats, and then any visible debris left on her old garden.
 >
-> You are her first student in a long while.
+> You have been her first student in such a long while.
 
 Welcome to Lemma's Garden, an idle botanical theory built on the workings of Lindenmayer systems. Reminisce the story of a retired teacher as she rambles about things long passed.
 

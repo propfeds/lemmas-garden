@@ -133,7 +133,9 @@ you have to dig really deep to find the underlying systems behind the plants
 
 - [x] Extra pot
   - [x] Make pot manager wait until main manager finishes processing
+
 - [ ] Beehives
+  - Leave it for the standalone game
 
 - [x] Pre-calendula plant:
   - [x] Pea or mung sprout
@@ -143,11 +145,12 @@ you have to dig really deep to find the underlying systems behind the plants
     - Buttercup
 
 - [ ] Calendula
-  - [ ] Flower transforms into seed pod with lower profit
-    - Turns `K(9)` into `K(9-1.5, 0)` (to avoid further interactions) and add seed pod
-    - Or slowly decays into from `K(9, 6)` to `K(6, 0)`.
-    - Or just to `7.5` to make calculations easier?
   - [ ] Singular inflorescence
+    - Flower transforms into seed pod with lower profit
+      - Turns `K(9)` into `K(9-1.5, 0)` (to avoid further interactions) and add seed pod
+      - Or slowly decays into from `K(9, 6)` to `K(6, 0)`.
+      - Or just to `7.5` to make calculations easier?
+    - Leave this for the standalone game
   - [x] Lower pub cost to 15p
 
 - [ ] Basil
@@ -183,21 +186,6 @@ you have to dig really deep to find the underlying systems behind the plants
   - [x] Dialogue:
   'Oh no. Maybe luminaries were right all along. Small campion, big campion,...'
 
-- [ ] Dandelion
-  - Spawn on random plot
-    - [x] Implement RNG engine
-
-- [ ] Hopleek
-  - Biting is on evolution queue instead of action?
-  - [x] Leap years calculation
-    - [ ] 400-year cycle wrapping
-  - [x] Hopleek schedule
-  - [ ] Move every stage
-  - [ ] Repelled by?
-    - [ ] rose campions and sunflowers?
-    - [ ] calendula and basil?
-    - [ ] nothing.
-
 - [x] Broomrape
   - [x] Schedule
     - Once per 2 years? Doesn't it make broomrape faster than hopleek?
@@ -208,6 +196,22 @@ you have to dig really deep to find the underlying systems behind the plants
     - [ ] Fruits droop more
   - [x] Narrations
   - [ ] Get into people's shoes
+
+- [ ] Dandelion
+  - Spawn on random plot
+    - [x] Implement RNG engine
+  - Wither and die when spring comes again instead of making seeds to let new dandelions come?
+
+- [ ] Hopleek
+  - [ ] Biting is on evolution queue instead of action?
+  - [x] Leap years calculation
+    - [ ] 400-year cycle wrapping
+  - [x] Hopleek schedule
+  - [ ] Move every stage
+  - [ ] Repelled by?
+    - rose campions and sunflowers?
+    - calendula and basil?
+    - nothing.
 
 - [ ] Ginger
   - [ ] Randomness makes root grow, branch or cap

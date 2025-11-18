@@ -33,8 +33,9 @@ var getName = (language) => {
 };
 var getDescription = (language) => {
     const descs = {
-        en: `Last night, she swept away the fallen leaves on her old garden.
-You are her first student in a long while.
+        en: `Last night, Léa had swept away the long-fallen leaves, the dead rats, and ` +
+            `then any visible debris left on her old garden.
+You have been her first student in such a long while.
 
 Welcome to Lemma's Garden, an idle botanical theory built on the workings of ` +
             `Lindenmayer systems. Reminisce the story of a retired teacher as she ` +
@@ -42,11 +43,11 @@ Welcome to Lemma's Garden, an idle botanical theory built on the workings of ` +
     };
     return descs[language] ?? descs.en;
 };
-var authors = 'prop (Minh)\n\n' +
+var authors = 'Minh Tea (prop)\n\n' +
     'Thanks to:\n' +
     'Prof. Nakamura, my research supervisor\n' +
     'The six questionnaire takers\n' +
-    'Sir Gilles\n' +
+    'Sir Gilles of the Exponential Idle\n' +
     'game-icons.net';
 var version = 0.26;
 // Numbers are often converted into 32-bit signed integers in JINT.
@@ -123,7 +124,7 @@ straight line will be drawn.`,
         unlockPlots: `\\text{{plots }}{{{0}}}~{{{1}}}`,
         unlockPlant: `\\text{{a new plant}}`,
         lockedPlot: `\\text{Untilled soil.}`,
-        permaExtraPot: `Borrow Miss Ruddles' flower pot`,
+        permaExtraPot: `Borrow Léa's flower pot`,
         permaExtraPotInfo: `Holds one plant, seeds free of charge, pest-proof`,
         permaNote: `Notebook \\&\\ 'Buy All' button`,
         permaNoteInfo: 'Allows management of colony sizes',
@@ -147,7 +148,7 @@ harvesting it for the first time.`,
 \\\\don't you dare forget it.
 \\\\Dorian`,
             `Etched on the pot's side:
-\\\\For Miss Ruddles' class,
+\\\\For Miss Simon-Ruddles' class,
 \\\\With love of course!
 \\\\C.`,
             `The pot is adorned with pearly grooves,
@@ -386,6 +387,18 @@ seeder. Watch for the new one coming right near ya.`
                     }
                 ]
             },
+            ginger: {
+                name: 'Ginger',
+                nameShort: 'G',
+                info: `Tastes yuck, innit?`,
+                LsDetails: ``,
+                actions: [
+                    `Harvest returns profit as the sum of all R sizes.`
+                ],
+                narrations: [
+                    {}
+                ]
+            },
             broomrape: {
                 name: 'Broomrape',
                 nameShort: 'Br',
@@ -585,7 +598,7 @@ Occasionally, visitors and artists, generous donors, they would come and ` +
                     `there is the occasional human too.`
             }
         },
-        manualTitle: 'Lindenmayer Systems',
+        manualTitle: 'On Lindenmayer Systems',
         manual: {
             note: {
                 title: `End Note`,
@@ -610,7 +623,7 @@ On a side note, I am delighted of the fact he does not think the wrinkled ` +
             },
             cover: {
                 title: 'Title Cover',
-                contents: `Lindenmayer Systems Renderer
+                contents: `On Lindenmayer Systems
 A User's Guide
 2nd Edition
 
@@ -619,7 +632,7 @@ A User's Guide
 
 
 
-T. M.
+Minh Tea
 Not for sale`
             },
             intro: {
@@ -2155,7 +2168,7 @@ class Renderer {
      * @param {object} colony hmm.
      */
     set colony(colony) {
-        if (!colony) {
+        if (!colony || !plantData[colony.id]) {
             this.configure('', []);
             return;
         }
@@ -2729,6 +2742,8 @@ class ColonyManager {
     linkParasites(plot) {
         for (let i = 0; i < this.colonies[plot].length; ++i) {
             let l = this.colonies[plot][i];
+            if (!plantData[l.id])
+                continue;
             if (plantData[l.id].parasite) {
                 l.host = undefined;
                 for (let j = 0; j < this.colonies[plot].length; ++j) {
@@ -2902,6 +2917,8 @@ class ColonyManager {
             for (let i = 0; i < this.colonies.length; ++i) {
                 for (let j = 0; j < this.colonies[i].length; ++j) {
                     let c = this.colonies[i][j];
+                    if (!plantData[c.id])
+                        continue;
                     let notMature = c.stage < (plantData[c.id].maxStage ??
                         INT_MAX);
                     // @ts-expect-error
@@ -3410,8 +3427,8 @@ const maxColoniesPerPlot = 5;
 const waterAmount = 1 / 2;
 const transferMinStage = 15;
 const plotCosts = new FirstFreeCost(new ExponentialCost(600, Math.log2(80)));
-const plantUnlocks = ['sprout', 'calendula', 'basil', 'campion'];
-const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2), new CompositeCost(1, new ConstantCost(1500), new ConstantCost(44000)));
+const plantUnlocks = ['sprout', 'calendula', 'basil', 'campion', 'ginger'];
+const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2), new CompositeCost(1, new ConstantCost(1500), new CompositeCost(1, new ConstantCost(44000), new ConstantCost(250000))));
 const permaCosts = [
     BigNumber.from(9),
     BigNumber.from(180),
@@ -3678,7 +3695,41 @@ const plantData = {
         },
         colour: 'magenta'
     },
-    // ginger
+    ginger: {
+        cost: new FirstFreeCost(new ExponentialCost(1e5, Math.log2(1e5))),
+        system: new LSystem('[-(90)R(0)]A(0.2, 3)', [
+            'A(r, t): t>0 = A(r+0.1, t-1)',
+            'A(r, t) = F(0.05)[-&L(0.1)][-^L(0.1)]/(137.508)A(r, 3)',
+            'F(p): p<0.5 = F(p+0.05)',
+            'L(r): r<1 = L(r+0.1)',
+            'A(r, t) < R(s) = R(s)',
+            'R(s): s>=10 = R(s)',
+            'R(s) = R(s+0.125): 0.5; &(15)R(s+0.125): 0.25; ^(15)R(s)[&R(0)]: 0.125, &(15)R(s)[^(60)R(0)]: 0.125'
+        ], 45, 0, 'A', '+-&^/\\T', 0, {}, [
+            '~> L(s) = {F(s/20)T(0.8*s)[\\(90-96*s)&F(s/30).&(30)F(s/15).^(60)F(s/15).^(30)F(s/15).^(30)F(s/15).^(30)F(s/30).][F(s/5)..].[/(90-96*s)^F(s/30).^(30)F(s/15).&(60)F(s/15).&(30)F(s/15).&(30)F(s/15).&(30)F(s/30).][F(s/5)..]}',
+            '~> R(s) = {F(sqrt(s)/5)}'
+        ]),
+        maxStage: 200,
+        requiresWater: true,
+        growthRate: BigNumber.from(1.5),
+        growthCost: BigNumber.from(0),
+        actions: [
+            {
+                symbols: new Set('R')
+            }
+        ],
+        camera: (stage) => {
+            return {
+                scale: 1,
+                x: 0,
+                y: 0.5,
+                z: 0,
+            };
+        },
+        stroke: (stage) => {
+            return {};
+        }
+    },
     // sunflower
     // hopleek:
     // {
@@ -3908,14 +3959,6 @@ const plantData = {
     },
 };
 const plantIDLookup = {
-    sprout: 0,
-    0: 'sprout',
-    calendula: 1,
-    1: 'calendula',
-    basil: 2,
-    2: 'basil',
-    campion: 3,
-    3: 'campion',
     rose: 3,
     arrow: 9001,
     9001: 'arrow',
@@ -4204,7 +4247,7 @@ const waterLabel = ui.createLatexLabel({
     margin: new Thickness(0, 9, 1, 9),
     text: () => {
         let c = selectedColony;
-        if (!c)
+        if (!c || !plantData[c.id])
             return '';
         // @ts-expect-error
         let threshold = plantData[c.id].growthCost *
@@ -4257,7 +4300,7 @@ const harvestLabel = ui.createLatexLabel({
 });
 const pruneFrame = createScrollBarImageBtn({
     isVisible: () => {
-        if (!selectedColony ||
+        if (!selectedColony || !plantData[selectedColony.id] ||
             !plantData[selectedColony.id].actions[1 /* Actions.PRUNE */])
             return false;
         return true;
@@ -4273,7 +4316,7 @@ const pruneFrame = createScrollBarImageBtn({
 }, null, false, () => true, icons.prune);
 const pruneLabel = ui.createLatexLabel({
     isVisible: () => {
-        if (!selectedColony ||
+        if (!selectedColony || !plantData[selectedColony.id] ||
             !plantData[selectedColony.id].actions[1 /* Actions.PRUNE */])
             return false;
         return true;
@@ -4339,6 +4382,12 @@ var init = () => {
     /* Plants
     No zombies.
     */
+    // Populate the plantIDLookup table
+    for (let i = 0; i < plantUnlocks.length; ++i) {
+        plantIDLookup[i] = plantUnlocks[i];
+        plantIDLookup[plantUnlocks[i]] = i;
+    }
+    // Spawn per-plot upgrades for unlockable plants
     for (let i = 0; i < nofPlots; ++i) {
         for (let j = 0; j < plantUnlocks.length; ++j) {
             plants[i][plantUnlocks[j]] = theory.createUpgrade(i * 100 + plantIDLookup[plantUnlocks[j]], currency, plantData[plantUnlocks[j]].cost);
@@ -4966,6 +5015,8 @@ var getSecondaryEquation = () => {
         // return `\\begin{array}{c}${getLoc('lockedPlot')}\\\\
         // (${plotCost}\\text{p})\\end{array}`;
     }
+    if (!plantData[c.id])
+        return getLoc('invisibleColony');
     let result;
     perfs[7 /* Profilers.EQ_2 */].exec(() => {
         switch (colonyMode) {
@@ -6669,6 +6720,7 @@ let createWorldMenu = () => {
                 ui.createGrid({
                     columnDefinitions: ['70*', '30*'],
                     rowDefinitions: [
+                        getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
                         getSmallBtnSize(ui.screenWidth),
