@@ -87,7 +87,7 @@ const LOC_STRINGS =
         wip: 'Work in Progress',
 
         currencyTax: 'p (tax)',
-        pubTax: 'Publishing fee \\&\\ taxes\\colon',
+        pubTax: 'Publishing fee\\colon',
 
         btnView: 'View L-system',
         btnViewAction: 'View Action L-system',
@@ -163,20 +163,20 @@ limits.`,
         labelAutoWaterDesc: `Scheduling is unlocked for a species after 
 harvesting it for the first time.`,
         menuExtraPot: 'Sheltered pot',
-        labelPlantPot: 'Shelter plant in pot: ',
-        labelTransferPot: 'Transfer to plot (stg. {0} required): ',
+        labelPlantPot: 'Test a plant: ',
+        labelTransferPot: 'Transfer to plot (stage {0} required): ',
         extraPotEqPlaceholder:
         [
             '',
             `Writes a note on the bookshelf:
 \\\\To my sister's best friend, for life
-\\\\You can always find shelter here
-\\\\don't you dare forget it.
-\\\\Dorian`,
+\\\\you can always find peace here
+\\\\don't you dare forget us.
+\\\\- D. Hayward`,
             `Etched on the pot's side:
-\\\\For Miss Simon-Ruddles' class,
+\\\\For Miss Léa's class,
 \\\\With love of course!
-\\\\C.`,
+\\\\- C.`,
             `The pot is adorned with pearly grooves,
 \\\\reminiscent of a vast, misting lake.`
         ],
@@ -634,7 +634,7 @@ Mind the medicinal definition of herbs, however! Not all herbaceous plants ` +
 The 'pot' in its name should also suggest it's uses as a cooking herb in ` +
 `stews and soups too.
 
-Life span: annual (~7 weeks)
+Life span: short
 Propagation: At life cycle's end, spread 1/3 population onto the same plot.
 
 Here's a recipe to make some delicious calendula bread for your pleasures:`
@@ -648,7 +648,7 @@ Here's a recipe to make some delicious calendula bread for your pleasures:`
 `by a sweet and slightly intoxicating flavour. Even my dog loves it from ` +
 `time to time.
 
-Life span: annual (5~7 weeks)
+Life span: short
 
 If you plan to harvest leaves, snip off the stem before it flowers. ` +
 `Otherwise, let the plant go into seed. The leaves will lose flavour, but ` +
@@ -665,7 +665,7 @@ If you plan to harvest leaves, snip off the stem before it flowers. ` +
 Rose campion can be used as a sedative, or for wound treatments, or wicks ` +
 `for a lamp, which gave it the name of 'lamp flower'.
 
-Life span: biennial (~32 weeks)
+Life span: long
 Propagation: Late in its life cycle, spread 1/2 population onto the same plot.
 Passively provides income per stage equal to its current profit.
 
@@ -5436,6 +5436,12 @@ const icons: {[x: string]: ImageSource} =
 
 const waterFrame = createScrollBarImageBtn
 ({
+    isVisible: () =>
+    {
+        if(!selectedColony || !plantData[selectedColony.id])
+            return false;
+        return true;
+    },
     row: 0, column: 0,
 }, () => manager.waterColony(selectedColony),
 () => manager.waterColony(selectedColony), true,
@@ -5447,6 +5453,12 @@ const waterFrame = createScrollBarImageBtn
 }, icons.water);
 const waterLabel = ui.createLatexLabel
 ({
+    isVisible: () =>
+    {
+        if(!selectedColony || !plantData[selectedColony.id])
+            return false;
+        return true;
+    },
     row: 0, column: 1,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
@@ -5479,6 +5491,13 @@ const waterLabel = ui.createLatexLabel
 
 const harvestFrame = createScrollBarImageBtn
 ({
+    isVisible: () =>
+    {
+        if(!selectedColony || !plantData[selectedColony.id] ||
+        !plantData[selectedColony.id].actions[Actions.HARVEST])
+            return false;
+        return true;
+    },
     row: 0, column: 2,
 }, () =>
 {
@@ -5510,6 +5529,13 @@ const harvestFrame = createScrollBarImageBtn
 () => true, icons.harvest);
 const harvestLabel = ui.createLatexLabel
 ({
+    isVisible: () =>
+    {
+        if(!selectedColony || !plantData[selectedColony.id] ||
+        !plantData[selectedColony.id].actions[Actions.PRUNE])
+            return false;
+        return true;
+    },
     row: 0, column: 3,
     // horizontalOptions: LayoutOptions.END,
     verticalTextAlignment: TextAlignment.START,
@@ -5612,6 +5638,7 @@ var speedMs: Upgrade;
 var freePenny: Upgrade;
 var pauseGame: Upgrade;
 var trueSight: Upgrade;
+var shovelKill: Upgrade;
 var warpTick: Upgrade;
 var warpDay: Upgrade;
 var warpWeek: Upgrade;
@@ -5805,7 +5832,7 @@ var init = () =>
     For testing purposes
     */
     {
-        pauseGame = theory.createPermanentUpgrade(9006, currency, new FreeCost);
+        pauseGame = theory.createPermanentUpgrade(9002, currency, new FreeCost);
         let descs = ['Pause theory', 'Resume theory'];
         pauseGame.getDescription = () => descs[pauseGame.level];
         pauseGame.info = 'Pauses/resumes the game (renderer still works)';
@@ -5823,7 +5850,7 @@ var init = () =>
     For testing purposes
     */
     {
-        trueSight = theory.createPermanentUpgrade(9007, currency, new FreeCost);
+        trueSight = theory.createPermanentUpgrade(9003, currency, new FreeCost);
         let descs = [`Light Luminary's lamp`, `Extinguish Luminary's lamp`];
         trueSight.getDescription = () => descs[trueSight.level];
         trueSight.info = 'Reveals colonies hidden underground';
@@ -5834,34 +5861,45 @@ var init = () =>
         }
         trueSight.isAvailable = haxEnabled;
     }
+    /* Shovel
+    For testing purposes
+    */
+    {
+        shovelKill = theory.createPermanentUpgrade(9004, currency,
+        new FreeCost);
+        shovelKill.description = 'Shovel up';
+        shovelKill.info = 'Instantly kills a colony';
+        shovelKill.bought = (_) => manager.killColony(plotIdx, slotIdx);
+        shovelKill.isAvailable = haxEnabled;
+    }
     /* Warp forward
     For testing purposes
     */
     {
-        warpTick = theory.createPermanentUpgrade(9004, currency,
+        warpTick = theory.createPermanentUpgrade(9005, currency,
         new FreeCost);
-        warpTick.description = 'Warp tick';
+        warpTick.description = 'Skip a tick';
         warpTick.info = 'Warps forward by a tick';
         warpTick.bought = (_) => tick(0.1, 1);
         warpTick.isAvailable = haxEnabled;
 
-        warpDay = theory.createPermanentUpgrade(9003, currency,
+        warpDay = theory.createPermanentUpgrade(9006, currency,
         new FreeCost);
-        warpDay.description = 'Warp day';
+        warpDay.description = 'Skip a day';
         warpDay.info = 'Warps forward by a day';
         warpDay.bought = (_) => tick(dayLength * speeds[speedMs.level], 1);
         warpDay.isAvailable = haxEnabled;
 
-        warpWeek = theory.createPermanentUpgrade(9008, currency,
+        warpWeek = theory.createPermanentUpgrade(9007, currency,
         new FreeCost);
-        warpWeek.description = 'Warp week';
+        warpWeek.description = 'Skip a week';
         warpWeek.info = 'Warps forward by a week';
         warpWeek.bought = (_) => tick(dayLength * 7 * speeds[speedMs.level], 1);
         warpWeek.isAvailable = haxEnabled;
 
-        warpYear = theory.createPermanentUpgrade(9005, currency,
+        warpYear = theory.createPermanentUpgrade(9008, currency,
         new FreeCost);
-        warpYear.description = 'Warp year';
+        warpYear.description = 'Skip a year';
         warpYear.info = 'Warps forward by 365 days';
         warpYear.bought = (_) => tick(dayLength * 365 * speeds[speedMs.level], 1);
         warpYear.isAvailable = haxEnabled;
@@ -5870,7 +5908,7 @@ var init = () =>
     For testing purposes
     */
     {
-        warpZero = theory.createPermanentUpgrade(9002, currency,
+        warpZero = theory.createPermanentUpgrade(9009, currency,
         new FreeCost);
         warpZero.description = 'Warp to day 1 (press 5 times to confirm)';
         warpZero.info = 'Warps backward';
@@ -6268,7 +6306,7 @@ var getCurrencyBarDelegate = () =>
 
     let plotUpBtn = createLabelBtn
     ({
-        column: 0,
+        column: 1,
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () =>
     {
@@ -6305,7 +6343,7 @@ var getCurrencyBarDelegate = () =>
 
     let plotDownBtn = createLabelBtn
     ({
-        column: 1,
+        column: 0,
         heightRequest: getMediumBtnSize(ui.screenWidth)
     }, () =>
     {
@@ -6411,7 +6449,7 @@ var getSecondaryEquation = () =>
         if(plotIdx < plotPerma.level)
         {
             let taxInfo = `\\text{${getLoc('pubTax')}}\\\\
-            T_{\\text{p}}=${taxRate}\\times ${theory.latexSymbol}`;
+            T_{\\text{p}}=${theory.latexSymbol} \\times ${taxRate}`;
             let tauInfo = `${theory.latexSymbol}=\\max\\text{p}`;
             return `\\begin{array}{c}${taxInfo}\\\\\\\\${tauInfo}\\end{array}`;
         }
@@ -7236,7 +7274,7 @@ let createBookMenu = (book: Book) =>
     ({
         row: 0, column: 0,
         text: pages[shelfPages[key]].title,
-        margin: new Thickness(0, 4),
+        margin: new Thickness(0, 6),
         heightRequest: getProgBarSize(ui.screenWidth),
         horizontalTextAlignment: TextAlignment.CENTER,
         verticalTextAlignment: TextAlignment.CENTER
@@ -8051,22 +8089,47 @@ let createExtraPotMenu = () =>
         textColor: Color.TEXT_MEDIUM
     });
 
+    let examineBtn = createLabelBtn
+    ({
+        isVisible: () => extraManager.colonies[0].length > 0,
+        heightRequest: getSmallBtnSize(ui.screenWidth),
+        column: 1
+    }, () =>
+    {
+        if(!extraManager.colonies[0][0])
+            return;
+        let seqMenu = createColonyViewMenu(extraManager.colonies[0][0]);
+        seqMenu.show();
+    }, () => extraManager.colonies[0].length > 0, getLoc('viewColony'), 12);
+
     // Plant pot
     let plantLabel = ui.createLatexLabel
     ({
         isVisible: () => !extraManager.colonies[0].length,
         text: getLoc('labelPlantPot'),
-        verticalTextAlignment: TextAlignment.CENTER
+        verticalTextAlignment: TextAlignment.CENTER,
+        margin: new Thickness(0, 6)
     });
     let plantGrid = ui.createGrid
     ({
         isVisible: () => !extraManager.colonies[0].length,
-        columnDefinitions: ['85*', '15*'],
+        columnDefinitions: ['15*', '70*', '15*'],
         children:
         [
             ui.createButton
             ({
                 column: 0,
+                text: '←',
+                onClicked: () =>
+                {
+                    Sound.playClick();
+                    extraPotPlantIdx = (extraPotPlantIdx + plantPerma.level) %
+                    (plantPerma.level + 1);
+                }
+            }),
+            ui.createButton
+            ({
+                column: 1,
                 text: () => getLoc('plants')[
                 plantUnlocks[extraPotPlantIdx]].name,
                 onClicked: () =>
@@ -8078,8 +8141,8 @@ let createExtraPotMenu = () =>
             }),
             ui.createButton
             ({
-                column: 1,
-                text: '►',
+                column: 2,
+                text: '→',
                 onClicked: () =>
                 {
                     Sound.playClick();
@@ -8095,9 +8158,9 @@ let createExtraPotMenu = () =>
     let transferLabel = ui.createLatexLabel
     ({
         isVisible: () => extraManager.colonies[0].length > 0,
-        text: Localization.format(getLoc('labelTransferPot',
-        transferMinStage.toString())),
-        verticalTextAlignment: TextAlignment.CENTER
+        text: Localization.format(getLoc('labelTransferPot'), transferMinStage),
+        verticalTextAlignment: TextAlignment.CENTER,
+        margin: new Thickness(0, 6)
     });
     let transferBtns = [];
     for(let i = 0; i < plotPerma.level; ++i)
@@ -8143,34 +8206,42 @@ let createExtraPotMenu = () =>
                     },
                     horizontalTextAlignment: TextAlignment.CENTER
                 }),
-                ui.createScrollView
+                ui.createGrid
                 ({
-                    row: 0, column: 0,
-                    orientation: ScrollOrientation.BOTH,
-                    content: ui.createGrid
-                    ({
-                        isVisible: () => extraManager.colonies[0].length > 0,
-                        margin: new Thickness(4),
-                        horizontalOptions: LayoutOptions.START,
-                        // verticalOptions: LayoutOptions.END,
-                        columnDefinitions:
-                        [
-                            'auto', 'auto',
-                            'auto', 'auto',
-                            'auto', 'auto'
-                        ],
-                        inputTransparent: true,
-                        cascadeInputTransparent: false,
-                        children:
-                        [
-                            extraWaterFrame,
-                            extraWaterLabel,
-                            extraHarvestFrame,
-                            extraHarvestLabel,
-                            extraPruneFrame,
-                            extraPruneLabel,
-                        ]
-                    }),
+                    columnDefinitions: ['5*', '3*'],
+                    children:
+                    [
+                        ui.createScrollView
+                        ({
+                            row: 0, column: 0,
+                            orientation: ScrollOrientation.BOTH,
+                            content: ui.createGrid
+                            ({
+                                isVisible: () => extraManager.colonies[0].length > 0,
+                                margin: new Thickness(4),
+                                horizontalOptions: LayoutOptions.START,
+                                // verticalOptions: LayoutOptions.END,
+                                columnDefinitions:
+                                [
+                                    'auto', 'auto',
+                                    'auto', 'auto',
+                                    'auto', 'auto'
+                                ],
+                                inputTransparent: true,
+                                cascadeInputTransparent: false,
+                                children:
+                                [
+                                    extraWaterFrame,
+                                    extraWaterLabel,
+                                    extraHarvestFrame,
+                                    extraHarvestLabel,
+                                    extraPruneFrame,
+                                    extraPruneLabel,
+                                ]
+                            }),
+                        }),
+                        examineBtn
+                    ]
                 }),
                 plantLabel,
                 plantGrid,
@@ -8733,6 +8804,7 @@ var setInternalState = (stateStr: string) =>
             if(pauseGame.level)
                 theory.pause();
             trueSight.isAvailable = haxEnabled;
+            shovelKill.isAvailable = haxEnabled;
             warpTick.isAvailable = haxEnabled;
             warpDay.isAvailable = haxEnabled;
             warpWeek.isAvailable = haxEnabled;
