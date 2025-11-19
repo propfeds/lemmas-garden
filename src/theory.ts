@@ -118,8 +118,8 @@ const LOC_STRINGS =
         labelExpand: 'Expand brackets: ',
         labelAxiom: 'Axiom: ',
         labelAngle: 'Turning angle (°): ',
-        labelRules: `Production rules: {0}\\\\Every stage, each symbol in
-the plant's sequence chooses one rule to evolve. Rules are checked from top to
+        labelRules: `Production rules: {0}\\\\Each stage, every symbol in a
+plant's sequence elects the first applicable rule to grow, checking from top to
 bottom.`,
         labelIgnored: 'Turtle-ignored: ',
         labelCtxIgnored: 'Context-ignored: ',
@@ -244,15 +244,15 @@ harvesting it for the first time.`,
         [
             'Account: Off',
             'Account: Expected revenue',
-            'Account: Colonies',
-            'Account: Performance (latest/avg)',
-            'Account: Performance (min/max)'
+            'Account: Colony mini-map',
+            'Account: Performance (latest/avg) (ms)',
+            'Account: Performance (min/max) (ms)'
         ],
         camModes:
         [
             'Camera: Static',
-            'Camera: Follow (Linear)',
-            'Camera: Follow (Squared)'
+            'Camera: Follow (linear)',
+            'Camera: Follow (squared)'
         ],
 
         plants:
@@ -524,7 +524,8 @@ friend to all mathematicians.`
             },
         },
         plantStats: `({0}) {1}\\\\—\\\\Photosynthetic rate: {2}/hr (noon)
-\\\\Growth rate: {3}/hr\\\\Growth cost: {4} × {5} symbols\\\\—\\\\Sequence:`,
+\\\\Average growth rate: {3}/hr\\\\Growth cost: {4} × {5} symbols\\\\—
+\\\\Sequence: `,
         narrationTrack: '{0}, {1}',
         noCommentary: 'No narrations.',
         noLsDetails: 'No explanations.',
@@ -4771,20 +4772,19 @@ const plantData: {[key: string]: Plant} =
     ginger:
     {
         cost: new FirstFreeCost(new ExponentialCost(1e5, Math.log2(1e5))),
-        system: new LSystem('[-(90)R(0)]A(0.2, 3)',
+        system: new LSystem('[-(90)R(-1)]A(0.2, 4)',
         [
             'A(r, t): t>0 = A(r+0.1, t-1)',
-            'A(r, t) = F(0.05)[-&L(0.1)][-^L(0.1)]/(137.508)A(r, 3)',
-            'F(p): p<0.5 = F(p+0.05)',
-            'L(r): r<1 = L(r+0.1)',
-            'A(r, t) < R(s) = R(s)',
+            'A(r, t) = F(0.05)[-&L(0.1)][-^L(0.1)]/(137.508)A(r-0.1, 4)',
+            'F(p): p<0.25 = F(p+0.025)',
+            'L(r): r<1 = L(r+0.05)',
             'R(s): s>=10 = R(s)',
-            'R(s) = R(s+0.125): 0.5; &(15)R(s+0.125): 0.25; ^(15)R(s)[&R(0)]: 0.125, &(15)R(s)[^(60)R(0)]: 0.125'
+            'R(s) = R(s+0.25): 0.5; &(15)R(s+0.25): 0.25; R(s)R(-1): 0.125; [&R(-1)]^(15)R(s): 0.0625, [^(30)R(-1)]&(30)R(s): 0.0625'
         ], 45, 0, 'A', '+-&^/\\T', 0,
         {},
         [
-            '~> L(s) = {F(s/20)T(0.8*s)[\\(90-96*s)&F(s/30).&(30)F(s/15).^(60)F(s/15).^(30)F(s/15).^(30)F(s/15).^(30)F(s/30).][F(s/5)..].[/(90-96*s)^F(s/30).^(30)F(s/15).&(60)F(s/15).&(30)F(s/15).&(30)F(s/15).&(30)F(s/30).][F(s/5)..]}',
-            '~> R(s) = {F(sqrt(s)/5)}'
+            '~> L(s) = {F(s/20)T(0.8*s)[\\(90-96*s)&F(s/30).&(30)F(s/15).^(60)F(s/15).^(30)F(s/15).^(30)F(s/15).^(30)F(s/30).][F(s/5)..].[/(90-96*s)^F(s/30).^(30)F(s/15).&(60)F(s/15).&(30)F(s/15).&(30)F(s/15).&(30)F(s/30).][F(s/5)..]}',    // Make new model please
+            '~> R(s): s>0 = F(sqrt(s)/5)'   // Make proper root model
         ]),
         maxStage: 200,
         requiresWater: true,
@@ -4808,7 +4808,8 @@ const plantData: {[key: string]: Plant} =
         stroke: (stage) =>
         {
             return {};
-        }
+        },
+        colour: 'yellow'
     },
     // sunflower
     // hopleek:

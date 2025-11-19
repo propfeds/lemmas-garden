@@ -214,8 +214,8 @@ you have to dig really deep to find the underlying systems behind the plants
     - nothing.
 
 - [ ] Ginger
-  - [ ] Randomness makes root grow, branch or cap
-  - [ ] Free or negligible cost first level
+  - [x] Test the first version
+    - [ ] Randomness is broken, please implement internal state-based RNG for each species
   - [ ] How to not make leaves slow down too much
   - [ ] Pruning kills all leaves and the upper body so that root could grow faster? This is not realistic
   - [ ] Harvest kills everything
