@@ -3461,7 +3461,7 @@ const plantData = {
             'A(r, t) = F(0.05)[-&L(0.1)][-^L(0.1)]/(137.508)A(r, 3)',
             'F(p): p<FMaxSize = F(p+0.05)',
             'L(r): r<LMaxSize = L(r+0.1)'
-        ], 45, 0, 'A', '+-&^/\\T', 0, {
+        ], 45, 1, 'A', '+-&^/\\T', 0, {
             'FMaxSize': '0.25',
             'LMaxSize': '0.5'
         }, [
@@ -3500,7 +3500,7 @@ const plantData = {
             'K(p): p<KMaxSize = K(p+0.25)',
             'L(r, lim): r<lim = L(r+0.1, lim)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
-        ], 15, 0, 'AI', '', -0.2, {
+        ], 15, 2, 'AI', '+-&^/\\T', -0.2, {
             'AThreshold': '4.8 - 1e-9',
             'KMaxSize': '3',
             'LMaxSize': '3.6'
@@ -3576,7 +3576,7 @@ const plantData = {
             'S(type) =',
             'B > S(type): type<=0 = BS(1)',
             'F(l, lim): l<lim = F(l+0.12, lim)'
-        ], 30, 0, 'BASIL', '+-&^/\\T', -0.16, {
+        ], 30, 3, 'BASIL', '+-&^/\\T', -0.16, {
             'AThreshold': '6.2',
             'LMaxSize': '1.2',
             'KMaxSize': '0.45'
@@ -3648,7 +3648,7 @@ const plantData = {
             'O(s): s>0.5 = O(s*0.9)',
             'O(s) =',
             'F(l, t): t>0 = F(l+0.4, t-1)'
-        ], 31, 0, 'A', '', -0.6, {
+        ], 31, 4, 'A', '+-&^/\\T', -0.6, {
             'LMaxSize': '3'
         }, [
             '~> b(s) = -[^-F(s).][--F(s*2)..][&-F(s).]+^(72)',
@@ -3705,7 +3705,7 @@ const plantData = {
             'L(r): r<1 = L(r+0.05)',
             'R(s): s>=10 = R(s)',
             'R(s) = R(s+0.25): 0.5; &(15)R(s+0.25): 0.25; R(s)R(-1): 0.125; [&R(-1)]^(15)R(s): 0.0625, [^(30)R(-1)]&(30)R(s): 0.0625'
-        ], 45, 0, 'A', '+-&^/\\T', 0, {}, [
+        ], 45, 5, 'A', '+-&^/\\T', 0, {}, [
             '~> L(s) = {F(s/20)T(0.8*s)[\\(90-96*s)&F(s/30).&(30)F(s/15).^(60)F(s/15).^(30)F(s/15).^(30)F(s/15).^(30)F(s/30).][F(s/5)..].[/(90-96*s)^F(s/30).^(30)F(s/15).&(60)F(s/15).&(30)F(s/15).&(30)F(s/15).&(30)F(s/30).][F(s/5)..]}',
             '~> R(s): s>0 = F(sqrt(s)/5)' // Make proper root model
         ]),
@@ -3770,7 +3770,7 @@ const plantData = {
             'K(s) = O(0.2)',
             'O(s): s>OMinSize = O(s-0.05)',
             'F(l, lim): l<lim = F(l+0.05, lim)',
-        ], 30, 0, 'B', '+-&^/\\T', 0, {
+        ], 30, 1001, 'B', '+-&^/\\T', 0, {
             'timer': '30',
             'KMaxSize': '4.5',
             'OMinSize': '0.05 + 1e-9'
@@ -4012,6 +4012,7 @@ let extraManager = new ColonyManager({}, 1, 1, manager);
 let renderer = new Renderer(new LSystem(), '', []);
 let gameRNG = new Xorshift(1752);
 let modelRNG = new Xorshift(Date.now());
+let plantRNG = {};
 let quaternaryEntries = [
     new QuaternaryEntry('p_1', null),
     new QuaternaryEntry('p_2', null),
@@ -4309,7 +4310,7 @@ const harvestFrame = createScrollBarImageBtn({
 const harvestLabel = ui.createLatexLabel({
     isVisible: () => {
         if (!selectedColony || !plantData[selectedColony.id] ||
-            !plantData[selectedColony.id].actions[1 /* Actions.PRUNE */])
+            !plantData[selectedColony.id].actions[0 /* Actions.HARVEST */])
             return false;
         return true;
     },
@@ -6889,9 +6890,11 @@ let unBigStringify = (_, val) => {
         BigNumber.fromBase64String(val.substring(9)) : val;
 };
 var getInternalState = () => {
-    // if(manager.busy)
-    //     return '';
+    // Last saved: 0 seconds
     lastSave = time;
+    // Save each plant's RNG sequence
+    for (let id in plantData)
+        plantRNG[id] = plantData[id].system.RNG;
     return JSON.stringify({
         version,
         haxEnabled,
@@ -6917,7 +6920,8 @@ var getInternalState = () => {
         shelfPages,
         autoWaterConfig,
         notebook,
-        gameRNG
+        gameRNG,
+        plantRNG
     }, bigStringify);
 };
 var setInternalState = (stateStr) => {
@@ -6996,6 +7000,10 @@ var setInternalState = (stateStr) => {
         notebook = state.notebook ?? notebook;
         gameRNG = state.gameRNG ?
             new Xorshift(state.gameRNG.seed, state.gameRNG.aux) : gameRNG;
+        plantRNG = state.plantRNG ?? plantRNG;
+        for (let id in plantData)
+            if (plantRNG[id])
+                plantData[id].system.RNG = new Xorshift(plantRNG[id].seed, plantRNG[id].aux);
     }
     // manager.registerSpawner(dandelionSpawner);
     manager.registerSpawner(broomrapeSpawner);
