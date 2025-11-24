@@ -216,10 +216,13 @@ you have to dig really deep to find the underlying systems behind the plants
 - [ ] Ginger
   - [x] Test the first version
     - [x] Randomness is broken, please implement internal state-based RNG for each species
+  - [ ] INVALID SPACE BETWEEN PUNCTUATION AND BINARY OPERATOR
+  - [ ] What if ginger only splits at max, and has RNG chance to make new segment or apex
   - [ ] How to not make leaves slow down too much
   - [ ] Pruning kills all leaves and the upper body so that root could grow faster? This is not realistic
-  - [ ] Harvest kills everything
-  - [ ] Harvest spawns a new node? Probably not
+  - Harvest
+    - [x] Kills everything
+    - [ ] Spawns a new node? Probably not
 
 - [ ] Sunflower
 

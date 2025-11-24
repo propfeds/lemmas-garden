@@ -3697,17 +3697,18 @@ const plantData = {
         colour: 'magenta'
     },
     ginger: {
-        cost: new FirstFreeCost(new ExponentialCost(1e5, Math.log2(1e5))),
+        cost: new ExponentialCost(1e5, Math.log2(1e5)),
         system: new LSystem('[-(90)R(-1)]A(0.2, 4)', [
             'A(r, t): t>0 = A(r+0.1, t-1)',
             'A(r, t): r<5 = F(0.05)[-&L(0.1)][-^L(0.1)]/(137.508)A(r-0.1, 4)',
             'F(p): p<0.25 = F(p+0.025)',
             'L(r): r<1 = L(r+0.05)',
             'R(s): s>=5 = R(s, 1)[+(90)A(0.2, 4)]',
-            'R(s) = R(s+0.25): 0.6; &(15)R(s+0.25): 0.2; R(s)R(-1): 0.1; [&R(-1)]^(15)R(s): 0.05, [^(30)R(-1)]&(30)R(s): 0.05'
+            'R(s) > A(r, t) = R(s)',
+            'R(s) = R(s+0.25): 0.6; &(15)R(s+0.25): 0.2; R(s)R(0): 0.1; [&R(0)]^(15)R(s): 0.05, [^(30)R(0)]&(30)R(s): 0.05'
         ], 45, 5, 'A', '+-&^/\\T', 0, {}, [
             '~> L(s) = {F(s/20)T(0.8*s)[\\(90-96*s)&F(s/30).&(30)F(s/15).^(60)F(s/15).^(30)F(s/15).^(30)F(s/15).^(30)F(s/30).][F(s/5)..].[/(90-96*s)^F(s/30).^(30)F(s/15).&(60)F(s/15).&(30)F(s/15).&(30)F(s/15).&(30)F(s/30).][F(s/5)..]}',
-            '~> R(s): s>0 = F(sqrt(s)/4)' // Make proper root model
+            '~> R(s): s>0 = F(sqrt(s)/5)' // Make proper root model
         ]),
         maxStage: 200,
         requiresWater: true,
@@ -3729,7 +3730,7 @@ const plantData = {
         stroke: (stage) => {
             return {};
         },
-        colour: 'yellow'
+        colour: 'olive'
     },
     // sunflower
     // hopleek:
@@ -6894,7 +6895,7 @@ var getInternalState = () => {
     lastSave = time;
     // Save each plant's RNG sequence
     for (let id in plantData)
-        plantRNG[id] = plantData[id].system.RNG;
+        plantRNG[id] = plantData[id].system.RNG.toJSON();
     return JSON.stringify({
         version,
         haxEnabled,
