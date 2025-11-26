@@ -187,8 +187,8 @@ harvesting it for the first time.`,
         colonyNoPop: `{1}, stg. {2} ({3}%)`,
         colonyNoPopEsc: `{1}, stg. {2} ({3}\\%)`,
         invisibleColony: `\\text{Tilled soil.}`,
-        colonyStats: `Energy\\colon\\ {0} +{1}/hr\\\\
-Growth\\colon\\ {2}/{3} +{4}/hr\\\\
+        colonyStats: `Energy\\colon\\ {0} {1}/hr\\\\
+Growth\\colon\\ {2}/{3} {4}/hr\\\\
 Base profit\\colon\\ {5}p\\\\
 \\ ({6}/{7}) {8}`,
         hour: 'hr',
@@ -1134,6 +1134,14 @@ let getCoordString = (x: number): string => x.toFixed(x >= -0.01 ?
  * @returns {string}
  */
 let getCString = (x: BigNumber): string => parseFloat(x.toString(6)).toString();
+
+/**
+ * Returns a sign formatted (positive/negative) string from a BigNumber.
+ * @param {BigNumber} x the number.
+ * @returns {string}
+ */
+let getSignedString = (x: BigNumber): string => x >= BigNumber.ZERO ?
+`+${x.toString()}` : x.toString();
 
 /**
  * Purge a string array of empty lines.
@@ -6496,15 +6504,16 @@ var getSecondaryEquation = () =>
                 getLoc('status').actions[manager.actionGangsta[2]] : '';
                 result = `\\text{\\begin{array}{c}${getColonyTitleString(c,
                 {colour: true})}\\\\${Localization.format(getLoc('colonyStats'),
+                c.energy,
                 // @ts-expect-error
-                c.energy, c.synthRate * BigNumber.from(insolationCoord),
+                getSignedString(c.synthRate * BigNumber.from(insolationCoord)),
                 c.growth, c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                 // @ts-expect-error
                 plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
                 '∞', c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                 // @ts-expect-error
-                plantData[c.id].growthRate * BigNumber.from(growthCoord) :
-                BigNumber.ZERO, c.profit, slotIdx + 1,
+                getSignedString(plantData[c.id].growthRate * BigNumber.from(
+                growthCoord)) : '+0', c.profit, slotIdx + 1,
                 manager.colonies[plotIdx].length, status)}\\end{array}}`;
                 break;
             case ColonyModes.SIMPLE:
@@ -7934,15 +7943,16 @@ let getExtraPotEquation = () =>
             result = `\\text{\\begin{array}{c}${getColonyTitleString(c,
             {noPop: true, escape: true, colour: true})}
             \\\\${Localization.format(getLoc('colonyStats'),
+            c.energy,
             // @ts-expect-error
-            c.energy, c.synthRate * BigNumber.from(insolationCoord),
+            getSignedString(c.synthRate * BigNumber.from(insolationCoord)),
             c.growth, c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
             // @ts-expect-error
             plantData[c.id].growthCost * BigNumber.from(c.sequence.length) :
             '∞', c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
             // @ts-expect-error
-            plantData[c.id].growthRate * BigNumber.from(growthCoord) :
-            BigNumber.ZERO, c.profit, 1, 1, status)}\\end{array}}`;
+            getSignedString(plantData[c.id].growthRate * BigNumber.from(
+            growthCoord)) : '+0', c.profit, 1, 1, status)}\\end{array}}`;
             break;
         case ColonyModes.SIMPLE:
             // if(!isColonyVisible(c))
