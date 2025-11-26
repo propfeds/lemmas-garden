@@ -146,7 +146,7 @@ harvesting it for the first time.`,
 \\\\To my sister's best friend, for life
 \\\\you can always find peace here
 \\\\don't you dare forget us.
-\\\\- D. Hayward`,
+\\\\- Dorian`,
             `Etched on the pot's side:
 \\\\For Miss Léa's class,
 \\\\With love of course!
@@ -3436,7 +3436,7 @@ const waterAmount = 1 / 2;
 const transferMinStage = 15;
 const plotCosts = new FirstFreeCost(new ExponentialCost(600, Math.log2(80)));
 const plantUnlocks = ['sprout', 'calendula', 'basil', 'campion', 'ginger'];
-const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2), new CompositeCost(1, new ConstantCost(1500), new CompositeCost(1, new ConstantCost(44000), new ConstantCost(250000))));
+const plantUnlockCosts = new CompositeCost(1, new ConstantCost(2), new CompositeCost(1, new ConstantCost(1500), new CompositeCost(1, new ConstantCost(44000), new ConstantCost(270000))));
 const permaCosts = [
     BigNumber.from(9),
     BigNumber.from(180),
@@ -3704,23 +3704,25 @@ const plantData = {
         colour: 'magenta'
     },
     ginger: {
-        cost: new ExponentialCost(1e5, Math.log2(1e5)),
-        system: new LSystem('[-(90)R(-1)]A(0.2, 4)', [
+        cost: new ExponentialCost(90000, Math.log2(1e5)),
+        system: new LSystem('^[A(0.2, 3)]-(90)R(-1)', [
             'A(r, t): t>0 = A(r+0.1, t-1)',
-            'A(r, t): r<5 = F(0.05)[-&L(0.1)][-^L(0.1)]/(137.508)A(r-0.1, 4)',
+            'A(r, t): r<3 = F(0.05)[^L(0.1)]/(180)A(r-0.1, 3)',
             'F(p): p<0.25 = F(p+0.025)',
             'L(r): r<1 = L(r+0.05)',
-            'R(s): s>=5 = R(s, 1)[+(90)A(0.2, 4)]',
+            'R(s): s>=5 = R(s, 1)[+(90)A(0.2, 3)]',
             'R(s) > A(r, t) = R(s)',
             'R(s) = R(s+0.25): 0.6; &(15)R(s+0.25): 0.2; R(s)R(0): 0.1; [&R(0)]^(15)R(s): 0.05, [^(30)R(0)]&(30)R(s): 0.05'
         ], 45, 5, 'A', '+-&^/\\T', 0, {}, [
             '~> L(s) = {F(s/20)T(0.8*s)[\\(90-96*s)&F(s/30).&(30)F(s/15).^(60)F(s/15).^(30)F(s/15).^(30)F(s/15).^(30)F(s/30).][F(s/5)..].[/(90-96*s)^F(s/30).^(30)F(s/15).&(60)F(s/15).&(30)F(s/15).&(30)F(s/15).&(30)F(s/30).][F(s/5)..]}',
-            '~> R(s): s>0 = F(sqrt(s)/5)' // Make proper root model
+            '~> R(s): s>0 = r(s^(1/3)/5)',
+            '~> r(s) = {o(s/4, s/6)o(s/3.2, s/6)o(s/2.4, s/6)o(s/3, s/6)o(s/2.8, s/6)o(s/4, s/6)}',
+            '~> o(s1, s2) = [.[^(90)F(s1).]/[F(s2/8)^(90)F(s1).]/[F(s2/4)^(90)F(s1).]/[F(s2*3/8)^(90)F(s1).]/[F(s2/2)^(90)F(s1).]/[F(s2*5/8)^(90)F(s1).]/[F(s2*3/4)^(90)F(s1).]/[F(s2*7/8)^(90)F(s1).]]F(s2)'
         ]),
-        maxStage: 200,
+        maxStage: 100,
         requiresWater: true,
         growthRate: BigNumber.from(1.5),
-        growthCost: BigNumber.from(0),
+        growthCost: BigNumber.from(4),
         actions: [
             {
                 symbols: new Set('R')
@@ -3735,7 +3737,7 @@ const plantData = {
             };
         },
         stroke: (stage) => {
-            return {};
+            return { tickLength: 3 }; // test
         },
         colour: 'olive'
     },
