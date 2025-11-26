@@ -160,10 +160,10 @@ harvesting it for the first time.`,
         colonyNoPop: `{1}, stg. {2} ({3}%)`,
         colonyNoPopEsc: `{1}, stg. {2} ({3}\\%)`,
         invisibleColony: `\\text{Tilled soil.}`,
-        colonyStats: `\\text{{Energy\\colon\\enspace {0} +{1}/hr}}\\\\
-\\text{{Growth\\colon\\enspace {2}/{3} +{4}/hr}}\\\\
-\\text{{Base profit\\colon\\enspace {5}p}}\\\\
-\\text{{({6}/{7}) {8}}}`,
+        colonyStats: `Energy\\colon\\ {0} +{1}/hr\\\\
+Growth\\colon\\ {2}/{3} +{4}/hr\\\\
+Base profit\\colon\\ {5}p\\\\
+\\ ({6}/{7}) {8}`,
         hour: 'hr',
         dateTime: 'Year {0} week {1}/{2}\\\\{3}:{4}',
         dateTimeBottom: '{3}:{4}\\\\Year {0} week {1}/{2}',
@@ -182,8 +182,8 @@ harvesting it for the first time.`,
         viewColonyInfo: 'Displays details about the colony',
         switchColony: 'Switch colony ({0}/{1})',
         switchColonyInfo: 'Cycles through the list of colonies',
-        labelSpeed: 'Game speed: 1/{0}',
-        labelSpeedUpg: 'Game speed: 1/{0} → 1/{1}',
+        labelSpeed: 'Game speed: {1}1/{0}',
+        labelSpeedUpg: 'Game speed: {2}1/{0} → {2}1/{1}',
         labelGM3D: '3D illustration: ',
         labelActionConfirm: 'Confirmation dialogue: ',
         lineGraphModes: [
@@ -4625,13 +4625,13 @@ var init = () => {
     }
     // Milestones
     theory.setMilestoneCost(milestoneCost);
-    /* c1 exponent
-    Standard exponent upgrade.
+    /* Speed
+    Replaces the speed slider.
     */
     {
         speedMs = theory.createMilestoneUpgrade(0, speeds.length - 1);
-        speedMs.getDescription = (_) => Localization.format(getLoc('labelSpeed'), speeds[speedMs.level]);
-        speedMs.getInfo = (amount) => Localization.format(getLoc('labelSpeedUpg'), speeds[speedMs.level], speeds[Math.min(speedMs.maxLevel, speedMs.level + amount)]);
+        speedMs.getDescription = (_) => Localization.format(getLoc('labelSpeed'), speeds[speedMs.level], Utils.getMath('\\times'));
+        speedMs.getInfo = (amount) => Localization.format(getLoc('labelSpeedUpg'), speeds[speedMs.level], speeds[Math.min(speedMs.maxLevel, speedMs.level + amount)], Utils.getMath('\\times'));
     }
     // Story chapters
     let chapters = getLoc('chapters');
@@ -5069,8 +5069,7 @@ var getSecondaryEquation = () => {
                     manager.actionGangsta[0] == plotIdx &&
                     manager.actionGangsta[1] == slotIdx) ?
                     getLoc('status').actions[manager.actionGangsta[2]] : '';
-                result = `\\begin{array}{c}\\text{${getColonyTitleString(c, { colour: true })}}
-                \\\\${Localization.format(getLoc('colonyStats'), 
+                result = `\\text{\\begin{array}{c}${getColonyTitleString(c, { colour: true })}\\\\${Localization.format(getLoc('colonyStats'), 
                 // @ts-expect-error
                 c.energy, c.synthRate * BigNumber.from(insolationCoord), c.growth, c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                     // @ts-expect-error
@@ -5078,7 +5077,7 @@ var getSecondaryEquation = () => {
                     '∞', c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                     // @ts-expect-error
                     plantData[c.id].growthRate * BigNumber.from(growthCoord) :
-                    BigNumber.ZERO, c.profit, slotIdx + 1, manager.colonies[plotIdx].length, status)}\\end{array}`;
+                    BigNumber.ZERO, c.profit, slotIdx + 1, manager.colonies[plotIdx].length, status)}\\end{array}}`;
                 break;
             case 2 /* ColonyModes.SIMPLE */:
                 // if(!isColonyVisible(c))
@@ -6234,7 +6233,7 @@ let getExtraPotEquation = () => {
             let status = extraManager.gangsta ?
                 getLoc('status').evolve : extraManager.actionGangsta ?
                 getLoc('status').actions[extraManager.actionGangsta[2]] : '';
-            result = `\\begin{array}{c}\\text{${getColonyTitleString(c, { noPop: true, escape: true, colour: true })}}
+            result = `\\text{\\begin{array}{c}${getColonyTitleString(c, { noPop: true, escape: true, colour: true })}
             \\\\${Localization.format(getLoc('colonyStats'), 
             // @ts-expect-error
             c.energy, c.synthRate * BigNumber.from(insolationCoord), c.growth, c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
@@ -6243,7 +6242,7 @@ let getExtraPotEquation = () => {
                 '∞', c.stage < (plantData[c.id].maxStage ?? INT_MAX) ?
                 // @ts-expect-error
                 plantData[c.id].growthRate * BigNumber.from(growthCoord) :
-                BigNumber.ZERO, c.profit, 1, 1, status)}\\end{array}`;
+                BigNumber.ZERO, c.profit, 1, 1, status)}\\end{array}}`;
             break;
         case 2 /* ColonyModes.SIMPLE */:
             // if(!isColonyVisible(c))
