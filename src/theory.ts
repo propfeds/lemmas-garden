@@ -6156,7 +6156,7 @@ var getEquationOverlay = () =>
             ({
                 isVisible: haxEnabled,
                 horizontalOptions: LayoutOptions.END,
-                verticalOptions: LayoutOptions.START,
+                verticalOptions: LayoutOptions.END,
                 text: getLoc('hacks')
             }),
             ui.createGrid
