@@ -4791,7 +4791,7 @@ const plantData: {[key: string]: Plant} =
     ginger:
     {
         cost: new ExponentialCost(100000, Math.log2(5)),
-        system: new LSystem('^[A(0.2, 3)]-(90)R(-1)',
+        system: new LSystem('\\[A(0.2, 3)]-(90)R(-1)',
         [
             'A(r, t): t>0 = A(r+0.1, t-1)',
             'A(r, t): r<3 = F(0.05)[^L(0.1)]/(180)A(r-0.1, 3)',
@@ -4805,7 +4805,7 @@ const plantData: {[key: string]: Plant} =
             '~> L(s) = {F(s/20)T(0.8*s)[\\(90-96*s)&F(s/30).&(30)F(s/15).^(60)F(s/15).^(30)F(s/15).^(30)F(s/15).^(30)F(s/30).][F(s/5)..].[/(90-96*s)^F(s/30).^(30)F(s/15).&(60)F(s/15).&(30)F(s/15).&(30)F(s/15).&(30)F(s/30).][F(s/5)..]}',    // Make new leaf model please
             '~> R(s): s>0 = r(s^(1/3)/5)',
             '~> r(s) = {o(s/4, s/6)o(s/3.2, s/6)o(s/2.4, s/6)o(s/3, s/6)o(s/2.8, s/6)o(s/4, s/6)}',
-            '~> o(s1, s2) = [.[^(90)F(s1).]/[F(s2/8)^(90)F(s1).]/[F(s2/4)^(90)F(s1).]/[F(s2*3/8)^(90)F(s1).]/[F(s2/2)^(90)F(s1).]/[F(s2*5/8)^(90)F(s1).]/[F(s2*3/4)^(90)F(s1).]/[F(s2*7/8)^(90)F(s1).]]F(s2)'
+            '~> o(s1, s2) = [[^(90)F(s1).]/[F(s2/8)^(90)F(s1).]/[F(s2/4)^(90)F(s1).]/[F(s2*3/8)^(90)F(s1).]/[F(s2/2)^(90)F(s1).]/[F(s2*5/8)^(90)F(s1).]/[F(s2*3/4)^(90)F(s1).]/[F(s2*7/8)^(90)F(s1).]]F(s2)[^(90)F(s1).]'
         ]),
         maxStage: 100,
         requiresWater: true,
@@ -4828,7 +4828,7 @@ const plantData: {[key: string]: Plant} =
         },
         stroke: (stage) =>
         {
-            return {tickLength: 3}; // test
+            return {/*tickLength: 3*/};
         },
         colour: 'olive'
     },
