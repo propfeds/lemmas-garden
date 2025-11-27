@@ -4791,25 +4791,28 @@ const plantData: {[key: string]: Plant} =
     ginger:
     {
         cost: new ExponentialCost(100000, Math.log2(5)),
-        system: new LSystem('\\[A(0.2, 3)]-(90)R(-1)',
+        system: new LSystem('\\[A(0.2, 3)]-(90)R(-2)',
         [
             'A(r, t): t>0 = A(r+0.1, t-1)',
             'A(r, t): r<3 = F(0.05)[^L(0.1)]/(180)A(r-0.1, 3)',
-            'F(p): p<0.25 = F(p+0.025)',
+            'F(p): p<0.2 = F(p+0.025)',
             'L(r): r<1 = L(r+0.05)',
-            'R(s): s<5 = R(s+0.25)',
-            'R(s) = R(s, 0)&(15)R(0): 0.5, R(s, 0)[+(90)A(0.2, 3)]: 0.25, R(s, 1)[&(30)R(0)][^R(-1)]: 0.125, [&R(0)]^(15)R(s): 0.0625, R(s+1, 1): 0.0625',   // maybe R(s, 1) can make flowers but not R(s, 0)
+            'R(s): s<8 = R(s+0.5)',
+            'R(s) = R(s, 0)&(15)R(0): 0.375; [&R(0)]^(15)R(s): 0.25; R(s, 0)[+(90)A(0.2, 3)]: 0.125; R(s, 1)[&(30)R(0)][^R(-1)]: 0.125; R(s+2, 1): 0.125',   // maybe R(s, 1) can make flowers but not R(s, 0)
             'R(s, type): type>=1 = R(s, 0)[+(90)K(9)]'
         ], 45, 5, 'A', '+-&^/\\T', 0, {},
         [
-            '~> L(s) = {F(s/20)T(0.8*s)[\\(90-96*s)&F(s/30).&(30)F(s/15).^(60)F(s/15).^(30)F(s/15).^(30)F(s/15).^(30)F(s/30).][F(s/5)..].[/(90-96*s)^F(s/30).^(30)F(s/15).&(60)F(s/15).&(30)F(s/15).&(30)F(s/15).&(30)F(s/30).][F(s/5)..]}',    // Make new leaf model please
+            '~> L(s) = {F(s/20)T(0.5*s)[F(s)..]}',// Make new leaf model please
             '~> R(s): s>0 = r(s^(1/3)/5)',
-            '~> r(s) = {o(s/4, s/6)o(s/3.2, s/6)o(s/2.4, s/6)o(s/3, s/6)o(s/2.8, s/6)o(s/4, s/6)}',
-            '~> o(s1, s2) = [[^(90)F(s1).]/[F(s2/8)^(90)F(s1).]/[F(s2/4)^(90)F(s1).]/[F(s2*3/8)^(90)F(s1).]/[F(s2/2)^(90)F(s1).]/[F(s2*5/8)^(90)F(s1).]/[F(s2*3/4)^(90)F(s1).]/[F(s2*7/8)^(90)F(s1).]]F(s2)[^(90)F(s1).]'
+            '~> R(s, type) = r(s^(1/3)/5)',
+            '~> r(s) = {F(s/16)o(s/4, s/8)o(s/3.2, s/8)o(s/2.4, s/8)o(s/3, s/8)o(s/2.8, s/8)o(s/4, s/8)F(s/16)}', // 6-ring model
+            '~> r(s) = {F(s/10)o(s/3.2, s/5)o(s/2.4, s/5)o(s/3, s/5)o(s/2.8, s/5)F(s/10)}', // 4-ring model
+            '~> o(s1, s2) = [[^(90)F(s1).]/[F(s2/8)^(90)F(s1).]/[F(s2/4)^(90)F(s1).]/[F(s2*3/8)^(90)F(s1).]/[F(s2/2)^(90)F(s1).]/[F(s2*5/8)^(90)F(s1).]/[F(s2*3/4)^(90)F(s1).]/[F(s2*7/8)^(90)F(s1).]]F(s2)[^(90)F(s1).]',   // 8-spoke model
+            '~> o(s1, s2) = [[^(90)F(s1).]/(60)[F(s2/6)^(90)F(s1).]/(60)[F(s2/3)^(90)F(s1).]/(60)[F(s2/2)^(90)F(s1).]/(60)[F(s2*2/3)^(90)F(s1).]/(60)[F(s2*5/6)^(90)F(s1).]]F(s2)[^(90)F(s1).]' // 6-spoke model
         ]),
         maxStage: 100,
         requiresWater: true,
-        growthRate: BigNumber.from(6),
+        growthRate: BigNumber.from(9),
         growthCost: BigNumber.from(0),  // 3 maybe
         actions:
         [
@@ -8205,6 +8208,7 @@ let createExtraPotMenu = () =>
                 {
                     manager.colonies[i].push(c);
                     extraManager.killColony(0, 0);
+                    theory.invalidateQuaternaryValues();
                 }
             }
         }));
