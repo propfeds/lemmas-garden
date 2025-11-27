@@ -222,7 +222,8 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Pruning kills all leaves and the upper body so that root could grow faster? This is not realistic
   - [ ] New leaf model
   - [ ] Flowers? Give profit
-  - Harvest
+  - [ ] Narrations
+  - [x] Harvest
     - [x] Kills everything
     - [ ] Spawns a new node? Probably not
 

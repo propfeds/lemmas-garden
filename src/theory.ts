@@ -103,7 +103,7 @@ const LOC_STRINGS =
         btnPage: 'p. {0}',
 
         actionConfirm: `You are about to perform a {0} on\\\\
-{4}.\\\\(plot {1}, {2})\\\\{5}\\\\\n\n\\\\{6}`,
+{4}. (plot {1}, {2})\\\\—\\\\{5}\\\\\n\n\\\\{6}`,
         bulkActionConfirm: `You are about to perform a {0} on all plants in ` +
 `plot {1}.\\\\\n\n\\\\{2}`,
 
@@ -172,11 +172,11 @@ harvesting it for the first time.`,
 \\\\To my sister's best friend, for life
 \\\\you can always find peace here
 \\\\don't you dare forget us.
-\\\\- Dorian`,
+\\\\- D`,
             `Etched on the pot's side:
 \\\\For Miss Léa's class,
 \\\\With love of course!
-\\\\- C.`,
+\\\\- C`,
             `The pot is adorned with pearly grooves,
 \\\\reminiscent of a vast, misting lake.`
         ],
@@ -185,7 +185,7 @@ harvesting it for the first time.`,
         colonyWithMaxStg: `{0} of {1}, stage {2}/{3}`,
         colonyProg: `{0} of {1}, stg. {2} ({3}\\%)`,
         colonyNoPop: `{1}, stg. {2} ({3}%)`,
-        colonyNoPopEsc: `{1}, stg. {2} ({3}\\%)`,
+        colonyNoPopEsc: `{1}, stage {2} ({3}\\%)`,
         invisibleColony: `\\text{Tilled soil.}`,
         colonyStats: `Energy\\colon\\ {0} {1}/hr\\\\
 Growth\\colon\\ {2}/{3} {4}/hr\\\\
@@ -446,7 +446,7 @@ seeder. Watch for the new one coming right near ya.`
                 LsDetails: ``,
                 actions:
                 [
-                    `Harvest returns profit as the sum of all R & K sizes.`
+                    `Harvest returns profit as the sum of all R \\&\\ K sizes.`
                 ],
                 narrations:
                 [
@@ -6472,8 +6472,10 @@ var getSecondaryEquation = () =>
     {
         if(plotIdx < plotPerma.level)
         {
+            // @ts-expect-error
+            let taxRateString = (taxRate * BigNumber.HUNDRED).toString(0);
             let taxInfo = `\\text{${getLoc('pubTax')}}\\\\
-            T_{\\text{p}}=${theory.latexSymbol} \\times ${taxRate}`;
+            T_{\\text{p}}=${theory.latexSymbol} \\times ${taxRateString}\\%`;
             let tauInfo = `${theory.latexSymbol}=\\max\\text{p}`;
             return `\\begin{array}{c}${taxInfo}\\\\\\\\${tauInfo}\\end{array}`;
         }
