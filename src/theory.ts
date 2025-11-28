@@ -3708,6 +3708,41 @@ class ColonyManager
         updateAvailability();
         return c;
     }
+    importColony(destPlot: number, source: ColonyManager, plot: number,
+    index: number): Colony
+    {
+        // Full!
+        if(this.colonies[destPlot].length >= this.width)
+            return null;
+
+        let colony = source.colonies[plot][index];
+        if(!colony)
+            return null;
+
+        this.colonies[destPlot].push(colony);
+        source.killColony(plot, index);
+
+        // Establish parasitic links
+        this.linkParasites(destPlot);
+
+        // Auto water
+        if(autoWaterConfig[id]?.maxStage > colony.stage)
+            this.waterColony(colony);
+
+        // Change renderer plant
+        // If there's no waitFor, then this is the main manager
+        // Spaghetti code
+        if(!this.waitFor && destPlot == plotIdx)
+        {
+            let prevColony = selectedColony;
+            selectedColony = this.colonies[plotIdx][slotIdx];
+            if(prevColony !== selectedColony)
+                renderer.colony = selectedColony;
+        }
+        theory.invalidateQuaternaryValues();
+        updateAvailability();
+        return colony;
+    }
     killColony(plot: number, index: number, id?: number)
     {
         let c = this.colonies[plot][index];
@@ -4791,29 +4826,37 @@ const plantData: {[key: string]: Plant} =
     ginger:
     {
         cost: new ExponentialCost(100000, Math.log2(5)),
-        system: new LSystem('\\[A(0.2, 3)]-(90)R(-2)',
+        system: new LSystem('/[A(0.2, 3)]-(90)R(-3)',
         [
             'A(r, t): t>0 = A(r+0.1, t-1)',
-            'A(r, t): r<3 = F(0.05)[^L(0.1)]/(180)A(r-0.1, 3)',
+            'A(r, t): r<AThreshold = F(0.05)[^L(0.1)]/(180)A(r-0.1, 3)',
             'F(p): p<0.2 = F(p+0.025)',
-            'L(r): r<1 = L(r+0.05)',
-            'R(s): s<8 = R(s+0.5)',
-            'R(s) = R(s, 0)&(15)R(0): 0.375; [&R(0)]^(15)R(s): 0.25; R(s, 0)[+(90)A(0.2, 3)]: 0.125; R(s, 1)[&(30)R(0)][^R(-1)]: 0.125; R(s+2, 1): 0.125',   // maybe R(s, 1) can make flowers but not R(s, 0)
-            'R(s, type): type>=1 = R(s, 0)[+(90)K(9)]'
-        ], 45, 5, 'A', '+-&^/\\T', 0, {},
+            'L(r): r<LMaxSize = L(r+0.05)',
+            'R(s): s<RMaxSize = R(s+1)',
+            'R(s) = R(s, 0)&(15)R(0): 0.375; [&R(0)]^(15)R(s): 0.25; R(s, 0)[+(90)A(0.2, 3)]: 0.125; R(s, 1)[&(30)R(0)][^R(-3)]: 0.125; R(s+5, 1): 0.125',
+            'R(s, type): type>=1 = R(s, 0)[+(90)F(0.05)K(0)]',
+            'K(s): s<KMaxSize = K(s+1)'
+        ], 45, 5, 'A', '+-&^/\\T', 0, {
+            'AThreshold': '3',
+            'LMaxSize': '1',
+            'RMaxSize': '15',
+            'KMaxSize': '20'
+        },
         [
-            '~> L(s) = {F(s/20)T(0.5*s)[F(s)..]}',// Make new leaf model please
-            '~> R(s): s>0 = r(s^(1/3)/5)',
-            '~> R(s, type) = r(s^(1/3)/5)',
-            '~> r(s) = {F(s/16)o(s/4, s/8)o(s/3.2, s/8)o(s/2.4, s/8)o(s/3, s/8)o(s/2.8, s/8)o(s/4, s/8)F(s/16)}', // 6-ring model
-            '~> r(s) = {F(s/10)o(s/3.2, s/5)o(s/2.4, s/5)o(s/3, s/5)o(s/2.8, s/5)F(s/10)}', // 4-ring model
-            '~> o(s1, s2) = [[^(90)F(s1).]/[F(s2/8)^(90)F(s1).]/[F(s2/4)^(90)F(s1).]/[F(s2*3/8)^(90)F(s1).]/[F(s2/2)^(90)F(s1).]/[F(s2*5/8)^(90)F(s1).]/[F(s2*3/4)^(90)F(s1).]/[F(s2*7/8)^(90)F(s1).]]F(s2)[^(90)F(s1).]',   // 8-spoke model
-            '~> o(s1, s2) = [[^(90)F(s1).]/(60)[F(s2/6)^(90)F(s1).]/(60)[F(s2/3)^(90)F(s1).]/(60)[F(s2/2)^(90)F(s1).]/(60)[F(s2*2/3)^(90)F(s1).]/(60)[F(s2*5/6)^(90)F(s1).]]F(s2)[^(90)F(s1).]' // 6-spoke model
+            // Make flower model please
+            '~> L(s) = {F(s/20)T(0.5*s)[F(s).]}',// Make new leaf model please
+            '~> R(s): s>0 = r(s^(1/3)/6)',
+            '~> R(s, type) = r(s^(1/3)/6)',
+            '~> r(s) = {F(s/16)o(s/4, s/8)o(s/3.2, s/8)o(s/2.4, s/8)o(s/3, s/8)o(s/2.8, s/8)o(s/4, s/8)F(s/16)}', // 6-ringed root
+            '~> o(s1, s2) = [[^(90)F(s1).]/[F(s2/8)^(90)F(s1).]/[F(s2/4)^(90)F(s1).]/[F(s2*3/8)^(90)F(s1).]/[F(s2/2)^(90)F(s1).]/[F(s2*5/8)^(90)F(s1).]/[F(s2*3/4)^(90)F(s1).]/[F(s2*7/8)^(90)F(s1).]]F(s2)[^(90)F(s1).]',   // 8-spoked root ring
+
+            // '~> r(s) = {F(s/10)o(s/3.2, s/5)o(s/2.4, s/5)o(s/3, s/5)o(s/2.8, s/5)F(s/10)}', // 4-ringed root
+            // '~> o(s1, s2) = [[^(90)F(s1).]/(60)[F(s2/6)^(90)F(s1).]/(60)[F(s2/3)^(90)F(s1).]/(60)[F(s2/2)^(90)F(s1).]/(60)[F(s2*2/3)^(90)F(s1).]/(60)[F(s2*5/6)^(90)F(s1).]]F(s2)[^(90)F(s1).]' // 6-spoked root ring
         ]),
         maxStage: 100,
         requiresWater: true,
         growthRate: BigNumber.from(9),
-        growthCost: BigNumber.from(0),  // 3 maybe
+        growthCost: BigNumber.from(1.5),
         actions:
         [
             {   // Harvest
@@ -4824,14 +4867,14 @@ const plantData: {[key: string]: Plant} =
         {
             return {
                 scale: 1,
-                x: 0,
+                x: <number>saturate(stage/50 - 1, 0, 1),
                 y: 0.375,
-                z: 0,
+                z: <number>saturate(1 - stage/50, -1, 0),
             };
         },
         stroke: (stage) =>
         {
-            return {/*tickLength: 3*/};
+            return {};
         },
         colour: 'olive'
     },
@@ -8203,13 +8246,8 @@ let createExtraPotMenu = () =>
             {
                 Sound.playClick();
                 let c = extraManager.colonies[0][0];
-                if(c && c.stage >= transferMinStage &&
-                manager.colonies[i].length < manager.width)
-                {
-                    manager.colonies[i].push(c);
-                    extraManager.killColony(0, 0);
-                    theory.invalidateQuaternaryValues();
-                }
+                if(c && c.stage >= transferMinStage)
+                    manager.importColony(i, extraManager, 0, 0);
             }
         }));
     }
