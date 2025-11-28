@@ -278,8 +278,8 @@ called by Mister Fibonacci as the golden angle.`,
                         28: 'The third and final flower appears.',
                         30: `My w... sister-in-law, she really liked munching on
 these flowers raw. Try it.`,
-                        31: `Try it!\\\\Naw, only teasing you ;). Keep your
-saliva away from my little profit.`,
+                        31: `Try it!\\\\Naw, merely a tease ;). Keep your wee
+mouth away from my coins.`,
                         35: 'The first flower matures.',
                         39: 'The second flower matures.',
                         40: 'All flowers have reached maturity.',
@@ -2881,8 +2881,10 @@ class ColonyManager {
         if (!c)
             return;
         // Reset levels & unlock autowatering
-        if (!c.propagated && plantUnlocks.includes(c.id)) {
-            plants[plot][c.id].level -= Math.min(plants[plot][c.id].level, c.population);
+        if (plantUnlocks.includes(c.id)) {
+            // Deduct from displayed level
+            if (!c.propagated)
+                plants[plot][c.id].level -= Math.min(plants[plot][c.id].level, c.population);
             if (!autoWaterConfig[c.id]) {
                 autoWaterConfig[c.id] =
                     {
@@ -3484,9 +3486,10 @@ var getPublicationMultiplier = (tau) => pubCoef *
 var getPublicationMultiplierFormula = (symbol) => `\\frac{2}{3}\\times
 {${symbol}}^{${pubExp.toString(2)}\\times h},\\quad
 h=\\ln{(2\\ln{(${symbol}+1)}+1)}`;
-const milestoneCost = new LinearCost(BigNumber.from(1.5), 
 // @ts-expect-error
-BigNumber.from(2.5) * tauRate);
+const milestoneCost = new LinearCost(BigNumber.from(2) * tauRate, 
+// @ts-expect-error
+BigNumber.from(3) * tauRate);
 const plantData = {
     sprout: {
         cost: new FirstFreeCost(new ExponentialCost(0.25, 1)),
@@ -3557,11 +3560,12 @@ const plantData = {
         requiresWater: true,
         growthRate: BigNumber.from(7.5),
         growthCost: BigNumber.from(2.5),
-        propagation: {
-            stage: [40],
-            rate: [1 / 3],
-            priority: 'c'
-        },
+        // propagation:
+        // {
+        //     stage: [40],
+        //     rate: [1/3],
+        //     priority: 'c'
+        // },
         actions: [
             {
                 symbols: new Set('K'),
@@ -3592,7 +3596,7 @@ const plantData = {
         colour: 'orange'
     },
     basil: {
-        cost: new ExponentialCost(7.5, 2),
+        cost: new ExponentialCost(7, 2),
         system: new LSystem('/(90)BA(0.2, 5)', [
             'A(r, t): r>=AThreshold = S(0)F(0.24, 0.96)K(0.03, 8)',
             'A(r, t): t>0 = A(r+0.4, t-1)',
@@ -3732,13 +3736,13 @@ const plantData = {
     },
     ginger: {
         cost: new ExponentialCost(100000, Math.log2(5)),
-        system: new LSystem('/[A(0.2, 3)]-(90)R(-3)', [
+        system: new LSystem('/(30)[A(0.2, 3)]-(90)R(-3)', [
             'A(r, t): t>0 = A(r+0.1, t-1)',
             'A(r, t): r<AThreshold = F(0.05)[^L(0.1)]/(180)A(r-0.1, 3)',
             'F(p): p<0.2 = F(p+0.025)',
             'L(r): r<LMaxSize = L(r+0.05)',
             'R(s): s<RMaxSize = R(s+1)',
-            'R(s) = R(s, 0)&(15)R(0): 0.375; [&R(0)]^(15)R(s): 0.25; R(s, 0)[+(90)A(0.2, 3)]: 0.125; R(s, 1)[&(30)R(0)][^R(-3)]: 0.125; R(s+5, 1): 0.125',
+            'R(s) = R(s, 0)&(15)R(0): 0.375; [&R(0)]^(15)R(s): 0.25; R(s, 0)[+(90)A(0.2, 3)]R(0): 0.125; R(s, 1)[&(30)R(0)][^R(-3)]: 0.125; R(s+5, 1): 0.125',
             'R(s, type): type>=1 = R(s, 0)[+(90)F(0.05)K(0)]',
             'K(s): s<KMaxSize = K(s+1)'
         ], 45, 5, 'A', '+-&^/\\T', 0, {
@@ -3749,8 +3753,8 @@ const plantData = {
         }, [
             // Make flower model please
             '~> L(s) = {F(s/20)T(0.5*s)[F(s).]}',
-            '~> R(s): s>0 = r(s^(1/3)/6)',
-            '~> R(s, type) = r(s^(1/3)/6)',
+            '~> R(s): s>0 = r(s^(1/3)/8)',
+            '~> R(s, type) = r(s^(1/3)/8)',
             '~> r(s) = {F(s/16)o(s/4, s/8)o(s/3.2, s/8)o(s/2.4, s/8)o(s/3, s/8)o(s/2.8, s/8)o(s/4, s/8)F(s/16)}',
             '~> o(s1, s2) = [[^(90)F(s1).]/[F(s2/8)^(90)F(s1).]/[F(s2/4)^(90)F(s1).]/[F(s2*3/8)^(90)F(s1).]/[F(s2/2)^(90)F(s1).]/[F(s2*5/8)^(90)F(s1).]/[F(s2*3/4)^(90)F(s1).]/[F(s2*7/8)^(90)F(s1).]]F(s2)[^(90)F(s1).]', // 8-spoked root ring
             // '~> r(s) = {F(s/10)o(s/3.2, s/5)o(s/2.4, s/5)o(s/3, s/5)o(s/2.8, s/5)F(s/10)}', // 4-ringed root
@@ -4158,8 +4162,8 @@ let createScrollBarImageBtn = (params, callback, heldCallback = null, repeatable
         }
         else if (e.type == TouchType.LONGPRESS) {
             // frame.borderColor = borderColor;
-            if (heldCallback &&
-                !(Math.abs(e.x - origx) > bound || Math.abs(e.y - origy) > bound)) {
+            if (heldCallback /*&&
+            !(Math.abs(e.x - origx) > bound || Math.abs(e.y - origy) > bound)*/) {
                 Sound.playClick();
                 heldCallback();
                 held = true;
@@ -4282,7 +4286,7 @@ const icons = {
         ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/dark/white-book.png') :
         ImageSource.fromUri('https://raw.githubusercontent.com/propfeds/lemmas-garden/trunk/src/icons/light/white-book.png')
 };
-const waterFrame = createScrollBarImageBtn({
+const waterBtn = createScrollBarImageBtn({
     isVisible: () => {
         if (!selectedColony || !plantData[selectedColony.id])
             return false;
@@ -4327,7 +4331,7 @@ const waterLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const harvestFrame = createScrollBarImageBtn({
+const harvestBtn = createScrollBarImageBtn({
     isVisible: () => {
         if (!selectedColony || !plantData[selectedColony.id] ||
             !plantData[selectedColony.id].actions[0 /* Actions.HARVEST */])
@@ -4369,7 +4373,7 @@ const harvestLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const pruneFrame = createScrollBarImageBtn({
+const pruneBtn = createScrollBarImageBtn({
     isVisible: () => {
         if (!selectedColony || !plantData[selectedColony.id] ||
             !plantData[selectedColony.id].actions[1 /* Actions.PRUNE */])
@@ -4413,7 +4417,7 @@ const mainMenuLabel = ui.createLatexLabel({
     fontSize: 10,
     textColor: Color.TEXT_MEDIUM
 });
-const mainMenuFrame = createImageBtn({
+const mainMenuBtn = createImageBtn({
     row: 0, column: 0,
     horizontalOptions: LayoutOptions.START
 }, () => createShelfMenu().show(), () => true, icons.shelf);
@@ -4886,7 +4890,7 @@ var getEquationOverlay = () => {
                 inputTransparent: true,
                 cascadeInputTransparent: false,
                 children: [
-                    mainMenuFrame,
+                    mainMenuBtn,
                     mainMenuLabel,
                 ]
             }),
@@ -4916,11 +4920,11 @@ var getEquationOverlay = () => {
                             inputTransparent: true,
                             cascadeInputTransparent: false,
                             children: [
-                                waterFrame,
+                                waterBtn,
                                 waterLabel,
-                                harvestFrame,
+                                harvestBtn,
                                 harvestLabel,
-                                pruneFrame,
+                                pruneBtn,
                                 pruneLabel,
                             ]
                         }),
@@ -5060,11 +5064,14 @@ var getCurrencyBarDelegate = () => {
  * Interface coming soon?
  */
 let getColonyTitleString = (colony, options = {}) => {
+    // If plant does not exist
+    if (!plantData[colony.id])
+        return colony.id;
     let format = getLoc(options.prog ? 'colonyProg' : options.maxStage ?
         'colonyWithMaxStg' : options.noPop ?
         (options.escape ? 'colonyNoPopEsc' : 'colonyNoPop') : 'colony');
     let pop = colony.propagated ? `+${colony.population}` : colony.population;
-    let name = getLoc('plants')[colony.id]?.name ??
+    let name = getLoc('plants')[colony.id].name ??
         `${options.escape ? '\\' : ''}#${colony.id}`;
     let colour = plantData[colony.id].colour;
     if (options.colour && colour)
@@ -5535,6 +5542,9 @@ let createSystemMenu = (id, action = null) => {
     return menu;
 };
 let createColonyViewMenu = (colony) => {
+    // If plant does not exist
+    if (!plantData[colony.id])
+        return null;
     if (!colonyViewConfig[colony.id]) {
         colonyViewConfig[colony.id] =
             {
@@ -6318,7 +6328,7 @@ let getExtraPotEquation = () => {
 };
 let createExtraPotMenu = () => {
     // extraManager.colonies[0][0]
-    let extraWaterFrame = createScrollBarImageBtn({
+    let extraWaterBtn = createScrollBarImageBtn({
         row: 0, column: 0,
     }, () => extraManager.water(0, 0), () => extraManager.water(0, 0), true, () => {
         if (extraManager.colonies[0][0] && !extraManager.colonies[0][0].wet)
@@ -6353,7 +6363,7 @@ let createExtraPotMenu = () => {
         fontSize: 10,
         textColor: Color.TEXT_MEDIUM
     });
-    let extraHarvestFrame = createScrollBarImageBtn({
+    let extraHarvestBtn = createScrollBarImageBtn({
         row: 0, column: 2,
     }, () => {
         if (actionConfirm) {
@@ -6383,7 +6393,7 @@ let createExtraPotMenu = () => {
         fontSize: 10,
         textColor: Color.TEXT_MEDIUM
     });
-    let extraPruneFrame = createScrollBarImageBtn({
+    let extraPruneBtn = createScrollBarImageBtn({
         isVisible: () => {
             if (!extraManager.colonies[0][0] ||
                 !plantData[extraManager.colonies[0][0].id].actions[1 /* Actions.PRUNE */])
@@ -6520,11 +6530,11 @@ let createExtraPotMenu = () => {
                                 inputTransparent: true,
                                 cascadeInputTransparent: false,
                                 children: [
-                                    extraWaterFrame,
+                                    extraWaterBtn,
                                     extraWaterLabel,
-                                    extraHarvestFrame,
+                                    extraHarvestBtn,
                                     extraHarvestLabel,
-                                    extraPruneFrame,
+                                    extraPruneBtn,
                                     extraPruneLabel,
                                 ]
                             }),
