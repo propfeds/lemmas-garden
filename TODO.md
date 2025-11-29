@@ -86,6 +86,16 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] Ginger
   - [ ] Sunflower
 
+- [ ] Leaf size scales with square root of synth rate
+  - [ ] Pea
+  - [ ] Calendula
+  - [ ] Basil
+  - [ ] Campion
+  - [ ] Hopleek
+  - [ ] Broomrape
+  - [x] Ginger
+  - [ ] Sunflower
+
 ## v0.3: Invasion
 
 - [x] Move references from loc strings to the Book class
@@ -221,7 +231,7 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] How to not make leaves slow down too much
   - [ ] Pruning kills all leaves and the upper body so that root could grow faster? This is not realistic
   - [ ] New leaf model
-  - [ ] Flowers? Give profit
+  - [ ] Flowers grow? Give profit
   - [ ] Narrations
   - [x] Harvest
     - [x] Kills everything

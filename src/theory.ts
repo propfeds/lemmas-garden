@@ -4832,22 +4832,23 @@ const plantData: {[key: string]: Plant} =
         system: new LSystem('/(30)[A(0.2, 3)]-(90)R(-3)',
         [
             'A(r, t): t>0 = A(r+0.1, t-1)',
-            'A(r, t): r<AThreshold = F(0.05)[^L(0.1)]/(180)A(r-0.1, 3)',
+            'A(r, t): r<AThreshold = F(0.05)[^(36)L(0.1)]/(180)A(r-0.1, 3)',
             'F(p): p<0.2 = F(p+0.025)',
-            'L(r): r<LMaxSize = L(r+0.05)',
+            'L(r): r<LMaxSize = L(r+0.1)',
             'R(s): s<RMaxSize = R(s+1)',
             'R(s) = R(s, 0)&(15)R(0): 0.375; [&R(0)]^(15)R(s): 0.25; R(s, 0)[+(90)A(0.2, 3)]R(0): 0.125; R(s, 1)[&(30)R(0)][^R(-3)]: 0.125; R(s+5, 1): 0.125',
             'R(s, type): type>=1 = R(s, 0)[+(90)F(0.05)K(0)]',
             'K(s): s<KMaxSize = K(s+1)'
         ], 45, 5, 'A', '+-&^/\\T', 0, {
             'AThreshold': '3',
-            'LMaxSize': '1',
+            'LMaxSize': '1 - 1e-9',
             'RMaxSize': '15',
             'KMaxSize': '20'
         },
         [
             // Make flower model please
-            '~> L(s) = {F(s/20)T(0.5*s)[F(s).]}',// Make new leaf model please
+            '~> L(s) = {l(sqrt(s))}',
+            '~> l(s) = F(s/16).T(s/2)[+(30)F(s/4).-(30)T(s/4)F(s/4).][T(s/8)F(s/4)[T(s/4)F(s/4)[T(s/4)F(s/2)[&(15)F(s/16)..].].].].[-(30)F(s/4).+(30)T(s/4)F(s/4).][T(s/8)F(s/4)[T(s/4)F(s/4)[T(s/4)F(s/2)[&(15)F(s/16)..].].].]',
             '~> R(s): s>0 = r(s^(1/3)/8)',
             '~> R(s, type) = r(s^(1/3)/8)',
             '~> r(s) = {F(s/16)o(s/4, s/8)o(s/3.2, s/8)o(s/2.4, s/8)o(s/3, s/8)o(s/2.8, s/8)o(s/4, s/8)F(s/16)}', // 6-ringed root
@@ -5055,83 +5056,11 @@ const plantData: {[key: string]: Plant} =
             };
         }
     },
-    brasil:   // Old basil
-    {
-        cost: new ExponentialCost(1, 1),
-        system: new LSystem('BA(0.18, 0)', [
-            'A(r, t): r>=flowerThreshold = K(0)',
-            'A(r, t): t<3 = A(r+0.06, t+1)',
-            'A(r, t) = F(0.12, 1.44)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(180)[+L(0.06, min(r+0.06, maxLeafSize), 0)]/(90)I(0)A(r+0.06, 0)',
-            'I(t) > S(type): type<=0 = S(type)I(t)',
-            'I(t): t<4 = I(t+1)',
-            'I(t) = F(0.12, 0.36)[+L(0.03, maxLeafSize/2, 0)]/(180)[+L(0.03, maxLeafSize/2, 0)]',
-            'K(t): t<=signalThreshold = S(0)/(90)[+K(1)][-K(1)]K(t+1)',
-            'K(t): t-2 = K(t+1)',
-            'K(t) = K(t+1)K(1)',
-            'L(p, lim, s): s<1 && p<lim = L(p+0.03, lim, s)',
-            'S(type) < L(p, lim, s): s<1 = L(p, p, 1)',
-            'L(p, lim, s): s>=1 && p>0.06 = L(p-0.06, lim, s)',
-            'F(l, lim) > S(type): type<=0 = S(type)F(l, lim)',
-            'S(type) < F(l, lim): type>=1 = F(l, lim)S(type)',
-            'S(type) =',
-            'B > S(type): type<=0 = BS(1)',
-            'F(l, lim): l<lim = F(l+0.12, lim)'
-        ], 30, 0, 'BASIL', '+-&^/\\T', 1, {
-            'flowerThreshold': '1.38',
-            'maxLeafSize': '0.66',
-            'signalThreshold': '0'
-        },
-        [
-            '~> K(t) = /(90)F(min(1.25, sqrt(t/4)))T(-0.2){[k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//k(sqrt(min(1, t/8)))//]}',
-            '~> k(size): size<1 = [++F(size/2).[-F(size/2).].]',
-            '~> k(size) = [++F(size/3).++[--F(size/2).][&F(size/2).].[^F(size/2).][--F(size/2).].[-F(size/2).].[F(size/2).].]',
-            '~> L(p, lim, s): s<1 = {\\(90)T(p*0.8)F(sqrt(p)).[-(48)F(p).+F(p).+&F(p).+F(p).][F(p)[&F(p)[F(p)[^F(p).].].].].[+(48)F(p).-F(p).-&F(p).-F(p).][F(p)[&F(p)[F(p)[^F(p).].].].]}',
-            '~> L(p, lim, s) = {\\(90)T(lim)F(sqrt(lim)).[--F(lim).+&F(lim).+&F(lim).+F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].].[++F(lim).-&F(lim).-&F(lim).-F(lim)..][F(lim)[&F(lim)[&F(lim)[&F(lim).].].].]}'
-        ]),
-        maxStage: 54,
-        requiresWater: false,
-        growthRate: BigNumber.TWO,
-        growthCost: BigNumber.THREE,
-        actions: [
-            {
-                symbols: new Set('L')
-            },
-            {
-                system: new LSystem('', ['K(t)=', 'A(r, t)='])
-            }
-        ],
-        decimals: {
-            'A': [2, 0],
-            'B': null,
-            'F': [2, 2],
-            'I': [0],
-            'K': [0],
-            'L': [2, 2, 0],
-            '/': [0]
-        },
-        camera: (stage) => {
-            return {
-                scale: 8,
-                x: 0,
-                y: <number>saturate(stage / 4, 5, 9),
-                z: 0,
-                upright: true
-            };
-        },
-        stroke: (stage) =>
-        {
-            return {};
-        }
-    },
 }
 
-const plantIDLookup =
+const plantIDLookup: {[key: string | number]: number | string} =
 {
-    rose: 3,
-    arrow: 9001,
-    9001: 'arrow',
-    brasil: 9002,
-    9002: 'brasil'
+    rose: 3
 }
 
 const speeds = [5, 4, 3, 2, 1];
@@ -5380,10 +5309,9 @@ isAvailable: () => boolean, image: ImageSource): Frame =>
             origy = null;
         }
         else if(e.type == TouchType.MOVED && (Math.abs(e.x - origx) > bound ||
-        Math.abs(e.y - origy) > bound))
+        Math.abs(e.y - origy) > bound) && !held)
         {
             frame.borderColor = borderColor;
-            held = false;
             triggerable = false;
         }
     };
@@ -5739,7 +5667,7 @@ var init = () =>
         for(let j = 0; j < plantUnlocks.length; ++j)
         {
             plants[i][plantUnlocks[j]] = theory.createUpgrade(
-            i * 100 + plantIDLookup[plantUnlocks[j]], currency,
+            i * 100 + <number>plantIDLookup[plantUnlocks[j]], currency,
             plantData[plantUnlocks[j]].cost);
             plants[i][plantUnlocks[j]].description = Localization.format(
             getLoc('plotPlant'), i + 1, getLoc('plants')[plantUnlocks[j]].name);
@@ -8926,7 +8854,7 @@ var setInternalState = (stateStr: string) =>
                 for(let j = 0; j < manager.colonies[i].length; ++j)
                     if(typeof manager.colonies[i][j].id === 'number')
                         manager.colonies[i][j].id =
-                        plantIDLookup[manager.colonies[i][j].id];
+                        <string>plantIDLookup[manager.colonies[i][j].id];
         }
 
         if(v < 0.04)
