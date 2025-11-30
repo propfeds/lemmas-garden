@@ -4837,7 +4837,7 @@ const plantData: {[key: string]: Plant} =
             'L(r): r<LMaxSize = L(r+0.1)',
             'R(s): s<RMaxSize = R(s+1)',
             'R(s) = R(s, 0)&(15)R(0): 0.375; [&R(0)]^(15)R(s): 0.25; R(s, 0)[+(90)A(0.2, 3)]R(0): 0.125; R(s, 1)[&(30)R(0)][^R(-3)]: 0.125; R(s+5, 1): 0.125',
-            'R(s, type): type>=1 = R(s, 0)[+(90)F(0.05)K(0)]',
+            'R(s, type): type>=1 = R(s, 0)[+(90)F(0.05)F(0)K(0)]',
             'K(s): s<KMaxSize = K(s+1)'
         ], 45, 5, 'A', '+-&^/\\T', 0, {
             'AThreshold': '3',
@@ -4847,7 +4847,7 @@ const plantData: {[key: string]: Plant} =
         },
         [
             // Make flower model please
-            '~> L(s) = {l(sqrt(s))}',
+            '~> L(s) = {l(sqrt(s/2))}',
             '~> l(s) = F(s/16).T(s/2)[+(30)F(s/4).-(30)T(s/4)F(s/4).][T(s/8)F(s/4)[T(s/4)F(s/4)[T(s/4)F(s/2)[&(15)F(s/16)..].].].].[-(30)F(s/4).+(30)T(s/4)F(s/4).][T(s/8)F(s/4)[T(s/4)F(s/4)[T(s/4)F(s/2)[&(15)F(s/16)..].].].]',
             '~> R(s): s>0 = r(s^(1/3)/8)',
             '~> R(s, type) = r(s^(1/3)/8)',
