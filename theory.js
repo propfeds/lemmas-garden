@@ -3741,25 +3741,25 @@ const plantData = {
         cost: new ExponentialCost(100000, Math.log2(5)),
         system: new LSystem('/(30)[A(0.2, 3)]-(90)R(-3)', [
             'A(r, t): t>0 = A(r+0.1, t-1)',
-            'A(r, t): r<AThreshold = F(0.04)[^(36)L(0.1)]/(180)A(r-0.1, 3)',
-            'F(p): p<FMaxSize = F(p+0.02)',
+            'A(r, t): r<AThreshold = F(0.08)[^(36)L(0.1)]/(180)A(r-0.1, 3)',
+            'F(p): p<FMaxSize = F(p+0.04)',
             'L(r): r<LMaxSize = L(r+0.1)',
             'R(s): s<RMaxSize = R(s+1)',
             'R(s) = R(s, 0)&(15)R(0): 0.375; [&R(0)]^(15)R(s): 0.25; R(s, 0)[+(90)A(0.2, 3)]R(0): 0.125; R(s, 1)[&(30)R(0)][^R(-3)]: 0.125; R(s+5, 1): 0.125',
-            'R(s, type): type>=1 = R(s, 0)[+(90)F(0.05)F(0)K(0)]',
+            'R(s, type): type>=1 = R(s, 0)[+(90)F(0.1)F(0)K(0)]',
             'K(s): s<KMaxSize = K(s+1)'
         ], 45, 5, 'A', '+-&^/\\T', 0, {
             'AThreshold': '3',
-            'FMaxSize': '0.2 - 1e-9',
+            'FMaxSize': '0.4 - 1e-9',
             'LMaxSize': '1.8',
             'RMaxSize': '15',
             'KMaxSize': '30'
         }, [
             // Make flower model please
-            '~> L(s) = {l(sqrt(s/4))}',
+            '~> L(s) = {l(sqrt(s))}',
             '~> l(s) = F(s/16).T(s/2)[+(30)F(s/4).-(30)T(s/4)F(s/4).][T(s/8)F(s/4)[T(s/4)F(s/4)[T(s/4)F(s/2)[&(15)F(s/16)..].].].].[-(30)F(s/4).+(30)T(s/4)F(s/4).][T(s/8)F(s/4)[T(s/4)F(s/4)[T(s/4)F(s/2)[&(15)F(s/16)..].].].]',
-            '~> R(s): s>0 = r(s^(1/3)/8)',
-            '~> R(s, type) = r(s^(1/3)/8)',
+            '~> R(s): s>0 = r(s^(1/3)/4)',
+            '~> R(s, type) = r(s^(1/3)/4)',
             '~> r(s) = {F(s/16)o(s/4, s/8)o(s/3.2, s/8)o(s/2.4, s/8)o(s/3, s/8)o(s/2.8, s/8)o(s/4, s/8)F(s/16)}',
             '~> o(s1, s2) = [[^(90)F(s1).]/[F(s2/8)^(90)F(s1).]/[F(s2/4)^(90)F(s1).]/[F(s2*3/8)^(90)F(s1).]/[F(s2/2)^(90)F(s1).]/[F(s2*5/8)^(90)F(s1).]/[F(s2*3/4)^(90)F(s1).]/[F(s2*7/8)^(90)F(s1).]]F(s2)[^(90)F(s1).]', // 8-spoked root ring
             // '~> r(s) = {F(s/10)o(s/3.2, s/5)o(s/2.4, s/5)o(s/3, s/5)o(s/2.8, s/5)F(s/10)}', // 4-ringed root
@@ -3776,10 +3776,10 @@ const plantData = {
         ],
         camera: (stage) => {
             return {
-                scale: 1,
-                x: saturate(stage / 50 - 1, 0, 0.5),
-                y: 0.375,
-                z: saturate(1 - stage / 50, -0.5, 0),
+                scale: 2,
+                x: saturate(stage / 25 - 2, 0, 1),
+                y: 0.75,
+                z: saturate(2 - stage / 25, -1, 0),
             };
         },
         stroke: (stage) => {
