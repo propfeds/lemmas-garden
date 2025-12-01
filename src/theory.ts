@@ -524,7 +524,7 @@ friend to all mathematicians.`
             },
         },
         plantStats: `({0}) {1}\\\\—\\\\Photosynthetic rate: {2}/hr (noon)
-\\\\Average growth rate: {3}/hr\\\\Growth cost: {4} × {5} symbols\\\\—
+\\\\Avg. growth rate: {3}/hr\\\\Growth cost: {4} × {5} symbols\\\\—
 \\\\Sequence: `,
         narrationTrack: '{0}, {1}',
         noCommentary: 'No narrations.',
