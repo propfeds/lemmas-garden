@@ -4876,9 +4876,9 @@ const plantData: {[key: string]: Plant} =
         {
             return {
                 scale: 2,
-                x: <number>saturate(stage/25 - 2, 0, 1),
+                x: <number>saturate(stage/50 - 1, 0, 0.5),
                 y: 0.75,
-                z: <number>saturate(2 - stage/25, -1, 0),
+                z: <number>saturate(stage/50 - 1, 0, 0.5),
             };
         },
         stroke: (stage) =>

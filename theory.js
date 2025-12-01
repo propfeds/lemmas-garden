@@ -3777,9 +3777,9 @@ const plantData = {
         camera: (stage) => {
             return {
                 scale: 2,
-                x: saturate(stage / 25 - 2, 0, 1),
+                x: saturate(stage / 50 - 1, 0, 0.5),
                 y: 0.75,
-                z: saturate(2 - stage / 25, -1, 0),
+                z: saturate(stage / 50 - 1, 0, 0.5),
             };
         },
         stroke: (stage) => {
