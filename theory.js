@@ -7033,7 +7033,7 @@ var get2DGraphValue = () => {
         case 1 /* LineGraphModes.INSOLATION */: // Insolation
             return insolationCoord;
         case 2 /* LineGraphModes.GROWTH */: // Growth
-            return growthCoord / 2;
+            return growthCoord;
     }
 };
 var get3DGraphPoint = () => {

@@ -8952,7 +8952,7 @@ var get2DGraphValue = () =>
         case LineGraphModes.INSOLATION:     // Insolation
             return insolationCoord;
         case LineGraphModes.GROWTH:     // Growth
-            return growthCoord / 2;
+            return growthCoord;
     }
 };
 
