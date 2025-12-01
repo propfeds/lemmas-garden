@@ -2569,14 +2569,17 @@ class LSystem
                 }
 
                 result += sequence[i];
-                if(displayParams && params[i])
+                if(displayParams)
                 {
-                    let paramStrings: string[] = [];
-                    for(let j = 0; j < params[i].length; ++j)
-                        paramStrings[j] = getCString(params[i][j]);
-                    result += `(${paramStrings.join(', ')})`;
+                    if(params[i])
+                    {
+                        let paramStrings: string[] = [];
+                        for(let j = 0; j < params[i].length; ++j)
+                            paramStrings[j] = getCString(params[i][j]);
+                        result += `(${paramStrings.join(', ')})`;
+                    }
+                    result += ' ';
                 }
-                result += ' ';
                 
                 switch(sequence[i + 1])
                 {

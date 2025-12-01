@@ -2056,13 +2056,15 @@ class LSystem {
                         break;
                 }
                 result += sequence[i];
-                if (displayParams && params[i]) {
-                    let paramStrings = [];
-                    for (let j = 0; j < params[i].length; ++j)
-                        paramStrings[j] = getCString(params[i][j]);
-                    result += `(${paramStrings.join(', ')})`;
+                if (displayParams) {
+                    if (params[i]) {
+                        let paramStrings = [];
+                        for (let j = 0; j < params[i].length; ++j)
+                            paramStrings[j] = getCString(params[i][j]);
+                        result += `(${paramStrings.join(', ')})`;
+                    }
+                    result += ' ';
                 }
-                result += ' ';
                 switch (sequence[i + 1]) {
                     // case '[':
                     //     // lineStart = true;
