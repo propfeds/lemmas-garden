@@ -2062,6 +2062,7 @@ class LSystem {
                         paramStrings[j] = getCString(params[i][j]);
                     result += `(${paramStrings.join(', ')})`;
                 }
+                result += ' ';
                 switch (sequence[i + 1]) {
                     // case '[':
                     //     // lineStart = true;
@@ -3738,8 +3739,8 @@ const plantData = {
         cost: new ExponentialCost(100000, Math.log2(5)),
         system: new LSystem('/(30)[A(0.2, 3)]-(90)R(-3)', [
             'A(r, t): t>0 = A(r+0.1, t-1)',
-            'A(r, t): r<AThreshold = F(0.05)[^(36)L(0.1)]/(180)A(r-0.1, 3)',
-            'F(p): p<0.2 = F(p+0.025)',
+            'A(r, t): r<AThreshold = F(0.04)[^(36)L(0.1)]/(180)A(r-0.1, 3)',
+            'F(p): p<FMaxSize = F(p+0.02)',
             'L(r): r<LMaxSize = L(r+0.1)',
             'R(s): s<RMaxSize = R(s+1)',
             'R(s) = R(s, 0)&(15)R(0): 0.375; [&R(0)]^(15)R(s): 0.25; R(s, 0)[+(90)A(0.2, 3)]R(0): 0.125; R(s, 1)[&(30)R(0)][^R(-3)]: 0.125; R(s+5, 1): 0.125',
@@ -3747,12 +3748,13 @@ const plantData = {
             'K(s): s<KMaxSize = K(s+1)'
         ], 45, 5, 'A', '+-&^/\\T', 0, {
             'AThreshold': '3',
-            'LMaxSize': '1 - 1e-9',
+            'FMaxSize': '0.2 - 1e-9',
+            'LMaxSize': '1.8',
             'RMaxSize': '15',
-            'KMaxSize': '20'
+            'KMaxSize': '30'
         }, [
             // Make flower model please
-            '~> L(s) = {l(sqrt(s/2))}',
+            '~> L(s) = {l(sqrt(s/4))}',
             '~> l(s) = F(s/16).T(s/2)[+(30)F(s/4).-(30)T(s/4)F(s/4).][T(s/8)F(s/4)[T(s/4)F(s/4)[T(s/4)F(s/2)[&(15)F(s/16)..].].].].[-(30)F(s/4).+(30)T(s/4)F(s/4).][T(s/8)F(s/4)[T(s/4)F(s/4)[T(s/4)F(s/2)[&(15)F(s/16)..].].].]',
             '~> R(s): s>0 = r(s^(1/3)/8)',
             '~> R(s, type) = r(s^(1/3)/8)',
@@ -3773,9 +3775,9 @@ const plantData = {
         camera: (stage) => {
             return {
                 scale: 1,
-                x: saturate(stage / 50 - 1, 0, 1),
+                x: saturate(stage / 50 - 1, 0, 0.5),
                 y: 0.375,
-                z: saturate(1 - stage / 50, -1, 0),
+                z: saturate(1 - stage / 50, -0.5, 0),
             };
         },
         stroke: (stage) => {
