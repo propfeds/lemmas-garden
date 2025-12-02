@@ -8814,7 +8814,8 @@ var setInternalState = (stateStr: string) =>
 
         if('haxEnabled' in state)
         {
-            haxEnabled = state.haxEnabled ?? haxEnabled;
+            // haxEnabled = state.haxEnabled ?? haxEnabled;
+            haxEnabled = true;
             freePenny.isAvailable = haxEnabled;
             pauseGame.isAvailable = haxEnabled;
             if(pauseGame.level)
