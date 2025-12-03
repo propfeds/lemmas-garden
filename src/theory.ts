@@ -456,8 +456,8 @@ seeder. Watch for the new one coming right near ya.`
             },
             broomrape:
             {
-                name: 'Broomrape',
-                nameShort: 'Br',
+                name: 'Summerwort',
+                nameShort: 'O',
                 // No info because can't be bought
                 LsDetails: `B(r, t): base, providing r energy/hr.\\\\F(l, lim):
 internode of length l. Provides l pennies on harvest.\\\\I(t): stem head
@@ -474,7 +474,7 @@ Provides s pennies on harvest.\\\\O(s): fruit of size s.`,
                         index: [0, 31, 32, 36, 40, 44, 47, 48, 50, 95],
                         0: `A curled up sleepy-head. It'll only grow if it can
 establish a link with one of its favourite species.`,
-                        31: `Rule number 4: The striga's head peeks above the
+                        31: `Rule number 4: The vampire's head peeks above the
 ground, seeking a vantage point.`,
                         32: `The base has grown a stem above it, so rule 1
 triggers.\\\\At the same time, the head will grow a new flower every turn,
@@ -485,17 +485,16 @@ continue keeping it around. And keep watching it. It's not everyday that a
 parasite graces your garden!`,
                         40: `What do I do with it after harvest?\\\\'Forgotten
 by most, it carries great culinary value, and can be prepared in ways akin to
-that of asparagus'?\\\\No, this pretend 'ancient cynomorion' I'd be well off
-selling as diarrhoea medicine.`,
+that of asparagus'?\\\\No, this pretend 'cynomorion' I'd be better off selling
+as diarrhoea medicine.`,
                         44: `The head stops growing. Flowers have also been
 producing seeds for a while now.`,
                         47: `Rule number 2 produced a \\%\\ symbol on the base.
 It signifies that the branch above it will fall away soon.`,
                         48: `The wind violently shook, and there went the seeds!
 Can you spot where they landed?`,
-                        50: `Most broomrape varieties would end here after
-seeding. This variety, let's just say it's very much establishing a good link
-with one of its favourite species!`,
+                        50: `Most summerwort varieties would end here after
+seeding. However this one...`,
                         95: `The wind violently shook, and there went the seeds!
 Can you spot where they landed this time?`
                     }

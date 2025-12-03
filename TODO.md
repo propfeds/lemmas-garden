@@ -233,7 +233,7 @@ you have to dig really deep to find the underlying systems behind the plants
   - [x] New leaf model
   - [ ] Flower stem grows leaf?
   - [ ] Flower model
-  - [ ] Narrations
+  - [ ] Info, system description & narrations
   - [x] Harvest
     - [x] Kills everything
     - [ ] Spawns a new node? Probably not
