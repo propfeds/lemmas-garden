@@ -224,19 +224,24 @@ you have to dig really deep to find the underlying systems behind the plants
     - nothing.
 
 - [ ] Ginger
+  - [ ] CURRENT TASK: finish narrations by testing plant
   - [x] Test the first version
     - [x] Randomness is broken, please implement internal state-based RNG for each species
   - [x] INVALID SPACE BETWEEN PUNCTUATION AND BINARY OPERATOR
   - [x] What if ginger only splits at max, and has RNG chance to make new segment or apex
   - [ ] How to not make leaves slow down too much
-  - [ ] Pruning kills all leaves and the upper body so that root could grow faster? This is not realistic
+    - Pruning kills all leaves and the upper body so that root could grow faster? This is too advanced
   - [x] New leaf model
   - [ ] Flower stem grows leaf?
   - [ ] Flower model
-  - [ ] Info, system description & narrations
   - [x] Harvest
     - [x] Kills everything
-    - [ ] Spawns a new node? Probably not
+    - Spawns a new node? Probably not
+  - [ ] Writing
+    - [x] Info
+    - [x] System description
+    - [ ] Narrations
+    - [ ] Almanac
 
 - [ ] Sunflower
 

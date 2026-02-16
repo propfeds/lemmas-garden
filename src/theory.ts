@@ -262,9 +262,10 @@ Base profit\\colon\\ {5}p\\\\
                 name: 'Pea sprout',
                 nameShort: 's',
                 info: `Tastes nice, innit?`,
-                LsDetails: `A(r, t): apex (stem bud) providing r energy/hr. Has
-t stages left until it spurts.\\\\F(p): segment of length p.
-Provides p pennies on harvest.\\\\L(r): leaf of size r, providing r energy/hr.`,
+                LsDetails: `A(r, t): apex (stem bud) providing r energy/hr.
+Will spurt after t+1 stages.
+\\\\F(p): segment of length p. Provides p pennies on harvest.
+\\\\L(r): leaf of size r, providing r energy/hr.`,
                 actions:
                 [
                     `Harvest returns profit as the sum of all F lengths.`
@@ -291,12 +292,13 @@ more, then I'll get you something new.`
             {
                 name: 'Calendula',
                 nameShort: 'C',
-                info: 'The flower to start a month.',
-                LsDetails: `A(r, t): apex (stem bud) providing r energy/hr. Has
-t stages left until it splits.\\\\F(l, lim): internode of length l, growing up
-to lim.\\\\I(t): flower stem. Grows a leaf every stage until t reaches 0,
-when it turns into K.\\\\K(p): flower of size p. Provides p pennies on harvest.
-\\\\L(r, lim): leaf providing r energy/hr, growing up to lim.`,
+                info: 'The perfect flower to start a month.',
+                LsDetails: `A(r, t): apex (stem bud) providing r energy/hr. Will
+spurt or split after t+1 stages.
+\\\\F(l, lim): segment of length l, growing up to length lim.
+\\\\I(t): flower stem. Will sprout a leaf for t stages, then turn into K.
+\\\\K(p): flower of size p. Provides p pennies on harvest.
+\\\\L(r, lim): leaf providing r energy/hr, growing up to size lim.`,
                 actions:
                 [
                     `Harvest returns profit as the sum of all K sizes.`
@@ -337,12 +339,13 @@ mouth away from my coins.`,
                 nameShort: 'Ba',
                 info: `A fragrant, quick-growing herb, requiring a bit of ` +
 `care.`,
-                LsDetails: `A(r, t): apex (stem bud).\\\\B: base, used for
-communications.\\\\F(l, lim): internode.\\\\I(t): side stem. t stages left
-until it advances.\\\\K(s, t): flower of size s. Grows another flower until t
-reaches 0. Provides s pennies on harvest.\\\\L(p, lim, s): leaf. s denotes
-whether a signal has been received. Provides p pennies on harvest.\\\\S(type):
-signal (type 0 travels down, type 1 travels up).`,
+                LsDetails: `A(r, t): apex (stem bud).
+\\\\B: base, used for communications.
+\\\\F(l, lim): segment.
+\\\\I(t): side stem. Will spurt after t+1 stages.
+\\\\K(s, t): flower. Another flower will grow next to it for t stages. Provides s pennies on harvest.
+\\\\L(p, lim, s): leaf. s denotes whether a wilting signal has been received. Provides p pennies on harvest.
+\\\\S(type): wilting signal (type 0 travels down, type 1 travels up).`,
                 actions:
                 [
                     `Harvest returns profit as the sum of all L and K sizes
@@ -401,12 +404,12 @@ up. Bye bye.`,
             {
                 name: 'Rose campion',
                 nameShort: 'R',
-                info: `A silvery shrub, passively providing coins every time ` +
-`it grows.`,
-                LsDetails: `A(r, t): apex (stem bud).\\\\F(l, t): internode of
-length l. t stages until it stops growing.\\\\K(p, t): flower of size p. t
-stages left until it disappears. Provides p pennies on harvest.\\\\L(s): leaf.
-\\\\O(s): fruit of size s.`,
+                info: `A silvery shrub, passively providing coins as it grows.`,
+                LsDetails: `A(r, t): apex (stem bud).
+\\\\F(l, t): segment. Will grow for t stages.
+\\\\K(p, t): flower with a lifetime of t stages. Provides p pennies on harvest.
+\\\\L(s): leaf.
+\\\\O(s): fruit of size s. Drops s seeds on disappearing.`,
                 actions:
                 [
                     `Harvest returns profit as the sum of all K sizes
@@ -442,8 +445,12 @@ seeder. Watch for the new one coming right near ya.`
             {
                 name: 'Ginger',
                 nameShort: 'G',
-                info: `Tastes yuck, innit?`,
-                LsDetails: ``,
+                info: `A prized medicinal herb with a side of chaos`,
+                LsDetails: `A(r, t): apex (stem bud).
+\\\\F(l): segment.
+\\\\L(r): leaf.
+\\\\K(s): flower clump.
+\\\\R(s): root of size s.`,
                 actions:
                 [
                     `Harvest returns profit as the sum of all R \\&\\ K sizes.`
@@ -451,6 +458,9 @@ seeder. Watch for the new one coming right near ya.`
                 narrations:
                 [
                     {
+                        index: [0],
+                        0: `A fresh cutting from the jaded gentleman\'s seed
+shop.`
                     }
                 ]
             },
@@ -459,10 +469,12 @@ seeder. Watch for the new one coming right near ya.`
                 name: 'Summerwort',
                 nameShort: 'O',
                 // No info because can't be bought
-                LsDetails: `B(r, t): base, providing r energy/hr.\\\\F(l, lim):
-internode of length l. Provides l pennies on harvest.\\\\I(t): stem head
-providing no energy. Spawns flowers for t turns.\\\\K(s): flower of size s.
-Provides s pennies on harvest.\\\\O(s): fruit of size s.`,
+                LsDetails: `B(r, t): base, leeching r energy/hr. t controls
+the plant's hiding behaviour.
+\\\\F(l, lim): segment. Provides l pennies on harvest.
+\\\\I(t): stem head, spawning flowers for t stages.
+\\\\K(s): flower. Provides s pennies on harvest.
+\\\\O(s): fruit.`,
                 actions:
                 [
                     `Harvest returns profit as the sum of all K and F sizes
@@ -789,7 +801,7 @@ A(x) < B(y) > C(z) : x+y+z>10 = E((x+y)/2)F(z*2)
             {
                 title: 'Appendix: Common organ symbols',
                 contents:
-`A: apex (stem shoot). Can photosynthesise.
+`A: apex (stem bud). Can photosynthesise.
 B: base. Often used to receive and send signals.
 I: alternate stem. May transform into a new branch, or a flower.
 K: flower. Looks good.
@@ -1196,7 +1208,7 @@ const dandelionSpawner: Spawner =
     id: 'dandelion',
     schedule: dandelionSchedule,
     population: (index) => 2 + gameRNG.nextInt % 2,
-    plot: () => gameRNG.nextInt % nofPlots
+    plot: (_) => gameRNG.nextInt % nofPlots
 }
 
 const broomrapeSpawner: Spawner =
@@ -1204,7 +1216,8 @@ const broomrapeSpawner: Spawner =
     id: 'broomrape',
     schedule: broomrapeSchedule,
     population: (index) => Math.min(index + 1, 5),
-    plot: () => 0
+    plot: (index) => gameRNG.nextInt % (Math.min(nofPlots,
+    1 + Math.floor(index / 3)))
 }
 
 const fibonacci = [1, 2, 3, 5, 8, 13];
@@ -1214,7 +1227,7 @@ const hopleekSpawner: Spawner =
     id: 'hopleek',
     schedule: hopleekSchedule,
     population: (index) => fibonacci[Math.min(index, 5)],
-    plot: () => nofPlots - 1 - gameRNG.nextInt % 2
+    plot: (_) => nofPlots - 1 - gameRNG.nextInt % 2
 }
 
 // Classes
@@ -3427,7 +3440,7 @@ interface Spawner
     id: string;
     schedule: number[];
     population: (index: number) => number;
-    plot: () => number;
+    plot: (index: number) => number;
 }
 
 interface SpawnerState
@@ -3575,7 +3588,7 @@ class ColonyManager
             let sp = this.spawnerStates[i];
             while(day >= sp.spawner.schedule[sp.index])
             {
-                let plot = sp.spawner.plot();
+                let plot = sp.spawner.plot(sp.index);
                 let pop = sp.spawner.population(sp.index);
                 this.addColony(plot, sp.spawner.id, pop);
                 ++sp.index;
@@ -4836,7 +4849,7 @@ const plantData: {[key: string]: Plant} =
         [
             'A(r, t): t>0 = A(r+0.1, t-1)',
             'A(r, t): r<AThreshold = F(0.08)[^(36)L(0.1)]/(180)A(r-0.1, 3)',
-            'F(p): p<FMaxSize = F(p+0.04)',
+            'F(l): l<FMaxSize = F(l+0.04)',
             'L(r): r<LMaxSize = L(r+0.1)',
             'R(s): s<RMaxSize = R(s+1)',
             'R(s) = R(s, 0)&(15)R(0): 0.375; [&R(0)]^(15)R(s): 0.25; R(s, 0)[+(90)A(0.2, 3)]R(0): 0.125; R(s, 1)[&(30)R(0)][^R(-3)]: 0.125; R(s+5, 1): 0.125',
