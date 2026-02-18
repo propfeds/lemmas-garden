@@ -231,16 +231,16 @@ you have to dig really deep to find the underlying systems behind the plants
   - [ ] How to not make leaves slow down too much
     - Pruning kills all leaves and the upper body so that root could grow faster? This is too advanced
   - [x] New leaf model
-  - [ ] Flower stem grows leaf?
+  - [x] Flower stem grows leaf
   - [ ] Flower model
   - [x] Harvest
     - [x] Kills everything
     - Spawns a new node? Probably not
-  - [ ] Writing
+  - [x] Writing
     - [x] Info
     - [x] System description
-    - [ ] Narrations
-    - [ ] Almanac
+    - [x] Narrations
+    - [x] Almanac
 
 - [ ] Sunflower
 

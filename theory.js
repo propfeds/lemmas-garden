@@ -71,7 +71,7 @@ const LOC_STRINGS = {
         pubTax: 'Publishing fee\\colon',
         btnView: 'View L-system',
         btnViewAction: 'View Action L-system',
-        btnAlmanac: 'Almanac',
+        btnAlmanac: 'View Almanac',
         btnAlmanacNoEntry: '(Unavailable)',
         btnVar: 'Variables',
         btnSave: 'Save',
@@ -160,8 +160,8 @@ harvesting it for the first time.`,
         colonyNoPop: `{1}, stg. {2} ({3}%)`,
         colonyNoPopEsc: `{1}, stage {2} ({3}\\%)`,
         invisibleColony: `\\text{Tilled soil.}`,
-        colonyStats: `Energy\\colon\\ {0} {1}/hr\\\\
-Growth\\colon\\ {2}/{3} {4}/hr\\\\
+        colonyStats: `Energy\\colon\\ {0} {1}/h\\\\
+Growth\\colon\\ {2}/{3} {4}/h\\\\
 Base profit\\colon\\ {5}p\\\\
 \\ ({6}/{7}) {8}`,
         hour: 'hr',
@@ -398,8 +398,8 @@ seeder. Watch for the new one coming right near ya.`
 \\\\L(r): leaf.
 \\\\K(s): flower clump.
 \\\\R(s): root of size s.
-\\\\R(s, bloom): root of size s, and carries blooming information (0: will not
-or cannot bloom, 1: will bloom)`,
+\\\\R(s, bloom): root of size s, and bloom carries blooming information
+(0: will not or cannot bloom, 1: will bloom)`,
                 actions: [
                     `Harvest returns profit as the sum of all R \\&\\ K sizes.`
                 ],
@@ -482,8 +482,8 @@ friend to all mathematicians.`
                 ]
             },
         },
-        plantStats: `({0}) {1}\\\\—\\\\Photosynthetic rate: {2}/hr (noon)
-\\\\Avg. growth rate: {3}/hr\\\\Growth cost: {4} × {5} symbols\\\\—
+        plantStats: `({0}) {1}\\\\—\\\\Photosynthetic rate: {2}/h (noon)
+\\\\Avg. growth rate: {3}/h\\\\Growth cost: {4} × {5} symbols\\\\—
 \\\\Sequence: `,
         narrationTrack: '{0}, {1}',
         noCommentary: 'No narrations.',
@@ -616,6 +616,17 @@ Occasionally, visitors and artists, generous donors, they would come and ` +
                     `toss a few pennies at your doorstep, as gratitude to keep the gardens ` +
                     `running. Well, mostly birds and bees paying for their hearty meals, but ` +
                     `there is the occasional human too.`
+            },
+            ginger: {
+                title: 'Ginger',
+                contents: `Brought back from lands far beyond the Twin Walls, where legends whispered ` +
+                    `of preturbant beasts and celestial kingdoms, ginger is a rooted medicinal ` +
+                    `herb sprouting vibrant shoots above, while resembling a spreading flame below.
+
+Life span: medium
+
+Like an untamed fire, a ginger's rhizome grows in an indeterminate pattern. ` +
+                    `Each cutting may yield vastly different results.`
             }
         },
         manualTitle: 'On Lindenmayer Systems',
@@ -3448,6 +3459,10 @@ const almanac = new Book(getLoc('almanacTitle'), 'almanac', [
         ...getLoc('almanac').campion,
         systemID: 'campion'
     },
+    {
+        ...getLoc('almanac').ginger,
+        systemID: 'ginger'
+    },
 ]);
 const LsManual = new Book(getLoc('manualTitle'), 'manual', [
     {
@@ -3618,7 +3633,7 @@ const plantData = {
         colour: 'orange'
     },
     basil: {
-        cost: new ExponentialCost(7, 2),
+        cost: new ExponentialCost(7.5, 2),
         system: new LSystem('/(90)BA(0.2, 5)', [
             'A(r, t): r>=AThreshold = S(0)F(0.24, 0.96)K(0.03, 8)',
             'A(r, t): t>0 = A(r+0.4, t-1)',
@@ -3766,7 +3781,7 @@ const plantData = {
             'R(s): s<RMaxSize = R(s+1)',
             'R(s) = R(s, 0)&(15)R(0): 0.375; [&R(0)]^(15)R(s): 0.25; R(s, 0)[+(90)A(0.2, 3)]R(0): 0.125; R(s, 1)[&(30)R(0)][^R(-3)]: 0.125; R(s+5, 1): 0.125',
             'R(s, bloom): bloom>=1 = R(s, 0)[+(90)F(0.1)F(0)K(0)]',
-            'K(s): s<KMaxSize = K(s+1)'
+            'K(s): s<KMaxSize = K(s+2)'
         ], 45, 5, 'A', '+-&^/\\T', 0, {
             'AThreshold': '3',
             'FMaxSize': '0.4 - 1e-9',
