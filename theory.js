@@ -125,7 +125,7 @@ straight line will be drawn.`,
         unlockPlant: `\\text{{a new plant}}`,
         lockedPlot: `\\text{Untilled soil.}`,
         permaExtraPot: `Borrow Léa's flower pot`,
-        permaExtraPotInfo: `Holds one plant, seeds free of charge, pest-proof`,
+        permaExtraPotInfo: `Holds one plant, free of charge and pest-proof`,
         permaNote: `Notebook \\&\\ 'Buy All' button`,
         permaNoteInfo: 'Allows management of colony sizes',
         menuNote: 'Notebook',
@@ -249,7 +249,7 @@ more, then I'll get you something new.`
             calendula: {
                 name: 'Calendula',
                 nameShort: 'C',
-                info: 'The perfect flower to start a month.',
+                info: 'The perfect flower to start a month',
                 LsDetails: `A(r, t): apex (stem bud) providing r energy/hr. Will
 spurt or split after t+1 stages.
 \\\\F(l, lim): segment of length l, growing up to length lim.
@@ -291,8 +291,7 @@ mouth away from my coins.`,
             basil: {
                 name: 'Basil',
                 nameShort: 'Ba',
-                info: `A fragrant, quick-growing herb, requiring a bit of ` +
-                    `care.`,
+                info: `A fragrant, quick-growing herb, requiring a bit of care`,
                 LsDetails: `A(r, t): apex (stem bud).
 \\\\B: base, used for communications.
 \\\\F(l, lim): segment.
@@ -355,7 +354,7 @@ up. Bye bye.`,
             campion: {
                 name: 'Rose campion',
                 nameShort: 'R',
-                info: `A silvery shrub, passively providing coins as it grows.`,
+                info: `A silvery shrub, passively providing coins as it grows`,
                 LsDetails: `A(r, t): apex (stem bud).
 \\\\F(l, t): segment. Will grow for t stages.
 \\\\K(p, t): flower with a lifetime of t stages. Provides p pennies on harvest.
@@ -398,15 +397,23 @@ seeder. Watch for the new one coming right near ya.`
 \\\\F(l): segment.
 \\\\L(r): leaf.
 \\\\K(s): flower clump.
-\\\\R(s): root of size s.`,
+\\\\R(s): root of size s.
+\\\\R(s, bloom): root of size s, and carries blooming information (0: will not
+or cannot bloom, 1: will bloom)`,
                 actions: [
                     `Harvest returns profit as the sum of all R \\&\\ K sizes.`
                 ],
                 narrations: [
                     {
-                        index: [0],
+                        index: [0, 9, 15, 18, 19],
                         0: `A fresh cutting from the jaded gentleman\'s seed
-shop.`
+shop.`,
+                        9: `The root has been swelling up near the cutting.`,
+                        15: `The root has been swelling up still. It's about to
+sprout soon.`,
+                        18: `It's about to sprout, right this instance...`,
+                        19: `The swollen root has sprouted a new segment. From
+then on, who could predict how it grows?`
                     }
                 ]
             },
@@ -458,7 +465,7 @@ Can you spot where they landed this time?`
             arrow: {
                 name: '(Test) Arrow weed',
                 nameShort: 'Ar',
-                info: 'Not balanced for regular play.',
+                info: 'Not balanced for regular play',
                 LsDetails: `The symbol A represents a rising shoot (apex), ` +
                     `while F represents the stem body.\\\\The Prune (scissors) action cuts every ` +
                     `F.\\\\The Harvest (bundle) action returns profit based on the sum of A, and ` +
@@ -3750,7 +3757,7 @@ const plantData = {
         colour: 'magenta'
     },
     ginger: {
-        cost: new ExponentialCost(100000, Math.log2(5)),
+        cost: new ExponentialCost(10000, Math.log2(5)),
         system: new LSystem('/(30)[A(0.2, 3)]-(90)R(-3)', [
             'A(r, t): t>0 = A(r+0.1, t-1)',
             'A(r, t): r<AThreshold = F(0.08)[^(36)L(0.1)]/(180)A(r-0.1, 3)',
@@ -3758,7 +3765,7 @@ const plantData = {
             'L(r): r<LMaxSize = L(r+0.1)',
             'R(s): s<RMaxSize = R(s+1)',
             'R(s) = R(s, 0)&(15)R(0): 0.375; [&R(0)]^(15)R(s): 0.25; R(s, 0)[+(90)A(0.2, 3)]R(0): 0.125; R(s, 1)[&(30)R(0)][^R(-3)]: 0.125; R(s+5, 1): 0.125',
-            'R(s, type): type>=1 = R(s, 0)[+(90)F(0.1)F(0)K(0)]',
+            'R(s, bloom): bloom>=1 = R(s, 0)[+(90)F(0.1)F(0)K(0)]',
             'K(s): s<KMaxSize = K(s+1)'
         ], 45, 5, 'A', '+-&^/\\T', 0, {
             'AThreshold': '3',
@@ -5150,11 +5157,10 @@ var getQuaternaryEntries = () => {
             if (!plotPerma.level)
                 return quaternaryEntries.slice(0, 1);
             for (let i = 0; i < plotPerma.level; ++i) {
-                // if(i >= plotPerma.level && !manager.colonies[i].length)
-                // {
-                //     quaternaryEntries[i].value = null;
-                //     continue;
-                // }
+                if (i == plotIdx)
+                    quaternaryEntries[i].name = `p^•_${i + 1}`;
+                else
+                    quaternaryEntries[i].name = `p_${i + 1}`;
                 let sum = BigNumber.ZERO;
                 for (let j = 0; j < manager.colonies[i].length; ++j) {
                     let c = manager.colonies[i][j];
@@ -5163,18 +5169,17 @@ var getQuaternaryEntries = () => {
                         // @ts-expect-error
                         theory.publicationMultiplier;
                 }
-                quaternaryEntries[i].value = sum; //`${sum}p`;
+                quaternaryEntries[i].value = sum;
             }
             break;
         case 2 /* QuaternaryModes.BOARD */:
             if (!plotPerma.level)
                 return quaternaryEntries.slice(0, 1);
             for (let i = 0; i < plotPerma.level; ++i) {
-                // if(i >= plotPerma.level && !manager.colonies[i].length)
-                // {
-                //     quaternaryEntries[i].value = null;
-                //     continue;
-                // }
+                if (i == plotIdx)
+                    quaternaryEntries[i].name = `p^•_${i + 1}`;
+                else
+                    quaternaryEntries[i].name = `p_${i + 1}`;
                 let column = '';
                 for (let j = 0; j < manager.colonies[i].length; ++j) {
                     let c = manager.colonies[i][j];
@@ -5188,8 +5193,6 @@ var getQuaternaryEntries = () => {
                         else
                             column += cStr;
                     }
-                    // else
-                    //     cStr = '   ';
                 }
                 quaternaryEntries[i].value = column;
             }

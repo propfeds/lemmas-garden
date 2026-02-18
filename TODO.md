@@ -224,7 +224,6 @@ you have to dig really deep to find the underlying systems behind the plants
     - nothing.
 
 - [ ] Ginger
-  - [ ] CURRENT TASK: finish narrations by testing plant
   - [x] Test the first version
     - [x] Randomness is broken, please implement internal state-based RNG for each species
   - [x] INVALID SPACE BETWEEN PUNCTUATION AND BINARY OPERATOR
